@@ -1,5 +1,8 @@
 import { useState } from "react";
 import AppShell from "../components/layout/AppShell.jsx";
+import { AuthProvider } from "../features/auth/AuthProvider.jsx";
+import AccountMenu from "../features/auth/components/AccountMenu.jsx";
+import AuthGate from "../features/auth/components/AuthGate.jsx";
 import BackupRestore from "../features/backup/components/BackupRestore.jsx";
 import BudgetTracker from "../features/budgets/components/BudgetTracker.jsx";
 import CreditCardTracker from "../features/creditCards/components/CreditCardTracker.jsx";
@@ -36,6 +39,16 @@ const pageContent = {
 };
 
 export default function App() {
+  return (
+    <AuthProvider>
+      <AuthGate>
+        <FinanceTrackerApp />
+      </AuthGate>
+    </AuthProvider>
+  );
+}
+
+function FinanceTrackerApp() {
   const [appData, setAppData] = useState(() => readAppData());
   const [activeView, setActiveView] = useState("dashboard");
   const currentPage = pageContent[activeView];
@@ -50,6 +63,7 @@ export default function App() {
       onViewChange={setActiveView}
       pageTitle={currentPage.title}
       pageDescription={currentPage.description}
+      accountSlot={<AccountMenu />}
     >
       {activeView === "dashboard" ? <Dashboard appData={appData} /> : null}
 
