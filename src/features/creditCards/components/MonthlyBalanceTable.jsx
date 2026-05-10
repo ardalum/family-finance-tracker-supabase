@@ -217,10 +217,11 @@ export default function MonthlyBalanceTable({
                           <input
                             className="h-4 w-4 rounded border-gray-300 text-gray-950 focus:ring-gray-950"
                             type="checkbox"
-                            checked={Boolean(entry.paid)}
+                            checked={status.isNoBalance ? false : Boolean(entry.paid)}
+                            disabled={status.isNoBalance}
                             onChange={(event) => handlePaidChange(card.id, event.target.checked)}
                           />
-                          Paid
+                          {status.isNoBalance ? "No payment needed" : "Paid"}
                         </label>
                       </div>
                     </td>

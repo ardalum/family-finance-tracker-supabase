@@ -1,4 +1,4 @@
-import { daysBetween, getDueDateForMonth, getNextDueDate } from "../../lib/dates";
+import { daysBetween, getDueDateForMonth } from "../../lib/dates";
 
 export function getSortedCards(cards, monthlyBalances, monthKey, sortMode) {
   const activeCards = cards.filter((card) => card.isActive);
@@ -31,19 +31,25 @@ export function getSortedCards(cards, monthlyBalances, monthKey, sortMode) {
 
 function sortByDefault(cards, monthlyBalances, monthKey) {
   const today = new Date();
-  const hasUnpaidCards = cards.some((card) => !monthlyBalances?.[card.id]?.paid);
+  const hasUnpaidBalanceCards = cards.some((card) => {
+    const entry = monthlyBalances?.[card.id];
+    return Number(entry?.balance || 0) > 0 && !entry?.paid;
+  });
 
   return [...cards].sort((a, b) => {
     const entryA = monthlyBalances?.[a.id];
     const entryB = monthlyBalances?.[b.id];
+    const dueA = getDueDateForMonth(monthKey, a.dueDay);
+    const dueB = getDueDateForMonth(monthKey, b.dueDay);
 
-    if (hasUnpaidCards) {
-      const paidA = Boolean(entryA?.paid);
-      const paidB = Boolean(entryB?.paid);
-      if (paidA !== paidB) return paidA ? 1 : -1;
+    if (hasUnpaidBalanceCards) {
+      const unpaidBalanceA = Number(entryA?.balance || 0) > 0 && !entryA?.paid;
+      const unpaidBalanceB = Number(entryB?.balance || 0) > 0 && !entryB?.paid;
 
-      const dueA = getDueDateForMonth(monthKey, a.dueDay);
-      const dueB = getDueDateForMonth(monthKey, b.dueDay);
+      if (unpaidBalanceA !== unpaidBalanceB) return unpaidBalanceA ? -1 : 1;
+
+      if (!unpaidBalanceA && !unpaidBalanceB) return dueA - dueB;
+
       const daysA = daysBetween(today, dueA);
       const daysB = daysBetween(today, dueB);
       const rankA = daysA < 0 ? 0 : 1;
@@ -53,6 +59,6 @@ function sortByDefault(cards, monthlyBalances, monthKey) {
       return dueA - dueB;
     }
 
-    return getNextDueDate(a.dueDay, today) - getNextDueDate(b.dueDay, today);
+    return dueA - dueB;
   });
 }

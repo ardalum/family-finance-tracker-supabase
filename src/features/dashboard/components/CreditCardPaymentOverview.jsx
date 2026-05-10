@@ -27,8 +27,8 @@ export default function CreditCardPaymentOverview({ rows, totalUnpaid }) {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {rows.map((row) => {
-                const warning = !row.paid && row.daysUntilDue <= 7;
-                const pastDue = !row.paid && row.daysUntilDue < 0;
+                const warning = row.hasPaymentDue && row.daysUntilDue <= 7;
+                const pastDue = row.hasPaymentDue && row.daysUntilDue < 0;
                 return (
                   <tr key={row.card.id} className={pastDue ? "bg-red-100" : warning ? "bg-red-50" : "bg-white"}>
                     <td className="px-5 py-4"><LinkedCardName card={row.card} /></td>
@@ -36,7 +36,9 @@ export default function CreditCardPaymentOverview({ rows, totalUnpaid }) {
                     <td className="px-5 py-4">{row.card.bank ?? "N/A"}</td>
                     <td className="px-5 py-4">Day {row.card.dueDay}</td>
                     <td className="px-5 py-4 font-semibold">{formatCurrency(row.balance)}</td>
-                    <td className="px-5 py-4">{row.paid ? "Paid" : "Unpaid"}</td>
+                    <td className="px-5 py-4">
+                      {row.balance <= 0 ? "No balance" : row.paid ? "Paid" : "Unpaid"}
+                    </td>
                     <td className="px-5 py-4">{row.daysUntilDue}</td>
                   </tr>
                 );

@@ -28,7 +28,8 @@ export function getDashboardData(appData, monthKey) {
   );
   const unpaidBalanceTotal = cards.reduce((sum, card) => {
     const entry = monthlyBalances[card.id] ?? { balance: 0, paid: false };
-    return entry.paid ? sum : sum + Number(entry.balance || 0);
+    const balance = Number(entry.balance || 0);
+    return entry.paid || balance <= 0 ? sum : sum + balance;
   }, 0);
   const recurringSummary = getRecurringSummary(appData.recurringPayments, monthKey, recurringTransactions);
 
@@ -78,9 +79,11 @@ export function getAlerts(data) {
   });
 
   data.cardRows.forEach((row) => {
-    if (!row.paid && row.daysUntilDue < 0) {
+    if (!row.hasPaymentDue) return;
+
+    if (row.daysUntilDue < 0) {
       alerts.push({ type: "danger", text: `${row.card.name} is past due with an unpaid balance.` });
-    } else if (!row.paid && row.daysUntilDue <= 7) {
+    } else if (row.daysUntilDue <= 7) {
       alerts.push({ type: "warning", text: `${row.card.name} is due within 7 days.` });
     }
   });
@@ -126,21 +129,28 @@ function getBudgetRows(budgets, transactions) {
 }
 
 function getCardRows(cards, monthlyBalances, monthKey) {
-  return cards
+  const rows = cards
     .map((card) => {
       const dueDate = getDueDateForMonth(monthKey, card.dueDay);
       const entry = monthlyBalances[card.id] ?? { balance: 0, paid: false };
+      const balance = Number(entry.balance || 0);
+      const paid = Boolean(entry.paid);
       return {
         card,
-        balance: Number(entry.balance || 0),
-        paid: Boolean(entry.paid),
+        balance,
+        paid,
+        hasPaymentDue: balance > 0 && !paid,
         daysUntilDue: daysBetween(new Date(), dueDate),
       };
-    })
-    .sort((a, b) => {
-      if (a.paid !== b.paid) return a.paid ? 1 : -1;
-      return a.daysUntilDue - b.daysUntilDue;
     });
+  const hasUnpaidBalanceCards = rows.some((row) => row.hasPaymentDue);
+
+  return rows.sort((a, b) => {
+    if (hasUnpaidBalanceCards && a.hasPaymentDue !== b.hasPaymentDue) {
+      return a.hasPaymentDue ? -1 : 1;
+    }
+    return a.daysUntilDue - b.daysUntilDue;
+  });
 }
 
 function getRecurringRows(templates, monthKey, transactions, statusByMonth) {
