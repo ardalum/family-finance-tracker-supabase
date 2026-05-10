@@ -5,6 +5,14 @@ import AccountMenu from "../features/auth/components/AccountMenu.jsx";
 import AuthGate from "../features/auth/components/AuthGate.jsx";
 import BackupRestore from "../features/backup/components/BackupRestore.jsx";
 import BudgetTracker from "../features/budgets/components/BudgetTracker.jsx";
+import {
+  addBudgetCategoryToSupabase,
+  deleteBudgetCategoryFromSupabase,
+  importLocalBudgetCategories,
+  listBudgetCategories,
+  updateBudgetCategoryInSupabase,
+} from "../features/budgets/budgetsSupabaseService.js";
+import { defaultBudgetCategories } from "../features/budgets/budgetDefaults.js";
 import CreditCardTracker from "../features/creditCards/components/CreditCardTracker.jsx";
 import {
   addCreditCardToSupabase,
@@ -85,6 +93,11 @@ function FinanceTrackerApp() {
   const [monthlyBalancesLoading, setMonthlyBalancesLoading] = useState(true);
   const [monthlyBalancesSaving, setMonthlyBalancesSaving] = useState(false);
   const [monthlyBalancesError, setMonthlyBalancesError] = useState("");
+  const [supabaseBudgets, setSupabaseBudgets] = useState([]);
+  const [selectedBudgetMonth, setSelectedBudgetMonth] = useState(getCurrentMonthKey());
+  const [budgetsLoading, setBudgetsLoading] = useState(true);
+  const [budgetsSaving, setBudgetsSaving] = useState(false);
+  const [budgetsError, setBudgetsError] = useState("");
   const [activeView, setActiveViewState] = useState(() => {
     try {
       const storedView = window.localStorage.getItem(ACTIVE_VIEW_KEY);
@@ -161,6 +174,33 @@ function FinanceTrackerApp() {
   useEffect(() => {
     loadSupabaseMonthlyBalances();
   }, [loadSupabaseMonthlyBalances, selectedBalanceMonth]);
+
+  const loadSupabaseBudgets = useCallback(async () => {
+    if (!activeHouseholdId) {
+      setSupabaseBudgets([]);
+      setBudgetsLoading(false);
+      return [];
+    }
+
+    setBudgetsLoading(true);
+    setBudgetsError("");
+
+    try {
+      const budgets = await listBudgetCategories(activeHouseholdId, selectedBudgetMonth);
+      setSupabaseBudgets(budgets);
+      return budgets;
+    } catch (error) {
+      setBudgetsError(error.message || "Could not load budget categories.");
+      setSupabaseBudgets([]);
+      return [];
+    } finally {
+      setBudgetsLoading(false);
+    }
+  }, [activeHouseholdId, selectedBudgetMonth]);
+
+  useEffect(() => {
+    loadSupabaseBudgets();
+  }, [loadSupabaseBudgets]);
 
   async function createSupabaseCreditCard(input) {
     setCreditCardsSaving(true);
@@ -277,6 +317,116 @@ function FinanceTrackerApp() {
     }
   }
 
+  async function createSupabaseBudget(input) {
+    setBudgetsSaving(true);
+    setBudgetsError("");
+
+    try {
+      const budget = await addBudgetCategoryToSupabase(
+        activeHouseholdId,
+        selectedBudgetMonth,
+        input,
+      );
+      setSupabaseBudgets((budgets) => [...budgets, budget]);
+      return budget;
+    } catch (error) {
+      setBudgetsError(error.message || "Could not add budget category.");
+      throw error;
+    } finally {
+      setBudgetsSaving(false);
+    }
+  }
+
+  async function updateSupabaseBudget(budgetId, input) {
+    setBudgetsSaving(true);
+    setBudgetsError("");
+
+    try {
+      const budget = await updateBudgetCategoryInSupabase(budgetId, input);
+      setSupabaseBudgets((budgets) =>
+        budgets.map((currentBudget) => (currentBudget.id === budget.id ? budget : currentBudget)),
+      );
+      return budget;
+    } catch (error) {
+      setBudgetsError(error.message || "Could not update budget category.");
+      throw error;
+    } finally {
+      setBudgetsSaving(false);
+    }
+  }
+
+  async function deleteSupabaseBudget(budgetId) {
+    setBudgetsSaving(true);
+    setBudgetsError("");
+
+    try {
+      await deleteBudgetCategoryFromSupabase(budgetId);
+      setSupabaseBudgets((budgets) =>
+        budgets.filter((budget) => (budget.supabaseId ?? budget.id) !== budgetId),
+      );
+    } catch (error) {
+      setBudgetsError(error.message || "Could not delete budget category.");
+      throw error;
+    } finally {
+      setBudgetsSaving(false);
+    }
+  }
+
+  async function importLocalBudgetsToSupabase() {
+    setBudgetsSaving(true);
+    setBudgetsError("");
+
+    try {
+      const importedBudgets = await importLocalBudgetCategories(
+        activeHouseholdId,
+        {
+          [selectedBudgetMonth]: appData.budgetsByMonth?.[selectedBudgetMonth] ?? [],
+        },
+      );
+      await loadSupabaseBudgets();
+      return importedBudgets;
+    } catch (error) {
+      setBudgetsError(error.message || "Could not import local budget categories.");
+      throw error;
+    } finally {
+      setBudgetsSaving(false);
+    }
+  }
+
+  async function addDefaultBudgetsToSupabase() {
+    setBudgetsSaving(true);
+    setBudgetsError("");
+
+    try {
+      const existingNames = new Set(
+        supabaseBudgets.map((budget) => budget.name.trim().toLowerCase()),
+      );
+      const missingCategories = defaultBudgetCategories.filter(
+        (name) => !existingNames.has(name.trim().toLowerCase()),
+      );
+
+      if (missingCategories.length === 0) return [];
+
+      const createdBudgets = [];
+      for (const name of missingCategories) {
+        const budget = await addBudgetCategoryToSupabase(activeHouseholdId, selectedBudgetMonth, {
+          name,
+          monthlyAmount: 0,
+          notes: "",
+        });
+        createdBudgets.push(budget);
+      }
+
+      setSupabaseBudgets((budgets) => [...budgets, ...createdBudgets]);
+      return createdBudgets;
+    } catch (error) {
+      setBudgetsError(error.message || "Could not add default budget categories.");
+      throw error;
+    } finally {
+      setBudgetsSaving(false);
+    }
+  }
+
   return (
     <AppShell
       activeView={activeView}
@@ -317,7 +467,20 @@ function FinanceTrackerApp() {
       ) : null}
 
       {activeView === "budgets" ? (
-        <BudgetTracker budgetsByMonth={appData.budgetsByMonth} onDataChange={refreshData} />
+        <BudgetTracker
+          budgets={supabaseBudgets}
+          localBudgetsByMonth={appData.budgetsByMonth}
+          selectedMonth={selectedBudgetMonth}
+          loading={budgetsLoading}
+          error={budgetsError}
+          isSaving={budgetsSaving}
+          onMonthChange={setSelectedBudgetMonth}
+          onCreateBudget={createSupabaseBudget}
+          onUpdateBudget={updateSupabaseBudget}
+          onDeleteBudget={deleteSupabaseBudget}
+          onAddDefaultBudgets={addDefaultBudgetsToSupabase}
+          onImportLocalBudgets={importLocalBudgetsToSupabase}
+        />
       ) : null}
 
       {activeView === "spending" ? (

@@ -188,12 +188,16 @@ create table if not exists public.budget_categories (
   name text not null,
   monthly_amount numeric(12, 2) not null default 0 check (monthly_amount >= 0),
   notes text not null default '',
+  imported_local_id text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
 create index if not exists budget_categories_household_month_idx
   on public.budget_categories (household_id, month_key);
+
+create unique index if not exists budget_categories_household_imported_local_id_unique
+  on public.budget_categories (household_id, imported_local_id);
 
 create table if not exists public.recurring_payments (
   id uuid primary key default gen_random_uuid(),

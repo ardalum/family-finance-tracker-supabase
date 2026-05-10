@@ -2,19 +2,32 @@ import { Edit, Trash2 } from "lucide-react";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
-import { deleteBudgetCategory } from "../budgetsService.js";
 
-export default function BudgetTable({ budgets, monthKey, onEdit, onDataChange }) {
-  function handleDelete(budget) {
+export default function BudgetTable({
+  budgets,
+  onEdit,
+  onDelete,
+  onAddDefaults,
+  isSaving = false,
+}) {
+  async function handleDelete(budget) {
     const confirmed = window.confirm(`Delete ${budget.name} from this month's budget?`);
-    if (confirmed) onDataChange(deleteBudgetCategory(monthKey, budget.id));
+    if (confirmed) await onDelete(budget);
   }
 
   return (
     <Card>
       {budgets.length === 0 ? (
-        <div className="p-8 text-center text-sm text-gray-500">
-          No budget categories for this month yet.
+        <div className="grid justify-items-center gap-4 p-8 text-center">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-950">No budget categories yet</h2>
+            <p className="mt-1 text-sm text-gray-500">
+              Add your own category or start with the default set for this month.
+            </p>
+          </div>
+          <Button type="button" onClick={onAddDefaults} disabled={isSaving}>
+            {isSaving ? "Adding..." : "Add Default Categories"}
+          </Button>
         </div>
       ) : (
         <div className="overflow-x-auto">
@@ -46,6 +59,7 @@ export default function BudgetTable({ budgets, monthKey, onEdit, onDataChange })
                         variant="secondary"
                         className="px-3"
                         onClick={() => onEdit(budget)}
+                        disabled={isSaving}
                         aria-label={`Edit ${budget.name}`}
                       >
                         <Edit size={16} aria-hidden="true" />
@@ -55,6 +69,7 @@ export default function BudgetTable({ budgets, monthKey, onEdit, onDataChange })
                         variant="danger"
                         className="px-3"
                         onClick={() => handleDelete(budget)}
+                        disabled={isSaving}
                         aria-label={`Delete ${budget.name}`}
                       >
                         <Trash2 size={16} aria-hidden="true" />
