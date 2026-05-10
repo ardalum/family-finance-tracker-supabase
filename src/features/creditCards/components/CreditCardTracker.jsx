@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
-import Card from "../../../components/ui/Card.jsx";
+import { Plus } from "lucide-react";
+import Button from "../../../components/ui/Button.jsx";
 import CreditCardMigrationPanel from "./CreditCardMigrationPanel.jsx";
-import CreditCardForm from "./CreditCardForm.jsx";
+import CreditCardModal from "./CreditCardModal.jsx";
 import CreditCardList from "./CreditCardList.jsx";
 import CreditLimitSummary from "./CreditLimitSummary.jsx";
 import MonthlyBalanceMigrationPanel from "./MonthlyBalanceMigrationPanel.jsx";
@@ -27,17 +28,27 @@ export default function CreditCardTracker({
   onBalanceMonthChange,
   onMonthlyBalanceChange,
   onImportLocalMonthlyBalances,
-  onDataChange,
 }) {
   const [editingCard, setEditingCard] = useState(null);
+  const [isCardModalOpen, setIsCardModalOpen] = useState(false);
   const activeCards = useMemo(
     () => creditCards.filter((card) => card.isActive),
     [creditCards],
   );
 
-  function refreshCreditCardData(nextData) {
+  function openAddModal() {
     setEditingCard(null);
-    onDataChange(nextData);
+    setIsCardModalOpen(true);
+  }
+
+  function openEditModal(card) {
+    setEditingCard(card);
+    setIsCardModalOpen(true);
+  }
+
+  function closeCardModal() {
+    setIsCardModalOpen(false);
+    setEditingCard(null);
   }
 
   async function handleSave(form, card) {
@@ -46,7 +57,7 @@ export default function CreditCardTracker({
     } else {
       await onCreateCard(form);
     }
-    setEditingCard(null);
+    closeCardModal();
   }
 
   async function handleDelete(card) {
@@ -79,39 +90,48 @@ export default function CreditCardTracker({
 
       <CreditLimitSummary cards={activeCards} />
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_390px]">
-        <div className="grid gap-6">
-          <MonthlyBalanceTable
-            cards={activeCards}
-            monthlyBalances={monthlyBalances}
-            selectedMonth={selectedBalanceMonth}
-            loading={monthlyBalancesLoading}
-            saving={monthlyBalancesSaving}
-            error={monthlyBalancesError}
-            onMonthChange={onBalanceMonthChange}
-            onBalanceChange={onMonthlyBalanceChange}
-          />
-          <MonthlyBalanceGraph monthlyBalances={monthlyBalances} />
-          <CreditCardList
-            cards={activeCards}
-            onEdit={setEditingCard}
-            onDelete={handleDelete}
-            isSaving={isSaving}
-          />
-        </div>
-
-        <Card className="h-fit p-5">
-          {loading ? (
-            <div className="text-sm text-gray-500">Loading credit cards...</div>
-          ) : null}
-          <CreditCardForm
-            editingCard={editingCard}
-            onCancel={() => setEditingCard(null)}
-            onSaved={handleSave}
-            isSaving={isSaving}
-          />
-        </Card>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        {loading ? <div className="text-sm text-gray-500">Loading credit cards...</div> : null}
+        <Button
+          type="button"
+          onClick={openAddModal}
+          disabled={loading || isSaving}
+          className="ml-auto"
+        >
+          <Plus size={16} aria-hidden="true" />
+          Add Credit Card
+        </Button>
       </div>
+
+      <div className="grid gap-6">
+        <MonthlyBalanceTable
+          cards={activeCards}
+          monthlyBalances={monthlyBalances}
+          selectedMonth={selectedBalanceMonth}
+          loading={monthlyBalancesLoading}
+          saving={monthlyBalancesSaving}
+          error={monthlyBalancesError}
+          onMonthChange={onBalanceMonthChange}
+          onBalanceChange={onMonthlyBalanceChange}
+          onEditCard={openEditModal}
+          isCardSaving={isSaving}
+        />
+        <MonthlyBalanceGraph monthlyBalances={monthlyBalances} />
+        <CreditCardList
+          cards={activeCards}
+          onEdit={openEditModal}
+          onDelete={handleDelete}
+          isSaving={isSaving}
+        />
+      </div>
+
+      <CreditCardModal
+        open={isCardModalOpen}
+        editingCard={editingCard}
+        onClose={closeCardModal}
+        onSaved={handleSave}
+        isSaving={isSaving}
+      />
     </section>
   );
 }

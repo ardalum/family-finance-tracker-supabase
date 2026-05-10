@@ -12,11 +12,18 @@ const emptyForm = {
   creditLimit: "",
   statementClosingDay: "",
   dueDay: "",
+  isActive: true,
 };
 
 const networks = ["Visa", "Mastercard", "American Express", "Discover", "Other"];
 
-export default function CreditCardForm({ editingCard, onCancel, onSaved, isSaving = false }) {
+export default function CreditCardForm({
+  editingCard,
+  onCancel,
+  onSaved,
+  isSaving = false,
+  showHeader = true,
+}) {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
 
@@ -33,6 +40,7 @@ export default function CreditCardForm({ editingCard, onCancel, onSaved, isSavin
             creditLimit: String(editingCard.creditLimit),
             statementClosingDay: String(editingCard.statementClosingDay ?? editingCard.dueDay),
             dueDay: String(editingCard.dueDay),
+            isActive: editingCard.isActive ?? true,
           }
         : emptyForm,
     );
@@ -60,12 +68,14 @@ export default function CreditCardForm({ editingCard, onCancel, onSaved, isSavin
 
   return (
     <form className="grid gap-4" onSubmit={handleSubmit}>
-      <div>
-        <h2 className="text-lg font-semibold text-gray-950">
-          {editingCard ? "Edit credit card" : "Add credit card"}
-        </h2>
-        <p className="mt-1 text-sm text-gray-500">Card URLs are required and open in a new tab.</p>
-      </div>
+      {showHeader ? (
+        <div>
+          <h2 className="text-lg font-semibold text-gray-950">
+            {editingCard ? "Edit credit card" : "Add credit card"}
+          </h2>
+          <p className="mt-1 text-sm text-gray-500">Card URLs are required and open in a new tab.</p>
+        </div>
+      ) : null}
 
       {error ? (
         <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
@@ -150,16 +160,25 @@ export default function CreditCardForm({ editingCard, onCancel, onSaved, isSavin
           required
         />
       </div>
+      <label className="flex items-center gap-3 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700">
+        <input
+          className="h-4 w-4 rounded border-gray-300 text-gray-950 focus:ring-gray-950"
+          type="checkbox"
+          checked={Boolean(form.isActive)}
+          onChange={(event) => updateField("isActive", event.target.checked)}
+        />
+        Active card
+      </label>
 
-      <div className="flex flex-wrap gap-3">
-        <Button type="submit" disabled={isSaving}>
-          {isSaving ? "Saving..." : editingCard ? "Save changes" : "Add card"}
-        </Button>
-        {editingCard ? (
+      <div className="flex flex-wrap justify-end gap-3">
+        {onCancel ? (
           <Button type="button" variant="secondary" onClick={onCancel} disabled={isSaving}>
             Cancel
           </Button>
         ) : null}
+        <Button type="submit" disabled={isSaving}>
+          {isSaving ? "Saving..." : "Save"}
+        </Button>
       </div>
     </form>
   );

@@ -14,7 +14,7 @@ function normalizeCard(input) {
     creditLimit: Number(input.creditLimit) || 0,
     statementClosingDay: Number(input.statementClosingDay) || Number(input.dueDay) || 1,
     dueDay: Number(input.dueDay) || 1,
-    isActive: true,
+    isActive: input.isActive ?? true,
   };
 }
 

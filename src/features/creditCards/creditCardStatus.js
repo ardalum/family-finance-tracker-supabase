@@ -17,18 +17,18 @@ export function getRowStatus(card, monthKey, entry) {
   if (daysUntilDue < 0) {
     return {
       label: "Past due",
-      rowClass: "bg-red-100 ring-1 ring-inset ring-red-300",
-      badgeClass: "bg-red-700 text-white ring-red-800",
-      balanceClass: balance === 0 ? "text-red-700" : "text-red-950",
+      rowClass: "bg-red-200 ring-2 ring-inset ring-red-500",
+      badgeClass: "bg-red-800 text-white ring-red-900",
+      balanceClass: balance === 0 ? "text-red-800" : "text-red-950",
     };
   }
 
   if (daysUntilDue === 0) {
     return {
       label: "Due now",
-      rowClass: "bg-red-200 ring-2 ring-inset ring-red-500",
-      badgeClass: "bg-red-800 text-white ring-red-900",
-      balanceClass: balance === 0 ? "text-red-800" : "text-red-950",
+      rowClass: "bg-red-100 ring-1 ring-inset ring-red-300",
+      badgeClass: "bg-red-700 text-white ring-red-800",
+      balanceClass: balance === 0 ? "text-red-700" : "text-red-950",
     };
   }
 

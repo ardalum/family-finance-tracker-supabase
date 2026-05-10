@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { RotateCcw } from "lucide-react";
+import { Pencil, RotateCcw } from "lucide-react";
 import LinkedCardName from "../../../components/shared/LinkedCardName.jsx";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
@@ -25,6 +25,8 @@ export default function MonthlyBalanceTable({
   error = "",
   onMonthChange,
   onBalanceChange,
+  onEditCard,
+  isCardSaving = false,
 }) {
   const [sortMode, setSortMode] = useState("default");
   const monthBalances = monthlyBalances[selectedMonth] ?? {};
@@ -93,6 +95,7 @@ export default function MonthlyBalanceTable({
           >
             <option value="default">Default</option>
             <option value="name">Card name</option>
+            <option value="owner">Owner</option>
             <option value="limit-desc">Highest limit</option>
             <option value="balance-desc">Highest balance</option>
           </Select>
@@ -135,7 +138,22 @@ export default function MonthlyBalanceTable({
                 return (
                   <tr key={card.id} className={status.rowClass}>
                     <td className="px-5 py-4 align-middle">
-                      <LinkedCardName card={card} />
+                      <div className="flex min-w-0 items-center gap-2">
+                        <div className="min-w-0">
+                          <LinkedCardName card={card} />
+                        </div>
+                        {onEditCard ? (
+                          <button
+                            type="button"
+                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-gray-500 transition hover:bg-white/80 hover:text-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-950/10"
+                            onClick={() => onEditCard(card)}
+                            disabled={isCardSaving}
+                            aria-label={`Edit ${card.name}`}
+                          >
+                            <Pencil size={15} aria-hidden="true" />
+                          </button>
+                        ) : null}
+                      </div>
                       <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
                         <span>{card.network}</span>
                         <span>**** {card.lastFour}</span>

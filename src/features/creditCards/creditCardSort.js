@@ -7,6 +7,13 @@ export function getSortedCards(cards, monthlyBalances, monthKey, sortMode) {
     return [...activeCards].sort((a, b) => a.name.localeCompare(b.name));
   }
 
+  if (sortMode === "owner") {
+    return [...activeCards].sort((a, b) => {
+      const ownerCompare = a.owner.localeCompare(b.owner);
+      return ownerCompare || a.name.localeCompare(b.name);
+    });
+  }
+
   if (sortMode === "limit-desc") {
     return [...activeCards].sort((a, b) => Number(b.creditLimit) - Number(a.creditLimit));
   }
