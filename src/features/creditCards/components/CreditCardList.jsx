@@ -3,14 +3,13 @@ import LinkedCardName from "../../../components/shared/LinkedCardName.jsx";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
-import { deleteCreditCard } from "../creditCardsService.js";
 
-export default function CreditCardList({ cards, onEdit, onDataChange }) {
-  function handleDelete(card) {
+export default function CreditCardList({ cards, onEdit, onDelete, isSaving = false }) {
+  async function handleDelete(card) {
     const confirmed = window.confirm(
-      `Delete ${card.name}? Monthly balances for this card will also be removed.`,
+      `Delete ${card.name}? This removes the card from Supabase for this household.`,
     );
-    if (confirmed) onDataChange(deleteCreditCard(card.id));
+    if (confirmed) await onDelete(card);
   }
 
   return (
@@ -18,7 +17,7 @@ export default function CreditCardList({ cards, onEdit, onDataChange }) {
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 p-5">
         <div>
           <h2 className="text-lg font-semibold text-gray-950">Credit cards</h2>
-          <p className="text-sm text-gray-500">Stored locally in this browser.</p>
+          <p className="text-sm text-gray-500">Stored in Supabase for the active household.</p>
         </div>
         <span className="rounded-md bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">
           {cards.length} active
@@ -54,6 +53,7 @@ export default function CreditCardList({ cards, onEdit, onDataChange }) {
                   type="button"
                   variant="secondary"
                   onClick={() => onEdit(card)}
+                  disabled={isSaving}
                   className="px-3"
                   aria-label={`Edit ${card.name}`}
                 >
@@ -63,6 +63,7 @@ export default function CreditCardList({ cards, onEdit, onDataChange }) {
                   type="button"
                   variant="danger"
                   onClick={() => handleDelete(card)}
+                  disabled={isSaving}
                   className="px-3"
                   aria-label={`Delete ${card.name}`}
                 >

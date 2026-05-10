@@ -155,12 +155,16 @@ create table if not exists public.credit_cards (
   statement_closing_day integer not null default 1 check (statement_closing_day between 1 and 31),
   due_day integer not null default 1 check (due_day between 1 and 31),
   is_active boolean not null default true,
+  imported_local_id text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
 create index if not exists credit_cards_household_id_idx
   on public.credit_cards (household_id);
+
+create unique index if not exists credit_cards_household_imported_local_id_unique
+  on public.credit_cards (household_id, imported_local_id);
 
 create table if not exists public.monthly_card_balances (
   id uuid primary key default gen_random_uuid(),

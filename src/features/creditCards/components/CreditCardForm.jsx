@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import Button from "../../../components/ui/Button.jsx";
 import Input from "../../../components/ui/Input.jsx";
 import Select from "../../../components/ui/Select.jsx";
-import { addCreditCard, updateCreditCard } from "../creditCardsService.js";
 
 const emptyForm = {
   name: "",
@@ -17,7 +16,7 @@ const emptyForm = {
 
 const networks = ["Visa", "Mastercard", "American Express", "Discover", "Other"];
 
-export default function CreditCardForm({ editingCard, onCancel, onSaved }) {
+export default function CreditCardForm({ editingCard, onCancel, onSaved, isSaving = false }) {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
 
@@ -43,7 +42,7 @@ export default function CreditCardForm({ editingCard, onCancel, onSaved }) {
     setForm((current) => ({ ...current, [field]: value }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     const validationError = validateForm(form);
     if (validationError) {
@@ -51,11 +50,12 @@ export default function CreditCardForm({ editingCard, onCancel, onSaved }) {
       return;
     }
 
-    const nextData = editingCard
-      ? updateCreditCard(editingCard.id, form)
-      : addCreditCard(form);
-    onSaved(nextData);
-    setForm(emptyForm);
+    try {
+      await onSaved(form, editingCard);
+      setForm(emptyForm);
+    } catch (currentError) {
+      setError(currentError.message || "Could not save credit card.");
+    }
   }
 
   return (
@@ -152,9 +152,11 @@ export default function CreditCardForm({ editingCard, onCancel, onSaved }) {
       </div>
 
       <div className="flex flex-wrap gap-3">
-        <Button type="submit">{editingCard ? "Save changes" : "Add card"}</Button>
+        <Button type="submit" disabled={isSaving}>
+          {isSaving ? "Saving..." : editingCard ? "Save changes" : "Add card"}
+        </Button>
         {editingCard ? (
-          <Button type="button" variant="secondary" onClick={onCancel}>
+          <Button type="button" variant="secondary" onClick={onCancel} disabled={isSaving}>
             Cancel
           </Button>
         ) : null}
