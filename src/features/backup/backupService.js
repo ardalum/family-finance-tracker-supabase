@@ -4,6 +4,16 @@ import { supabase } from "../../lib/supabase/client.js";
 const BACKUP_APP_NAME = "Credit Card Tracker";
 const SUPPORTED_SCHEMA_VERSION = 1;
 const SUPABASE_BACKUP_VERSION = 1;
+const EXPECTED_SUPABASE_SECTIONS = [
+  "household",
+  "creditCards",
+  "monthlyCardBalances",
+  "budgetCategories",
+  "transactions",
+  "transactionSplits",
+  "recurringPayments",
+  "recurringPaymentInstances",
+];
 
 function requireSupabase() {
   if (!supabase) {
@@ -110,6 +120,308 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
   }
 }
 
+export async function previewSupabaseBackupImport(file, householdId) {
+  if (!householdId) {
+    return {
+      ok: false,
+      message: "Choose an active household before importing cloud data.",
+    };
+  }
+
+  const parsed = await parseSupabaseBackupFile(file);
+  if (!parsed.ok) return parsed;
+
+  try {
+    const context = await loadSupabaseImportContext(householdId);
+    const preview = buildSupabaseImportPreview(parsed.backup, context);
+
+    return {
+      ok: true,
+      message: "Backup file is ready to import.",
+      backup: parsed.backup,
+      preview,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      message: error.message || "Could not prepare Supabase import preview.",
+    };
+  }
+}
+
+export async function importSupabaseBackupMerge(householdId, backup) {
+  const validation = validateSupabaseBackup(backup);
+  if (!validation.ok) return validation;
+
+  if (!householdId) {
+    return {
+      ok: false,
+      message: "Choose an active household before importing cloud data.",
+    };
+  }
+
+  try {
+    const client = requireSupabase();
+    const context = await loadSupabaseImportContext(householdId);
+    const maps = createImportMaps();
+    const counts = createImportCounts();
+
+    const cardRows = [...context.creditCards];
+    for (const card of backup.creditCards) {
+      const existing = findCreditCardMatch(card, cardRows);
+      if (existing) {
+        maps.creditCards.set(card.id, existing.id);
+        counts.creditCards.skipped += 1;
+        continue;
+      }
+
+      const { data, error } = await client
+        .from("credit_cards")
+        .insert({
+          household_id: householdId,
+          name: card.name,
+          url: card.url ?? "",
+          network: card.network ?? "",
+          owner_name: card.owner_name ?? "",
+          last_four: card.last_four ?? "",
+          credit_limit: Number(card.credit_limit || 0),
+          statement_closing_day: Number(card.statement_closing_day || 1),
+          due_day: Number(card.due_day || 1),
+          is_active: card.is_active ?? true,
+          imported_local_id: card.imported_local_id ?? card.id,
+        })
+        .select("*")
+        .single();
+
+      if (error) throw error;
+      cardRows.push(data);
+      maps.creditCards.set(card.id, data.id);
+      counts.creditCards.imported += 1;
+    }
+
+    const categoryRows = [...context.budgetCategories];
+    for (const category of backup.budgetCategories) {
+      const existing = findBudgetCategoryMatch(category, categoryRows);
+      if (existing) {
+        maps.budgetCategories.set(category.id, existing.id);
+        counts.budgetCategories.skipped += 1;
+        continue;
+      }
+
+      const { data, error } = await client
+        .from("budget_categories")
+        .insert({
+          household_id: householdId,
+          month_key: category.month_key,
+          name: category.name,
+          monthly_amount: Number(category.monthly_amount || 0),
+          notes: category.notes ?? "",
+          imported_local_id: category.imported_local_id ?? category.id,
+        })
+        .select("*")
+        .single();
+
+      if (error) throw error;
+      categoryRows.push(data);
+      maps.budgetCategories.set(category.id, data.id);
+      counts.budgetCategories.imported += 1;
+    }
+
+    const recurringRows = [...context.recurringPayments];
+    for (const recurringPayment of backup.recurringPayments) {
+      const existing = findRecurringPaymentMatch(recurringPayment, recurringRows);
+      if (existing) {
+        maps.recurringPayments.set(recurringPayment.id, existing.id);
+        counts.recurringPayments.skipped += 1;
+        continue;
+      }
+
+      const { data, error } = await client
+        .from("recurring_payments")
+        .insert({
+          household_id: householdId,
+          name: recurringPayment.name,
+          category_id: getMappedId(maps.budgetCategories, recurringPayment.category_id),
+          bill_type: recurringPayment.bill_type,
+          estimated_amount: Number(recurringPayment.estimated_amount || 0),
+          due_day: Number(recurringPayment.due_day || 1),
+          payment_method: recurringPayment.payment_method ?? "Other",
+          credit_card_id: getMappedId(maps.creditCards, recurringPayment.credit_card_id),
+          start_month: recurringPayment.start_month,
+          end_month: recurringPayment.end_month || null,
+          active: recurringPayment.active ?? true,
+          notes: recurringPayment.notes ?? "",
+          imported_local_id: recurringPayment.imported_local_id ?? recurringPayment.id,
+        })
+        .select("*")
+        .single();
+
+      if (error) throw error;
+      recurringRows.push(data);
+      maps.recurringPayments.set(recurringPayment.id, data.id);
+      counts.recurringPayments.imported += 1;
+    }
+
+    const transactionRows = [...context.transactions];
+    for (const transaction of backup.transactions) {
+      const mappedTransaction = mapTransactionReferences(transaction, maps);
+      const existing = findTransactionMatch(mappedTransaction, transactionRows);
+      if (existing) {
+        maps.transactions.set(transaction.id, existing.id);
+        counts.transactions.skipped += 1;
+        continue;
+      }
+
+      const { data, error } = await client
+        .from("transactions")
+        .insert({
+          household_id: householdId,
+          transaction_date: transaction.transaction_date,
+          merchant: transaction.merchant,
+          payment_method: transaction.payment_method ?? "Other",
+          credit_card_id: mappedTransaction.credit_card_id,
+          category_id: mappedTransaction.category_id,
+          amount: Number(transaction.amount || 0),
+          notes: transaction.notes ?? "",
+          source: transaction.source ?? "manual",
+          recurring_payment_id: getMappedId(maps.recurringPayments, transaction.recurring_payment_id),
+          recurring_month: transaction.recurring_month || null,
+          imported_local_id: transaction.imported_local_id ?? transaction.id,
+        })
+        .select("*")
+        .single();
+
+      if (error) throw error;
+      transactionRows.push(data);
+      maps.transactions.set(transaction.id, data.id);
+      counts.transactions.imported += 1;
+    }
+
+    const balanceRows = [...context.monthlyCardBalances];
+    for (const balance of backup.monthlyCardBalances) {
+      const mappedCardId = getMappedId(maps.creditCards, balance.credit_card_id);
+      if (!mappedCardId) {
+        counts.monthlyCardBalances.skipped += 1;
+        continue;
+      }
+
+      const existing = balanceRows.find(
+        (row) => row.credit_card_id === mappedCardId && row.month_key === balance.month_key,
+      );
+      if (existing) {
+        counts.monthlyCardBalances.skipped += 1;
+        continue;
+      }
+
+      const { data, error } = await client
+        .from("monthly_card_balances")
+        .insert({
+          household_id: householdId,
+          credit_card_id: mappedCardId,
+          month_key: balance.month_key,
+          balance: Number(balance.balance || 0),
+          paid: Boolean(balance.paid),
+        })
+        .select("*")
+        .single();
+
+      if (error) throw error;
+      balanceRows.push(data);
+      counts.monthlyCardBalances.imported += 1;
+    }
+
+    const splitRows = [...context.transactionSplits];
+    for (const split of backup.transactionSplits) {
+      const mappedTransactionId = getMappedId(maps.transactions, split.transaction_id);
+      if (!mappedTransactionId) {
+        counts.transactionSplits.skipped += 1;
+        continue;
+      }
+
+      const mappedCategoryId = getMappedId(maps.budgetCategories, split.category_id);
+      const existing = findTransactionSplitMatch(
+        {
+          ...split,
+          transaction_id: mappedTransactionId,
+          category_id: mappedCategoryId,
+        },
+        splitRows,
+      );
+
+      if (existing) {
+        counts.transactionSplits.skipped += 1;
+        continue;
+      }
+
+      const { data, error } = await client
+        .from("transaction_splits")
+        .insert({
+          household_id: householdId,
+          transaction_id: mappedTransactionId,
+          category_id: mappedCategoryId,
+          category_fallback: split.category_fallback ?? "Uncategorized",
+          amount: Number(split.amount || 0),
+        })
+        .select("*")
+        .single();
+
+      if (error) throw error;
+      splitRows.push(data);
+      counts.transactionSplits.imported += 1;
+    }
+
+    const instanceRows = [...context.recurringPaymentInstances];
+    for (const instance of backup.recurringPaymentInstances) {
+      const mappedRecurringPaymentId = getMappedId(maps.recurringPayments, instance.recurring_payment_id);
+      if (!mappedRecurringPaymentId) {
+        counts.recurringPaymentInstances.skipped += 1;
+        continue;
+      }
+
+      const existing = instanceRows.find(
+        (row) =>
+          row.recurring_payment_id === mappedRecurringPaymentId &&
+          row.month_key === instance.month_key,
+      );
+      if (existing) {
+        counts.recurringPaymentInstances.skipped += 1;
+        continue;
+      }
+
+      const { data, error } = await client
+        .from("recurring_payment_instances")
+        .insert({
+          household_id: householdId,
+          recurring_payment_id: mappedRecurringPaymentId,
+          month_key: instance.month_key,
+          status: instance.status,
+          transaction_id: getMappedId(maps.transactions, instance.transaction_id),
+          actual_amount:
+            instance.actual_amount === null || instance.actual_amount === undefined
+              ? null
+              : Number(instance.actual_amount),
+        })
+        .select("*")
+        .single();
+
+      if (error) throw error;
+      instanceRows.push(data);
+      counts.recurringPaymentInstances.imported += 1;
+    }
+
+    return {
+      ok: true,
+      message: "Supabase backup imported successfully.",
+      counts,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      message: error.message || "Could not import Supabase backup.",
+    };
+  }
+}
+
 export function exportBackup() {
   const appData = readAppData();
   const backup = {
@@ -127,6 +439,596 @@ export function exportBackup() {
     ok: true,
     message: "Legacy localStorage backup exported successfully.",
   };
+}
+
+async function parseSupabaseBackupFile(file) {
+  if (!file) {
+    return {
+      ok: false,
+      message: "Choose a Supabase backup JSON file first.",
+    };
+  }
+
+  if (file.type && file.type !== "application/json") {
+    return {
+      ok: false,
+      message: "Supabase backup file must be a JSON file.",
+    };
+  }
+
+  try {
+    const backup = JSON.parse(await file.text());
+    const validation = validateSupabaseBackup(backup);
+    if (!validation.ok) return validation;
+
+    return {
+      ok: true,
+      backup: validation.backup,
+    };
+  } catch {
+    return {
+      ok: false,
+      message: "Could not read that Supabase backup. Make sure it is valid JSON.",
+    };
+  }
+}
+
+function validateSupabaseBackup(backup) {
+  if (!backup || typeof backup !== "object") {
+    return invalid("Supabase backup must be a JSON object.");
+  }
+
+  if (backup.source !== "supabase") {
+    return invalid("This is not a Supabase backup file.");
+  }
+
+  if (backup.version !== SUPABASE_BACKUP_VERSION) {
+    return invalid("Supabase backup version is not supported.");
+  }
+
+  const missingSection = EXPECTED_SUPABASE_SECTIONS.find((section) => !(section in backup));
+  if (missingSection) {
+    return invalid(`Supabase backup is missing ${missingSection}.`);
+  }
+
+  const invalidArraySection = EXPECTED_SUPABASE_SECTIONS
+    .filter((section) => section !== "household")
+    .find((section) => !Array.isArray(backup[section]));
+  if (invalidArraySection) {
+    return invalid(`Supabase backup ${invalidArraySection} must be an array.`);
+  }
+
+  if (!backup.household || typeof backup.household !== "object") {
+    return invalid("Supabase backup household must be an object.");
+  }
+
+  if (!backup.exportedAt || Number.isNaN(Date.parse(backup.exportedAt))) {
+    return invalid("Supabase backup is missing a valid exportedAt timestamp.");
+  }
+
+  if (containsForbiddenBackupKeys(backup)) {
+    return invalid("Supabase backup contains fields that look like secrets or unsupported sensitive data.");
+  }
+
+  if (!backup.creditCards.every(isValidSupabaseCreditCard)) {
+    return invalid("Supabase backup contains an invalid credit card record.");
+  }
+
+  if (!backup.monthlyCardBalances.every(isValidSupabaseMonthlyBalance)) {
+    return invalid("Supabase backup contains an invalid monthly balance record.");
+  }
+
+  if (!backup.budgetCategories.every(isValidSupabaseBudgetCategory)) {
+    return invalid("Supabase backup contains an invalid budget category record.");
+  }
+
+  if (!backup.transactions.every(isValidSupabaseTransaction)) {
+    return invalid("Supabase backup contains an invalid transaction record.");
+  }
+
+  if (!backup.transactionSplits.every(isValidSupabaseTransactionSplit)) {
+    return invalid("Supabase backup contains an invalid transaction split record.");
+  }
+
+  if (!backup.recurringPayments.every(isValidSupabaseRecurringPayment)) {
+    return invalid("Supabase backup contains an invalid recurring payment record.");
+  }
+
+  if (!backup.recurringPaymentInstances.every(isValidSupabaseRecurringInstance)) {
+    return invalid("Supabase backup contains an invalid recurring payment instance record.");
+  }
+
+  const cardIds = new Set(backup.creditCards.map((card) => card.id));
+  const categoryIds = new Set(backup.budgetCategories.map((category) => category.id));
+  const transactionIds = new Set(backup.transactions.map((transaction) => transaction.id));
+  const recurringIds = new Set(backup.recurringPayments.map((payment) => payment.id));
+
+  if (!backup.monthlyCardBalances.every((balance) => cardIds.has(balance.credit_card_id))) {
+    return invalid("Supabase backup has monthly balances that reference missing credit cards.");
+  }
+
+  if (
+    !backup.transactions.every(
+      (transaction) =>
+        nullableSetHas(cardIds, transaction.credit_card_id) &&
+        nullableSetHas(categoryIds, transaction.category_id) &&
+        nullableSetHas(recurringIds, transaction.recurring_payment_id),
+    )
+  ) {
+    return invalid("Supabase backup has transactions with invalid related records.");
+  }
+
+  if (
+    !backup.transactionSplits.every(
+      (split) =>
+        transactionIds.has(split.transaction_id) &&
+        nullableSetHas(categoryIds, split.category_id),
+    )
+  ) {
+    return invalid("Supabase backup has transaction splits with invalid related records.");
+  }
+
+  if (
+    !backup.recurringPayments.every(
+      (payment) =>
+        nullableSetHas(cardIds, payment.credit_card_id) &&
+        nullableSetHas(categoryIds, payment.category_id),
+    )
+  ) {
+    return invalid("Supabase backup has recurring payments with invalid related records.");
+  }
+
+  if (
+    !backup.recurringPaymentInstances.every(
+      (instance) =>
+        recurringIds.has(instance.recurring_payment_id) &&
+        nullableSetHas(transactionIds, instance.transaction_id),
+    )
+  ) {
+    return invalid("Supabase backup has recurring instances with invalid related records.");
+  }
+
+  return {
+    ok: true,
+    message: "Supabase backup is valid.",
+    backup,
+  };
+}
+
+async function loadSupabaseImportContext(householdId) {
+  const client = requireSupabase();
+  const [
+    creditCardsResult,
+    monthlyBalancesResult,
+    budgetCategoriesResult,
+    transactionsResult,
+    transactionSplitsResult,
+    recurringPaymentsResult,
+    recurringInstancesResult,
+  ] = await Promise.all([
+    client.from("credit_cards").select("*").eq("household_id", householdId),
+    client.from("monthly_card_balances").select("*").eq("household_id", householdId),
+    client.from("budget_categories").select("*").eq("household_id", householdId),
+    client.from("transactions").select("*").eq("household_id", householdId),
+    client.from("transaction_splits").select("*").eq("household_id", householdId),
+    client.from("recurring_payments").select("*").eq("household_id", householdId),
+    client.from("recurring_payment_instances").select("*").eq("household_id", householdId),
+  ]);
+
+  const error = [
+    creditCardsResult,
+    monthlyBalancesResult,
+    budgetCategoriesResult,
+    transactionsResult,
+    transactionSplitsResult,
+    recurringPaymentsResult,
+    recurringInstancesResult,
+  ].find((result) => result.error)?.error;
+
+  if (error) throw error;
+
+  return {
+    creditCards: creditCardsResult.data ?? [],
+    monthlyCardBalances: monthlyBalancesResult.data ?? [],
+    budgetCategories: budgetCategoriesResult.data ?? [],
+    transactions: transactionsResult.data ?? [],
+    transactionSplits: transactionSplitsResult.data ?? [],
+    recurringPayments: recurringPaymentsResult.data ?? [],
+    recurringPaymentInstances: recurringInstancesResult.data ?? [],
+  };
+}
+
+function buildSupabaseImportPreview(backup, context) {
+  const maps = createImportMaps();
+  const counts = createImportCounts();
+  const cardRows = [...context.creditCards];
+  const categoryRows = [...context.budgetCategories];
+  const recurringRows = [...context.recurringPayments];
+  const transactionRows = [...context.transactions];
+
+  backup.creditCards.forEach((card) => {
+    const existing = findCreditCardMatch(card, cardRows);
+    if (existing) {
+      maps.creditCards.set(card.id, existing.id);
+      counts.creditCards.skipped += 1;
+    } else {
+      const previewId = `new:${card.id}`;
+      maps.creditCards.set(card.id, previewId);
+      cardRows.push({ ...card, id: previewId });
+      counts.creditCards.imported += 1;
+    }
+  });
+
+  backup.budgetCategories.forEach((category) => {
+    const existing = findBudgetCategoryMatch(category, categoryRows);
+    if (existing) {
+      maps.budgetCategories.set(category.id, existing.id);
+      counts.budgetCategories.skipped += 1;
+    } else {
+      const previewId = `new:${category.id}`;
+      maps.budgetCategories.set(category.id, previewId);
+      categoryRows.push({ ...category, id: previewId });
+      counts.budgetCategories.imported += 1;
+    }
+  });
+
+  backup.recurringPayments.forEach((recurringPayment) => {
+    const existing = findRecurringPaymentMatch(recurringPayment, recurringRows);
+    if (existing) {
+      maps.recurringPayments.set(recurringPayment.id, existing.id);
+      counts.recurringPayments.skipped += 1;
+    } else {
+      const previewId = `new:${recurringPayment.id}`;
+      maps.recurringPayments.set(recurringPayment.id, previewId);
+      recurringRows.push({ ...recurringPayment, id: previewId });
+      counts.recurringPayments.imported += 1;
+    }
+  });
+
+  backup.transactions.forEach((transaction) => {
+    const mappedTransaction = mapTransactionReferences(transaction, maps);
+    const existing = findTransactionMatch(mappedTransaction, transactionRows);
+    if (existing) {
+      maps.transactions.set(transaction.id, existing.id);
+      counts.transactions.skipped += 1;
+    } else {
+      const previewId = `new:${transaction.id}`;
+      maps.transactions.set(transaction.id, previewId);
+      transactionRows.push({ ...mappedTransaction, id: previewId });
+      counts.transactions.imported += 1;
+    }
+  });
+
+  const balanceRows = [...context.monthlyCardBalances];
+  backup.monthlyCardBalances.forEach((balance) => {
+    const mappedCardId = getMappedId(maps.creditCards, balance.credit_card_id);
+    const existing = balanceRows.find(
+      (row) => row.credit_card_id === mappedCardId && row.month_key === balance.month_key,
+    );
+    if (!mappedCardId || existing) {
+      counts.monthlyCardBalances.skipped += 1;
+    } else {
+      balanceRows.push({ ...balance, credit_card_id: mappedCardId });
+      counts.monthlyCardBalances.imported += 1;
+    }
+  });
+
+  const splitRows = [...context.transactionSplits];
+  backup.transactionSplits.forEach((split) => {
+    const mappedTransactionId = getMappedId(maps.transactions, split.transaction_id);
+    const mappedCategoryId = getMappedId(maps.budgetCategories, split.category_id);
+    const existing = findTransactionSplitMatch(
+      {
+        ...split,
+        transaction_id: mappedTransactionId,
+        category_id: mappedCategoryId,
+      },
+      splitRows,
+    );
+
+    if (!mappedTransactionId || existing) {
+      counts.transactionSplits.skipped += 1;
+    } else {
+      splitRows.push({
+        ...split,
+        transaction_id: mappedTransactionId,
+        category_id: mappedCategoryId,
+      });
+      counts.transactionSplits.imported += 1;
+    }
+  });
+
+  const instanceRows = [...context.recurringPaymentInstances];
+  backup.recurringPaymentInstances.forEach((instance) => {
+    const mappedRecurringPaymentId = getMappedId(maps.recurringPayments, instance.recurring_payment_id);
+    const existing = instanceRows.find(
+      (row) =>
+        row.recurring_payment_id === mappedRecurringPaymentId &&
+        row.month_key === instance.month_key,
+    );
+    if (!mappedRecurringPaymentId || existing) {
+      counts.recurringPaymentInstances.skipped += 1;
+    } else {
+      instanceRows.push({
+        ...instance,
+        recurring_payment_id: mappedRecurringPaymentId,
+      });
+      counts.recurringPaymentInstances.imported += 1;
+    }
+  });
+
+  return counts;
+}
+
+function createImportMaps() {
+  return {
+    creditCards: new Map(),
+    budgetCategories: new Map(),
+    transactions: new Map(),
+    recurringPayments: new Map(),
+  };
+}
+
+function createImportCounts() {
+  return {
+    creditCards: { imported: 0, skipped: 0 },
+    monthlyCardBalances: { imported: 0, skipped: 0 },
+    budgetCategories: { imported: 0, skipped: 0 },
+    transactions: { imported: 0, skipped: 0 },
+    transactionSplits: { imported: 0, skipped: 0 },
+    recurringPayments: { imported: 0, skipped: 0 },
+    recurringPaymentInstances: { imported: 0, skipped: 0 },
+  };
+}
+
+function findCreditCardMatch(card, rows) {
+  const target = [
+    normalizeText(card.name),
+    normalizeText(card.last_four),
+    normalizeText(card.owner_name),
+  ].join("|");
+
+  return rows.find(
+    (row) =>
+      [
+        normalizeText(row.name),
+        normalizeText(row.last_four),
+        normalizeText(row.owner_name),
+      ].join("|") === target,
+  );
+}
+
+function findBudgetCategoryMatch(category, rows) {
+  const target = [normalizeText(category.month_key), normalizeText(category.name)].join("|");
+  return rows.find(
+    (row) => [normalizeText(row.month_key), normalizeText(row.name)].join("|") === target,
+  );
+}
+
+function findRecurringPaymentMatch(recurringPayment, rows) {
+  const target = [
+    normalizeText(recurringPayment.name),
+    String(recurringPayment.due_day),
+    moneyKey(recurringPayment.estimated_amount),
+    normalizeText(recurringPayment.payment_method),
+  ].join("|");
+
+  return rows.find(
+    (row) =>
+      [
+        normalizeText(row.name),
+        String(row.due_day),
+        moneyKey(row.estimated_amount),
+        normalizeText(row.payment_method),
+      ].join("|") === target,
+  );
+}
+
+function findTransactionMatch(transaction, rows) {
+  const target = transactionKey(transaction);
+  return rows.find((row) => transactionKey(row) === target);
+}
+
+function findTransactionSplitMatch(split, rows) {
+  const target = [
+    split.transaction_id ?? "",
+    split.category_id ?? "",
+    moneyKey(split.amount),
+  ].join("|");
+
+  return rows.find(
+    (row) =>
+      [
+        row.transaction_id ?? "",
+        row.category_id ?? "",
+        moneyKey(row.amount),
+      ].join("|") === target,
+  );
+}
+
+function mapTransactionReferences(transaction, maps) {
+  return {
+    ...transaction,
+    credit_card_id: getMappedId(maps.creditCards, transaction.credit_card_id),
+    category_id: getMappedId(maps.budgetCategories, transaction.category_id),
+  };
+}
+
+function getMappedId(map, id) {
+  if (!id) return null;
+  return map.get(id) ?? null;
+}
+
+function transactionKey(transaction) {
+  return [
+    normalizeText(transaction.transaction_date),
+    normalizeText(transaction.merchant),
+    moneyKey(transaction.amount),
+    normalizeText(transaction.category_id),
+    normalizeText(transaction.payment_method),
+    normalizeText(transaction.credit_card_id),
+  ].join("|");
+}
+
+function normalizeText(value) {
+  return String(value ?? "").trim().toLowerCase();
+}
+
+function moneyKey(value) {
+  return Number(value || 0).toFixed(2);
+}
+
+function nullableSetHas(set, value) {
+  return value === null || value === undefined || value === "" || set.has(value);
+}
+
+function containsForbiddenBackupKeys(value) {
+  const forbiddenPatterns = [
+    /password/i,
+    /token/i,
+    /secret/i,
+    /service.?role/i,
+    /anon.?key/i,
+    /cvv/i,
+    /ssn/i,
+    /account.?number/i,
+    /bank.?password/i,
+    /full.?card/i,
+  ];
+
+  if (!value || typeof value !== "object") return false;
+
+  return Object.entries(value).some(([key, childValue]) => {
+    if (forbiddenPatterns.some((pattern) => pattern.test(key))) return true;
+    if (Array.isArray(childValue)) return childValue.some((item) => containsForbiddenBackupKeys(item));
+    return containsForbiddenBackupKeys(childValue);
+  });
+}
+
+function isValidUuidLike(value) {
+  return typeof value === "string" && value.length > 0;
+}
+
+function isValidMonthKey(value) {
+  return typeof value === "string" && /^\d{4}-\d{2}$/.test(value);
+}
+
+function isValidDateKey(value) {
+  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
+function isNonNegativeNumber(value) {
+  return Number.isFinite(Number(value)) && Number(value) >= 0;
+}
+
+function isValidDay(value) {
+  return Number.isFinite(Number(value)) && Number(value) >= 1 && Number(value) <= 31;
+}
+
+function isNullableUuidLike(value) {
+  return value === null || value === undefined || value === "" || isValidUuidLike(value);
+}
+
+function isValidSupabaseCreditCard(card) {
+  return (
+    card &&
+    typeof card === "object" &&
+    isValidUuidLike(card.id) &&
+    typeof card.name === "string" &&
+    typeof card.url === "string" &&
+    typeof card.network === "string" &&
+    typeof card.owner_name === "string" &&
+    typeof card.last_four === "string" &&
+    isNonNegativeNumber(card.credit_limit) &&
+    isValidDay(card.statement_closing_day) &&
+    isValidDay(card.due_day)
+  );
+}
+
+function isValidSupabaseMonthlyBalance(balance) {
+  return (
+    balance &&
+    typeof balance === "object" &&
+    isValidUuidLike(balance.id) &&
+    isValidUuidLike(balance.credit_card_id) &&
+    isValidMonthKey(balance.month_key) &&
+    isNonNegativeNumber(balance.balance) &&
+    typeof balance.paid === "boolean"
+  );
+}
+
+function isValidSupabaseBudgetCategory(category) {
+  return (
+    category &&
+    typeof category === "object" &&
+    isValidUuidLike(category.id) &&
+    isValidMonthKey(category.month_key) &&
+    typeof category.name === "string" &&
+    isNonNegativeNumber(category.monthly_amount) &&
+    typeof category.notes === "string"
+  );
+}
+
+function isValidSupabaseTransaction(transaction) {
+  return (
+    transaction &&
+    typeof transaction === "object" &&
+    isValidUuidLike(transaction.id) &&
+    isValidDateKey(transaction.transaction_date) &&
+    typeof transaction.merchant === "string" &&
+    isNonNegativeNumber(transaction.amount) &&
+    typeof transaction.payment_method === "string" &&
+    isNullableUuidLike(transaction.credit_card_id) &&
+    isNullableUuidLike(transaction.category_id) &&
+    isNullableUuidLike(transaction.recurring_payment_id) &&
+    ["manual", "recurring", "imported"].includes(transaction.source) &&
+    (transaction.recurring_month === null ||
+      transaction.recurring_month === undefined ||
+      isValidMonthKey(transaction.recurring_month))
+  );
+}
+
+function isValidSupabaseTransactionSplit(split) {
+  return (
+    split &&
+    typeof split === "object" &&
+    isValidUuidLike(split.id) &&
+    isValidUuidLike(split.transaction_id) &&
+    isNullableUuidLike(split.category_id) &&
+    isNonNegativeNumber(split.amount)
+  );
+}
+
+function isValidSupabaseRecurringPayment(payment) {
+  return (
+    payment &&
+    typeof payment === "object" &&
+    isValidUuidLike(payment.id) &&
+    typeof payment.name === "string" &&
+    ["fixed", "variable"].includes(payment.bill_type) &&
+    isNonNegativeNumber(payment.estimated_amount) &&
+    isValidDay(payment.due_day) &&
+    typeof payment.payment_method === "string" &&
+    isNullableUuidLike(payment.credit_card_id) &&
+    isNullableUuidLike(payment.category_id) &&
+    isValidMonthKey(payment.start_month) &&
+    (payment.end_month === null || payment.end_month === undefined || isValidMonthKey(payment.end_month))
+  );
+}
+
+function isValidSupabaseRecurringInstance(instance) {
+  return (
+    instance &&
+    typeof instance === "object" &&
+    isValidUuidLike(instance.id) &&
+    isValidUuidLike(instance.recurring_payment_id) &&
+    isValidMonthKey(instance.month_key) &&
+    ["generated", "skipped"].includes(instance.status) &&
+    isNullableUuidLike(instance.transaction_id) &&
+    (instance.actual_amount === null ||
+      instance.actual_amount === undefined ||
+      isNonNegativeNumber(instance.actual_amount))
+  );
 }
 
 export async function importBackupFile(file) {

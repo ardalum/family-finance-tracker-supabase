@@ -6,16 +6,32 @@ import { useHouseholds } from "../../households/HouseholdProvider.jsx";
 import {
   exportBackup,
   exportSupabaseBackup,
+  importSupabaseBackupMerge,
   importBackupFile,
+  previewSupabaseBackupImport,
   resetAllData,
 } from "../backupService.js";
 
-export default function BackupPanel({ onDataChange }) {
+const summaryLabels = {
+  creditCards: "Credit cards",
+  monthlyCardBalances: "Monthly balances",
+  budgetCategories: "Budget categories",
+  transactions: "Transactions",
+  transactionSplits: "Transaction splits",
+  recurringPayments: "Recurring payments",
+  recurringPaymentInstances: "Recurring instances",
+};
+
+export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) {
   const { activeHouseholdId, activeHousehold } = useHouseholds();
   const inputRef = useRef(null);
+  const cloudInputRef = useRef(null);
   const [message, setMessage] = useState(null);
   const [isExportingCloud, setIsExportingCloud] = useState(false);
+  const [isPreviewingCloudImport, setIsPreviewingCloudImport] = useState(false);
+  const [isImportingCloud, setIsImportingCloud] = useState(false);
   const [isWorkingLegacy, setIsWorkingLegacy] = useState(false);
+  const [cloudImport, setCloudImport] = useState(null);
 
   function showMessage(result) {
     setMessage({
@@ -41,6 +57,63 @@ export default function BackupPanel({ onDataChange }) {
 
   function handleImportClick() {
     inputRef.current?.click();
+  }
+
+  function handleCloudImportClick() {
+    cloudInputRef.current?.click();
+  }
+
+  async function handleCloudImportFile(event) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    setCloudImport(null);
+    setMessage(null);
+    setIsPreviewingCloudImport(true);
+
+    try {
+      const result = await previewSupabaseBackupImport(file, activeHouseholdId);
+      if (!result.ok) {
+        showMessage(result);
+        return;
+      }
+
+      setCloudImport({
+        backup: result.backup,
+        preview: result.preview,
+        fileName: file.name,
+      });
+      showMessage(result);
+    } finally {
+      setIsPreviewingCloudImport(false);
+    }
+  }
+
+  async function handleCloudImportConfirm() {
+    if (!cloudImport?.backup) return;
+
+    const confirmed = window.confirm(
+      "Import this backup into the current household? Existing data will not be deleted. Obvious duplicates will be skipped.",
+    );
+    if (!confirmed) return;
+
+    setIsImportingCloud(true);
+    setMessage(null);
+
+    try {
+      const result = await importSupabaseBackupMerge(activeHouseholdId, cloudImport.backup);
+      showMessage(result);
+
+      if (result.ok) {
+        setCloudImport({
+          ...cloudImport,
+          result: result.counts,
+        });
+        await onSupabaseImportComplete?.();
+      }
+    } finally {
+      setIsImportingCloud(false);
+    }
   }
 
   async function handleImport(event) {
@@ -102,15 +175,91 @@ export default function BackupPanel({ onDataChange }) {
               <CloudDownload size={16} aria-hidden="true" />
               {isExportingCloud ? "Exporting..." : "Export Supabase Backup"}
             </Button>
-            <Button type="button" variant="secondary" disabled>
-              <Upload size={16} aria-hidden="true" />
-              Supabase import coming soon
-            </Button>
           </div>
 
           <p className="text-xs text-gray-500">
             Active household: {activeHousehold?.name ?? "No household selected"}
           </p>
+
+          <div className="rounded-md border border-sky-100 bg-white p-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-950">
+                  Import Supabase Backup
+                </h3>
+                <p className="mt-1 max-w-2xl text-sm text-gray-500">
+                  Merge mode only. This will add missing records and avoid obvious duplicates.
+                  It will not delete existing data.
+                </p>
+                <p className="mt-2 text-xs text-amber-700">
+                  Recommended: Export a fresh Supabase backup before importing.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={handleSupabaseExport}
+                  disabled={isExportingCloud || !activeHouseholdId}
+                  className="min-h-9 px-3 py-1.5 text-xs"
+                >
+                  <CloudDownload size={14} aria-hidden="true" />
+                  Export current first
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={handleCloudImportClick}
+                  disabled={isPreviewingCloudImport || isImportingCloud || !activeHouseholdId}
+                >
+                  <Upload size={16} aria-hidden="true" />
+                  {isPreviewingCloudImport ? "Reading..." : "Choose backup file"}
+                </Button>
+              </div>
+            </div>
+
+            {cloudImport ? (
+              <div className="mt-4 grid gap-3">
+                <div className="rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-600">
+                  Preview for <span className="font-medium text-gray-900">{cloudImport.fileName}</span>
+                </div>
+                <ImportSummary counts={cloudImport.preview} />
+                {cloudImport.result ? (
+                  <div className="grid gap-2">
+                    <p className="text-sm font-semibold text-gray-950">Import result</p>
+                    <ImportSummary counts={cloudImport.result} />
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      onClick={handleCloudImportConfirm}
+                      disabled={isImportingCloud}
+                    >
+                      <Upload size={16} aria-hidden="true" />
+                      {isImportingCloud ? "Importing..." : "Import backup in merge mode"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => setCloudImport(null)}
+                      disabled={isImportingCloud}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ) : null}
+
+            <input
+              ref={cloudInputRef}
+              className="hidden"
+              type="file"
+              accept="application/json,.json"
+              onChange={handleCloudImportFile}
+            />
+          </div>
         </div>
       </Card>
 
@@ -182,6 +331,32 @@ export default function BackupPanel({ onDataChange }) {
           onChange={handleImport}
         />
       </Card>
+    </div>
+  );
+}
+
+function ImportSummary({ counts }) {
+  return (
+    <div className="overflow-hidden rounded-md border border-gray-200">
+      <div className="grid grid-cols-[1fr_auto_auto] bg-gray-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+        <span>Data type</span>
+        <span className="text-right">To import</span>
+        <span className="text-right">Skipped</span>
+      </div>
+      {Object.entries(summaryLabels).map(([key, label]) => (
+        <div
+          key={key}
+          className="grid grid-cols-[1fr_auto_auto] gap-4 border-t border-gray-100 px-3 py-2 text-sm"
+        >
+          <span className="text-gray-700">{label}</span>
+          <span className="min-w-12 text-right font-medium text-gray-950">
+            {counts?.[key]?.imported ?? 0}
+          </span>
+          <span className="min-w-12 text-right text-gray-500">
+            {counts?.[key]?.skipped ?? 0}
+          </span>
+        </div>
+      ))}
     </div>
   );
 }

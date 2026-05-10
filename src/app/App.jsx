@@ -821,6 +821,17 @@ function FinanceTrackerApp() {
     }
   }
 
+  async function refreshSupabaseDataAfterImport() {
+    await loadSupabaseCreditCards();
+    await loadSupabaseMonthlyBalances();
+    await loadSupabaseBudgets();
+    await loadSpendingCategories();
+    await loadSpendingTransactions();
+    await loadDashboardData();
+    await loadRecurringCategories();
+    await loadRecurringData();
+  }
+
   const dashboardAppData = {
     ...appData,
     creditCards: supabaseCreditCards,
@@ -942,7 +953,12 @@ function FinanceTrackerApp() {
         />
       ) : null}
 
-      {activeView === "backup" ? <BackupRestore onDataChange={refreshData} /> : null}
+      {activeView === "backup" ? (
+        <BackupRestore
+          onDataChange={refreshData}
+          onSupabaseImportComplete={refreshSupabaseDataAfterImport}
+        />
+      ) : null}
 
       {activeView === "household-settings" ? <HouseholdSettings /> : null}
     </AppShell>
