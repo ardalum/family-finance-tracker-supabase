@@ -16,21 +16,30 @@ import {
 import Card from "../../../components/ui/Card.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
 
-const colors = ["#111827", "#2563eb", "#059669", "#d97706", "#dc2626", "#7c3aed", "#0891b2", "#4b5563"];
+const colors = ["#0f766e", "#2563eb", "#16a34a", "#f59e0b", "#e11d48", "#8b5cf6", "#0891b2", "#64748b"];
 
 export default function DashboardCharts({ chartData }) {
+  const spendingByCategory = withPercentages(chartData.spendingByCategory);
+
   return (
     <section className="grid gap-6 xl:grid-cols-3">
       <ChartCard title="Spending by Category">
-        {chartData.spendingByCategory.length === 0 ? <EmptyChart /> : (
+        {spendingByCategory.length === 0 ? <EmptyChart /> : (
           <ResponsiveContainer width="100%" height={260}>
             <PieChart>
-              <Pie data={chartData.spendingByCategory} dataKey="value" nameKey="name" outerRadius={90} label>
-                {chartData.spendingByCategory.map((entry, index) => (
+              <Pie
+                data={spendingByCategory}
+                dataKey="value"
+                nameKey="label"
+                outerRadius={88}
+                labelLine={false}
+              >
+                {spendingByCategory.map((entry, index) => (
                   <Cell key={entry.name} fill={colors[index % colors.length]} />
                 ))}
               </Pie>
               <Tooltip formatter={(value) => formatCurrency(value)} />
+              <Legend iconType="circle" wrapperStyle={{ fontSize: 12, lineHeight: "18px" }} />
             </PieChart>
           </ResponsiveContainer>
         )}
@@ -46,7 +55,7 @@ export default function DashboardCharts({ chartData }) {
               <Tooltip formatter={(value) => formatCurrency(value)} />
               <Legend />
               <Bar dataKey="budget" fill="#9ca3af" />
-              <Bar dataKey="spent" fill="#111827" />
+              <Bar dataKey="spent" fill="#0f766e" />
             </BarChart>
           </ResponsiveContainer>
         )}
@@ -60,7 +69,7 @@ export default function DashboardCharts({ chartData }) {
               <XAxis dataKey="month" />
               <YAxis tickFormatter={(value) => `$${value}`} />
               <Tooltip formatter={(value) => formatCurrency(value)} />
-              <Line type="monotone" dataKey="total" stroke="#111827" strokeWidth={2} />
+              <Line type="monotone" dataKey="total" stroke="#0f766e" strokeWidth={2} />
             </LineChart>
           </ResponsiveContainer>
         )}
@@ -68,6 +77,17 @@ export default function DashboardCharts({ chartData }) {
     </section>
   );
 }
+
+function withPercentages(items) {
+  const total = items.reduce((sum, item) => sum + Number(item.value || 0), 0);
+  if (total <= 0) return items;
+
+  return items.map((item) => ({
+    ...item,
+    label: `${item.name} ${(Number(item.value || 0) / total * 100).toFixed(0)}%`,
+  }));
+}
+
 
 function ChartCard({ title, children }) {
   return (

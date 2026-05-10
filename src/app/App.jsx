@@ -113,6 +113,11 @@ function FinanceTrackerApp() {
   const [spendingError, setSpendingError] = useState("");
   const [spendingCategoriesLoading, setSpendingCategoriesLoading] = useState(true);
   const [spendingCategoriesError, setSpendingCategoriesError] = useState("");
+  const [selectedDashboardMonth, setSelectedDashboardMonth] = useState(getCurrentMonthKey());
+  const [dashboardBudgets, setDashboardBudgets] = useState([]);
+  const [dashboardTransactions, setDashboardTransactions] = useState([]);
+  const [dashboardLoading, setDashboardLoading] = useState(true);
+  const [dashboardError, setDashboardError] = useState("");
   const [activeView, setActiveViewState] = useState(() => {
     try {
       const storedView = window.localStorage.getItem(ACTIVE_VIEW_KEY);
@@ -276,6 +281,41 @@ function FinanceTrackerApp() {
     loadSpendingTransactions();
   }, [loadSpendingTransactions]);
 
+  const loadDashboardData = useCallback(async () => {
+    if (!activeHouseholdId) {
+      setDashboardBudgets([]);
+      setDashboardTransactions([]);
+      setDashboardLoading(false);
+      return;
+    }
+
+    setDashboardLoading(true);
+    setDashboardError("");
+
+    try {
+      const budgets = await listBudgetCategories(activeHouseholdId, selectedDashboardMonth);
+      const transactions = await listTransactions(
+        activeHouseholdId,
+        selectedDashboardMonth,
+        supabaseCreditCards,
+        budgets,
+      );
+
+      setDashboardBudgets(budgets);
+      setDashboardTransactions(transactions);
+    } catch (error) {
+      setDashboardError(error.message || "Could not load dashboard data.");
+      setDashboardBudgets([]);
+      setDashboardTransactions([]);
+    } finally {
+      setDashboardLoading(false);
+    }
+  }, [activeHouseholdId, selectedDashboardMonth, supabaseCreditCards]);
+
+  useEffect(() => {
+    loadDashboardData();
+  }, [loadDashboardData]);
+
   async function createSupabaseCreditCard(input) {
     setCreditCardsSaving(true);
     setCreditCardsError("");
@@ -402,6 +442,7 @@ function FinanceTrackerApp() {
         input,
       );
       setSupabaseBudgets((budgets) => [...budgets, budget]);
+      await loadDashboardData();
       return budget;
     } catch (error) {
       setBudgetsError(error.message || "Could not add budget category.");
@@ -420,6 +461,7 @@ function FinanceTrackerApp() {
       setSupabaseBudgets((budgets) =>
         budgets.map((currentBudget) => (currentBudget.id === budget.id ? budget : currentBudget)),
       );
+      await loadDashboardData();
       return budget;
     } catch (error) {
       setBudgetsError(error.message || "Could not update budget category.");
@@ -438,6 +480,7 @@ function FinanceTrackerApp() {
       setSupabaseBudgets((budgets) =>
         budgets.filter((budget) => (budget.supabaseId ?? budget.id) !== budgetId),
       );
+      await loadDashboardData();
     } catch (error) {
       setBudgetsError(error.message || "Could not delete budget category.");
       throw error;
@@ -458,6 +501,7 @@ function FinanceTrackerApp() {
         },
       );
       await loadSupabaseBudgets();
+      await loadDashboardData();
       return importedBudgets;
     } catch (error) {
       setBudgetsError(error.message || "Could not import local budget categories.");
@@ -492,6 +536,7 @@ function FinanceTrackerApp() {
       }
 
       setSupabaseBudgets((budgets) => [...budgets, ...createdBudgets]);
+      await loadDashboardData();
       return createdBudgets;
     } catch (error) {
       setBudgetsError(error.message || "Could not add default budget categories.");
@@ -513,6 +558,7 @@ function FinanceTrackerApp() {
         spendingCategories,
       );
       await loadSpendingTransactions();
+      await loadDashboardData();
     } catch (error) {
       setSpendingError(error.message || "Could not add transaction.");
       throw error;
@@ -533,6 +579,7 @@ function FinanceTrackerApp() {
         spendingCategories,
       );
       await loadSpendingTransactions();
+      await loadDashboardData();
     } catch (error) {
       setSpendingError(error.message || "Could not update transaction.");
       throw error;
@@ -550,6 +597,7 @@ function FinanceTrackerApp() {
       setSpendingTransactions((transactions) =>
         transactions.filter((transaction) => (transaction.supabaseId ?? transaction.id) !== transactionId),
       );
+      await loadDashboardData();
     } catch (error) {
       setSpendingError(error.message || "Could not delete transaction.");
       throw error;
@@ -570,6 +618,7 @@ function FinanceTrackerApp() {
         spendingCategories,
       );
       await loadSpendingTransactions();
+      await loadDashboardData();
       return importedIds;
     } catch (error) {
       setSpendingError(error.message || "Could not import local spending transactions.");
@@ -585,10 +634,10 @@ function FinanceTrackerApp() {
     monthlyBalances: supabaseMonthlyBalances,
     budgetsByMonth: {
       ...appData.budgetsByMonth,
-      [selectedSpendingMonth]: spendingCategories,
-      [selectedBudgetMonth]: supabaseBudgets,
+      [selectedDashboardMonth]: dashboardBudgets,
     },
-    transactions: spendingTransactions,
+    transactions: dashboardTransactions,
+    recurringTransactions: appData.transactions,
   };
 
   return (
@@ -604,7 +653,15 @@ function FinanceTrackerApp() {
         </>
       }
     >
-      {activeView === "dashboard" ? <Dashboard appData={dashboardAppData} /> : null}
+      {activeView === "dashboard" ? (
+        <Dashboard
+          appData={dashboardAppData}
+          selectedMonth={selectedDashboardMonth}
+          onMonthChange={setSelectedDashboardMonth}
+          loading={dashboardLoading}
+          error={dashboardError}
+        />
+      ) : null}
 
       {activeView === "credit-cards" ? (
         <CreditCardTracker

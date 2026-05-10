@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import Card from "../../../components/ui/Card.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { buildMonthOptions, getCurrentMonthKey } from "../../../lib/dates.js";
@@ -12,8 +12,13 @@ import RecentTransactionsTable from "./RecentTransactionsTable.jsx";
 import RecurringOverview from "./RecurringOverview.jsx";
 import { getDashboardData } from "../dashboardUtils.js";
 
-export default function Dashboard({ appData }) {
-  const [selectedMonth, setSelectedMonth] = useState(getCurrentMonthKey());
+export default function Dashboard({
+  appData,
+  selectedMonth = getCurrentMonthKey(),
+  onMonthChange,
+  loading = false,
+  error = "",
+}) {
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const data = useMemo(() => getDashboardData(appData, selectedMonth), [appData, selectedMonth]);
 
@@ -29,11 +34,13 @@ export default function Dashboard({ appData }) {
             <p className="mt-1 text-sm text-gray-500">
               A monthly overview calculated from your existing tracker data.
             </p>
+            {loading ? <p className="mt-2 text-sm text-gray-500">Loading dashboard data...</p> : null}
+            {error ? <p className="mt-2 text-sm font-medium text-red-700">{error}</p> : null}
           </div>
           <Select
             label="Month"
             value={selectedMonth}
-            onChange={(event) => setSelectedMonth(event.target.value)}
+            onChange={(event) => onMonthChange(event.target.value)}
           >
             {monthOptions.map((month) => (
               <option key={month} value={month}>

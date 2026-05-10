@@ -18,6 +18,7 @@ export function getDashboardData(appData, monthKey) {
   const cards = appData.creditCards.filter((card) => card.isActive);
   const budgets = appData.budgetsByMonth[monthKey] ?? [];
   const transactions = getMonthTransactions(appData.transactions, monthKey);
+  const recurringTransactions = appData.recurringTransactions ?? appData.transactions;
   const monthlyBalances = appData.monthlyBalances[monthKey] ?? {};
   const budgetTotal = budgets.reduce((sum, budget) => sum + Number(budget.monthlyAmount || 0), 0);
   const spendingTotal = getTotalSpending(transactions);
@@ -29,7 +30,7 @@ export function getDashboardData(appData, monthKey) {
     const entry = monthlyBalances[card.id] ?? { balance: 0, paid: false };
     return entry.paid ? sum : sum + Number(entry.balance || 0);
   }, 0);
-  const recurringSummary = getRecurringSummary(appData.recurringPayments, monthKey, appData.transactions);
+  const recurringSummary = getRecurringSummary(appData.recurringPayments, monthKey, recurringTransactions);
 
   return {
     cards,
@@ -53,7 +54,7 @@ export function getDashboardData(appData, monthKey) {
     recurringRows: getRecurringRows(
       appData.recurringPayments,
       monthKey,
-      appData.transactions,
+      recurringTransactions,
       appData.recurringStatusByMonth,
     ),
     recentTransactions: getRecentTransactions(transactions),
