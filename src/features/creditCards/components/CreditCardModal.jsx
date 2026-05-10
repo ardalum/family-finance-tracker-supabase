@@ -5,6 +5,8 @@ import CreditCardForm from "./CreditCardForm.jsx";
 export default function CreditCardModal({
   open,
   editingCard,
+  householdProfiles = [],
+  householdProfilesLoading = false,
   onClose,
   onSaved,
   isSaving = false,
@@ -54,6 +56,8 @@ export default function CreditCardModal({
         <div className="overflow-y-auto px-5 py-5">
           <CreditCardForm
             editingCard={editingCard}
+            householdProfiles={householdProfiles}
+            householdProfilesLoading={householdProfilesLoading}
             onCancel={onClose}
             onSaved={onSaved}
             isSaving={isSaving}

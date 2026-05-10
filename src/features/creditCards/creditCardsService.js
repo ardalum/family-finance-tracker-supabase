@@ -10,6 +10,7 @@ function normalizeCard(input) {
     url: input.url.trim(),
     network: input.network,
     owner: input.owner,
+    ownerProfileId: input.ownerProfileId || null,
     lastFour: input.lastFour.trim(),
     creditLimit: Number(input.creditLimit) || 0,
     statementClosingDay: Number(input.statementClosingDay) || Number(input.dueDay) || 1,

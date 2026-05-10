@@ -31,6 +31,13 @@ import { useHouseholds } from "../features/households/HouseholdProvider.jsx";
 import HouseholdGate from "../features/households/components/HouseholdGate.jsx";
 import HouseholdSettings from "../features/households/components/HouseholdSettings.jsx";
 import HouseholdSwitcher from "../features/households/components/HouseholdSwitcher.jsx";
+import {
+  addHouseholdProfile,
+  createDefaultHouseholdProfiles,
+  deactivateHouseholdProfile,
+  listHouseholdProfiles,
+  updateHouseholdProfile,
+} from "../features/households/householdProfilesService.js";
 import RecurringPayments from "../features/recurring/components/RecurringPayments.jsx";
 import {
   addRecurringPaymentToSupabase,
@@ -104,6 +111,10 @@ function FinanceTrackerApp() {
   const [creditCardsLoading, setCreditCardsLoading] = useState(true);
   const [creditCardsSaving, setCreditCardsSaving] = useState(false);
   const [creditCardsError, setCreditCardsError] = useState("");
+  const [householdProfiles, setHouseholdProfiles] = useState([]);
+  const [householdProfilesLoading, setHouseholdProfilesLoading] = useState(true);
+  const [householdProfilesSaving, setHouseholdProfilesSaving] = useState(false);
+  const [householdProfilesError, setHouseholdProfilesError] = useState("");
   const [supabaseMonthlyBalances, setSupabaseMonthlyBalances] = useState({});
   const [selectedBalanceMonth, setSelectedBalanceMonth] = useState(getCurrentMonthKey());
   const [monthlyBalancesLoading, setMonthlyBalancesLoading] = useState(true);
@@ -159,6 +170,33 @@ function FinanceTrackerApp() {
   function refreshData(nextData) {
     setAppData(nextData ?? readAppData());
   }
+
+  const loadHouseholdProfiles = useCallback(async () => {
+    if (!activeHouseholdId) {
+      setHouseholdProfiles([]);
+      setHouseholdProfilesLoading(false);
+      return [];
+    }
+
+    setHouseholdProfilesLoading(true);
+    setHouseholdProfilesError("");
+
+    try {
+      const profiles = await listHouseholdProfiles(activeHouseholdId);
+      setHouseholdProfiles(profiles);
+      return profiles;
+    } catch (error) {
+      setHouseholdProfilesError(error.message || "Could not load household profiles.");
+      setHouseholdProfiles([]);
+      return [];
+    } finally {
+      setHouseholdProfilesLoading(false);
+    }
+  }, [activeHouseholdId]);
+
+  useEffect(() => {
+    loadHouseholdProfiles();
+  }, [loadHouseholdProfiles]);
 
   const loadSupabaseCreditCards = useCallback(async () => {
     if (!activeHouseholdId) {
@@ -418,6 +456,101 @@ function FinanceTrackerApp() {
       throw error;
     } finally {
       setCreditCardsSaving(false);
+    }
+  }
+
+  async function createHouseholdProfile(input) {
+    setHouseholdProfilesSaving(true);
+    setHouseholdProfilesError("");
+
+    try {
+      const profile = await addHouseholdProfile(activeHouseholdId, input);
+      setHouseholdProfiles((profiles) =>
+        [...profiles, profile].sort((a, b) => a.displayName.localeCompare(b.displayName)),
+      );
+      return profile;
+    } catch (error) {
+      setHouseholdProfilesError(error.message || "Could not add household profile.");
+      throw error;
+    } finally {
+      setHouseholdProfilesSaving(false);
+    }
+  }
+
+  async function saveHouseholdProfile(profileId, input) {
+    setHouseholdProfilesSaving(true);
+    setHouseholdProfilesError("");
+
+    try {
+      const profile = await updateHouseholdProfile(profileId, input);
+      setHouseholdProfiles((profiles) =>
+        profiles
+          .map((currentProfile) => (currentProfile.id === profile.id ? profile : currentProfile))
+          .sort((a, b) => a.displayName.localeCompare(b.displayName)),
+      );
+      await loadSupabaseCreditCards();
+      return profile;
+    } catch (error) {
+      setHouseholdProfilesError(error.message || "Could not update household profile.");
+      throw error;
+    } finally {
+      setHouseholdProfilesSaving(false);
+    }
+  }
+
+  async function deactivateProfile(profileId) {
+    setHouseholdProfilesSaving(true);
+    setHouseholdProfilesError("");
+
+    try {
+      const profile = await deactivateHouseholdProfile(profileId);
+      setHouseholdProfiles((profiles) =>
+        profiles.map((currentProfile) => (currentProfile.id === profile.id ? profile : currentProfile)),
+      );
+      await loadSupabaseCreditCards();
+      return profile;
+    } catch (error) {
+      setHouseholdProfilesError(error.message || "Could not deactivate household profile.");
+      throw error;
+    } finally {
+      setHouseholdProfilesSaving(false);
+    }
+  }
+
+  async function addDefaultProfiles() {
+    setHouseholdProfilesSaving(true);
+    setHouseholdProfilesError("");
+
+    try {
+      const existingOwnerNames = [
+        ...new Set(
+          supabaseCreditCards
+            .map((card) => card.owner?.trim())
+            .filter(Boolean),
+        ),
+      ];
+      if (existingOwnerNames.length === 0) {
+        setHouseholdProfilesError("No existing card owner names were found. Add profiles manually.");
+        return [];
+      }
+      const profiles = await createDefaultHouseholdProfiles(
+        activeHouseholdId,
+        householdProfiles,
+        existingOwnerNames,
+      );
+      if (profiles.length > 0) {
+        setHouseholdProfiles((currentProfiles) =>
+          [...currentProfiles, ...profiles].sort((a, b) =>
+            a.displayName.localeCompare(b.displayName),
+          ),
+        );
+      }
+      return profiles;
+    } catch (error) {
+      setHouseholdProfilesError(error.message || "Could not create default profiles.");
+      throw error;
+    } finally {
+      setHouseholdProfilesSaving(false);
     }
   }
 
@@ -882,6 +1015,8 @@ function FinanceTrackerApp() {
           monthlyBalancesLoading={monthlyBalancesLoading}
           monthlyBalancesSaving={monthlyBalancesSaving}
           monthlyBalancesError={monthlyBalancesError}
+          householdProfiles={householdProfiles}
+          householdProfilesLoading={householdProfilesLoading}
           onCreateCard={createSupabaseCreditCard}
           onUpdateCard={updateSupabaseCreditCard}
           onDeleteCard={deleteSupabaseCreditCard}
@@ -960,7 +1095,18 @@ function FinanceTrackerApp() {
         />
       ) : null}
 
-      {activeView === "household-settings" ? <HouseholdSettings /> : null}
+      {activeView === "household-settings" ? (
+        <HouseholdSettings
+          householdProfiles={householdProfiles}
+          householdProfilesLoading={householdProfilesLoading}
+          householdProfilesSaving={householdProfilesSaving}
+          householdProfilesError={householdProfilesError}
+          onCreateProfile={createHouseholdProfile}
+          onUpdateProfile={saveHouseholdProfile}
+          onDeactivateProfile={deactivateProfile}
+          onCreateDefaultProfiles={addDefaultProfiles}
+        />
+      ) : null}
     </AppShell>
   );
 }

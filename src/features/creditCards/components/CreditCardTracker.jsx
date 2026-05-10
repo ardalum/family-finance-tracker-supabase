@@ -21,6 +21,8 @@ export default function CreditCardTracker({
   monthlyBalancesLoading = false,
   monthlyBalancesSaving = false,
   monthlyBalancesError = "",
+  householdProfiles = [],
+  householdProfilesLoading = false,
   onCreateCard,
   onUpdateCard,
   onDeleteCard,
@@ -128,6 +130,8 @@ export default function CreditCardTracker({
       <CreditCardModal
         open={isCardModalOpen}
         editingCard={editingCard}
+        householdProfiles={householdProfiles}
+        householdProfilesLoading={householdProfilesLoading}
         onClose={closeCardModal}
         onSaved={handleSave}
         isSaving={isSaving}

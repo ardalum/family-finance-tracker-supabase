@@ -14,6 +14,7 @@ function normalizeCardInput(input) {
     url: input.url.trim(),
     network: input.network,
     owner_name: input.owner,
+    owner_profile_id: input.ownerProfileId || null,
     last_four: input.lastFour.trim(),
     credit_limit: Number(input.creditLimit) || 0,
     statement_closing_day: Number(input.statementClosingDay) || Number(input.dueDay) || 1,
@@ -29,7 +30,8 @@ function toAppCreditCard(row) {
     name: row.name,
     url: row.url,
     network: row.network,
-    owner: row.owner_name,
+    owner: row.household_profiles?.display_name ?? row.owner_name,
+    ownerProfileId: row.owner_profile_id,
     lastFour: row.last_four,
     creditLimit: Number(row.credit_limit || 0),
     statementClosingDay: row.statement_closing_day,
@@ -47,7 +49,7 @@ export async function listCreditCards(householdId) {
   const client = requireSupabase();
   const { data, error } = await client
     .from("credit_cards")
-    .select("*")
+    .select("*, household_profiles (display_name)")
     .eq("household_id", householdId)
     .order("created_at", { ascending: true });
 
@@ -63,7 +65,7 @@ export async function addCreditCardToSupabase(householdId, input) {
       household_id: householdId,
       ...normalizeCardInput(input),
     })
-    .select("*")
+    .select("*, household_profiles (display_name)")
     .single();
 
   if (error) throw error;
@@ -76,7 +78,7 @@ export async function updateCreditCardInSupabase(cardId, input) {
     .from("credit_cards")
     .update(normalizeCardInput(input))
     .eq("id", cardId)
-    .select("*")
+    .select("*, household_profiles (display_name)")
     .single();
 
   if (error) throw error;
@@ -116,7 +118,7 @@ export async function importLocalCreditCards(householdId, localCards) {
       onConflict: "household_id,imported_local_id",
       ignoreDuplicates: true,
     })
-    .select("*");
+    .select("*, household_profiles (display_name)");
 
   if (error) throw error;
   return (data ?? []).map(toAppCreditCard);

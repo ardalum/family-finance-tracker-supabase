@@ -4,8 +4,18 @@ import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import Input from "../../../components/ui/Input.jsx";
 import { useHouseholds } from "../HouseholdProvider.jsx";
+import HouseholdProfilesManager from "./HouseholdProfilesManager.jsx";
 
-export default function HouseholdSettings() {
+export default function HouseholdSettings({
+  householdProfiles = [],
+  householdProfilesLoading = false,
+  householdProfilesSaving = false,
+  householdProfilesError = "",
+  onCreateProfile,
+  onUpdateProfile,
+  onDeactivateProfile,
+  onCreateDefaultProfiles,
+}) {
   const {
     activeHousehold,
     activeHouseholdId,
@@ -71,6 +81,17 @@ export default function HouseholdSettings() {
           </div>
         </div>
       </Card>
+
+      <HouseholdProfilesManager
+        profiles={householdProfiles}
+        loading={householdProfilesLoading}
+        saving={householdProfilesSaving}
+        error={householdProfilesError}
+        onCreateProfile={onCreateProfile}
+        onUpdateProfile={onUpdateProfile}
+        onDeactivateProfile={onDeactivateProfile}
+        onCreateDefaultProfiles={onCreateDefaultProfiles}
+      />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_390px]">
         <Card>

@@ -8,6 +8,7 @@ const emptyForm = {
   url: "",
   network: "Visa",
   owner: "",
+  ownerProfileId: "",
   lastFour: "",
   creditLimit: "",
   statementClosingDay: "",
@@ -23,12 +24,22 @@ export default function CreditCardForm({
   onSaved,
   isSaving = false,
   showHeader = true,
+  householdProfiles = [],
+  householdProfilesLoading = false,
 }) {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
 
   useEffect(() => {
     setError("");
+    const matchedProfile = editingCard
+      ? householdProfiles.find(
+          (profile) =>
+            profile.id === editingCard.ownerProfileId ||
+            profile.displayName.toLowerCase() === editingCard.owner?.toLowerCase(),
+        )
+      : null;
+
     setForm(
       editingCard
         ? {
@@ -36,6 +47,7 @@ export default function CreditCardForm({
             url: editingCard.url,
             network: editingCard.network,
             owner: editingCard.owner,
+            ownerProfileId: matchedProfile?.id ?? editingCard.ownerProfileId ?? "",
             lastFour: editingCard.lastFour,
             creditLimit: String(editingCard.creditLimit),
             statementClosingDay: String(editingCard.statementClosingDay ?? editingCard.dueDay),
@@ -44,11 +56,14 @@ export default function CreditCardForm({
           }
         : emptyForm,
     );
-  }, [editingCard]);
+  }, [editingCard, householdProfiles]);
 
   function updateField(field, value) {
     setForm((current) => ({ ...current, [field]: value }));
   }
+
+  const ownerOptions = getOwnerOptions(householdProfiles, form.ownerProfileId);
+  const activeOwnerProfiles = householdProfiles.filter((profile) => profile.isActive);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -59,7 +74,14 @@ export default function CreditCardForm({
     }
 
     try {
-      await onSaved(form, editingCard);
+      const selectedProfile = householdProfiles.find((profile) => profile.id === form.ownerProfileId);
+      await onSaved(
+        {
+          ...form,
+          owner: selectedProfile?.displayName ?? form.owner,
+        },
+        editingCard,
+      );
       setForm(emptyForm);
     } catch (currentError) {
       setError(currentError.message || "Could not save credit card.");
@@ -97,6 +119,12 @@ export default function CreditCardForm({
         placeholder="https://example.com"
         required
       />
+      {activeOwnerProfiles.length === 0 && !householdProfilesLoading ? (
+        <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+          Create household profiles before assigning card owners.
+        </div>
+      ) : null}
+
       <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <Select
           label="Network"
@@ -109,14 +137,25 @@ export default function CreditCardForm({
         </Select>
         <Select
           label="Owner"
-          value={form.owner}
-          onChange={(event) => updateField("owner", event.target.value)}
+          value={form.ownerProfileId}
+          onChange={(event) => {
+            const profile = householdProfiles.find(
+              (currentProfile) => currentProfile.id === event.target.value,
+            );
+            updateField("ownerProfileId", event.target.value);
+            updateField("owner", profile?.displayName ?? "");
+          }}
+          disabled={householdProfilesLoading || ownerOptions.length === 0}
         >
           <option value="" disabled>
-            Select owner
+            {householdProfilesLoading ? "Loading owners..." : "Select owner"}
           </option>
-          <option>Arvin</option>
-          <option>Kristine</option>
+          {ownerOptions.map((profile) => (
+            <option key={profile.id} value={profile.id}>
+              {profile.displayName}
+              {profile.isActive ? "" : " (inactive)"}
+            </option>
+          ))}
         </Select>
       </div>
       <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
@@ -176,7 +215,7 @@ export default function CreditCardForm({
             Cancel
           </Button>
         ) : null}
-        <Button type="submit" disabled={isSaving}>
+        <Button type="submit" disabled={isSaving || ownerOptions.length === 0}>
           {isSaving ? "Saving..." : "Save"}
         </Button>
       </div>
@@ -193,7 +232,7 @@ function validateForm(form) {
   } catch {
     return "Enter a valid card URL.";
   }
-  if (!form.owner) return "Owner is required.";
+  if (!form.ownerProfileId) return "Owner is required.";
   if (!/^\d{4}$/.test(form.lastFour)) return "Last 4 digits must be exactly four numbers.";
   if (Number(form.creditLimit) < 0) return "Credit limit cannot be negative.";
   if (Number(form.statementClosingDay) < 1 || Number(form.statementClosingDay) > 31) {
@@ -201,4 +240,13 @@ function validateForm(form) {
   }
   if (Number(form.dueDay) < 1 || Number(form.dueDay) > 31) return "Due day must be between 1 and 31.";
   return "";
+}
+
+function getOwnerOptions(profiles, selectedProfileId) {
+  const activeProfiles = profiles.filter((profile) => profile.isActive);
+  const selectedInactiveProfile = profiles.find(
+    (profile) => profile.id === selectedProfileId && !profile.isActive,
+  );
+
+  return selectedInactiveProfile ? [...activeProfiles, selectedInactiveProfile] : activeProfiles;
 }
