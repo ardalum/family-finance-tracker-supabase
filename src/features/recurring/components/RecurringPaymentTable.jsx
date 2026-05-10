@@ -4,18 +4,18 @@ import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
 import { getCardName, getCategoryName } from "../../spending/spendingService.js";
-import { deleteRecurringPayment } from "../recurringService.js";
 
 export default function RecurringPaymentTable({
   templates,
   cards,
   categories,
   onEdit,
-  onDataChange,
+  onDelete,
+  isSaving = false,
 }) {
-  function handleDelete(template) {
+  async function handleDelete(template) {
     const confirmed = window.confirm(`Delete recurring payment template for ${template.name}?`);
-    if (confirmed) onDataChange(deleteRecurringPayment(template.id));
+    if (confirmed) await onDelete(template);
   }
 
   return (
@@ -72,10 +72,10 @@ export default function RecurringPaymentTable({
                     </td>
                     <td className="px-5 py-4 align-middle">
                       <div className="flex flex-wrap gap-2">
-                        <Button type="button" variant="secondary" className="px-3" onClick={() => onEdit(template)} aria-label={`Edit ${template.name}`}>
+                        <Button type="button" variant="secondary" className="px-3" onClick={() => onEdit(template)} disabled={isSaving} aria-label={`Edit ${template.name}`}>
                           <Edit size={16} aria-hidden="true" />
                         </Button>
-                        <Button type="button" variant="danger" className="px-3" onClick={() => handleDelete(template)} aria-label={`Delete ${template.name}`}>
+                        <Button type="button" variant="danger" className="px-3" onClick={() => handleDelete(template)} disabled={isSaving} aria-label={`Delete ${template.name}`}>
                           <Trash2 size={16} aria-hidden="true" />
                         </Button>
                       </div>

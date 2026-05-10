@@ -4,7 +4,7 @@ import Input from "../../../components/ui/Input.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { getCurrentMonthKey } from "../../../lib/dates.js";
 import { UNCATEGORIZED_ID } from "../../spending/spendingService.js";
-import { addRecurringPayment, paymentMethods, updateRecurringPayment } from "../recurringService.js";
+import { paymentMethods } from "../recurringService.js";
 
 const emptyForm = {
   name: "",
@@ -26,6 +26,7 @@ export default function RecurringPaymentForm({
   editingTemplate,
   onCancel,
   onSaved,
+  isSaving = false,
 }) {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
@@ -63,7 +64,7 @@ export default function RecurringPaymentForm({
     }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     const validationError = validateForm(form, cards);
     if (validationError) {
@@ -71,11 +72,12 @@ export default function RecurringPaymentForm({
       return;
     }
 
-    const nextData = editingTemplate
-      ? updateRecurringPayment(editingTemplate.id, form)
-      : addRecurringPayment(form);
-    onSaved(nextData);
-    setForm(emptyForm);
+    try {
+      await onSaved(form, editingTemplate);
+      setForm(emptyForm);
+    } catch (currentError) {
+      setError(currentError.message || "Could not save recurring payment.");
+    }
   }
 
   return (
@@ -138,8 +140,10 @@ export default function RecurringPaymentForm({
       </label>
 
       <div className="flex flex-wrap gap-3">
-        <Button type="submit">{editingTemplate ? "Save template" : "Add template"}</Button>
-        {editingTemplate ? <Button type="button" variant="secondary" onClick={onCancel}>Cancel</Button> : null}
+        <Button type="submit" disabled={isSaving}>
+          {isSaving ? "Saving..." : editingTemplate ? "Save template" : "Add template"}
+        </Button>
+        {editingTemplate ? <Button type="button" variant="secondary" onClick={onCancel} disabled={isSaving}>Cancel</Button> : null}
       </div>
     </form>
   );

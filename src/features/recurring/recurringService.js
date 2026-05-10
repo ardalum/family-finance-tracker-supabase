@@ -75,17 +75,22 @@ export function getEligibleRecurringPayments(templates, monthKey) {
   });
 }
 
-export function getRecurringGeneratedTransaction(transactions, templateId, monthKey) {
+export function getRecurringGeneratedTransaction(transactions, templateOrId, monthKey) {
+  const templateIds =
+    typeof templateOrId === "object"
+      ? [templateOrId.id, templateOrId.supabaseId].filter(Boolean)
+      : [templateOrId];
+
   return transactions.find(
     (transaction) =>
       transaction.source === "recurring" &&
-      transaction.recurringPaymentId === templateId &&
+      templateIds.includes(transaction.recurringPaymentId) &&
       transaction.recurringMonth === monthKey,
   );
 }
 
 export function getRecurringStatus(template, monthKey, transactions, statusByMonth) {
-  if (getRecurringGeneratedTransaction(transactions, template.id, monthKey)) return "Generated";
+  if (getRecurringGeneratedTransaction(transactions, template, monthKey)) return "Generated";
   if (statusByMonth?.[monthKey]?.[template.id] === "skipped") return "Skipped";
   return "Not generated";
 }

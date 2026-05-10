@@ -5,7 +5,6 @@ import Input from "../../../components/ui/Input.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
 import { getCategoryName } from "../../spending/spendingService.js";
 import {
-  generateRecurringTransactions,
   getEligibleRecurringPayments,
   getRecurringGeneratedTransaction,
   getRecurringStatus,
@@ -17,7 +16,8 @@ export default function RecurringGenerationPanel({
   transactions,
   recurringStatusByMonth,
   categories,
-  onDataChange,
+  onGenerate,
+  isSaving = false,
 }) {
   const eligibleTemplates = useMemo(
     () => getEligibleRecurringPayments(templates, monthKey),
@@ -45,7 +45,7 @@ export default function RecurringGenerationPanel({
     );
   }
 
-  function handleGenerate() {
+  async function handleGenerate() {
     const candidates = rows.filter((row) => {
       const status = getRecurringStatus(row.template, monthKey, transactions, recurringStatusByMonth);
       return status !== "Generated";
@@ -56,9 +56,16 @@ export default function RecurringGenerationPanel({
       return;
     }
 
-    const nextData = generateRecurringTransactions(monthKey, candidates);
-    setMessage("Recurring transactions generated.");
-    onDataChange(nextData);
+    try {
+      const generated = await onGenerate(candidates);
+      setMessage(
+        generated.length === 0
+          ? "No new recurring transactions generated."
+          : "Recurring transactions generated.",
+      );
+    } catch (error) {
+      setMessage(error.message || "Could not generate recurring transactions.");
+    }
   }
 
   return (
@@ -91,7 +98,7 @@ export default function RecurringGenerationPanel({
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {rows.map((row) => {
-                  const generated = getRecurringGeneratedTransaction(transactions, row.template.id, monthKey);
+                  const generated = getRecurringGeneratedTransaction(transactions, row.template, monthKey);
                   const status = getRecurringStatus(row.template, monthKey, transactions, recurringStatusByMonth);
                   const disabled = Boolean(generated);
                   return (
@@ -125,7 +132,9 @@ export default function RecurringGenerationPanel({
             </table>
           </div>
           <div className="border-t border-gray-200 p-5">
-            <Button type="button" onClick={handleGenerate}>Generate Recurring Transactions</Button>
+            <Button type="button" onClick={handleGenerate} disabled={isSaving}>
+              {isSaving ? "Generating..." : "Generate Recurring Transactions"}
+            </Button>
           </div>
         </>
       )}

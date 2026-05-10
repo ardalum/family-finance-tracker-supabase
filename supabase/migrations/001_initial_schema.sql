@@ -221,12 +221,16 @@ create table if not exists public.recurring_payments (
   end_month text check (end_month is null or end_month ~ '^[0-9]{4}-[0-9]{2}$'),
   active boolean not null default true,
   notes text not null default '',
+  imported_local_id text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
 create index if not exists recurring_payments_household_id_idx
   on public.recurring_payments (household_id);
+
+create unique index if not exists recurring_payments_household_imported_local_id_unique
+  on public.recurring_payments (household_id, imported_local_id);
 
 create table if not exists public.transactions (
   id uuid primary key default gen_random_uuid(),
