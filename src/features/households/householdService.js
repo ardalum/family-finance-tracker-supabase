@@ -58,6 +58,8 @@ export async function listUserHouseholds() {
         households (
           id,
           name,
+          setup_complete,
+          setup_completed_at,
           created_at,
           updated_at
         )
@@ -75,8 +77,19 @@ export async function listUserHouseholds() {
       householdId: membership.household_id,
       role: membership.role,
       status: membership.status,
-      household: membership.households,
+      household: toAppHousehold(membership.households),
     }));
+}
+
+function toAppHousehold(row) {
+  return {
+    id: row.id,
+    name: row.name,
+    setupComplete: Boolean(row.setup_complete),
+    setupCompletedAt: row.setup_completed_at,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
 }
 
 export async function createFirstHousehold(name) {
@@ -96,5 +109,34 @@ export async function createHousehold(name) {
   });
 
   if (error) throw error;
-  return data;
+  return data ? toAppHousehold(data) : data;
+}
+
+export async function updateHouseholdName(householdId, name) {
+  const client = requireSupabase();
+  const { data, error } = await client
+    .from("households")
+    .update({ name: name.trim() || "My Household" })
+    .eq("id", householdId)
+    .select("id,name,setup_complete,setup_completed_at,created_at,updated_at")
+    .single();
+
+  if (error) throw error;
+  return toAppHousehold(data);
+}
+
+export async function markHouseholdSetupComplete(householdId) {
+  const client = requireSupabase();
+  const { data, error } = await client
+    .from("households")
+    .update({
+      setup_complete: true,
+      setup_completed_at: new Date().toISOString(),
+    })
+    .eq("id", householdId)
+    .select("id,name,setup_complete,setup_completed_at,created_at,updated_at")
+    .single();
+
+  if (error) throw error;
+  return toAppHousehold(data);
 }

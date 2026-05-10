@@ -1,10 +1,14 @@
 import { useRef, useState } from "react";
-import { CloudDownload, Download, RotateCcw, Upload } from "lucide-react";
+import { CloudDownload, Download, FileSpreadsheet, RotateCcw, Trash2, Upload } from "lucide-react";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
+import Input from "../../../components/ui/Input.jsx";
+import { signOut } from "../../auth/authService.js";
 import { useHouseholds } from "../../households/HouseholdProvider.jsx";
 import {
+  deleteSupabaseAccount,
   exportBackup,
+  exportSupabaseExcel,
   exportSupabaseBackup,
   importSupabaseBackupMerge,
   importBackupFile,
@@ -28,9 +32,12 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
   const cloudInputRef = useRef(null);
   const [message, setMessage] = useState(null);
   const [isExportingCloud, setIsExportingCloud] = useState(false);
+  const [isExportingExcel, setIsExportingExcel] = useState(false);
   const [isPreviewingCloudImport, setIsPreviewingCloudImport] = useState(false);
   const [isImportingCloud, setIsImportingCloud] = useState(false);
   const [isWorkingLegacy, setIsWorkingLegacy] = useState(false);
+  const [isDeletingData, setIsDeletingData] = useState(false);
+  const [deletePhrase, setDeletePhrase] = useState("");
   const [cloudImport, setCloudImport] = useState(null);
 
   function showMessage(result) {
@@ -48,6 +55,17 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
       showMessage(await exportSupabaseBackup(activeHouseholdId, activeHousehold));
     } finally {
       setIsExportingCloud(false);
+    }
+  }
+
+  async function handleExcelExport() {
+    setIsExportingExcel(true);
+    setMessage(null);
+
+    try {
+      showMessage(await exportSupabaseExcel(activeHouseholdId, activeHousehold));
+    } finally {
+      setIsExportingExcel(false);
     }
   }
 
@@ -145,6 +163,28 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
     setIsWorkingLegacy(false);
   }
 
+  async function handleDeleteHouseholdData() {
+    if (deletePhrase !== "DELETE") return;
+
+    const confirmed = window.confirm(
+      "This will permanently delete your account and owned household finance data. This action cannot be undone.",
+    );
+    if (!confirmed) return;
+
+    setIsDeletingData(true);
+    setMessage(null);
+
+    try {
+      const result = await deleteSupabaseAccount(activeHouseholdId, deletePhrase);
+      showMessage(result);
+      if (result.ok) {
+        await signOut();
+      }
+    } finally {
+      setIsDeletingData(false);
+    }
+  }
+
   return (
     <div className="grid gap-5">
       <Card className="border-sky-200 bg-sky-50/40 p-5">
@@ -174,6 +214,15 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
             >
               <CloudDownload size={16} aria-hidden="true" />
               {isExportingCloud ? "Exporting..." : "Export Supabase Backup"}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleExcelExport}
+              disabled={isExportingExcel || !activeHouseholdId}
+            >
+              <FileSpreadsheet size={16} aria-hidden="true" />
+              {isExportingExcel ? "Exporting..." : "Export to Excel"}
             </Button>
           </div>
 
@@ -259,6 +308,68 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
               accept="application/json,.json"
               onChange={handleCloudImportFile}
             />
+          </div>
+        </div>
+      </Card>
+
+      <Card className="border-red-200 bg-red-50/40 p-5">
+        <div className="grid gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-red-700">
+              Danger Zone
+            </p>
+            <h2 className="mt-1 text-lg font-semibold text-gray-950">
+              Delete Account
+            </h2>
+            <p className="mt-1 max-w-3xl text-sm text-gray-600">
+              This permanently deletes your Supabase Auth login and households you created. The
+              service role key stays server-side in a Supabase Edge Function and is never exposed in
+              this browser app.
+            </p>
+          </div>
+
+          <div className="rounded-md border border-red-200 bg-white px-3 py-2 text-sm text-red-700">
+            This will permanently delete your account and owned household finance data. This action
+            cannot be undone.
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleExcelExport}
+              disabled={isExportingExcel || !activeHouseholdId}
+            >
+              <FileSpreadsheet size={16} aria-hidden="true" />
+              Export to Excel before deleting
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleSupabaseExport}
+              disabled={isExportingCloud || !activeHouseholdId}
+            >
+              <CloudDownload size={16} aria-hidden="true" />
+              Export JSON backup before deleting
+            </Button>
+          </div>
+
+          <div className="grid max-w-sm gap-3">
+            <Input
+              label="Type DELETE to confirm"
+              value={deletePhrase}
+              onChange={(event) => setDeletePhrase(event.target.value)}
+              autoComplete="off"
+            />
+            <Button
+              type="button"
+              variant="danger"
+              onClick={handleDeleteHouseholdData}
+              disabled={deletePhrase !== "DELETE" || isDeletingData || !activeHouseholdId}
+            >
+              <Trash2 size={16} aria-hidden="true" />
+              {isDeletingData ? "Deleting..." : "Delete Account"}
+            </Button>
           </div>
         </div>
       </Card>

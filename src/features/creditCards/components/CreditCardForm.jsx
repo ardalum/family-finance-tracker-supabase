@@ -64,20 +64,38 @@ export default function CreditCardForm({
 
   const ownerOptions = getOwnerOptions(householdProfiles, form.ownerProfileId);
   const activeOwnerProfiles = householdProfiles.filter((profile) => profile.isActive);
+  const singleActiveOwnerProfile = activeOwnerProfiles.length === 1 ? activeOwnerProfiles[0] : null;
+
+  useEffect(() => {
+    if (!singleActiveOwnerProfile) return;
+    setForm((current) => {
+      if (current.ownerProfileId === singleActiveOwnerProfile.id) return current;
+      return {
+        ...current,
+        ownerProfileId: singleActiveOwnerProfile.id,
+        owner: singleActiveOwnerProfile.displayName,
+      };
+    });
+  }, [singleActiveOwnerProfile]);
 
   async function handleSubmit(event) {
     event.preventDefault();
-    const validationError = validateForm(form);
+    const effectiveOwnerProfileId = singleActiveOwnerProfile?.id ?? form.ownerProfileId;
+    const validationError = validateForm({
+      ...form,
+      ownerProfileId: effectiveOwnerProfileId,
+    });
     if (validationError) {
       setError(validationError);
       return;
     }
 
     try {
-      const selectedProfile = householdProfiles.find((profile) => profile.id === form.ownerProfileId);
+      const selectedProfile = householdProfiles.find((profile) => profile.id === effectiveOwnerProfileId);
       await onSaved(
         {
           ...form,
+          ownerProfileId: effectiveOwnerProfileId,
           owner: selectedProfile?.displayName ?? form.owner,
         },
         editingCard,
@@ -121,7 +139,7 @@ export default function CreditCardForm({
       />
       {activeOwnerProfiles.length === 0 && !householdProfilesLoading ? (
         <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-          Create household profiles before assigning card owners.
+          Create a household profile before adding a credit card.
         </div>
       ) : null}
 
@@ -135,28 +153,37 @@ export default function CreditCardForm({
             <option key={network}>{network}</option>
           ))}
         </Select>
-        <Select
-          label="Owner"
-          value={form.ownerProfileId}
-          onChange={(event) => {
-            const profile = householdProfiles.find(
-              (currentProfile) => currentProfile.id === event.target.value,
-            );
-            updateField("ownerProfileId", event.target.value);
-            updateField("owner", profile?.displayName ?? "");
-          }}
-          disabled={householdProfilesLoading || ownerOptions.length === 0}
-        >
-          <option value="" disabled>
-            {householdProfilesLoading ? "Loading owners..." : "Select owner"}
-          </option>
-          {ownerOptions.map((profile) => (
-            <option key={profile.id} value={profile.id}>
-              {profile.displayName}
-              {profile.isActive ? "" : " (inactive)"}
+        {singleActiveOwnerProfile ? (
+          <div className="grid min-w-0 gap-1.5 text-sm font-medium text-gray-700">
+            Owner
+            <div className="flex min-h-10 items-center rounded-md border border-gray-200 bg-gray-50 px-3 text-sm text-gray-700">
+              Owner automatically set to {singleActiveOwnerProfile.displayName}.
+            </div>
+          </div>
+        ) : (
+          <Select
+            label="Owner"
+            value={form.ownerProfileId}
+            onChange={(event) => {
+              const profile = householdProfiles.find(
+                (currentProfile) => currentProfile.id === event.target.value,
+              );
+              updateField("ownerProfileId", event.target.value);
+              updateField("owner", profile?.displayName ?? "");
+            }}
+            disabled={householdProfilesLoading || ownerOptions.length === 0}
+          >
+            <option value="" disabled>
+              {householdProfilesLoading ? "Loading owners..." : "Select owner"}
             </option>
-          ))}
-        </Select>
+            {ownerOptions.map((profile) => (
+              <option key={profile.id} value={profile.id}>
+                {profile.displayName}
+                {profile.isActive ? "" : " (inactive)"}
+              </option>
+            ))}
+          </Select>
+        )}
       </div>
       <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <Input
@@ -215,7 +242,7 @@ export default function CreditCardForm({
             Cancel
           </Button>
         ) : null}
-        <Button type="submit" disabled={isSaving || ownerOptions.length === 0}>
+        <Button type="submit" disabled={isSaving || activeOwnerProfiles.length === 0}>
           {isSaving ? "Saving..." : "Save"}
         </Button>
       </div>

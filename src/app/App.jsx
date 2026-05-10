@@ -48,6 +48,8 @@ import {
   listRecurringPayments,
   updateRecurringPaymentInSupabase,
 } from "../features/recurring/recurringSupabaseService.js";
+import FirstTimeSetupWizard from "../features/setup/components/FirstTimeSetupWizard.jsx";
+import { householdHasFinanceData } from "../features/setup/setupService.js";
 import SpendingTracker from "../features/spending/components/SpendingTracker.jsx";
 import {
   addTransactionToSupabase,
@@ -105,8 +107,10 @@ export default function App() {
 }
 
 function FinanceTrackerApp() {
-  const { activeHouseholdId } = useHouseholds();
+  const { activeHouseholdId, activeHousehold, completeActiveHouseholdSetup } = useHouseholds();
   const [appData, setAppData] = useState(() => readAppData());
+  const [setupCheckLoading, setSetupCheckLoading] = useState(true);
+  const [setupCheckError, setSetupCheckError] = useState("");
   const [supabaseCreditCards, setSupabaseCreditCards] = useState([]);
   const [creditCardsLoading, setCreditCardsLoading] = useState(true);
   const [creditCardsSaving, setCreditCardsSaving] = useState(false);
@@ -157,6 +161,42 @@ function FinanceTrackerApp() {
     }
   });
   const currentPage = pageContent[activeView];
+
+  useEffect(() => {
+    let isCurrent = true;
+
+    async function checkSetupStatus() {
+      if (!activeHouseholdId || activeHousehold?.setupComplete) {
+        setSetupCheckLoading(false);
+        setSetupCheckError("");
+        return;
+      }
+
+      setSetupCheckLoading(true);
+      setSetupCheckError("");
+
+      try {
+        const hasExistingData = await householdHasFinanceData(activeHouseholdId);
+        if (hasExistingData) {
+          await completeActiveHouseholdSetup();
+        }
+      } catch (error) {
+        if (isCurrent) {
+          setSetupCheckError(error.message || "Could not check setup status.");
+        }
+      } finally {
+        if (isCurrent) {
+          setSetupCheckLoading(false);
+        }
+      }
+    }
+
+    checkSetupStatus();
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [activeHousehold?.setupComplete, activeHouseholdId, completeActiveHouseholdSetup]);
 
   function setActiveView(nextView) {
     setActiveViewState(nextView);
@@ -965,6 +1005,11 @@ function FinanceTrackerApp() {
     await loadRecurringData();
   }
 
+  async function finishFirstTimeSetup() {
+    await completeActiveHouseholdSetup();
+    setActiveView("dashboard");
+  }
+
   const dashboardAppData = {
     ...appData,
     creditCards: supabaseCreditCards,
@@ -979,6 +1024,32 @@ function FinanceTrackerApp() {
     recurringTransactions: dashboardTransactions,
   };
 
+  if (setupCheckLoading) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-gray-100 px-4 text-sm text-gray-600">
+        Checking setup...
+      </div>
+    );
+  }
+
+  if (!activeHousehold?.setupComplete) {
+    return (
+      <FirstTimeSetupWizard
+        householdProfiles={householdProfiles}
+        householdProfilesLoading={householdProfilesLoading}
+        householdProfilesSaving={householdProfilesSaving}
+        onCreateProfile={createHouseholdProfile}
+        onUpdateProfile={saveHouseholdProfile}
+        onDeactivateProfile={deactivateProfile}
+        onCreateCard={createSupabaseCreditCard}
+        creditCardsSaving={creditCardsSaving}
+        onAddDefaultBudgets={addDefaultBudgetsToSupabase}
+        budgetsSaving={budgetsSaving}
+        onFinish={finishFirstTimeSetup}
+      />
+    );
+  }
+
   return (
     <AppShell
       activeView={activeView}
@@ -992,6 +1063,12 @@ function FinanceTrackerApp() {
         </>
       }
     >
+      {setupCheckError ? (
+        <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+          {setupCheckError}
+        </div>
+      ) : null}
+
       {activeView === "dashboard" ? (
         <Dashboard
           appData={dashboardAppData}

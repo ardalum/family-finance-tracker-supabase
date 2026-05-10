@@ -35,6 +35,7 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
     const client = requireSupabase();
     const [
       householdResult,
+      householdProfilesResult,
       creditCardsResult,
       monthlyBalancesResult,
       budgetCategoriesResult,
@@ -43,7 +44,16 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
       recurringPaymentsResult,
       recurringInstancesResult,
     ] = await Promise.all([
-      client.from("households").select("id,name,created_by,created_at,updated_at").eq("id", householdId).single(),
+      client
+        .from("households")
+        .select("id,name,created_by,setup_complete,setup_completed_at,created_at,updated_at")
+        .eq("id", householdId)
+        .single(),
+      client
+        .from("household_profiles")
+        .select("*")
+        .eq("household_id", householdId)
+        .order("display_name", { ascending: true }),
       client.from("credit_cards").select("*").eq("household_id", householdId).order("created_at", { ascending: true }),
       client
         .from("monthly_card_balances")
@@ -81,6 +91,7 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
 
     const error = [
       householdResult,
+      householdProfilesResult,
       creditCardsResult,
       monthlyBalancesResult,
       budgetCategoriesResult,
@@ -97,6 +108,7 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
       source: "supabase",
       exportedAt: new Date().toISOString(),
       household: householdResult.data ?? activeHousehold,
+      householdProfiles: householdProfilesResult.data ?? [],
       creditCards: creditCardsResult.data ?? [],
       monthlyCardBalances: monthlyBalancesResult.data ?? [],
       budgetCategories: budgetCategoriesResult.data ?? [],
@@ -118,6 +130,386 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
       message: error.message || "Could not export Supabase cloud backup.",
     };
   }
+}
+
+export async function exportSupabaseExcel(householdId, activeHousehold) {
+  if (!householdId) {
+    return {
+      ok: false,
+      message: "Choose an active household before exporting to Excel.",
+    };
+  }
+
+  try {
+    const { default: ExcelJS } = await import("exceljs");
+    const data = await loadHouseholdExportData(householdId, activeHousehold);
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = BACKUP_APP_NAME;
+    workbook.created = new Date();
+
+    appendSheet(workbook, "Household", [
+      {
+        "Household Name": data.household?.name ?? "",
+        "Setup Complete": data.household?.setup_complete ? "Yes" : "No",
+        "Setup Completed At": formatDateTime(data.household?.setup_completed_at),
+        "Created At": formatDateTime(data.household?.created_at),
+        "Updated At": formatDateTime(data.household?.updated_at),
+        ID: data.household?.id ?? householdId,
+      },
+    ]);
+
+    appendSheet(
+      workbook,
+      "Household Profiles",
+      data.householdProfiles.map((profile) => ({
+        "Display Name": profile.display_name,
+        "Role Label": profile.role_label ?? "",
+        Active: profile.is_active ? "Yes" : "No",
+        "Created At": formatDateTime(profile.created_at),
+        "Updated At": formatDateTime(profile.updated_at),
+        ID: profile.id,
+      })),
+    );
+
+    appendSheet(
+      workbook,
+      "Credit Cards",
+      data.creditCards.map((card) => ({
+        "Card Name": card.name,
+        URL: card.url,
+        Network: card.network,
+        Owner: card.household_profiles?.display_name ?? card.owner_name,
+        "Last 4": card.last_four,
+        "Credit Limit": Number(card.credit_limit || 0),
+        "Statement Closing Day": card.statement_closing_day,
+        "Due Day": card.due_day,
+        Active: card.is_active ? "Yes" : "No",
+        "Created At": formatDateTime(card.created_at),
+        ID: card.id,
+      })),
+    );
+
+    appendSheet(
+      workbook,
+      "Monthly Card Balances",
+      data.monthlyCardBalances.map((balance) => ({
+        Month: balance.month_key,
+        Card: balance.credit_cards?.name ?? balance.credit_card_id,
+        Balance: Number(balance.balance || 0),
+        Paid: balance.paid ? "Yes" : "No",
+        "Updated At": formatDateTime(balance.updated_at),
+        ID: balance.id,
+      })),
+    );
+
+    appendSheet(
+      workbook,
+      "Budget Categories",
+      data.budgetCategories.map((category) => ({
+        Month: category.month_key,
+        Category: category.name,
+        "Monthly Amount": Number(category.monthly_amount || 0),
+        Notes: category.notes ?? "",
+        "Created At": formatDateTime(category.created_at),
+        ID: category.id,
+      })),
+    );
+
+    appendSheet(
+      workbook,
+      "Transactions",
+      data.transactions.map((transaction) => ({
+        Date: transaction.transaction_date,
+        Merchant: transaction.merchant,
+        "Payment Method": transaction.payment_method,
+        Card: transaction.credit_cards?.name ?? "",
+        Category: transaction.budget_categories?.name ?? "",
+        Amount: Number(transaction.amount || 0),
+        Notes: transaction.notes ?? "",
+        Source: transaction.source ?? "",
+        "Recurring Month": transaction.recurring_month ?? "",
+        ID: transaction.id,
+      })),
+    );
+
+    appendSheet(
+      workbook,
+      "Transaction Splits",
+      data.transactionSplits.map((split) => ({
+        Transaction: split.transactions?.merchant ?? split.transaction_id,
+        Category: split.budget_categories?.name ?? split.category_fallback ?? "",
+        Amount: Number(split.amount || 0),
+        ID: split.id,
+      })),
+    );
+
+    appendSheet(
+      workbook,
+      "Recurring Payments",
+      data.recurringPayments.map((payment) => ({
+        Name: payment.name,
+        Category: payment.budget_categories?.name ?? "",
+        "Bill Type": payment.bill_type,
+        "Estimated Amount": Number(payment.estimated_amount || 0),
+        "Due Day": payment.due_day,
+        "Payment Method": payment.payment_method,
+        Card: payment.credit_cards?.name ?? "",
+        "Start Month": payment.start_month,
+        "End Month": payment.end_month ?? "",
+        Active: payment.active ? "Yes" : "No",
+        Notes: payment.notes ?? "",
+        ID: payment.id,
+      })),
+    );
+
+    appendSheet(
+      workbook,
+      "Recurring Instances",
+      data.recurringPaymentInstances.map((instance) => ({
+        Payment: instance.recurring_payments?.name ?? instance.recurring_payment_id,
+        Month: instance.month_key,
+        Status: instance.status,
+        "Actual Amount":
+          instance.actual_amount === null || instance.actual_amount === undefined
+            ? ""
+            : Number(instance.actual_amount),
+        "Transaction ID": instance.transaction_id ?? "",
+        ID: instance.id,
+      })),
+    );
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    downloadBlob(
+      buffer,
+      `finance-tracker-export-${getDateStamp()}.xlsx`,
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    );
+
+    return {
+      ok: true,
+      message: "Excel export created successfully.",
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      message: error.message || "Could not export Excel file.",
+    };
+  }
+}
+
+export async function deleteActiveHouseholdFinanceData(householdId) {
+  if (!householdId) {
+    return {
+      ok: false,
+      message: "Choose an active household before deleting data.",
+    };
+  }
+
+  try {
+    const client = requireSupabase();
+    const deleteOrder = [
+      "recurring_payment_instances",
+      "transaction_splits",
+      "transactions",
+      "monthly_card_balances",
+      "recurring_payments",
+      "credit_cards",
+      "budget_categories",
+      "household_profiles",
+    ];
+
+    for (const table of deleteOrder) {
+      const { error } = await client.from(table).delete().eq("household_id", householdId);
+      if (error) throw error;
+    }
+
+    const { error: householdError } = await client
+      .from("households")
+      .update({
+        setup_complete: false,
+        setup_completed_at: null,
+      })
+      .eq("id", householdId);
+
+    if (householdError) throw householdError;
+
+    return {
+      ok: true,
+      message: "Household finance data deleted. You have been signed out.",
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      message: error.message || "Could not delete household data.",
+    };
+  }
+}
+
+export async function deleteSupabaseAccount(householdId, confirmation) {
+  if (!householdId) {
+    return {
+      ok: false,
+      message: "Choose an active household before deleting your account.",
+    };
+  }
+
+  if (confirmation !== "DELETE") {
+    return {
+      ok: false,
+      message: "Type DELETE to confirm account deletion.",
+    };
+  }
+
+  try {
+    const client = requireSupabase();
+    const { data, error } = await client.functions.invoke("delete-account", {
+      body: {
+        householdId,
+        confirmation,
+      },
+    });
+
+    if (error) throw error;
+    if (data?.error) throw new Error(data.error);
+
+    return {
+      ok: true,
+      message: "Your account and owned household data were deleted.",
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      message: error.message || "Could not delete account.",
+    };
+  }
+}
+
+async function loadHouseholdExportData(householdId, activeHousehold) {
+  const client = requireSupabase();
+  const [
+    householdResult,
+    householdProfilesResult,
+    creditCardsResult,
+    monthlyBalancesResult,
+    budgetCategoriesResult,
+    transactionsResult,
+    transactionSplitsResult,
+    recurringPaymentsResult,
+    recurringInstancesResult,
+  ] = await Promise.all([
+    client
+      .from("households")
+      .select("id,name,created_by,setup_complete,setup_completed_at,created_at,updated_at")
+      .eq("id", householdId)
+      .single(),
+    client
+      .from("household_profiles")
+      .select("*")
+      .eq("household_id", householdId)
+      .order("display_name", { ascending: true }),
+    client
+      .from("credit_cards")
+      .select("*, household_profiles (display_name)")
+      .eq("household_id", householdId)
+      .order("created_at", { ascending: true }),
+    client
+      .from("monthly_card_balances")
+      .select("*, credit_cards (name)")
+      .eq("household_id", householdId)
+      .order("month_key", { ascending: true }),
+    client
+      .from("budget_categories")
+      .select("*")
+      .eq("household_id", householdId)
+      .order("month_key", { ascending: true })
+      .order("created_at", { ascending: true }),
+    client
+      .from("transactions")
+      .select("*, credit_cards (name), budget_categories (name)")
+      .eq("household_id", householdId)
+      .order("transaction_date", { ascending: true })
+      .order("created_at", { ascending: true }),
+    client
+      .from("transaction_splits")
+      .select("*, transactions (merchant), budget_categories (name)")
+      .eq("household_id", householdId)
+      .order("created_at", { ascending: true }),
+    client
+      .from("recurring_payments")
+      .select("*, credit_cards (name), budget_categories (name)")
+      .eq("household_id", householdId)
+      .order("created_at", { ascending: true }),
+    client
+      .from("recurring_payment_instances")
+      .select("*, recurring_payments (name)")
+      .eq("household_id", householdId)
+      .order("month_key", { ascending: true }),
+  ]);
+
+  const error = [
+    householdResult,
+    householdProfilesResult,
+    creditCardsResult,
+    monthlyBalancesResult,
+    budgetCategoriesResult,
+    transactionsResult,
+    transactionSplitsResult,
+    recurringPaymentsResult,
+    recurringInstancesResult,
+  ].find((result) => result.error)?.error;
+
+  if (error) throw error;
+
+  return {
+    household: householdResult.data ?? activeHousehold,
+    householdProfiles: householdProfilesResult.data ?? [],
+    creditCards: creditCardsResult.data ?? [],
+    monthlyCardBalances: monthlyBalancesResult.data ?? [],
+    budgetCategories: budgetCategoriesResult.data ?? [],
+    transactions: transactionsResult.data ?? [],
+    transactionSplits: transactionSplitsResult.data ?? [],
+    recurringPayments: recurringPaymentsResult.data ?? [],
+    recurringPaymentInstances: recurringInstancesResult.data ?? [],
+  };
+}
+
+function appendSheet(workbook, name, rows) {
+  const worksheet = workbook.addWorksheet(name);
+
+  if (rows.length === 0) {
+    worksheet.addRow(["No records"]);
+    worksheet.getColumn(1).width = 16;
+    return;
+  }
+
+  const headers = Object.keys(rows[0]);
+  worksheet.columns = headers.map((header) => ({
+    header,
+    key: header,
+    width: Math.min(Math.max(header.length + 4, 14), 32),
+  }));
+  rows.forEach((row) => worksheet.addRow(row));
+  worksheet.views = [{ state: "frozen", ySplit: 1 }];
+  worksheet.getRow(1).font = { bold: true };
+  worksheet.getRow(1).fill = {
+    type: "pattern",
+    pattern: "solid",
+    fgColor: { argb: "FFE5E7EB" },
+  };
+
+  headers.forEach((header, index) => {
+    const column = worksheet.getColumn(index + 1);
+    if (/(amount|balance|limit)/i.test(header)) {
+      column.numFmt = "$#,##0.00";
+    }
+  });
+}
+
+function formatDateTime(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toISOString().replace("T", " ").slice(0, 19);
 }
 
 export async function previewSupabaseBackupImport(file, householdId) {
@@ -1317,6 +1709,11 @@ function downloadJson(data, filename) {
   const blob = new Blob([JSON.stringify(data, null, 2)], {
     type: "application/json",
   });
+  downloadBlob(blob, filename, "application/json");
+}
+
+function downloadBlob(data, filename, type) {
+  const blob = data instanceof Blob ? data : new Blob([data], { type });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;

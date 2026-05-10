@@ -6,7 +6,9 @@ import {
   createFirstHousehold,
   getStoredActiveHouseholdId,
   listUserHouseholds,
+  markHouseholdSetupComplete,
   storeActiveHouseholdId,
+  updateHouseholdName,
 } from "./householdService.js";
 
 const HouseholdContext = createContext(null);
@@ -108,6 +110,23 @@ export function HouseholdProvider({ children }) {
     [loadHouseholds, setActiveHouseholdId, user?.id],
   );
 
+  const renameActiveHousehold = useCallback(
+    async (name) => {
+      if (!activeHouseholdId) throw new Error("Choose a household before renaming it.");
+      const household = await updateHouseholdName(activeHouseholdId, name);
+      await loadHouseholds();
+      return household;
+    },
+    [activeHouseholdId, loadHouseholds],
+  );
+
+  const completeActiveHouseholdSetup = useCallback(async () => {
+    if (!activeHouseholdId) throw new Error("Choose a household before finishing setup.");
+    const household = await markHouseholdSetupComplete(activeHouseholdId);
+    await loadHouseholds();
+    return household;
+  }, [activeHouseholdId, loadHouseholds]);
+
   const activeMembership = useMemo(
     () => memberships.find((membership) => membership.householdId === activeHouseholdId) ?? null,
     [activeHouseholdId, memberships],
@@ -127,12 +146,16 @@ export function HouseholdProvider({ children }) {
       refreshHouseholds: loadHouseholds,
       createInitialHousehold,
       createAdditionalHousehold,
+      renameActiveHousehold,
+      completeActiveHouseholdSetup,
     }),
     [
       activeHouseholdId,
       activeMembership,
       createInitialHousehold,
       createAdditionalHousehold,
+      renameActiveHousehold,
+      completeActiveHouseholdSetup,
       error,
       loadHouseholds,
       loading,
