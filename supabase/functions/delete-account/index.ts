@@ -78,30 +78,64 @@ Deno.serve(async (request) => {
       );
     }
 
+    const { data: activeHousehold, error: activeHouseholdError } = await adminClient
+      .from("households")
+      .select("id,created_by")
+      .eq("id", body.householdId)
+      .maybeSingle();
+
+    if (activeHouseholdError) throw activeHouseholdError;
+
+    if (!activeHousehold || activeHousehold.created_by !== user.id) {
+      return jsonResponse(
+        { error: "Account deletion can only delete a household created by the signed-in owner." },
+        403,
+      );
+    }
+
+    const { count: activeMemberCount, error: activeMemberCountError } = await adminClient
+      .from("household_members")
+      .select("id", { count: "exact", head: true })
+      .eq("household_id", body.householdId)
+      .eq("status", "active");
+
+    if (activeMemberCountError) throw activeMemberCountError;
+
+    if (activeMemberCount !== 1) {
+      return jsonResponse(
+        { error: "Account deletion is blocked because the active household has other active members." },
+        409,
+      );
+    }
+
     const { data: ownedHouseholds, error: ownedHouseholdsError } = await adminClient
       .from("households")
       .select("id")
-      .eq("created_by", user.id);
+      .eq("created_by", user.id)
+      .neq("id", body.householdId);
 
     if (ownedHouseholdsError) throw ownedHouseholdsError;
 
-    const ownedHouseholdIds = (ownedHouseholds ?? []).map((household) => household.id);
-
-    if (ownedHouseholdIds.length > 0) {
-      const { error: deleteHouseholdsError } = await adminClient
-        .from("households")
-        .delete()
-        .in("id", ownedHouseholdIds);
-
-      if (deleteHouseholdsError) throw deleteHouseholdsError;
+    if ((ownedHouseholds ?? []).length > 0) {
+      return jsonResponse(
+        { error: "Account deletion is blocked because this user created other households." },
+        409,
+      );
     }
+
+    const { error: deleteHouseholdError } = await adminClient
+      .from("households")
+      .delete()
+      .eq("id", body.householdId);
+
+    if (deleteHouseholdError) throw deleteHouseholdError;
 
     const { error: deleteUserError } = await adminClient.auth.admin.deleteUser(user.id);
     if (deleteUserError) throw deleteUserError;
 
     return jsonResponse({
       ok: true,
-      deletedOwnedHouseholdCount: ownedHouseholdIds.length,
+      deletedHouseholdId: body.householdId,
     });
   } catch (error) {
     console.error(error);

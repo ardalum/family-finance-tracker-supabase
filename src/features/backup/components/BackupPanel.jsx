@@ -167,7 +167,7 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
     if (deletePhrase !== "DELETE") return;
 
     const confirmed = window.confirm(
-      "This will permanently delete your account and owned household finance data. This action cannot be undone.",
+      "This will permanently delete your account and this private household's finance data. This action cannot be undone.",
     );
     if (!confirmed) return;
 
@@ -322,15 +322,16 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
               Delete Account
             </h2>
             <p className="mt-1 max-w-3xl text-sm text-gray-600">
-              This permanently deletes your Supabase Auth login and households you created. The
-              service role key stays server-side in a Supabase Edge Function and is never exposed in
-              this browser app.
+              This permanently deletes your Supabase Auth login and the active household only when
+              you are its only active member and owner. Shared households or extra households you
+              created will block deletion. The service role key stays server-side in a Supabase Edge
+              Function and is never exposed in this browser app.
             </p>
           </div>
 
           <div className="rounded-md border border-red-200 bg-white px-3 py-2 text-sm text-red-700">
-            This will permanently delete your account and owned household finance data. This action
-            cannot be undone.
+            This will permanently delete your account and this private household's finance data.
+            This action cannot be undone.
           </div>
 
           <div className="flex flex-wrap gap-3">
