@@ -75,7 +75,7 @@ const pageContent = {
   },
   backup: {
     title: "Backup / Restore",
-    description: "Export, import, or reset the local data saved in this browser.",
+    description: "Export Supabase household data and access legacy localStorage backup tools.",
   },
   "household-settings": {
     title: "Household Settings",

@@ -1,7 +1,114 @@
 import { readAppData, resetAppData, writeAppData } from "../../lib/storage/appStorage.js";
+import { supabase } from "../../lib/supabase/client.js";
 
 const BACKUP_APP_NAME = "Credit Card Tracker";
 const SUPPORTED_SCHEMA_VERSION = 1;
+const SUPABASE_BACKUP_VERSION = 1;
+
+function requireSupabase() {
+  if (!supabase) {
+    throw new Error("Supabase is not configured. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
+  }
+
+  return supabase;
+}
+
+export async function exportSupabaseBackup(householdId, activeHousehold) {
+  if (!householdId) {
+    return {
+      ok: false,
+      message: "Choose an active household before exporting cloud data.",
+    };
+  }
+
+  try {
+    const client = requireSupabase();
+    const [
+      householdResult,
+      creditCardsResult,
+      monthlyBalancesResult,
+      budgetCategoriesResult,
+      transactionsResult,
+      transactionSplitsResult,
+      recurringPaymentsResult,
+      recurringInstancesResult,
+    ] = await Promise.all([
+      client.from("households").select("id,name,created_by,created_at,updated_at").eq("id", householdId).single(),
+      client.from("credit_cards").select("*").eq("household_id", householdId).order("created_at", { ascending: true }),
+      client
+        .from("monthly_card_balances")
+        .select("*")
+        .eq("household_id", householdId)
+        .order("month_key", { ascending: true }),
+      client
+        .from("budget_categories")
+        .select("*")
+        .eq("household_id", householdId)
+        .order("month_key", { ascending: true })
+        .order("created_at", { ascending: true }),
+      client
+        .from("transactions")
+        .select("*")
+        .eq("household_id", householdId)
+        .order("transaction_date", { ascending: true })
+        .order("created_at", { ascending: true }),
+      client
+        .from("transaction_splits")
+        .select("*")
+        .eq("household_id", householdId)
+        .order("created_at", { ascending: true }),
+      client
+        .from("recurring_payments")
+        .select("*")
+        .eq("household_id", householdId)
+        .order("created_at", { ascending: true }),
+      client
+        .from("recurring_payment_instances")
+        .select("*")
+        .eq("household_id", householdId)
+        .order("month_key", { ascending: true }),
+    ]);
+
+    const error = [
+      householdResult,
+      creditCardsResult,
+      monthlyBalancesResult,
+      budgetCategoriesResult,
+      transactionsResult,
+      transactionSplitsResult,
+      recurringPaymentsResult,
+      recurringInstancesResult,
+    ].find((result) => result.error)?.error;
+
+    if (error) throw error;
+
+    const backup = {
+      version: SUPABASE_BACKUP_VERSION,
+      source: "supabase",
+      exportedAt: new Date().toISOString(),
+      household: householdResult.data ?? activeHousehold,
+      creditCards: creditCardsResult.data ?? [],
+      monthlyCardBalances: monthlyBalancesResult.data ?? [],
+      budgetCategories: budgetCategoriesResult.data ?? [],
+      transactions: transactionsResult.data ?? [],
+      transactionSplits: transactionSplitsResult.data ?? [],
+      recurringPayments: recurringPaymentsResult.data ?? [],
+      recurringPaymentInstances: recurringInstancesResult.data ?? [],
+    };
+
+    downloadJson(backup, `finance-tracker-supabase-backup-${getDateStamp()}.json`);
+
+    return {
+      ok: true,
+      message: "Supabase cloud backup exported successfully.",
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      message: error.message || "Could not export Supabase cloud backup.",
+    };
+  }
+}
 
 export function exportBackup() {
   const appData = readAppData();
@@ -14,21 +121,11 @@ export function exportBackup() {
     data: appData,
   };
 
-  const blob = new Blob([JSON.stringify(backup, null, 2)], {
-    type: "application/json",
-  });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `finance-tracker-backup-${getDateStamp()}.json`;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
+  downloadJson(backup, `finance-tracker-legacy-localstorage-backup-${getDateStamp()}.json`);
 
   return {
     ok: true,
-    message: "Backup exported successfully.",
+    message: "Legacy localStorage backup exported successfully.",
   };
 }
 
@@ -312,6 +409,20 @@ function invalid(message) {
     ok: false,
     message,
   };
+}
+
+function downloadJson(data, filename) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], {
+    type: "application/json",
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }
 
 function getDateStamp() {
