@@ -29,6 +29,11 @@ export default function TransactionTable({
     [categories],
   );
 
+  function resetFilters() {
+    setSortMode("date-desc");
+    onFiltersChange({ cardId: "", categoryId: "", store: "" });
+  }
+
   const filteredTransactions = useMemo(() => {
     return transactions
       .filter((transaction) => !filters.cardId || transaction.cardId === filters.cardId)
@@ -104,7 +109,7 @@ export default function TransactionTable({
             type="button"
             variant="secondary"
             className="min-h-9 px-3 py-1.5 text-sm"
-            onClick={() => onFiltersChange({ cardId: "", categoryId: "", store: "" })}
+            onClick={resetFilters}
           >
             <RotateCcw size={16} aria-hidden="true" />
             Reset filters
