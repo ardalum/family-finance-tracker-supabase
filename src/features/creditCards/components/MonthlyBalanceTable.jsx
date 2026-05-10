@@ -14,24 +14,45 @@ import {
 import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
 import { getRowStatus } from "../creditCardStatus.js";
 import { getSortedCards } from "../creditCardSort.js";
-import { getMonthTotal, updateMonthlyBalance } from "../creditCardsService.js";
+import { getMonthTotal } from "../creditCardsService.js";
 
-export default function MonthlyBalanceTable({ cards, monthlyBalances, onDataChange }) {
-  const [selectedMonth, setSelectedMonth] = useState(getCurrentMonthKey());
+export default function MonthlyBalanceTable({
+  cards,
+  monthlyBalances,
+  selectedMonth = getCurrentMonthKey(),
+  loading = false,
+  saving = false,
+  error = "",
+  onMonthChange,
+  onBalanceChange,
+}) {
   const [sortMode, setSortMode] = useState("default");
   const monthBalances = monthlyBalances[selectedMonth] ?? {};
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
+  const monthTotal = getMonthTotal(monthBalances);
+  const unpaidTotal = Object.values(monthBalances ?? {}).reduce(
+    (total, entry) => total + (entry?.paid ? 0 : Number(entry?.balance || 0)),
+    0,
+  );
   const sortedCards = useMemo(
     () => getSortedCards(cards, monthBalances, selectedMonth, sortMode),
     [cards, monthBalances, selectedMonth, sortMode],
   );
 
   function handleBalanceChange(cardId, value) {
-    onDataChange(updateMonthlyBalance(selectedMonth, cardId, { balance: Number(value) || 0 }));
+    const currentEntry = monthBalances[cardId] ?? { balance: 0, paid: false };
+    onBalanceChange(selectedMonth, cardId, {
+      ...currentEntry,
+      balance: Number(value) || 0,
+    });
   }
 
   function handlePaidChange(cardId, paid) {
-    onDataChange(updateMonthlyBalance(selectedMonth, cardId, { paid }));
+    const currentEntry = monthBalances[cardId] ?? { balance: 0, paid: false };
+    onBalanceChange(selectedMonth, cardId, {
+      ...currentEntry,
+      paid,
+    });
   }
 
   return (
@@ -42,15 +63,22 @@ export default function MonthlyBalanceTable({ cards, monthlyBalances, onDataChan
           <p className="mt-1 text-sm text-gray-500">
             {formatMonthLabel(selectedMonth)} total statement balance:{" "}
             <span className="font-semibold text-gray-950">
-              {formatCurrency(getMonthTotal(monthBalances))}
+              {formatCurrency(monthTotal)}
             </span>
           </p>
+          <p className="mt-1 text-sm text-gray-500">
+            Total unpaid balance:{" "}
+            <span className="font-semibold text-red-700">{formatCurrency(unpaidTotal)}</span>
+          </p>
+          {loading ? <p className="mt-2 text-sm text-gray-500">Loading monthly balances...</p> : null}
+          {saving ? <p className="mt-2 text-sm text-gray-500">Saving monthly balance...</p> : null}
+          {error ? <p className="mt-2 text-sm font-medium text-red-700">{error}</p> : null}
         </div>
         <div className="grid gap-3 sm:grid-cols-[160px_180px_auto] sm:items-end">
           <Select
             label="Month"
             value={selectedMonth}
-            onChange={(event) => setSelectedMonth(event.target.value)}
+            onChange={(event) => onMonthChange(event.target.value)}
           >
             {monthOptions.map((month) => (
               <option key={month} value={month}>

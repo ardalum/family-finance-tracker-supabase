@@ -13,6 +13,11 @@ import {
   listCreditCards,
   updateCreditCardInSupabase,
 } from "../features/creditCards/creditCardsSupabaseService.js";
+import {
+  importLocalMonthlyBalances,
+  listAllMonthlyBalances,
+  upsertMonthlyBalance,
+} from "../features/creditCards/monthlyBalancesSupabaseService.js";
 import Dashboard from "../features/dashboard/components/Dashboard.jsx";
 import { useHouseholds } from "../features/households/HouseholdProvider.jsx";
 import HouseholdGate from "../features/households/components/HouseholdGate.jsx";
@@ -20,6 +25,7 @@ import HouseholdSettings from "../features/households/components/HouseholdSettin
 import HouseholdSwitcher from "../features/households/components/HouseholdSwitcher.jsx";
 import RecurringPayments from "../features/recurring/components/RecurringPayments.jsx";
 import SpendingTracker from "../features/spending/components/SpendingTracker.jsx";
+import { getCurrentMonthKey } from "../lib/dates.js";
 import { readAppData } from "../lib/storage/appStorage.js";
 
 const pageContent = {
@@ -74,6 +80,11 @@ function FinanceTrackerApp() {
   const [creditCardsLoading, setCreditCardsLoading] = useState(true);
   const [creditCardsSaving, setCreditCardsSaving] = useState(false);
   const [creditCardsError, setCreditCardsError] = useState("");
+  const [supabaseMonthlyBalances, setSupabaseMonthlyBalances] = useState({});
+  const [selectedBalanceMonth, setSelectedBalanceMonth] = useState(getCurrentMonthKey());
+  const [monthlyBalancesLoading, setMonthlyBalancesLoading] = useState(true);
+  const [monthlyBalancesSaving, setMonthlyBalancesSaving] = useState(false);
+  const [monthlyBalancesError, setMonthlyBalancesError] = useState("");
   const [activeView, setActiveViewState] = useState(() => {
     try {
       const storedView = window.localStorage.getItem(ACTIVE_VIEW_KEY);
@@ -123,6 +134,33 @@ function FinanceTrackerApp() {
   useEffect(() => {
     loadSupabaseCreditCards();
   }, [loadSupabaseCreditCards]);
+
+  const loadSupabaseMonthlyBalances = useCallback(async () => {
+    if (!activeHouseholdId) {
+      setSupabaseMonthlyBalances({});
+      setMonthlyBalancesLoading(false);
+      return {};
+    }
+
+    setMonthlyBalancesLoading(true);
+    setMonthlyBalancesError("");
+
+    try {
+      const balances = await listAllMonthlyBalances(activeHouseholdId, supabaseCreditCards);
+      setSupabaseMonthlyBalances(balances);
+      return balances;
+    } catch (error) {
+      setMonthlyBalancesError(error.message || "Could not load monthly balances.");
+      setSupabaseMonthlyBalances({});
+      return {};
+    } finally {
+      setMonthlyBalancesLoading(false);
+    }
+  }, [activeHouseholdId, supabaseCreditCards]);
+
+  useEffect(() => {
+    loadSupabaseMonthlyBalances();
+  }, [loadSupabaseMonthlyBalances, selectedBalanceMonth]);
 
   async function createSupabaseCreditCard(input) {
     setCreditCardsSaving(true);
@@ -189,6 +227,56 @@ function FinanceTrackerApp() {
     }
   }
 
+  async function saveSupabaseMonthlyBalance(monthKey, cardId, entry) {
+    const card = supabaseCreditCards.find((currentCard) => currentCard.id === cardId);
+    if (!card) return;
+
+    setMonthlyBalancesError("");
+    setSupabaseMonthlyBalances((balances) => ({
+      ...balances,
+      [monthKey]: {
+        ...(balances[monthKey] ?? {}),
+        [cardId]: {
+          balance: Number(entry.balance || 0),
+          paid: Boolean(entry.paid),
+          updatedAt: new Date().toISOString(),
+        },
+      },
+    }));
+
+    setMonthlyBalancesSaving(true);
+
+    try {
+      await upsertMonthlyBalance(activeHouseholdId, monthKey, card, entry);
+    } catch (error) {
+      setMonthlyBalancesError(error.message || "Could not save monthly balance.");
+      await loadSupabaseMonthlyBalances();
+      throw error;
+    } finally {
+      setMonthlyBalancesSaving(false);
+    }
+  }
+
+  async function importLocalBalancesToSupabase() {
+    setMonthlyBalancesSaving(true);
+    setMonthlyBalancesError("");
+
+    try {
+      const importedRows = await importLocalMonthlyBalances(
+        activeHouseholdId,
+        appData.monthlyBalances,
+        supabaseCreditCards,
+      );
+      await loadSupabaseMonthlyBalances();
+      return importedRows;
+    } catch (error) {
+      setMonthlyBalancesError(error.message || "Could not import local monthly balances.");
+      throw error;
+    } finally {
+      setMonthlyBalancesSaving(false);
+    }
+  }
+
   return (
     <AppShell
       activeView={activeView}
@@ -208,14 +296,22 @@ function FinanceTrackerApp() {
         <CreditCardTracker
           creditCards={supabaseCreditCards}
           localCreditCards={appData.creditCards}
-          monthlyBalances={appData.monthlyBalances}
+          monthlyBalances={supabaseMonthlyBalances}
+          localMonthlyBalances={appData.monthlyBalances}
+          selectedBalanceMonth={selectedBalanceMonth}
           loading={creditCardsLoading}
           error={creditCardsError}
           isSaving={creditCardsSaving}
+          monthlyBalancesLoading={monthlyBalancesLoading}
+          monthlyBalancesSaving={monthlyBalancesSaving}
+          monthlyBalancesError={monthlyBalancesError}
           onCreateCard={createSupabaseCreditCard}
           onUpdateCard={updateSupabaseCreditCard}
           onDeleteCard={deleteSupabaseCreditCard}
           onImportLocalCards={importLocalCardsToSupabase}
+          onBalanceMonthChange={setSelectedBalanceMonth}
+          onMonthlyBalanceChange={saveSupabaseMonthlyBalance}
+          onImportLocalMonthlyBalances={importLocalBalancesToSupabase}
           onDataChange={refreshData}
         />
       ) : null}

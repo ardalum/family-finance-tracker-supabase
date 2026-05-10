@@ -23,6 +23,15 @@ export function getRowStatus(card, monthKey, entry) {
     };
   }
 
+  if (daysUntilDue === 0) {
+    return {
+      label: "Due now",
+      rowClass: "bg-red-200 ring-2 ring-inset ring-red-500",
+      badgeClass: "bg-red-800 text-white ring-red-900",
+      balanceClass: balance === 0 ? "text-red-800" : "text-red-950",
+    };
+  }
+
   if (daysUntilDue <= 7) {
     return {
       label: "Due soon",

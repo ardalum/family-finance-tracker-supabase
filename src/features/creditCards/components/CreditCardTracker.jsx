@@ -4,6 +4,7 @@ import CreditCardMigrationPanel from "./CreditCardMigrationPanel.jsx";
 import CreditCardForm from "./CreditCardForm.jsx";
 import CreditCardList from "./CreditCardList.jsx";
 import CreditLimitSummary from "./CreditLimitSummary.jsx";
+import MonthlyBalanceMigrationPanel from "./MonthlyBalanceMigrationPanel.jsx";
 import MonthlyBalanceGraph from "./MonthlyBalanceGraph.jsx";
 import MonthlyBalanceTable from "./MonthlyBalanceTable.jsx";
 
@@ -11,13 +12,21 @@ export default function CreditCardTracker({
   creditCards,
   localCreditCards,
   monthlyBalances,
+  localMonthlyBalances,
+  selectedBalanceMonth,
   loading = false,
   error = "",
   isSaving = false,
+  monthlyBalancesLoading = false,
+  monthlyBalancesSaving = false,
+  monthlyBalancesError = "",
   onCreateCard,
   onUpdateCard,
   onDeleteCard,
   onImportLocalCards,
+  onBalanceMonthChange,
+  onMonthlyBalanceChange,
+  onImportLocalMonthlyBalances,
   onDataChange,
 }) {
   const [editingCard, setEditingCard] = useState(null);
@@ -60,6 +69,14 @@ export default function CreditCardTracker({
         disabled={loading || isSaving}
       />
 
+      <MonthlyBalanceMigrationPanel
+        cards={creditCards}
+        localMonthlyBalances={localMonthlyBalances}
+        supabaseMonthlyBalances={monthlyBalances}
+        onImport={onImportLocalMonthlyBalances}
+        disabled={monthlyBalancesLoading || monthlyBalancesSaving}
+      />
+
       <CreditLimitSummary cards={activeCards} />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_390px]">
@@ -67,7 +84,12 @@ export default function CreditCardTracker({
           <MonthlyBalanceTable
             cards={activeCards}
             monthlyBalances={monthlyBalances}
-            onDataChange={refreshCreditCardData}
+            selectedMonth={selectedBalanceMonth}
+            loading={monthlyBalancesLoading}
+            saving={monthlyBalancesSaving}
+            error={monthlyBalancesError}
+            onMonthChange={onBalanceMonthChange}
+            onBalanceChange={onMonthlyBalanceChange}
           />
           <MonthlyBalanceGraph monthlyBalances={monthlyBalances} />
           <CreditCardList
