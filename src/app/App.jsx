@@ -579,6 +579,18 @@ function FinanceTrackerApp() {
     }
   }
 
+  const dashboardAppData = {
+    ...appData,
+    creditCards: supabaseCreditCards,
+    monthlyBalances: supabaseMonthlyBalances,
+    budgetsByMonth: {
+      ...appData.budgetsByMonth,
+      [selectedSpendingMonth]: spendingCategories,
+      [selectedBudgetMonth]: supabaseBudgets,
+    },
+    transactions: spendingTransactions,
+  };
+
   return (
     <AppShell
       activeView={activeView}
@@ -592,7 +604,7 @@ function FinanceTrackerApp() {
         </>
       }
     >
-      {activeView === "dashboard" ? <Dashboard appData={appData} /> : null}
+      {activeView === "dashboard" ? <Dashboard appData={dashboardAppData} /> : null}
 
       {activeView === "credit-cards" ? (
         <CreditCardTracker

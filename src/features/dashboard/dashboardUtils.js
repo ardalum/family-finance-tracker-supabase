@@ -3,6 +3,7 @@ import { getOwnerCreditLimitTotal } from "../creditCards/creditCardsService.js";
 import {
   getCategoryName,
   getMonthTransactions,
+  getTransactionCategoryRows,
   getTotalSpending,
   UNCATEGORIZED_ID,
   UNCATEGORIZED_NAME,
@@ -106,9 +107,9 @@ function getBudgetRows(budgets, transactions) {
     const spent = transactions.reduce((sum, transaction) => {
       return (
         sum +
-        transaction.splits
-          .filter((split) => split.categoryId === budget.id)
-          .reduce((splitSum, split) => splitSum + Number(split.amount || 0), 0)
+        getTransactionCategoryRows(transaction)
+          .filter((row) => row.categoryId === budget.id)
+          .reduce((rowSum, row) => rowSum + Number(row.amount || 0), 0)
       );
     }, 0);
     const amount = Number(budget.monthlyAmount || 0);
@@ -159,11 +160,11 @@ function getSpendingByCategory(transactions, budgets) {
   const totals = new Map();
 
   transactions.forEach((transaction) => {
-    transaction.splits.forEach((split) => {
-      const name = split.categoryId === UNCATEGORIZED_ID
+    getTransactionCategoryRows(transaction).forEach((row) => {
+      const name = row.categoryId === UNCATEGORIZED_ID
         ? UNCATEGORIZED_NAME
-        : getCategoryName(split.categoryId, budgets);
-      totals.set(name, (totals.get(name) ?? 0) + Number(split.amount || 0));
+        : getCategoryName(row.categoryId, budgets);
+      totals.set(name, (totals.get(name) ?? 0) + Number(row.amount || 0));
     });
   });
 
