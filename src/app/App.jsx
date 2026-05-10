@@ -48,6 +48,8 @@ const pageContent = {
   },
 };
 
+const ACTIVE_VIEW_KEY = "personalFinanceApp:activeView:v1";
+
 export default function App() {
   return (
     <AuthProvider>
@@ -67,8 +69,24 @@ function FinanceTrackerApp() {
   const [creditCardsLoading, setCreditCardsLoading] = useState(true);
   const [creditCardsSaving, setCreditCardsSaving] = useState(false);
   const [creditCardsError, setCreditCardsError] = useState("");
-  const [activeView, setActiveView] = useState("dashboard");
+  const [activeView, setActiveViewState] = useState(() => {
+    try {
+      const storedView = window.localStorage.getItem(ACTIVE_VIEW_KEY);
+      return pageContent[storedView] ? storedView : "dashboard";
+    } catch {
+      return "dashboard";
+    }
+  });
   const currentPage = pageContent[activeView];
+
+  function setActiveView(nextView) {
+    setActiveViewState(nextView);
+    try {
+      window.localStorage.setItem(ACTIVE_VIEW_KEY, nextView);
+    } catch {
+      // Keeping navigation usable matters more than persisting this preference.
+    }
+  }
 
   function refreshData(nextData) {
     setAppData(nextData ?? readAppData());
