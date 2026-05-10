@@ -3,9 +3,11 @@ import { supabase } from "../../lib/supabase/client.js";
 
 const BACKUP_APP_NAME = "Credit Card Tracker";
 const SUPPORTED_SCHEMA_VERSION = 1;
-const SUPABASE_BACKUP_VERSION = 1;
+const SUPABASE_BACKUP_VERSION = 2;
+const SUPPORTED_SUPABASE_BACKUP_VERSIONS = [1, 2];
 const EXPECTED_SUPABASE_SECTIONS = [
   "household",
+  "householdProfiles",
   "creditCards",
   "monthlyCardBalances",
   "budgetCategories",
@@ -544,6 +546,7 @@ export async function previewSupabaseBackupImport(file, householdId) {
 export async function importSupabaseBackupMerge(householdId, backup) {
   const validation = validateSupabaseBackup(backup);
   if (!validation.ok) return validation;
+  const normalizedBackup = validation.backup;
 
   if (!householdId) {
     return {
@@ -558,8 +561,34 @@ export async function importSupabaseBackupMerge(householdId, backup) {
     const maps = createImportMaps();
     const counts = createImportCounts();
 
+    const profileRows = [...context.householdProfiles];
+    for (const profile of normalizedBackup.householdProfiles) {
+      const existing = findHouseholdProfileMatch(profile, profileRows);
+      if (existing) {
+        maps.householdProfiles.set(profile.id, existing.id);
+        counts.householdProfiles.skipped += 1;
+        continue;
+      }
+
+      const { data, error } = await client
+        .from("household_profiles")
+        .insert({
+          household_id: householdId,
+          display_name: profile.display_name,
+          role_label: profile.role_label ?? null,
+          is_active: profile.is_active ?? true,
+        })
+        .select("*")
+        .single();
+
+      if (error) throw error;
+      profileRows.push(data);
+      maps.householdProfiles.set(profile.id, data.id);
+      counts.householdProfiles.imported += 1;
+    }
+
     const cardRows = [...context.creditCards];
-    for (const card of backup.creditCards) {
+    for (const card of normalizedBackup.creditCards) {
       const existing = findCreditCardMatch(card, cardRows);
       if (existing) {
         maps.creditCards.set(card.id, existing.id);
@@ -575,6 +604,7 @@ export async function importSupabaseBackupMerge(householdId, backup) {
           url: card.url ?? "",
           network: card.network ?? "",
           owner_name: card.owner_name ?? "",
+          owner_profile_id: getMappedId(maps.householdProfiles, card.owner_profile_id),
           last_four: card.last_four ?? "",
           credit_limit: Number(card.credit_limit || 0),
           statement_closing_day: Number(card.statement_closing_day || 1),
@@ -592,7 +622,7 @@ export async function importSupabaseBackupMerge(householdId, backup) {
     }
 
     const categoryRows = [...context.budgetCategories];
-    for (const category of backup.budgetCategories) {
+    for (const category of normalizedBackup.budgetCategories) {
       const existing = findBudgetCategoryMatch(category, categoryRows);
       if (existing) {
         maps.budgetCategories.set(category.id, existing.id);
@@ -620,7 +650,7 @@ export async function importSupabaseBackupMerge(householdId, backup) {
     }
 
     const recurringRows = [...context.recurringPayments];
-    for (const recurringPayment of backup.recurringPayments) {
+    for (const recurringPayment of normalizedBackup.recurringPayments) {
       const existing = findRecurringPaymentMatch(recurringPayment, recurringRows);
       if (existing) {
         maps.recurringPayments.set(recurringPayment.id, existing.id);
@@ -655,7 +685,7 @@ export async function importSupabaseBackupMerge(householdId, backup) {
     }
 
     const transactionRows = [...context.transactions];
-    for (const transaction of backup.transactions) {
+    for (const transaction of normalizedBackup.transactions) {
       const mappedTransaction = mapTransactionReferences(transaction, maps);
       const existing = findTransactionMatch(mappedTransaction, transactionRows);
       if (existing) {
@@ -690,7 +720,7 @@ export async function importSupabaseBackupMerge(householdId, backup) {
     }
 
     const balanceRows = [...context.monthlyCardBalances];
-    for (const balance of backup.monthlyCardBalances) {
+    for (const balance of normalizedBackup.monthlyCardBalances) {
       const mappedCardId = getMappedId(maps.creditCards, balance.credit_card_id);
       if (!mappedCardId) {
         counts.monthlyCardBalances.skipped += 1;
@@ -723,7 +753,7 @@ export async function importSupabaseBackupMerge(householdId, backup) {
     }
 
     const splitRows = [...context.transactionSplits];
-    for (const split of backup.transactionSplits) {
+    for (const split of normalizedBackup.transactionSplits) {
       const mappedTransactionId = getMappedId(maps.transactions, split.transaction_id);
       if (!mappedTransactionId) {
         counts.transactionSplits.skipped += 1;
@@ -763,7 +793,7 @@ export async function importSupabaseBackupMerge(householdId, backup) {
     }
 
     const instanceRows = [...context.recurringPaymentInstances];
-    for (const instance of backup.recurringPaymentInstances) {
+    for (const instance of normalizedBackup.recurringPaymentInstances) {
       const mappedRecurringPaymentId = getMappedId(maps.recurringPayments, instance.recurring_payment_id);
       if (!mappedRecurringPaymentId) {
         counts.recurringPaymentInstances.skipped += 1;
@@ -874,73 +904,87 @@ function validateSupabaseBackup(backup) {
     return invalid("This is not a Supabase backup file.");
   }
 
-  if (backup.version !== SUPABASE_BACKUP_VERSION) {
+  if (!SUPPORTED_SUPABASE_BACKUP_VERSIONS.includes(backup.version)) {
     return invalid("Supabase backup version is not supported.");
   }
 
-  const missingSection = EXPECTED_SUPABASE_SECTIONS.find((section) => !(section in backup));
+  const normalizedBackup = {
+    ...backup,
+    householdProfiles: Array.isArray(backup.householdProfiles) ? backup.householdProfiles : [],
+  };
+
+  const missingSection = EXPECTED_SUPABASE_SECTIONS.find((section) => !(section in normalizedBackup));
   if (missingSection) {
     return invalid(`Supabase backup is missing ${missingSection}.`);
   }
 
   const invalidArraySection = EXPECTED_SUPABASE_SECTIONS
     .filter((section) => section !== "household")
-    .find((section) => !Array.isArray(backup[section]));
+    .find((section) => !Array.isArray(normalizedBackup[section]));
   if (invalidArraySection) {
     return invalid(`Supabase backup ${invalidArraySection} must be an array.`);
   }
 
-  if (!backup.household || typeof backup.household !== "object") {
+  if (!normalizedBackup.household || typeof normalizedBackup.household !== "object") {
     return invalid("Supabase backup household must be an object.");
   }
 
-  if (!backup.exportedAt || Number.isNaN(Date.parse(backup.exportedAt))) {
+  if (!normalizedBackup.exportedAt || Number.isNaN(Date.parse(normalizedBackup.exportedAt))) {
     return invalid("Supabase backup is missing a valid exportedAt timestamp.");
   }
 
-  if (containsForbiddenBackupKeys(backup)) {
+  if (containsForbiddenBackupKeys(normalizedBackup)) {
     return invalid("Supabase backup contains fields that look like secrets or unsupported sensitive data.");
   }
 
-  if (!backup.creditCards.every(isValidSupabaseCreditCard)) {
+  if (!normalizedBackup.householdProfiles.every(isValidSupabaseHouseholdProfile)) {
+    return invalid("Supabase backup contains an invalid household profile record.");
+  }
+
+  if (!normalizedBackup.creditCards.every(isValidSupabaseCreditCard)) {
     return invalid("Supabase backup contains an invalid credit card record.");
   }
 
-  if (!backup.monthlyCardBalances.every(isValidSupabaseMonthlyBalance)) {
+  if (!normalizedBackup.monthlyCardBalances.every(isValidSupabaseMonthlyBalance)) {
     return invalid("Supabase backup contains an invalid monthly balance record.");
   }
 
-  if (!backup.budgetCategories.every(isValidSupabaseBudgetCategory)) {
+  if (!normalizedBackup.budgetCategories.every(isValidSupabaseBudgetCategory)) {
     return invalid("Supabase backup contains an invalid budget category record.");
   }
 
-  if (!backup.transactions.every(isValidSupabaseTransaction)) {
+  if (!normalizedBackup.transactions.every(isValidSupabaseTransaction)) {
     return invalid("Supabase backup contains an invalid transaction record.");
   }
 
-  if (!backup.transactionSplits.every(isValidSupabaseTransactionSplit)) {
+  if (!normalizedBackup.transactionSplits.every(isValidSupabaseTransactionSplit)) {
     return invalid("Supabase backup contains an invalid transaction split record.");
   }
 
-  if (!backup.recurringPayments.every(isValidSupabaseRecurringPayment)) {
+  if (!normalizedBackup.recurringPayments.every(isValidSupabaseRecurringPayment)) {
     return invalid("Supabase backup contains an invalid recurring payment record.");
   }
 
-  if (!backup.recurringPaymentInstances.every(isValidSupabaseRecurringInstance)) {
+  if (!normalizedBackup.recurringPaymentInstances.every(isValidSupabaseRecurringInstance)) {
     return invalid("Supabase backup contains an invalid recurring payment instance record.");
   }
 
-  const cardIds = new Set(backup.creditCards.map((card) => card.id));
-  const categoryIds = new Set(backup.budgetCategories.map((category) => category.id));
-  const transactionIds = new Set(backup.transactions.map((transaction) => transaction.id));
-  const recurringIds = new Set(backup.recurringPayments.map((payment) => payment.id));
+  const profileIds = new Set(normalizedBackup.householdProfiles.map((profile) => profile.id));
+  const cardIds = new Set(normalizedBackup.creditCards.map((card) => card.id));
+  const categoryIds = new Set(normalizedBackup.budgetCategories.map((category) => category.id));
+  const transactionIds = new Set(normalizedBackup.transactions.map((transaction) => transaction.id));
+  const recurringIds = new Set(normalizedBackup.recurringPayments.map((payment) => payment.id));
 
-  if (!backup.monthlyCardBalances.every((balance) => cardIds.has(balance.credit_card_id))) {
+  if (!normalizedBackup.creditCards.every((card) => nullableSetHas(profileIds, card.owner_profile_id))) {
+    return invalid("Supabase backup has credit cards that reference missing household profiles.");
+  }
+
+  if (!normalizedBackup.monthlyCardBalances.every((balance) => cardIds.has(balance.credit_card_id))) {
     return invalid("Supabase backup has monthly balances that reference missing credit cards.");
   }
 
   if (
-    !backup.transactions.every(
+    !normalizedBackup.transactions.every(
       (transaction) =>
         nullableSetHas(cardIds, transaction.credit_card_id) &&
         nullableSetHas(categoryIds, transaction.category_id) &&
@@ -951,7 +995,7 @@ function validateSupabaseBackup(backup) {
   }
 
   if (
-    !backup.transactionSplits.every(
+    !normalizedBackup.transactionSplits.every(
       (split) =>
         transactionIds.has(split.transaction_id) &&
         nullableSetHas(categoryIds, split.category_id),
@@ -961,7 +1005,7 @@ function validateSupabaseBackup(backup) {
   }
 
   if (
-    !backup.recurringPayments.every(
+    !normalizedBackup.recurringPayments.every(
       (payment) =>
         nullableSetHas(cardIds, payment.credit_card_id) &&
         nullableSetHas(categoryIds, payment.category_id),
@@ -971,7 +1015,7 @@ function validateSupabaseBackup(backup) {
   }
 
   if (
-    !backup.recurringPaymentInstances.every(
+    !normalizedBackup.recurringPaymentInstances.every(
       (instance) =>
         recurringIds.has(instance.recurring_payment_id) &&
         nullableSetHas(transactionIds, instance.transaction_id),
@@ -983,13 +1027,14 @@ function validateSupabaseBackup(backup) {
   return {
     ok: true,
     message: "Supabase backup is valid.",
-    backup,
+    backup: normalizedBackup,
   };
 }
 
 async function loadSupabaseImportContext(householdId) {
   const client = requireSupabase();
   const [
+    householdProfilesResult,
     creditCardsResult,
     monthlyBalancesResult,
     budgetCategoriesResult,
@@ -998,6 +1043,7 @@ async function loadSupabaseImportContext(householdId) {
     recurringPaymentsResult,
     recurringInstancesResult,
   ] = await Promise.all([
+    client.from("household_profiles").select("*").eq("household_id", householdId),
     client.from("credit_cards").select("*").eq("household_id", householdId),
     client.from("monthly_card_balances").select("*").eq("household_id", householdId),
     client.from("budget_categories").select("*").eq("household_id", householdId),
@@ -1008,6 +1054,7 @@ async function loadSupabaseImportContext(householdId) {
   ]);
 
   const error = [
+    householdProfilesResult,
     creditCardsResult,
     monthlyBalancesResult,
     budgetCategoriesResult,
@@ -1020,6 +1067,7 @@ async function loadSupabaseImportContext(householdId) {
   if (error) throw error;
 
   return {
+    householdProfiles: householdProfilesResult.data ?? [],
     creditCards: creditCardsResult.data ?? [],
     monthlyCardBalances: monthlyBalancesResult.data ?? [],
     budgetCategories: budgetCategoriesResult.data ?? [],
@@ -1033,10 +1081,24 @@ async function loadSupabaseImportContext(householdId) {
 function buildSupabaseImportPreview(backup, context) {
   const maps = createImportMaps();
   const counts = createImportCounts();
+  const profileRows = [...context.householdProfiles];
   const cardRows = [...context.creditCards];
   const categoryRows = [...context.budgetCategories];
   const recurringRows = [...context.recurringPayments];
   const transactionRows = [...context.transactions];
+
+  backup.householdProfiles.forEach((profile) => {
+    const existing = findHouseholdProfileMatch(profile, profileRows);
+    if (existing) {
+      maps.householdProfiles.set(profile.id, existing.id);
+      counts.householdProfiles.skipped += 1;
+    } else {
+      const previewId = `new:${profile.id}`;
+      maps.householdProfiles.set(profile.id, previewId);
+      profileRows.push({ ...profile, id: previewId });
+      counts.householdProfiles.imported += 1;
+    }
+  });
 
   backup.creditCards.forEach((card) => {
     const existing = findCreditCardMatch(card, cardRows);
@@ -1154,6 +1216,7 @@ function buildSupabaseImportPreview(backup, context) {
 
 function createImportMaps() {
   return {
+    householdProfiles: new Map(),
     creditCards: new Map(),
     budgetCategories: new Map(),
     transactions: new Map(),
@@ -1163,6 +1226,7 @@ function createImportMaps() {
 
 function createImportCounts() {
   return {
+    householdProfiles: { imported: 0, skipped: 0 },
     creditCards: { imported: 0, skipped: 0 },
     monthlyCardBalances: { imported: 0, skipped: 0 },
     budgetCategories: { imported: 0, skipped: 0 },
@@ -1171,6 +1235,11 @@ function createImportCounts() {
     recurringPayments: { imported: 0, skipped: 0 },
     recurringPaymentInstances: { imported: 0, skipped: 0 },
   };
+}
+
+function findHouseholdProfileMatch(profile, rows) {
+  const target = normalizeText(profile.display_name);
+  return rows.find((row) => normalizeText(row.display_name) === target);
 }
 
 function findCreditCardMatch(card, rows) {
@@ -1321,6 +1390,20 @@ function isNullableUuidLike(value) {
   return value === null || value === undefined || value === "" || isValidUuidLike(value);
 }
 
+function isValidSupabaseHouseholdProfile(profile) {
+  return (
+    profile &&
+    typeof profile === "object" &&
+    isValidUuidLike(profile.id) &&
+    typeof profile.display_name === "string" &&
+    profile.display_name.trim().length > 0 &&
+    (profile.role_label === null ||
+      profile.role_label === undefined ||
+      typeof profile.role_label === "string") &&
+    typeof profile.is_active === "boolean"
+  );
+}
+
 function isValidSupabaseCreditCard(card) {
   return (
     card &&
@@ -1330,6 +1413,7 @@ function isValidSupabaseCreditCard(card) {
     typeof card.url === "string" &&
     typeof card.network === "string" &&
     typeof card.owner_name === "string" &&
+    isNullableUuidLike(card.owner_profile_id) &&
     typeof card.last_four === "string" &&
     isNonNegativeNumber(card.credit_limit) &&
     isValidDay(card.statement_closing_day) &&

@@ -17,6 +17,7 @@ import {
 } from "../backupService.js";
 
 const summaryLabels = {
+  householdProfiles: "Household profiles",
   creditCards: "Credit cards",
   monthlyCardBalances: "Monthly balances",
   budgetCategories: "Budget categories",
