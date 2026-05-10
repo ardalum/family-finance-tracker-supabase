@@ -25,7 +25,9 @@ export default function AppShell({
                 <p className="text-sm text-gray-500">Local-first personal finance tools</p>
               </div>
             </div>
-            {accountSlot}
+            {accountSlot ? (
+              <div className="flex flex-wrap items-center justify-end gap-3">{accountSlot}</div>
+            ) : null}
           </div>
           <Navigation activeView={activeView} onChange={onViewChange} />
         </div>

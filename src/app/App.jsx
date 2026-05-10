@@ -7,6 +7,8 @@ import BackupRestore from "../features/backup/components/BackupRestore.jsx";
 import BudgetTracker from "../features/budgets/components/BudgetTracker.jsx";
 import CreditCardTracker from "../features/creditCards/components/CreditCardTracker.jsx";
 import Dashboard from "../features/dashboard/components/Dashboard.jsx";
+import HouseholdGate from "../features/households/components/HouseholdGate.jsx";
+import HouseholdSwitcher from "../features/households/components/HouseholdSwitcher.jsx";
 import RecurringPayments from "../features/recurring/components/RecurringPayments.jsx";
 import SpendingTracker from "../features/spending/components/SpendingTracker.jsx";
 import { readAppData } from "../lib/storage/appStorage.js";
@@ -42,7 +44,9 @@ export default function App() {
   return (
     <AuthProvider>
       <AuthGate>
-        <FinanceTrackerApp />
+        <HouseholdGate>
+          <FinanceTrackerApp />
+        </HouseholdGate>
       </AuthGate>
     </AuthProvider>
   );
@@ -63,7 +67,12 @@ function FinanceTrackerApp() {
       onViewChange={setActiveView}
       pageTitle={currentPage.title}
       pageDescription={currentPage.description}
-      accountSlot={<AccountMenu />}
+      accountSlot={
+        <>
+          <HouseholdSwitcher />
+          <AccountMenu />
+        </>
+      }
     >
       {activeView === "dashboard" ? <Dashboard appData={appData} /> : null}
 
