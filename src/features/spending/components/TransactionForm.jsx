@@ -3,7 +3,7 @@ import { Plus, Trash2 } from "lucide-react";
 import Button from "../../../components/ui/Button.jsx";
 import Input from "../../../components/ui/Input.jsx";
 import Select from "../../../components/ui/Select.jsx";
-import { addTransaction, getSplitTotal, UNCATEGORIZED_ID, updateTransaction } from "../spendingService.js";
+import { getSplitTotal, UNCATEGORIZED_ID } from "../spendingService.js";
 
 function todayDate() {
   return new Date().toISOString().slice(0, 10);
@@ -19,10 +19,12 @@ function defaultDateForMonth(monthKey) {
 const emptyForm = {
   date: todayDate(),
   merchant: "",
-  paymentMethod: "Credit Card",
+  paymentMethod: "",
   cardId: "",
+  categoryId: UNCATEGORIZED_ID,
   amount: "",
   notes: "",
+  splitMode: false,
   source: "manual",
   recurringPaymentId: null,
   recurringMonth: null,
@@ -36,6 +38,7 @@ export default function TransactionForm({
   editingTransaction,
   onCancel,
   onSaved,
+  isSaving = false,
 }) {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
@@ -51,10 +54,12 @@ export default function TransactionForm({
         ? {
             date: editingTransaction.date,
             merchant: editingTransaction.merchant,
-            paymentMethod: editingTransaction.paymentMethod || "Credit Card",
+            paymentMethod: editingTransaction.paymentMethod || "",
             cardId: editingTransaction.cardId,
+            categoryId: editingTransaction.categoryId || UNCATEGORIZED_ID,
             amount: String(editingTransaction.amount),
             notes: editingTransaction.notes ?? "",
+            splitMode: Boolean(editingTransaction.splitMode || editingTransaction.splits?.length),
             source: editingTransaction.source || "manual",
             recurringPaymentId: editingTransaction.recurringPaymentId || null,
             recurringMonth: editingTransaction.recurringMonth || null,
@@ -97,6 +102,17 @@ export default function TransactionForm({
     }));
   }
 
+  function toggleSplitMode(checked) {
+    setForm((current) => ({
+      ...current,
+      splitMode: checked,
+      splits:
+        checked && current.splits.length === 0
+          ? [{ id: crypto.randomUUID(), categoryId: current.categoryId, amount: current.amount }]
+          : current.splits,
+    }));
+  }
+
   function removeSplit(splitId) {
     setForm((current) => ({
       ...current,
@@ -104,7 +120,7 @@ export default function TransactionForm({
     }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     const validationError = validateForm(form, cards);
     if (validationError) {
@@ -112,11 +128,12 @@ export default function TransactionForm({
       return;
     }
 
-    const nextData = editingTransaction
-      ? updateTransaction(editingTransaction.id, form)
-      : addTransaction(form);
-    onSaved(nextData);
-    setForm(emptyForm);
+    try {
+      await onSaved(form, editingTransaction);
+      setForm(emptyForm);
+    } catch (currentError) {
+      setError(currentError.message || "Could not save transaction.");
+    }
   }
 
   return (
@@ -125,9 +142,7 @@ export default function TransactionForm({
         <h3 className="text-base font-semibold text-gray-950">
           {editingTransaction ? "Edit transaction" : "Add transaction"}
         </h3>
-        <p className="mt-1 text-sm text-gray-500">
-          Split amounts must match the transaction total.
-        </p>
+        <p className="mt-1 text-sm text-gray-500">Use category split only when needed.</p>
       </div>
 
       {categories.length === 0 ? (
@@ -149,31 +164,35 @@ export default function TransactionForm({
         </div>
       ) : null}
 
-      <Input
-        label="Date"
-        type="date"
-        value={form.date}
-        onChange={(event) => updateField("date", event.target.value)}
-        required
-      />
-      <Input
-        label="Store or merchant"
-        value={form.merchant}
-        onChange={(event) => updateField("merchant", event.target.value)}
-        required
-      />
-      <Select
-        label="Payment method"
-        value={form.paymentMethod}
-        onChange={(event) => updateField("paymentMethod", event.target.value)}
-        required
-      >
-        <option>Credit Card</option>
-        <option>Checking Account</option>
-        <option>Savings Account</option>
-        <option>Cash</option>
-        <option>Other</option>
-      </Select>
+      <div className="grid gap-4">
+        <Input
+          label="Date"
+          type="date"
+          value={form.date}
+          onChange={(event) => updateField("date", event.target.value)}
+          required
+        />
+        <Input
+          label="Store or merchant"
+          value={form.merchant}
+          onChange={(event) => updateField("merchant", event.target.value)}
+          required
+        />
+        <Select
+          label="Payment method"
+          value={form.paymentMethod}
+          onChange={(event) => updateField("paymentMethod", event.target.value)}
+          required
+        >
+          <option value="" disabled>
+            Select payment method
+          </option>
+          <option>Credit Card</option>
+          <option>Checking Account</option>
+          <option>Savings Account</option>
+          <option>Cash</option>
+          <option>Other</option>
+        </Select>
       {form.paymentMethod === "Credit Card" ? (
         <Select
           label="Card used"
@@ -191,46 +210,73 @@ export default function TransactionForm({
           ))}
         </Select>
       ) : null}
-      <Input
-        label="Amount"
-        type="number"
-        min="0"
-        step="0.01"
-        value={form.amount}
-        onChange={(event) => updateField("amount", event.target.value)}
-        required
-      />
+        <Input
+          label="Amount"
+          type="number"
+          min="0"
+          step="0.01"
+          value={form.amount}
+          onChange={(event) => updateField("amount", event.target.value)}
+          required
+        />
+        <Select
+          label="Category"
+          value={form.categoryId}
+          onChange={(event) => updateField("categoryId", event.target.value)}
+        >
+          {categoryOptions.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+        </Select>
+      </div>
 
-      <div className="grid gap-3 rounded-md border border-gray-200 bg-gray-50 p-3">
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-sm font-semibold text-gray-950">Category split</p>
-          <Button type="button" variant="secondary" className="min-h-9 px-3 py-1" onClick={addSplit}>
-            <Plus size={15} aria-hidden="true" />
-            Add split
-          </Button>
-        </div>
-        {form.splits.map((split) => (
-          <div key={split.id} className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_120px_auto]">
-            <Select
-              label="Category"
-              value={split.categoryId}
-              onChange={(event) => updateSplit(split.id, "categoryId", event.target.value)}
-            >
-              {categoryOptions.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </Select>
-            <Input
-              label="Amount"
-              type="number"
-              min="0"
-              step="0.01"
-              value={split.amount}
-              onChange={(event) => updateSplit(split.id, "amount", event.target.value)}
-            />
-            <div className="flex items-end">
+      <label className="inline-flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700">
+        <input
+          className="h-4 w-4 rounded border-gray-300 text-gray-950 focus:ring-gray-950"
+          type="checkbox"
+          checked={form.splitMode}
+          onChange={(event) => toggleSplitMode(event.target.checked)}
+        />
+        Use category split
+      </label>
+
+      {form.splitMode ? (
+        <div className="grid gap-3 rounded-md border border-gray-200 bg-gray-50 p-3">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold text-gray-950">Category split</p>
+              <p className="mt-0.5 text-xs text-gray-500">
+                Split amounts must match the transaction total.
+              </p>
+            </div>
+            <Button type="button" variant="secondary" className="min-h-9 px-3 py-1" onClick={addSplit}>
+              <Plus size={15} aria-hidden="true" />
+              Add split
+            </Button>
+          </div>
+          {form.splits.map((split) => (
+            <div key={split.id} className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_120px_40px] sm:items-end">
+              <Select
+                label="Category"
+                value={split.categoryId}
+                onChange={(event) => updateSplit(split.id, "categoryId", event.target.value)}
+              >
+                {categoryOptions.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </Select>
+              <Input
+                label="Amount"
+                type="number"
+                min="0"
+                step="0.01"
+                value={split.amount}
+                onChange={(event) => updateSplit(split.id, "amount", event.target.value)}
+              />
               <Button
                 type="button"
                 variant="danger"
@@ -242,12 +288,12 @@ export default function TransactionForm({
                 <Trash2 size={16} aria-hidden="true" />
               </Button>
             </div>
-          </div>
-        ))}
-        <p className="text-xs text-gray-500">
-          Split total: ${getSplitTotal(form.splits).toFixed(2)}
-        </p>
-      </div>
+          ))}
+          <p className="text-xs text-gray-500">
+            Split total: ${getSplitTotal(form.splits).toFixed(2)}
+          </p>
+        </div>
+      ) : null}
 
       <label className="grid min-w-0 gap-1.5 text-sm font-medium text-gray-700">
         Notes
@@ -260,9 +306,11 @@ export default function TransactionForm({
       </label>
 
       <div className="flex flex-wrap gap-3">
-        <Button type="submit">{editingTransaction ? "Save transaction" : "Add transaction"}</Button>
+        <Button type="submit" disabled={isSaving}>
+          {isSaving ? "Saving..." : editingTransaction ? "Save transaction" : "Add transaction"}
+        </Button>
         {editingTransaction ? (
-          <Button type="button" variant="secondary" onClick={onCancel}>
+          <Button type="button" variant="secondary" onClick={onCancel} disabled={isSaving}>
             Cancel
           </Button>
         ) : null}
@@ -274,9 +322,12 @@ export default function TransactionForm({
 function validateForm(form, cards) {
   if (!form.date) return "Date is required.";
   if (!form.merchant.trim()) return "Store or merchant is required.";
+  if (!form.paymentMethod) return "Payment method is required.";
   if (form.paymentMethod === "Credit Card" && !form.cardId) return "Card used is required.";
   if (form.paymentMethod === "Credit Card" && !cards.some((card) => card.id === form.cardId)) return "Select a valid card.";
   if (Number(form.amount) <= 0) return "Amount must be greater than zero.";
+  if (!form.splitMode && !form.categoryId) return "Category is required.";
+  if (!form.splitMode) return "";
   if (form.splits.length === 0) return "At least one category split is required.";
   if (form.splits.some((split) => Number(split.amount) < 0)) {
     return "Split amounts cannot be negative.";

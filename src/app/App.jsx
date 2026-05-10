@@ -33,6 +33,13 @@ import HouseholdSettings from "../features/households/components/HouseholdSettin
 import HouseholdSwitcher from "../features/households/components/HouseholdSwitcher.jsx";
 import RecurringPayments from "../features/recurring/components/RecurringPayments.jsx";
 import SpendingTracker from "../features/spending/components/SpendingTracker.jsx";
+import {
+  addTransactionToSupabase,
+  deleteTransactionFromSupabase,
+  importLocalTransactions,
+  listTransactions,
+  updateTransactionInSupabase,
+} from "../features/spending/spendingSupabaseService.js";
 import { getCurrentMonthKey } from "../lib/dates.js";
 import { readAppData } from "../lib/storage/appStorage.js";
 
@@ -98,6 +105,14 @@ function FinanceTrackerApp() {
   const [budgetsLoading, setBudgetsLoading] = useState(true);
   const [budgetsSaving, setBudgetsSaving] = useState(false);
   const [budgetsError, setBudgetsError] = useState("");
+  const [spendingTransactions, setSpendingTransactions] = useState([]);
+  const [spendingCategories, setSpendingCategories] = useState([]);
+  const [selectedSpendingMonth, setSelectedSpendingMonth] = useState(getCurrentMonthKey());
+  const [spendingLoading, setSpendingLoading] = useState(true);
+  const [spendingSaving, setSpendingSaving] = useState(false);
+  const [spendingError, setSpendingError] = useState("");
+  const [spendingCategoriesLoading, setSpendingCategoriesLoading] = useState(true);
+  const [spendingCategoriesError, setSpendingCategoriesError] = useState("");
   const [activeView, setActiveViewState] = useState(() => {
     try {
       const storedView = window.localStorage.getItem(ACTIVE_VIEW_KEY);
@@ -201,6 +216,65 @@ function FinanceTrackerApp() {
   useEffect(() => {
     loadSupabaseBudgets();
   }, [loadSupabaseBudgets]);
+
+  const loadSpendingCategories = useCallback(async () => {
+    if (!activeHouseholdId) {
+      setSpendingCategories([]);
+      setSpendingCategoriesLoading(false);
+      return [];
+    }
+
+    setSpendingCategoriesLoading(true);
+    setSpendingCategoriesError("");
+
+    try {
+      const categories = await listBudgetCategories(activeHouseholdId, selectedSpendingMonth);
+      setSpendingCategories(categories);
+      return categories;
+    } catch (error) {
+      setSpendingCategoriesError(error.message || "Could not load spending categories.");
+      setSpendingCategories([]);
+      return [];
+    } finally {
+      setSpendingCategoriesLoading(false);
+    }
+  }, [activeHouseholdId, selectedSpendingMonth]);
+
+  useEffect(() => {
+    loadSpendingCategories();
+  }, [loadSpendingCategories]);
+
+  const loadSpendingTransactions = useCallback(async () => {
+    if (!activeHouseholdId) {
+      setSpendingTransactions([]);
+      setSpendingLoading(false);
+      return [];
+    }
+
+    setSpendingLoading(true);
+    setSpendingError("");
+
+    try {
+      const transactions = await listTransactions(
+        activeHouseholdId,
+        selectedSpendingMonth,
+        supabaseCreditCards,
+        spendingCategories,
+      );
+      setSpendingTransactions(transactions);
+      return transactions;
+    } catch (error) {
+      setSpendingError(error.message || "Could not load spending transactions.");
+      setSpendingTransactions([]);
+      return [];
+    } finally {
+      setSpendingLoading(false);
+    }
+  }, [activeHouseholdId, selectedSpendingMonth, spendingCategories, supabaseCreditCards]);
+
+  useEffect(() => {
+    loadSpendingTransactions();
+  }, [loadSpendingTransactions]);
 
   async function createSupabaseCreditCard(input) {
     setCreditCardsSaving(true);
@@ -427,6 +501,84 @@ function FinanceTrackerApp() {
     }
   }
 
+  async function createSupabaseTransaction(input) {
+    setSpendingSaving(true);
+    setSpendingError("");
+
+    try {
+      await addTransactionToSupabase(
+        activeHouseholdId,
+        input,
+        supabaseCreditCards,
+        spendingCategories,
+      );
+      await loadSpendingTransactions();
+    } catch (error) {
+      setSpendingError(error.message || "Could not add transaction.");
+      throw error;
+    } finally {
+      setSpendingSaving(false);
+    }
+  }
+
+  async function updateSupabaseTransaction(transactionId, input) {
+    setSpendingSaving(true);
+    setSpendingError("");
+
+    try {
+      await updateTransactionInSupabase(
+        transactionId,
+        input,
+        supabaseCreditCards,
+        spendingCategories,
+      );
+      await loadSpendingTransactions();
+    } catch (error) {
+      setSpendingError(error.message || "Could not update transaction.");
+      throw error;
+    } finally {
+      setSpendingSaving(false);
+    }
+  }
+
+  async function deleteSupabaseTransaction(transactionId) {
+    setSpendingSaving(true);
+    setSpendingError("");
+
+    try {
+      await deleteTransactionFromSupabase(transactionId);
+      setSpendingTransactions((transactions) =>
+        transactions.filter((transaction) => (transaction.supabaseId ?? transaction.id) !== transactionId),
+      );
+    } catch (error) {
+      setSpendingError(error.message || "Could not delete transaction.");
+      throw error;
+    } finally {
+      setSpendingSaving(false);
+    }
+  }
+
+  async function importLocalSpendingToSupabase(localMonthTransactions) {
+    setSpendingSaving(true);
+    setSpendingError("");
+
+    try {
+      const importedIds = await importLocalTransactions(
+        activeHouseholdId,
+        localMonthTransactions,
+        supabaseCreditCards,
+        spendingCategories,
+      );
+      await loadSpendingTransactions();
+      return importedIds;
+    } catch (error) {
+      setSpendingError(error.message || "Could not import local spending transactions.");
+      throw error;
+    } finally {
+      setSpendingSaving(false);
+    }
+  }
+
   return (
     <AppShell
       activeView={activeView}
@@ -485,10 +637,21 @@ function FinanceTrackerApp() {
 
       {activeView === "spending" ? (
         <SpendingTracker
-          creditCards={appData.creditCards}
-          budgetsByMonth={appData.budgetsByMonth}
-          transactions={appData.transactions}
-          onDataChange={refreshData}
+          creditCards={supabaseCreditCards}
+          categories={spendingCategories}
+          transactions={spendingTransactions}
+          localTransactions={appData.transactions}
+          selectedMonth={selectedSpendingMonth}
+          loading={spendingLoading}
+          error={spendingError}
+          isSaving={spendingSaving}
+          categoriesLoading={spendingCategoriesLoading}
+          categoriesError={spendingCategoriesError}
+          onMonthChange={setSelectedSpendingMonth}
+          onCreateTransaction={createSupabaseTransaction}
+          onUpdateTransaction={updateSupabaseTransaction}
+          onDeleteTransaction={deleteSupabaseTransaction}
+          onImportLocalTransactions={importLocalSpendingToSupabase}
         />
       ) : null}
 

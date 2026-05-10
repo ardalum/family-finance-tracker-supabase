@@ -62,6 +62,14 @@ begin
     ) then
       raise exception 'transactions.recurring_payment_id must belong to the same household.';
     end if;
+
+    if new.category_id is not null and not exists (
+      select 1 from public.budget_categories bc
+      where bc.id = new.category_id
+        and bc.household_id = new.household_id
+    ) then
+      raise exception 'transactions.category_id must belong to the same household.';
+    end if;
   end if;
 
   if tg_table_name = 'transaction_splits' then
@@ -227,11 +235,13 @@ create table if not exists public.transactions (
   merchant text not null,
   payment_method text not null default 'Credit Card',
   credit_card_id uuid references public.credit_cards(id) on delete set null,
+  category_id uuid references public.budget_categories(id) on delete set null,
   amount numeric(12, 2) not null default 0 check (amount >= 0),
   notes text not null default '',
   source text not null default 'manual' check (source in ('manual', 'recurring', 'imported')),
   recurring_payment_id uuid references public.recurring_payments(id) on delete set null,
   recurring_month text check (recurring_month is null or recurring_month ~ '^[0-9]{4}-[0-9]{2}$'),
+  imported_local_id text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -241,6 +251,9 @@ create index if not exists transactions_household_date_idx
 
 create index if not exists transactions_recurring_payment_idx
   on public.transactions (recurring_payment_id);
+
+create unique index if not exists transactions_household_imported_local_id_unique
+  on public.transactions (household_id, imported_local_id);
 
 create table if not exists public.transaction_splits (
   id uuid primary key default gen_random_uuid(),

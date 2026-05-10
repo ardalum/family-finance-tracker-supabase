@@ -19,14 +19,16 @@ function normalizeTransaction(input) {
     cardId: input.cardId || "",
     amount: Number(input.amount) || 0,
     notes: input.notes.trim(),
+    categoryId: input.categoryId || UNCATEGORIZED_ID,
+    splitMode: Boolean(input.splitMode),
     source: input.source || "manual",
     recurringPaymentId: input.recurringPaymentId || null,
     recurringMonth: input.recurringMonth || null,
-    splits: input.splits.map((split) => ({
+    splits: input.splitMode ? input.splits.map((split) => ({
       id: split.id || createId("split"),
       categoryId: split.categoryId || UNCATEGORIZED_ID,
       amount: Number(split.amount) || 0,
-    })),
+    })) : [],
   };
 }
 
@@ -98,9 +100,9 @@ export function summarizeByCategory(transactions, categories) {
   const totals = new Map();
 
   transactions.forEach((transaction) => {
-    transaction.splits.forEach((split) => {
-      const name = getCategoryName(split.categoryId, categories);
-      totals.set(name, (totals.get(name) ?? 0) + Number(split.amount || 0));
+    getTransactionCategoryRows(transaction).forEach((row) => {
+      const name = getCategoryName(row.categoryId, categories);
+      totals.set(name, (totals.get(name) ?? 0) + Number(row.amount || 0));
     });
   });
 
@@ -139,4 +141,18 @@ function sortSummary(totals) {
 
 export function getSplitTotal(splits) {
   return splits.reduce((total, split) => total + Number(split.amount || 0), 0);
+}
+
+export function getTransactionCategoryRows(transaction) {
+  if (transaction.splitMode || transaction.splits?.length > 0) {
+    return transaction.splits ?? [];
+  }
+
+  return [
+    {
+      id: `${transaction.id}_category`,
+      categoryId: transaction.categoryId || UNCATEGORIZED_ID,
+      amount: Number(transaction.amount || 0),
+    },
+  ];
 }

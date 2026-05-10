@@ -7,9 +7,9 @@ import Input from "../../../components/ui/Input.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
 import {
-  deleteTransaction,
   getCardName,
   getCategoryName,
+  getTransactionCategoryRows,
   UNCATEGORIZED_ID,
 } from "../spendingService.js";
 
@@ -20,7 +20,8 @@ export default function TransactionTable({
   filters,
   onFiltersChange,
   onEdit,
-  onDataChange,
+  onDelete,
+  isSaving = false,
 }) {
   const [sortMode, setSortMode] = useState("date-desc");
   const categoryOptions = useMemo(
@@ -33,7 +34,9 @@ export default function TransactionTable({
       .filter((transaction) => !filters.cardId || transaction.cardId === filters.cardId)
       .filter((transaction) => {
         if (!filters.categoryId) return true;
-        return transaction.splits.some((split) => split.categoryId === filters.categoryId);
+        return getTransactionCategoryRows(transaction).some(
+          (row) => row.categoryId === filters.categoryId,
+        );
       })
       .filter((transaction) => {
         if (!filters.store.trim()) return true;
@@ -42,15 +45,15 @@ export default function TransactionTable({
       .sort((a, b) => sortTransactions(a, b, sortMode, cards, categories));
   }, [cards, categories, filters, sortMode, transactions]);
 
-  function handleDelete(transaction) {
+  async function handleDelete(transaction) {
     const confirmed = window.confirm(`Delete transaction from ${transaction.merchant}?`);
-    if (confirmed) onDataChange(deleteTransaction(transaction.id));
+    if (confirmed) await onDelete(transaction);
   }
 
   return (
     <Card>
-      <div className="grid gap-4 border-b border-gray-200 p-5">
-        <div className="grid gap-3 lg:grid-cols-[160px_160px_160px_minmax(0,1fr)_180px_auto] lg:items-end">
+      <div className="grid gap-3 border-b border-gray-200 p-5">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[160px_180px_160px_minmax(260px,1fr)_auto] xl:items-end">
           <Select
             label="Card"
             value={filters.cardId}
@@ -89,19 +92,21 @@ export default function TransactionTable({
             value={filters.store}
             onChange={(event) => onFiltersChange({ ...filters, store: event.target.value })}
             placeholder="Search store"
+            className="min-w-0"
           />
-          <div className="text-sm text-gray-500">
-            Showing{" "}
-            <span className="font-semibold text-gray-950">{filteredTransactions.length}</span>
-          </div>
           <Button
             type="button"
             variant="secondary"
+            className="w-full xl:w-auto"
             onClick={() => onFiltersChange({ cardId: "", categoryId: "", store: "" })}
           >
             <RotateCcw size={16} aria-hidden="true" />
             Reset filters
           </Button>
+        </div>
+        <div className="text-sm text-gray-500">
+          Showing <span className="font-semibold text-gray-950">{filteredTransactions.length}</span>{" "}
+          transaction{filteredTransactions.length === 1 ? "" : "s"}
         </div>
       </div>
 
@@ -146,10 +151,14 @@ export default function TransactionTable({
                       </div>
                     </td>
                     <td className="px-5 py-4 align-middle text-gray-700">
-                      {transaction.splits.map((split) => (
-                        <div key={split.id}>
-                          {getCategoryName(split.categoryId, categories)}:{" "}
-                          <span className="font-semibold">{formatCurrency(split.amount)}</span>
+                      {getTransactionCategoryRows(transaction).map((row) => (
+                        <div key={row.id}>
+                          {getCategoryName(row.categoryId, categories)}
+                          {transaction.splitMode ? (
+                            <>
+                              : <span className="font-semibold">{formatCurrency(row.amount)}</span>
+                            </>
+                          ) : null}
                         </div>
                       ))}
                     </td>
@@ -166,6 +175,7 @@ export default function TransactionTable({
                           variant="secondary"
                           className="px-3"
                           onClick={() => onEdit(transaction)}
+                          disabled={isSaving}
                           aria-label={`Edit ${transaction.merchant}`}
                         >
                           <Edit size={16} aria-hidden="true" />
@@ -175,6 +185,7 @@ export default function TransactionTable({
                           variant="danger"
                           className="px-3"
                           onClick={() => handleDelete(transaction)}
+                          disabled={isSaving}
                           aria-label={`Delete ${transaction.merchant}`}
                         >
                           <Trash2 size={16} aria-hidden="true" />
@@ -205,5 +216,8 @@ function sortTransactions(a, b, sortMode, cards, categories) {
 }
 
 function getPrimaryCategoryName(transaction, categories) {
-  return getCategoryName(transaction.splits[0]?.categoryId ?? UNCATEGORIZED_ID, categories);
+  return getCategoryName(
+    getTransactionCategoryRows(transaction)[0]?.categoryId ?? UNCATEGORIZED_ID,
+    categories,
+  );
 }
