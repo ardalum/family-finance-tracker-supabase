@@ -88,3 +88,13 @@ export async function createFirstHousehold(name) {
   if (error) throw error;
   return data;
 }
+
+export async function createHousehold(name) {
+  const client = requireSupabase();
+  const { data, error } = await client.rpc("create_household_for_current_user", {
+    household_name: name,
+  });
+
+  if (error) throw error;
+  return data;
+}

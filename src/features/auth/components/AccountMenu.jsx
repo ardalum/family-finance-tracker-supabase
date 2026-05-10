@@ -1,6 +1,5 @@
 import { LogOut, UserCircle } from "lucide-react";
 import { useState } from "react";
-import Button from "../../../components/ui/Button.jsx";
 import { useAuth } from "../AuthProvider.jsx";
 import { signOut } from "../authService.js";
 
@@ -21,15 +20,20 @@ export default function AccountMenu() {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600">
-      <span className="inline-flex min-w-0 items-center gap-2">
-        <UserCircle size={18} aria-hidden="true" />
-        <span className="max-w-64 truncate">{user?.email}</span>
+    <div className="flex min-w-0 items-center gap-2 rounded-md border border-gray-200 bg-white px-2.5 py-1.5">
+      <span className="inline-flex min-w-0 items-center gap-1.5 text-xs text-gray-500">
+        <UserCircle size={15} className="shrink-0" aria-hidden="true" />
+        <span className="max-w-40 truncate sm:max-w-56">{user?.email}</span>
       </span>
-      <Button type="button" variant="secondary" onClick={handleSignOut} disabled={isSigningOut}>
+      <button
+        type="button"
+        className="inline-flex h-7 items-center gap-1.5 rounded-md border border-gray-200 bg-gray-50 px-2 text-xs font-medium text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+        onClick={handleSignOut}
+        disabled={isSigningOut}
+      >
         <LogOut size={16} aria-hidden="true" />
         {isSigningOut ? "Signing out..." : "Sign out"}
-      </Button>
+      </button>
     </div>
   );
 }

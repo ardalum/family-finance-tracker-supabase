@@ -16,6 +16,7 @@ import {
 import Dashboard from "../features/dashboard/components/Dashboard.jsx";
 import { useHouseholds } from "../features/households/HouseholdProvider.jsx";
 import HouseholdGate from "../features/households/components/HouseholdGate.jsx";
+import HouseholdSettings from "../features/households/components/HouseholdSettings.jsx";
 import HouseholdSwitcher from "../features/households/components/HouseholdSwitcher.jsx";
 import RecurringPayments from "../features/recurring/components/RecurringPayments.jsx";
 import SpendingTracker from "../features/spending/components/SpendingTracker.jsx";
@@ -45,6 +46,10 @@ const pageContent = {
   backup: {
     title: "Backup / Restore",
     description: "Export, import, or reset the local data saved in this browser.",
+  },
+  "household-settings": {
+    title: "Household Settings",
+    description: "Create households, review membership, and choose the active household.",
   },
 };
 
@@ -240,6 +245,8 @@ function FinanceTrackerApp() {
       ) : null}
 
       {activeView === "backup" ? <BackupRestore onDataChange={refreshData} /> : null}
+
+      {activeView === "household-settings" ? <HouseholdSettings /> : null}
     </AppShell>
   );
 }

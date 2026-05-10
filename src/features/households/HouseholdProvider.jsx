@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { useAuth } from "../auth/AuthProvider.jsx";
 import {
   clearStoredActiveHouseholdId,
+  createHousehold,
   createFirstHousehold,
   getStoredActiveHouseholdId,
   listUserHouseholds,
@@ -90,6 +91,23 @@ export function HouseholdProvider({ children }) {
     [activeHouseholdId, loadHouseholds, setActiveHouseholdId, user?.id],
   );
 
+  const createAdditionalHousehold = useCallback(
+    async (name) => {
+      if (!user?.id) throw new Error("You must be signed in to create a household.");
+
+      setError("");
+      const household = await createHousehold(name);
+      await loadHouseholds();
+
+      if (household?.id) {
+        setActiveHouseholdId(household.id);
+      }
+
+      return household;
+    },
+    [loadHouseholds, setActiveHouseholdId, user?.id],
+  );
+
   const activeMembership = useMemo(
     () => memberships.find((membership) => membership.householdId === activeHouseholdId) ?? null,
     [activeHouseholdId, memberships],
@@ -108,11 +126,13 @@ export function HouseholdProvider({ children }) {
       setActiveHouseholdId,
       refreshHouseholds: loadHouseholds,
       createInitialHousehold,
+      createAdditionalHousehold,
     }),
     [
       activeHouseholdId,
       activeMembership,
       createInitialHousehold,
+      createAdditionalHousehold,
       error,
       loadHouseholds,
       loading,

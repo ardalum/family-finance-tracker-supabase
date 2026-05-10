@@ -1,4 +1,12 @@
-import { CalendarSync, CreditCard, DatabaseBackup, LayoutDashboard, ReceiptText, WalletCards } from "lucide-react";
+import {
+  CalendarSync,
+  CreditCard,
+  DatabaseBackup,
+  Home,
+  LayoutDashboard,
+  ReceiptText,
+  WalletCards,
+} from "lucide-react";
 
 const navItems = [
   {
@@ -30,6 +38,11 @@ const navItems = [
     id: "backup",
     label: "Backup / Restore",
     icon: DatabaseBackup,
+  },
+  {
+    id: "household-settings",
+    label: "Household Settings",
+    icon: Home,
   },
 ];
 
