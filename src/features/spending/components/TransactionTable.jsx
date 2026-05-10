@@ -51,9 +51,9 @@ export default function TransactionTable({
   }
 
   return (
-    <Card>
-      <div className="grid gap-3 border-b border-gray-200 p-5">
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[160px_180px_160px_minmax(260px,1fr)_auto] xl:items-end">
+    <Card className="min-w-0 overflow-hidden">
+      <div className="grid gap-3 border-b border-gray-200 p-4">
+        <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-[150px_170px_150px_minmax(260px,1fr)] xl:items-end">
           <Select
             label="Card"
             value={filters.cardId}
@@ -94,19 +94,21 @@ export default function TransactionTable({
             placeholder="Search store"
             className="min-w-0"
           />
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="text-xs font-medium text-gray-500">
+            Showing <span className="font-semibold text-gray-950">{filteredTransactions.length}</span>{" "}
+            transaction{filteredTransactions.length === 1 ? "" : "s"}
+          </div>
           <Button
             type="button"
             variant="secondary"
-            className="w-full xl:w-auto"
+            className="min-h-9 px-3 py-1.5 text-sm"
             onClick={() => onFiltersChange({ cardId: "", categoryId: "", store: "" })}
           >
             <RotateCcw size={16} aria-hidden="true" />
             Reset filters
           </Button>
-        </div>
-        <div className="text-sm text-gray-500">
-          Showing <span className="font-semibold text-gray-950">{filteredTransactions.length}</span>{" "}
-          transaction{filteredTransactions.length === 1 ? "" : "s"}
         </div>
       </div>
 
@@ -119,23 +121,25 @@ export default function TransactionTable({
           <table className="min-w-full border-separate border-spacing-0 text-left text-sm">
             <thead className="bg-gray-50 text-xs uppercase tracking-normal text-gray-500">
               <tr>
-                <th className="px-5 py-3 font-semibold">Date</th>
-                <th className="px-5 py-3 font-semibold">Store</th>
-                <th className="px-5 py-3 font-semibold">Card</th>
-                <th className="px-5 py-3 font-semibold">Category</th>
-                <th className="px-5 py-3 font-semibold">Amount</th>
-                <th className="px-5 py-3 font-semibold">Notes</th>
-                <th className="px-5 py-3 font-semibold">Actions</th>
+                <th className="px-4 py-2.5 font-semibold">Date</th>
+                <th className="px-4 py-2.5 font-semibold">Store</th>
+                <th className="px-4 py-2.5 font-semibold">Payment</th>
+                <th className="px-4 py-2.5 font-semibold">Category</th>
+                <th className="px-4 py-2.5 text-right font-semibold">Amount</th>
+                <th className="px-4 py-2.5 font-semibold">Notes</th>
+                <th className="px-4 py-2.5 font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {filteredTransactions.map((transaction) => {
                 const card = cards.find((item) => item.id === transaction.cardId);
                 return (
-                  <tr key={transaction.id} className="bg-white">
-                    <td className="px-5 py-4 align-middle text-gray-700">{transaction.date}</td>
-                    <td className="px-5 py-4 align-middle font-semibold text-gray-950">
-                      <div className="grid gap-1">
+                  <tr key={transaction.id} className="bg-white transition hover:bg-gray-50">
+                    <td className="whitespace-nowrap px-4 py-3 align-middle text-gray-700">
+                      {transaction.date}
+                    </td>
+                    <td className="px-4 py-3 align-middle font-semibold text-gray-950">
+                      <div className="grid gap-0.5">
                         <span>{transaction.merchant}</span>
                         {transaction.source === "recurring" ? (
                           <span className="w-fit rounded-md bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700 ring-1 ring-inset ring-blue-200">
@@ -144,15 +148,25 @@ export default function TransactionTable({
                         ) : null}
                       </div>
                     </td>
-                    <td className="px-5 py-4 align-middle">
-                      <div className="grid gap-1">
-                        <span className="text-gray-600">{transaction.paymentMethod || "Credit Card"}</span>
-                        {card ? <LinkedCardName card={card} /> : getCardName(transaction.cardId, cards)}
+                    <td className="px-4 py-3 align-middle">
+                      <div className="grid min-w-36 gap-0.5">
+                        <span className="text-xs font-medium text-gray-500">
+                          {transaction.paymentMethod || "No payment method"}
+                        </span>
+                        {card ? (
+                          <LinkedCardName card={card} className="text-sm font-medium decoration-transparent" />
+                        ) : (
+                          <span className="text-sm text-gray-500">
+                            {transaction.paymentMethod === "Credit Card"
+                              ? getCardName(transaction.cardId, cards)
+                              : "No card"}
+                          </span>
+                        )}
                       </div>
                     </td>
-                    <td className="px-5 py-4 align-middle text-gray-700">
+                    <td className="px-4 py-3 align-middle text-gray-700">
                       {getTransactionCategoryRows(transaction).map((row) => (
-                        <div key={row.id}>
+                        <div key={row.id} className="whitespace-nowrap">
                           {getCategoryName(row.categoryId, categories)}
                           {transaction.splitMode ? (
                             <>
@@ -162,18 +176,18 @@ export default function TransactionTable({
                         </div>
                       ))}
                     </td>
-                    <td className="px-5 py-4 align-middle font-semibold text-gray-950">
+                    <td className="whitespace-nowrap px-4 py-3 text-right align-middle font-semibold text-gray-950">
                       {formatCurrency(transaction.amount)}
                     </td>
-                    <td className="max-w-xs px-5 py-4 align-middle text-gray-600">
+                    <td className="max-w-xs px-4 py-3 align-middle text-gray-600">
                       {transaction.notes || <span className="text-gray-400">None</span>}
                     </td>
-                    <td className="px-5 py-4 align-middle">
-                      <div className="flex flex-wrap gap-2">
+                    <td className="px-4 py-3 align-middle">
+                      <div className="flex items-center gap-1.5">
                         <Button
                           type="button"
                           variant="secondary"
-                          className="px-3"
+                          className="min-h-8 px-2"
                           onClick={() => onEdit(transaction)}
                           disabled={isSaving}
                           aria-label={`Edit ${transaction.merchant}`}
@@ -183,7 +197,7 @@ export default function TransactionTable({
                         <Button
                           type="button"
                           variant="danger"
-                          className="px-3"
+                          className="min-h-8 px-2"
                           onClick={() => handleDelete(transaction)}
                           disabled={isSaving}
                           aria-label={`Delete ${transaction.merchant}`}

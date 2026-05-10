@@ -45,7 +45,7 @@ export default function SpendingTracker({
   }
 
   return (
-    <section className="grid gap-6">
+    <section className="mx-auto grid w-full max-w-7xl gap-6">
       {error ? (
         <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
           {error}
@@ -104,19 +104,21 @@ export default function SpendingTracker({
         categories={categories}
       />
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_390px]">
-        <TransactionTable
-          transactions={transactions}
-          cards={activeCards}
-          categories={categories}
-          filters={filters}
-          onFiltersChange={setFilters}
-          onEdit={setEditingTransaction}
-          onDelete={handleDelete}
-          isSaving={isSaving}
-        />
+      <div className="grid min-w-0 gap-8 2xl:grid-cols-[minmax(0,1fr)_380px] 2xl:items-start">
+        <div className="min-w-0">
+          <TransactionTable
+            transactions={transactions}
+            cards={activeCards}
+            categories={categories}
+            filters={filters}
+            onFiltersChange={setFilters}
+            onEdit={setEditingTransaction}
+            onDelete={handleDelete}
+            isSaving={isSaving}
+          />
+        </div>
 
-        <Card className="h-fit p-5">
+        <Card className="h-fit min-w-0 p-5 2xl:sticky 2xl:top-6">
           <TransactionForm
             monthKey={selectedMonth}
             cards={activeCards}
