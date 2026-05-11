@@ -5,7 +5,6 @@ import { buildMonthOptions, getCurrentMonthKey } from "../../../lib/dates.js";
 import { formatMonthLabel } from "../../../lib/formatters.js";
 import BudgetVsSpendingTable from "./BudgetVsSpendingTable.jsx";
 import CreditCardPaymentOverview from "./CreditCardPaymentOverview.jsx";
-import DashboardAlerts from "./DashboardAlerts.jsx";
 import DashboardCharts from "./DashboardCharts.jsx";
 import DashboardSummaryCards from "./DashboardSummaryCards.jsx";
 import RecentTransactionsTable from "./RecentTransactionsTable.jsx";
@@ -52,7 +51,6 @@ export default function Dashboard({
       </Card>
 
       <DashboardSummaryCards summary={data.summary} />
-      <DashboardAlerts data={data} />
       <DashboardCharts chartData={data.chartData} />
 
       <div className="grid gap-6">

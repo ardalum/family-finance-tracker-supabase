@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import AppShell from "../components/layout/AppShell.jsx";
 import { AuthProvider } from "../features/auth/AuthProvider.jsx";
 import AccountMenu from "../features/auth/components/AccountMenu.jsx";
@@ -58,6 +58,8 @@ import {
   listTransactions,
   updateTransactionInSupabase,
 } from "../features/spending/spendingSupabaseService.js";
+import AlertsMenu from "../features/dashboard/components/AlertsMenu.jsx";
+import { getAlerts, getDashboardData } from "../features/dashboard/dashboardUtils.js";
 import { getCurrentMonthKey } from "../lib/dates.js";
 import { readAppData } from "../lib/storage/appStorage.js";
 
@@ -1018,19 +1020,35 @@ function FinanceTrackerApp() {
     setActiveView("dashboard");
   }
 
-  const dashboardAppData = {
-    ...appData,
-    creditCards: supabaseCreditCards,
-    monthlyBalances: supabaseMonthlyBalances,
-    budgetsByMonth: {
-      ...appData.budgetsByMonth,
-      [selectedDashboardMonth]: dashboardBudgets,
-    },
-    transactions: dashboardTransactions,
-    recurringPayments,
-    recurringStatusByMonth,
-    recurringTransactions: dashboardTransactions,
-  };
+  const dashboardAppData = useMemo(
+    () => ({
+      ...appData,
+      creditCards: supabaseCreditCards,
+      monthlyBalances: supabaseMonthlyBalances,
+      budgetsByMonth: {
+        ...appData.budgetsByMonth,
+        [selectedDashboardMonth]: dashboardBudgets,
+      },
+      transactions: dashboardTransactions,
+      recurringPayments,
+      recurringStatusByMonth,
+      recurringTransactions: dashboardTransactions,
+    }),
+    [
+      appData,
+      dashboardBudgets,
+      dashboardTransactions,
+      recurringPayments,
+      recurringStatusByMonth,
+      selectedDashboardMonth,
+      supabaseCreditCards,
+      supabaseMonthlyBalances,
+    ],
+  );
+  const headerAlerts = useMemo(
+    () => getAlerts(getDashboardData(dashboardAppData, selectedDashboardMonth)),
+    [dashboardAppData, selectedDashboardMonth],
+  );
 
   if (setupCheckLoading) {
     return (
@@ -1067,6 +1085,7 @@ function FinanceTrackerApp() {
       accountSlot={
         <>
           <HouseholdSwitcher />
+          <AlertsMenu alerts={headerAlerts} />
           <AccountMenu />
         </>
       }
