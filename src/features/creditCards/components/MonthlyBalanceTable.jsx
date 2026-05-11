@@ -43,9 +43,10 @@ export default function MonthlyBalanceTable({
 
   function handleBalanceChange(cardId, value) {
     const currentEntry = monthBalances[cardId] ?? { balance: 0, paid: false };
+    const balance = value === "" ? 0 : Number.parseFloat(value);
     onBalanceChange(selectedMonth, cardId, {
       ...currentEntry,
-      balance: Number(value) || 0,
+      balance: Number.isFinite(balance) ? balance : 0,
     });
   }
 
@@ -65,12 +66,14 @@ export default function MonthlyBalanceTable({
           <p className="mt-1 text-sm text-gray-500">
             {formatMonthLabel(selectedMonth)} total statement balance:{" "}
             <span className="font-semibold text-gray-950">
-              {formatCurrency(monthTotal)}
+              {formatCurrency(monthTotal, { cents: true })}
             </span>
           </p>
           <p className="mt-1 text-sm text-gray-500">
             Total unpaid balance:{" "}
-            <span className="font-semibold text-red-700">{formatCurrency(unpaidTotal)}</span>
+            <span className="font-semibold text-red-700">
+              {formatCurrency(unpaidTotal, { cents: true })}
+            </span>
           </p>
           {loading ? <p className="mt-2 text-sm text-gray-500">Loading monthly balances...</p> : null}
           {saving ? <p className="mt-2 text-sm text-gray-500">Saving monthly balance...</p> : null}

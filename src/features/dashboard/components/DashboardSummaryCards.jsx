@@ -19,12 +19,13 @@ export default function DashboardSummaryCards({ summary }) {
         const value = summary[key];
         const isWarning =
           key === "remainingBudget" ? value < 0 : warnIfPositiveOrNegative && value > 0;
+        const showCents = key === "statementBalanceTotal" || key === "unpaidBalanceTotal";
 
         return (
           <Card key={key} className="p-5">
             <p className="text-sm font-medium text-gray-500">{label}</p>
             <p className={`mt-2 text-2xl font-semibold tracking-normal ${isWarning ? "text-red-700" : "text-gray-950"}`}>
-              {formatCurrency(value)}
+              {formatCurrency(value, { cents: showCents })}
             </p>
           </Card>
         );

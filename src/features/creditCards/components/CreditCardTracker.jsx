@@ -33,10 +33,7 @@ export default function CreditCardTracker({
 }) {
   const [editingCard, setEditingCard] = useState(null);
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
-  const activeCards = useMemo(
-    () => creditCards.filter((card) => card.isActive),
-    [creditCards],
-  );
+  const activeCards = useMemo(() => creditCards.filter((card) => card.isActive), [creditCards]);
 
   function openAddModal() {
     setEditingCard(null);
@@ -90,7 +87,7 @@ export default function CreditCardTracker({
         disabled={monthlyBalancesLoading || monthlyBalancesSaving}
       />
 
-      <CreditLimitSummary cards={activeCards} />
+      <CreditLimitSummary cards={creditCards} />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         {loading ? <div className="text-sm text-gray-500">Loading credit cards...</div> : null}

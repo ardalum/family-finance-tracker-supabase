@@ -8,7 +8,7 @@ export default function CreditCardPaymentOverview({ rows, totalUnpaid }) {
       <div className="border-b border-gray-200 p-5">
         <h3 className="text-lg font-semibold text-gray-950">Credit Card Payment Overview</h3>
         <p className={`mt-1 text-sm font-semibold ${totalUnpaid > 0 ? "text-red-700" : "text-gray-600"}`}>
-          Total unpaid balance: {formatCurrency(totalUnpaid)}
+          Total unpaid balance: {formatCurrency(totalUnpaid, { cents: true })}
         </p>
       </div>
       {rows.length === 0 ? <Empty message="No active credit cards." /> : (
@@ -35,7 +35,9 @@ export default function CreditCardPaymentOverview({ rows, totalUnpaid }) {
                     <td className="px-5 py-4">{row.card.owner}</td>
                     <td className="px-5 py-4">{row.card.bank ?? "N/A"}</td>
                     <td className="px-5 py-4">Day {row.card.dueDay}</td>
-                    <td className="px-5 py-4 font-semibold">{formatCurrency(row.balance)}</td>
+                    <td className="px-5 py-4 font-semibold">
+                      {formatCurrency(row.balance, { cents: true })}
+                    </td>
                     <td className="px-5 py-4">
                       {row.balance <= 0 ? "No balance" : row.paid ? "Paid" : "Unpaid"}
                     </td>

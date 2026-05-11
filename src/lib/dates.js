@@ -20,7 +20,9 @@ export function getDueDateForMonth(monthKey, dueDay) {
 }
 
 export function getStatementClosingDateForMonth(monthKey, statementClosingDay) {
-  return getDueDateForMonth(monthKey, statementClosingDay);
+  const [year, month] = monthKey.split("-").map(Number);
+  const lastDay = new Date(year, month - 1, 0).getDate();
+  return new Date(year, month - 2, Math.min(Number(statementClosingDay), lastDay));
 }
 
 export function isDateOnOrBeforeToday(date) {

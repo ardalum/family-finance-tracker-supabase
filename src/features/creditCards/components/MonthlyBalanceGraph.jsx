@@ -33,11 +33,13 @@ export default function MonthlyBalanceGraph({ monthlyBalances }) {
             const height = Math.max((point.total / maxTotal) * 100, 5);
             return (
               <div key={point.month} className="flex h-full min-w-16 flex-col items-center justify-end gap-2">
-                <span className="text-xs font-semibold text-gray-700">{formatCurrency(point.total)}</span>
+                <span className="text-xs font-semibold text-gray-700">
+                  {formatCurrency(point.total, { cents: true })}
+                </span>
                 <div
                   className="w-full rounded-t-md bg-gray-950 transition-all"
                   style={{ height: `${height}%` }}
-                  title={`${formatMonthLabel(point.month)}: ${formatCurrency(point.total)}`}
+                  title={`${formatMonthLabel(point.month)}: ${formatCurrency(point.total, { cents: true })}`}
                 />
                 <span className="text-xs text-gray-500">
                   {new Date(`${point.month}-01T00:00:00`).toLocaleDateString("en-US", {

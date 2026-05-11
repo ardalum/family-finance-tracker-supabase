@@ -653,7 +653,7 @@ function FinanceTrackerApp() {
       [monthKey]: {
         ...(balances[monthKey] ?? {}),
         [cardId]: {
-          balance: Number(entry.balance || 0),
+          balance: Number(entry.balance ?? 0) || 0,
           paid: Boolean(entry.paid),
           updatedAt: new Date().toISOString(),
         },

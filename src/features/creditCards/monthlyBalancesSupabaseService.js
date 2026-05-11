@@ -106,7 +106,7 @@ export async function importLocalMonthlyBalances(householdId, localMonthlyBalanc
         household_id: householdId,
         credit_card_id: getSupabaseCardId(card),
         month_key: monthKey,
-        balance: Number(entry?.balance || 0),
+        balance: Number(entry?.balance ?? 0) || 0,
         paid: Boolean(entry?.paid),
       });
     });

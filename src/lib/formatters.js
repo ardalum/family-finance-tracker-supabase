@@ -1,8 +1,11 @@
-export function formatCurrency(value) {
+export function formatCurrency(value, options = {}) {
+  const fractionDigits = options.cents ? 2 : 0;
+
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
-    maximumFractionDigits: 0,
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
   }).format(Number(value) || 0);
 }
 
