@@ -50,6 +50,7 @@ import {
   updateRecurringPaymentInSupabase,
 } from "../features/recurring/recurringSupabaseService.js";
 import FirstTimeSetupWizard from "../features/setup/components/FirstTimeSetupWizard.jsx";
+import AppSettings from "../features/settings/components/AppSettings.jsx";
 import { householdHasFinanceData } from "../features/setup/setupService.js";
 import SpendingTracker from "../features/spending/components/SpendingTracker.jsx";
 import {
@@ -96,6 +97,10 @@ const pageContent = {
   "household-settings": {
     title: "Household Settings",
     description: "Create households, review membership, and choose the active household.",
+  },
+  "app-settings": {
+    title: "App Settings",
+    description: "Customize display and app preferences.",
   },
 };
 
@@ -1305,6 +1310,8 @@ function FinanceTrackerApp() {
           onCreateDefaultProfiles={addDefaultProfiles}
         />
       ) : null}
+
+      {activeView === "app-settings" ? <AppSettings /> : null}
     </AppShell>
   );
 }

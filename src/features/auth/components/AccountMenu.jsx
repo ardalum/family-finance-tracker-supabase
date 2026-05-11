@@ -43,7 +43,7 @@ export default function AccountMenu({ onNavigate }) {
     <div ref={menuRef} className="relative min-w-0">
       <button
         type="button"
-        className="inline-flex h-10 max-w-64 items-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-2.5 text-xs font-semibold text-[#374151] transition hover:bg-[#F9FAFB] focus:outline-none focus:ring-2 focus:ring-[#1F2937]/10"
+        className="inline-flex h-10 max-w-64 items-center gap-2 rounded-xl border border-app-border bg-app-surface px-2.5 text-xs font-semibold text-text-soft transition hover:bg-app-background focus:outline-none focus:ring-2 focus:ring-brand-primary/10"
         onClick={() => setOpen((current) => !current)}
         aria-haspopup="menu"
         aria-expanded={open}
@@ -54,21 +54,20 @@ export default function AccountMenu({ onNavigate }) {
       </button>
 
       {open ? (
-        <div className="absolute right-0 z-30 mt-2 w-[calc(100vw-2rem)] max-w-72 overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-lg" role="menu">
-          <div className="border-b border-[#E5E7EB] px-4 py-3">
-            <p className="text-xs font-medium uppercase tracking-normal text-[#6B7280]">Signed in as</p>
-            <p className="mt-1 truncate text-sm font-semibold text-[#111827]">{user?.email}</p>
+        <div className="absolute right-0 z-30 mt-2 w-[calc(100vw-2rem)] max-w-72 overflow-hidden rounded-2xl border border-app-border bg-app-surface shadow-lg" role="menu">
+          <div className="border-b border-app-border px-4 py-3">
+            <p className="text-xs font-medium uppercase tracking-normal text-text-muted">Signed in as</p>
+            <p className="mt-1 truncate text-sm font-semibold text-text-main">{user?.email}</p>
           </div>
           <div className="grid gap-1 p-2">
-            <MenuButton icon={UserCircle} label="Profile" disabled />
             <MenuButton icon={Home} label="Household Settings" onClick={() => navigate("household-settings")} />
             <MenuButton icon={DatabaseBackup} label="Backup & Restore" onClick={() => navigate("backup")} />
-            <MenuButton icon={Settings} label="App Settings" disabled />
+            <MenuButton icon={Settings} label="App Settings" onClick={() => navigate("app-settings")} />
           </div>
-          <div className="border-t border-[#E5E7EB] p-2">
+          <div className="border-t border-app-border p-2">
             <button
               type="button"
-              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-[#DC2626] transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-status-danger transition hover:bg-status-dangerBg disabled:cursor-not-allowed disabled:opacity-50"
               onClick={handleSignOut}
               disabled={isSigningOut}
               role="menuitem"
@@ -83,13 +82,12 @@ export default function AccountMenu({ onNavigate }) {
   );
 }
 
-function MenuButton({ icon: Icon, label, onClick, disabled = false }) {
+function MenuButton({ icon: Icon, label, onClick }) {
   return (
     <button
       type="button"
-      className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-[#374151] transition hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-50"
+      className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-text-soft transition hover:bg-app-background hover:text-text-main"
       onClick={onClick}
-      disabled={disabled}
       role="menuitem"
     >
       <Icon size={16} aria-hidden="true" />
