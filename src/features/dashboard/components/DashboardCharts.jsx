@@ -45,7 +45,7 @@ export default function DashboardCharts({ chartData }) {
         )}
       </ChartCard>
 
-      <ChartCard title="Budget vs Spending">
+      <ChartCard title="Budget vs Actual">
         {chartData.budgetVsSpending.length === 0 ? <EmptyChart /> : (
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={chartData.budgetVsSpending}>
@@ -92,7 +92,7 @@ function withPercentages(items) {
 function ChartCard({ title, children }) {
   return (
     <Card className="p-5">
-      <h3 className="text-lg font-semibold text-[#111827]">{title}</h3>
+      <h3 className="text-lg font-semibold text-text-main">{title}</h3>
       <div className="mt-4">{children}</div>
     </Card>
   );
@@ -100,7 +100,7 @@ function ChartCard({ title, children }) {
 
 function EmptyChart() {
   return (
-    <div className="flex h-64 items-center justify-center rounded-2xl border border-dashed border-[#E5E7EB] text-sm text-[#6B7280]">
+    <div className="flex h-64 items-center justify-center rounded-2xl border border-dashed border-app-border text-sm text-text-muted">
       No data for this chart yet.
     </div>
   );

@@ -1,19 +1,24 @@
 import Card from "../../../components/ui/Card.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
 
-export default function RecurringOverview({ rows, summary }) {
+export default function RecurringOverview({
+  rows,
+  summary,
+  title = "Recurring Bills Overview",
+  emptyMessage = "No recurring payments due this month.",
+}) {
   return (
     <Card>
-      <div className="border-b border-gray-200 p-5">
-        <h3 className="text-lg font-semibold text-[#111827]">Recurring Bills Overview</h3>
-        <p className="mt-1 text-sm text-gray-500">
+      <div className="border-b border-app-border p-5">
+        <h3 className="text-lg font-semibold text-text-main">{title}</h3>
+        <p className="mt-1 text-sm text-text-muted">
           Total {formatCurrency(summary.estimatedTotal)} / Paid {formatCurrency(summary.paidTotal)} / Remaining {formatCurrency(summary.remainingTotal)}
         </p>
       </div>
-      {rows.length === 0 ? <Empty message="No recurring payments due this month." /> : (
+      {rows.length === 0 ? <Empty message={emptyMessage} /> : (
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
-            <thead className="bg-gray-50 text-xs uppercase text-gray-500">
+            <thead className="bg-app-background text-xs uppercase text-text-muted">
               <tr>
                 <th className="px-5 py-3">Bill</th>
                 <th className="px-5 py-3">Type</th>
@@ -23,19 +28,23 @@ export default function RecurringOverview({ rows, summary }) {
                 <th className="px-5 py-3">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-app-border">
               {rows.map((row) => {
                 const variableNeedsActual = row.template.billType === "variable" && row.displayStatus !== "Paid" && !row.instance?.actualAmount;
                 const dueSoon = ["Due now", "Due soon"].includes(row.displayStatus);
                 const pastDue = row.displayStatus === "Past due";
                 return (
-                  <tr key={row.template.id} className={pastDue ? "bg-red-100" : dueSoon || variableNeedsActual ? "bg-amber-50" : "bg-white"}>
-                    <td className="px-5 py-4 font-semibold text-gray-950">{row.template.name}</td>
+                  <tr key={row.template.id} className="bg-app-surface">
+                    <td className="px-5 py-4 font-semibold text-text-main">{row.template.name}</td>
                     <td className="px-5 py-4 capitalize">{row.template.billType}</td>
                     <td className="px-5 py-4">{formatCurrency(row.template.estimatedAmount)}</td>
                     <td className="px-5 py-4">{formatCurrency(row.amount)}</td>
                     <td className="px-5 py-4">{row.dueDate}</td>
-                    <td className="px-5 py-4">{row.displayStatus}</td>
+                    <td className="px-5 py-4">
+                      <span className={`rounded-lg px-2 py-1 text-xs font-semibold ${getStatusBadgeClass(row.displayStatus, variableNeedsActual)}`}>
+                        {row.displayStatus}
+                      </span>
+                    </td>
                   </tr>
                 );
               })}
@@ -48,5 +57,15 @@ export default function RecurringOverview({ rows, summary }) {
 }
 
 function Empty({ message }) {
-  return <div className="p-8 text-center text-sm text-gray-500">{message}</div>;
+  return <div className="p-8 text-center text-sm text-text-muted">{message}</div>;
+}
+
+function getStatusBadgeClass(status, variableNeedsActual) {
+  if (status === "Paid") return "bg-status-successBg text-status-successDark";
+  if (status === "Past due") return "bg-status-dangerBg text-status-dangerDark";
+  if (["Due now", "Due soon"].includes(status) || variableNeedsActual) {
+    return "bg-status-warningBg text-status-warningDark";
+  }
+  if (status === "Skipped") return "bg-app-muted text-text-soft";
+  return "bg-status-infoBg text-status-infoDark";
 }

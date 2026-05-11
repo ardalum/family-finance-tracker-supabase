@@ -1,10 +1,10 @@
 export default function Button({ children, variant = "primary", className = "", ...props }) {
   const variants = {
-    primary: "bg-[#1F2937] text-white shadow-sm hover:bg-[#111827]",
-    secondary: "bg-white text-[#111827] ring-1 ring-inset ring-[#E5E7EB] hover:bg-[#F9FAFB]",
-    success: "bg-[#10B981] text-white shadow-sm hover:bg-[#059669]",
-    danger: "bg-[#DC2626] text-white shadow-sm hover:bg-red-700",
-    ghost: "text-[#374151] hover:bg-[#F3F4F6]",
+    primary: "bg-brand-primary text-white shadow-sm hover:bg-brand-dark",
+    secondary: "bg-app-surface text-text-main ring-1 ring-inset ring-app-border hover:bg-app-background",
+    success: "bg-brand-accent text-white shadow-sm hover:bg-status-success",
+    danger: "bg-status-danger text-white shadow-sm hover:bg-status-dangerDark",
+    ghost: "text-text-soft hover:bg-app-muted",
   };
 
   return (

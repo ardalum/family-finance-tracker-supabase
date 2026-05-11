@@ -60,24 +60,24 @@ export default function MonthlyBalanceTable({
 
   return (
     <Card>
-      <div className="grid gap-4 border-b border-gray-200 p-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+      <div className="grid gap-4 border-b border-app-border p-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
         <div>
-          <h2 className="text-lg font-semibold text-gray-950">Monthly balance table</h2>
-          <p className="mt-1 text-sm text-gray-500">
+          <h2 className="text-lg font-semibold text-text-main">Monthly balance table</h2>
+          <p className="mt-1 text-sm text-text-muted">
             {formatMonthLabel(selectedMonth)} total statement balance:{" "}
-            <span className="font-semibold text-gray-950">
+            <span className="font-semibold text-text-main">
               {formatCurrency(monthTotal, { cents: true })}
             </span>
           </p>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-text-muted">
             Total unpaid balance:{" "}
-            <span className="font-semibold text-red-700">
+            <span className="font-semibold text-status-danger">
               {formatCurrency(unpaidTotal, { cents: true })}
             </span>
           </p>
-          {loading ? <p className="mt-2 text-sm text-gray-500">Loading monthly balances...</p> : null}
-          {saving ? <p className="mt-2 text-sm text-gray-500">Saving monthly balance...</p> : null}
-          {error ? <p className="mt-2 text-sm font-medium text-red-700">{error}</p> : null}
+          {loading ? <p className="mt-2 text-sm text-text-muted">Loading monthly balances...</p> : null}
+          {saving ? <p className="mt-2 text-sm text-text-muted">Saving monthly balance...</p> : null}
+          {error ? <p className="mt-2 text-sm font-medium text-status-danger">{error}</p> : null}
         </div>
         <div className="grid gap-3 sm:grid-cols-[160px_180px_auto] sm:items-end">
           <Select
@@ -110,13 +110,13 @@ export default function MonthlyBalanceTable({
       </div>
 
       {cards.length === 0 ? (
-        <div className="p-8 text-center text-sm text-gray-500">
+        <div className="p-8 text-center text-sm text-text-muted">
           Add a credit card before entering monthly balances.
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full border-separate border-spacing-0 text-left text-sm">
-            <thead className="bg-gray-50 text-xs uppercase tracking-normal text-gray-500">
+            <thead className="bg-app-background text-xs uppercase tracking-normal text-text-muted">
               <tr>
                 <th className="px-5 py-3 font-semibold">Card</th>
                 <th className="px-5 py-3 font-semibold">Owner</th>
@@ -126,7 +126,7 @@ export default function MonthlyBalanceTable({
                 <th className="px-5 py-3 font-semibold">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-app-border">
               {sortedCards.map((card) => {
                 const entry = monthBalances[card.id] ?? { balance: 0, paid: false };
                 const status = getRowStatus(card, selectedMonth, entry);
@@ -148,7 +148,7 @@ export default function MonthlyBalanceTable({
                         {onEditCard ? (
                           <button
                             type="button"
-                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-gray-500 transition hover:bg-white/80 hover:text-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-950/10"
+                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-text-muted transition hover:bg-app-muted hover:text-text-main focus:outline-none focus:ring-2 focus:ring-brand-primary/10"
                             onClick={() => onEditCard(card)}
                             disabled={isCardSaving}
                             aria-label={`Edit ${card.name}`}
@@ -157,15 +157,15 @@ export default function MonthlyBalanceTable({
                           </button>
                         ) : null}
                       </div>
-                      <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
+                      <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-muted">
                         <span>{card.network}</span>
                         <span>**** {card.lastFour}</span>
                       </div>
                     </td>
-                    <td className="px-5 py-4 align-middle font-medium text-gray-700">
+                    <td className="px-5 py-4 align-middle font-medium text-text-soft">
                       {card.owner}
                     </td>
-                    <td className="px-5 py-4 align-middle text-gray-700">
+                    <td className="px-5 py-4 align-middle text-text-soft">
                       <div className="grid gap-1">
                         <span>
                           {closingDate.toLocaleDateString("en-US", {
@@ -177,15 +177,15 @@ export default function MonthlyBalanceTable({
                         <span
                           className={`w-fit rounded-md px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ${
                             statementGenerated
-                              ? "bg-blue-50 text-blue-700 ring-blue-200"
-                              : "bg-gray-100 text-gray-600 ring-gray-200"
+                              ? "bg-status-infoBg text-status-infoDark ring-status-infoBg"
+                              : "bg-app-muted text-text-muted ring-app-muted"
                           }`}
                         >
                           {statementGenerated ? "Generated" : "Not yet"}
                         </span>
                       </div>
                     </td>
-                    <td className="px-5 py-4 align-middle text-gray-700">
+                    <td className="px-5 py-4 align-middle text-text-soft">
                       {dueDate.toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
@@ -200,7 +200,7 @@ export default function MonthlyBalanceTable({
                         <span className={`font-semibold ${status.balanceClass}`}>$</span>
                         <input
                           id={`balance-${card.id}`}
-                          className={`h-10 w-32 rounded-md border border-gray-300 bg-white px-3 text-sm font-semibold outline-none focus:border-gray-950 focus:ring-2 focus:ring-gray-950/10 ${status.balanceClass}`}
+                          className={`h-10 w-32 rounded-xl border border-app-border bg-app-surface px-3 text-sm font-semibold outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/10 ${status.balanceClass}`}
                           type="number"
                           min="0"
                           step="0.01"
@@ -212,13 +212,13 @@ export default function MonthlyBalanceTable({
                     <td className="px-5 py-4 align-middle">
                       <div className="flex flex-wrap items-center gap-3">
                         <span
-                          className={`rounded-md px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${status.badgeClass}`}
+                          className={`rounded-lg px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${status.badgeClass}`}
                         >
                           {status.label}
                         </span>
-                        <label className="inline-flex items-center gap-2 text-sm font-medium text-gray-700">
+                        <label className="inline-flex items-center gap-2 text-sm font-medium text-text-soft">
                           <input
-                            className="h-4 w-4 rounded border-gray-300 text-gray-950 focus:ring-gray-950"
+                            className="h-4 w-4 rounded border-app-border text-brand-primary focus:ring-brand-primary"
                             type="checkbox"
                             checked={status.isNoBalance ? false : Boolean(entry.paid)}
                             disabled={status.isNoBalance}

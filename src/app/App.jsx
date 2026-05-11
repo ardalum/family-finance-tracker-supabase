@@ -29,6 +29,7 @@ import { useHouseholds } from "../features/households/HouseholdProvider.jsx";
 import HouseholdGate from "../features/households/components/HouseholdGate.jsx";
 import HouseholdSettings from "../features/households/components/HouseholdSettings.jsx";
 import HouseholdSwitcher from "../features/households/components/HouseholdSwitcher.jsx";
+import Insights from "../features/insights/components/Insights.jsx";
 import {
   addHouseholdProfile,
   createDefaultHouseholdProfiles,
@@ -81,8 +82,12 @@ const pageContent = {
     description: "Track spending, payment methods, categories, and notes.",
   },
   recurring: {
+    title: "Recurring Payments",
+    description: "Manage monthly bills, subscriptions, and mandatory payments.",
+  },
+  insights: {
     title: "Insights",
-    description: "Track recurring bills and monthly paid status.",
+    description: "Review spending trends, budget performance, and payment patterns.",
   },
   backup: {
     title: "Backup & Restore",
@@ -144,6 +149,11 @@ function FinanceTrackerApp() {
   const [dashboardTransactions, setDashboardTransactions] = useState([]);
   const [dashboardLoading, setDashboardLoading] = useState(true);
   const [dashboardError, setDashboardError] = useState("");
+  const [selectedInsightsMonth, setSelectedInsightsMonth] = useState(getCurrentMonthKey());
+  const [insightsBudgets, setInsightsBudgets] = useState([]);
+  const [insightsTransactions, setInsightsTransactions] = useState([]);
+  const [insightsLoading, setInsightsLoading] = useState(true);
+  const [insightsError, setInsightsError] = useState("");
   const [recurringPayments, setRecurringPayments] = useState([]);
   const [recurringStatusByMonth, setRecurringStatusByMonth] = useState({});
   const [recurringTransactions, setRecurringTransactions] = useState([]);
@@ -415,6 +425,41 @@ function FinanceTrackerApp() {
     loadDashboardData();
   }, [loadDashboardData]);
 
+  const loadInsightsData = useCallback(async () => {
+    if (!activeHouseholdId) {
+      setInsightsBudgets([]);
+      setInsightsTransactions([]);
+      setInsightsLoading(false);
+      return;
+    }
+
+    setInsightsLoading(true);
+    setInsightsError("");
+
+    try {
+      const budgets = await listBudgetCategories(activeHouseholdId, selectedInsightsMonth);
+      const transactions = await listTransactions(
+        activeHouseholdId,
+        selectedInsightsMonth,
+        supabaseCreditCards,
+        budgets,
+      );
+
+      setInsightsBudgets(budgets);
+      setInsightsTransactions(transactions);
+    } catch (error) {
+      setInsightsError(error.message || "Could not load insights data.");
+      setInsightsBudgets([]);
+      setInsightsTransactions([]);
+    } finally {
+      setInsightsLoading(false);
+    }
+  }, [activeHouseholdId, selectedInsightsMonth, supabaseCreditCards]);
+
+  useEffect(() => {
+    loadInsightsData();
+  }, [loadInsightsData]);
+
   const loadRecurringCategories = useCallback(async () => {
     if (!activeHouseholdId) {
       setRecurringCategories([]);
@@ -671,6 +716,7 @@ function FinanceTrackerApp() {
       );
       setSupabaseBudgets((budgets) => [...budgets, budget]);
       await loadDashboardData();
+      await loadInsightsData();
       return budget;
     } catch (error) {
       setBudgetsError(error.message || "Could not add budget category.");
@@ -690,6 +736,7 @@ function FinanceTrackerApp() {
         budgets.map((currentBudget) => (currentBudget.id === budget.id ? budget : currentBudget)),
       );
       await loadDashboardData();
+      await loadInsightsData();
       return budget;
     } catch (error) {
       setBudgetsError(error.message || "Could not update budget category.");
@@ -709,6 +756,7 @@ function FinanceTrackerApp() {
         budgets.filter((budget) => (budget.supabaseId ?? budget.id) !== budgetId),
       );
       await loadDashboardData();
+      await loadInsightsData();
     } catch (error) {
       setBudgetsError(error.message || "Could not delete budget category.");
       throw error;
@@ -730,6 +778,7 @@ function FinanceTrackerApp() {
       );
       await loadSupabaseBudgets();
       await loadDashboardData();
+      await loadInsightsData();
       return importedBudgets;
     } catch (error) {
       setBudgetsError(error.message || "Could not import local budget categories.");
@@ -765,6 +814,7 @@ function FinanceTrackerApp() {
 
       setSupabaseBudgets((budgets) => [...budgets, ...createdBudgets]);
       await loadDashboardData();
+      await loadInsightsData();
       return createdBudgets;
     } catch (error) {
       setBudgetsError(error.message || "Could not add default budget categories.");
@@ -787,6 +837,7 @@ function FinanceTrackerApp() {
       );
       await loadSpendingTransactions();
       await loadDashboardData();
+      await loadInsightsData();
     } catch (error) {
       setSpendingError(error.message || "Could not add transaction.");
       throw error;
@@ -808,6 +859,7 @@ function FinanceTrackerApp() {
       );
       await loadSpendingTransactions();
       await loadDashboardData();
+      await loadInsightsData();
     } catch (error) {
       setSpendingError(error.message || "Could not update transaction.");
       throw error;
@@ -826,6 +878,7 @@ function FinanceTrackerApp() {
         transactions.filter((transaction) => (transaction.supabaseId ?? transaction.id) !== transactionId),
       );
       await loadDashboardData();
+      await loadInsightsData();
     } catch (error) {
       setSpendingError(error.message || "Could not delete transaction.");
       throw error;
@@ -869,6 +922,7 @@ function FinanceTrackerApp() {
       );
       await loadRecurringData();
       await loadDashboardData();
+      await loadInsightsData();
     } catch (error) {
       setRecurringError(error.message || "Could not add recurring payment.");
       throw error;
@@ -890,6 +944,7 @@ function FinanceTrackerApp() {
       );
       await loadRecurringData();
       await loadDashboardData();
+      await loadInsightsData();
     } catch (error) {
       setRecurringError(error.message || "Could not update recurring payment.");
       throw error;
@@ -906,6 +961,7 @@ function FinanceTrackerApp() {
       await deleteRecurringPaymentFromSupabase(templateId);
       await loadRecurringData();
       await loadDashboardData();
+      await loadInsightsData();
     } catch (error) {
       setRecurringError(error.message || "Could not delete recurring payment.");
       throw error;
@@ -929,6 +985,7 @@ function FinanceTrackerApp() {
       await loadRecurringData();
       await loadSpendingTransactions();
       await loadDashboardData();
+      await loadInsightsData();
       return instance;
     } catch (error) {
       setRecurringError(error.message || "Could not mark recurring payment paid.");
@@ -951,6 +1008,7 @@ function FinanceTrackerApp() {
       await loadRecurringData();
       await loadSpendingTransactions();
       await loadDashboardData();
+      await loadInsightsData();
       return instance;
     } catch (error) {
       setRecurringError(error.message || "Could not mark recurring payment unpaid.");
@@ -973,6 +1031,7 @@ function FinanceTrackerApp() {
       await loadRecurringData();
       await loadSpendingTransactions();
       await loadDashboardData();
+      await loadInsightsData();
       return instance;
     } catch (error) {
       setRecurringError(error.message || "Could not skip recurring payment.");
@@ -995,6 +1054,7 @@ function FinanceTrackerApp() {
       );
       await loadRecurringData();
       await loadDashboardData();
+      await loadInsightsData();
       return imported;
     } catch (error) {
       setRecurringError(error.message || "Could not import local recurring payments.");
@@ -1011,6 +1071,7 @@ function FinanceTrackerApp() {
     await loadSpendingCategories();
     await loadSpendingTransactions();
     await loadDashboardData();
+    await loadInsightsData();
     await loadRecurringCategories();
     await loadRecurringData();
   }
@@ -1041,6 +1102,31 @@ function FinanceTrackerApp() {
       recurringPayments,
       recurringStatusByMonth,
       selectedDashboardMonth,
+      supabaseCreditCards,
+      supabaseMonthlyBalances,
+    ],
+  );
+  const insightsAppData = useMemo(
+    () => ({
+      ...appData,
+      creditCards: supabaseCreditCards,
+      monthlyBalances: supabaseMonthlyBalances,
+      budgetsByMonth: {
+        ...appData.budgetsByMonth,
+        [selectedInsightsMonth]: insightsBudgets,
+      },
+      transactions: insightsTransactions,
+      recurringPayments,
+      recurringStatusByMonth,
+      recurringTransactions: insightsTransactions,
+    }),
+    [
+      appData,
+      insightsBudgets,
+      insightsTransactions,
+      recurringPayments,
+      recurringStatusByMonth,
+      selectedInsightsMonth,
       supabaseCreditCards,
       supabaseMonthlyBalances,
     ],
@@ -1187,6 +1273,16 @@ function FinanceTrackerApp() {
           onMarkRecurringUnpaid={markSupabaseRecurringUnpaid}
           onSkipRecurringPayment={skipSupabaseRecurringPayment}
           onImportLocalRecurringPayments={importLocalRecurringToSupabase}
+        />
+      ) : null}
+
+      {activeView === "insights" ? (
+        <Insights
+          appData={insightsAppData}
+          selectedMonth={selectedInsightsMonth}
+          onMonthChange={setSelectedInsightsMonth}
+          loading={insightsLoading}
+          error={insightsError}
         />
       ) : null}
 

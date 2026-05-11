@@ -24,8 +24,8 @@ export default function AlertsMenu({ alerts = [] }) {
     <div ref={containerRef} className="relative">
       <button
         type="button"
-        className={`relative inline-flex h-10 w-10 items-center justify-center rounded-xl border text-[#374151] transition hover:bg-[#F9FAFB] focus:outline-none focus:ring-2 focus:ring-[#1F2937]/10 ${
-          count > 0 ? "border-[#E5E7EB] bg-white" : "border-[#E5E7EB] bg-white"
+        className={`relative inline-flex h-10 w-10 items-center justify-center rounded-xl border text-text-soft transition hover:bg-app-background focus:outline-none focus:ring-2 focus:ring-brand-primary/10 ${
+          count > 0 ? "border-app-border bg-app-surface" : "border-app-border bg-app-surface"
         }`}
         onClick={() => setOpen((current) => !current)}
         aria-label={count > 0 ? `${count} active alert${count === 1 ? "" : "s"}` : "No active alerts"}
@@ -35,7 +35,7 @@ export default function AlertsMenu({ alerts = [] }) {
         {count > 0 ? (
           <span
             className={`absolute -right-1 -top-1 min-w-5 rounded-full px-1.5 py-0.5 text-center text-[11px] font-semibold leading-none text-white ${
-              hasCritical ? "bg-[#DC2626]" : "bg-[#F97316]"
+              hasCritical ? "bg-status-danger" : "bg-status-warning"
             }`}
           >
             {count}
@@ -44,12 +44,12 @@ export default function AlertsMenu({ alerts = [] }) {
       </button>
 
       {open ? (
-        <div className="absolute right-0 z-30 mt-2 max-h-[70vh] w-[calc(100vw-2rem)] max-w-sm overflow-y-auto rounded-2xl border border-[#E5E7EB] bg-white shadow-lg">
-          <div className="border-b border-[#E5E7EB] px-4 py-3">
-            <p className="text-sm font-semibold text-[#111827]">Alerts</p>
+        <div className="absolute right-0 z-30 mt-2 max-h-[70vh] w-[calc(100vw-2rem)] max-w-sm overflow-y-auto rounded-2xl border border-app-border bg-app-surface shadow-lg">
+          <div className="border-b border-app-border px-4 py-3">
+            <p className="text-sm font-semibold text-text-main">Alerts</p>
           </div>
           {count === 0 ? (
-            <p className="px-4 py-5 text-sm text-[#6B7280]">No alerts right now.</p>
+            <p className="px-4 py-5 text-sm text-text-muted">No alerts right now.</p>
           ) : (
             <div className="grid gap-2 p-3">
               {alerts.map((alert, index) => (
@@ -57,10 +57,10 @@ export default function AlertsMenu({ alerts = [] }) {
                   key={`${alert.text}-${index}`}
                   className={`rounded-xl border px-3 py-2 text-sm ${
                     alert.type === "danger"
-                      ? "border-red-200 bg-[#FEE2E2] text-[#991B1B]"
+                      ? "border-status-dangerBg bg-status-dangerBg text-status-dangerDark"
                       : alert.type === "info"
-                        ? "border-blue-200 bg-[#DBEAFE] text-[#1E40AF]"
-                        : "border-amber-200 bg-[#FEF3C7] text-[#92400E]"
+                        ? "border-status-infoBg bg-status-infoBg text-status-infoDark"
+                        : "border-status-warningBg bg-status-warningBg text-status-warningDark"
                   }`}
                 >
                   <p className="text-xs font-semibold uppercase tracking-normal">

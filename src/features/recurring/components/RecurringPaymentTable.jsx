@@ -21,13 +21,13 @@ export default function RecurringPaymentTable({
   return (
     <Card>
       {templates.length === 0 ? (
-        <div className="p-8 text-center text-sm text-gray-500">
+        <div className="p-8 text-center text-sm text-text-muted">
           No recurring payment templates yet.
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full border-separate border-spacing-0 text-left text-sm">
-            <thead className="bg-gray-50 text-xs uppercase tracking-normal text-gray-500">
+            <thead className="bg-app-background text-xs uppercase tracking-normal text-text-muted">
               <tr>
                 <th className="px-5 py-3 font-semibold">Name</th>
                 <th className="px-5 py-3 font-semibold">Category</th>
@@ -39,25 +39,25 @@ export default function RecurringPaymentTable({
                 <th className="px-5 py-3 font-semibold">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-app-border">
               {templates.map((template) => {
                 const card = cards.find((item) => item.id === template.cardId);
                 return (
-                  <tr key={template.id} className="bg-white">
-                    <td className="px-5 py-4 align-middle font-semibold text-gray-950">
+                  <tr key={template.id} className="bg-app-surface">
+                    <td className="px-5 py-4 align-middle font-semibold text-text-main">
                       {template.name}
                     </td>
-                    <td className="px-5 py-4 align-middle text-gray-700">
+                    <td className="px-5 py-4 align-middle text-text-soft">
                       {getCategoryName(template.categoryId, categories)}
                     </td>
-                    <td className="px-5 py-4 align-middle capitalize text-gray-700">
+                    <td className="px-5 py-4 align-middle capitalize text-text-soft">
                       {template.billType}
                     </td>
-                    <td className="px-5 py-4 align-middle font-semibold text-gray-950">
+                    <td className="px-5 py-4 align-middle font-semibold text-text-main">
                       {formatCurrency(template.estimatedAmount)}
                     </td>
-                    <td className="px-5 py-4 align-middle text-gray-700">Day {template.dueDay}</td>
-                    <td className="px-5 py-4 align-middle text-gray-700">
+                    <td className="px-5 py-4 align-middle text-text-soft">Day {template.dueDay}</td>
+                    <td className="px-5 py-4 align-middle text-text-soft">
                       <div className="grid gap-1">
                         <span>{template.paymentMethod}</span>
                         {template.paymentMethod === "Credit Card" ? (
@@ -66,7 +66,7 @@ export default function RecurringPaymentTable({
                       </div>
                     </td>
                     <td className="px-5 py-4 align-middle">
-                      <span className={`rounded-md px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${template.active ? "bg-emerald-50 text-emerald-700 ring-emerald-200" : "bg-gray-100 text-gray-600 ring-gray-200"}`}>
+                      <span className={`rounded-lg px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${template.active ? "bg-status-successBg text-status-successDark ring-status-successBg" : "bg-app-muted text-text-muted ring-app-muted"}`}>
                         {template.active ? "Active" : "Inactive"}
                       </span>
                     </td>

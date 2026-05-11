@@ -145,28 +145,28 @@ export default function TransactionForm({
     <form className="grid gap-4" onSubmit={handleSubmit}>
       {showHeader ? (
         <div>
-          <h3 className="text-base font-semibold text-[#111827]">
+          <h3 className="text-base font-semibold text-text-main">
             {editingTransaction ? "Edit transaction" : "Add transaction"}
           </h3>
-          <p className="mt-1 text-sm text-[#6B7280]">Use category split only when needed.</p>
+          <p className="mt-1 text-sm text-text-muted">Use category split only when needed.</p>
         </div>
       ) : null}
 
       {categories.length === 0 ? (
-        <div className="rounded-xl border border-amber-200 bg-[#FEF3C7] px-3 py-2 text-sm text-[#92400E]">
+        <div className="rounded-xl border border-status-warningBg bg-status-warningBg px-3 py-2 text-sm text-status-warningDark">
           No budget categories exist for this month. Create budget categories first, or use
           Uncategorized.
         </div>
       ) : null}
 
       {cards.length === 0 ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B]">
+        <div className="rounded-xl border border-status-dangerBg bg-status-dangerBg px-3 py-2 text-sm text-status-dangerDark">
           Add a credit card before adding transactions.
         </div>
       ) : null}
 
       {error ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B]">
+        <div className="rounded-xl border border-status-dangerBg bg-status-dangerBg px-3 py-2 text-sm text-status-dangerDark">
           {error}
         </div>
       ) : null}
@@ -239,9 +239,9 @@ export default function TransactionForm({
         </Select>
       </div>
 
-      <label className="inline-flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-3 py-2 text-sm font-medium text-[#374151]">
+      <label className="inline-flex items-center gap-2 rounded-xl border border-app-border bg-app-background px-3 py-2 text-sm font-medium text-text-soft">
         <input
-          className="h-4 w-4 rounded border-gray-300 text-[#1F2937] focus:ring-[#1F2937]"
+          className="h-4 w-4 rounded border-app-border text-brand-primary focus:ring-brand-primary"
           type="checkbox"
           checked={form.splitMode}
           onChange={(event) => toggleSplitMode(event.target.checked)}
@@ -250,11 +250,11 @@ export default function TransactionForm({
       </label>
 
       {form.splitMode ? (
-        <div className="grid gap-3 rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-3">
+        <div className="grid gap-3 rounded-2xl border border-app-border bg-app-background p-3">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold text-[#111827]">Category split</p>
-              <p className="mt-0.5 text-xs text-[#6B7280]">
+              <p className="text-sm font-semibold text-text-main">Category split</p>
+              <p className="mt-0.5 text-xs text-text-muted">
                 Split amounts must match the transaction total.
               </p>
             </div>
@@ -296,16 +296,16 @@ export default function TransactionForm({
               </Button>
             </div>
           ))}
-          <p className="text-xs text-[#6B7280]">
+          <p className="text-xs text-text-muted">
             Split total: ${getSplitTotal(form.splits).toFixed(2)}
           </p>
         </div>
       ) : null}
 
-      <label className="grid min-w-0 gap-1.5 text-sm font-medium text-[#374151]">
+      <label className="grid min-w-0 gap-1.5 text-sm font-medium text-text-soft">
         Notes
         <textarea
-          className="min-h-20 w-full min-w-0 resize-y rounded-xl border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-[#111827] outline-none transition placeholder:text-gray-400 focus:border-[#1F2937] focus:ring-2 focus:ring-[#1F2937]/10"
+          className="min-h-20 w-full min-w-0 resize-y rounded-xl border border-app-border bg-app-surface px-3 py-2 text-sm text-text-main outline-none transition placeholder:text-text-muted focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/10"
           value={form.notes}
           onChange={(event) => updateField("notes", event.target.value)}
           placeholder="Optional"

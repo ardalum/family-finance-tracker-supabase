@@ -1,14 +1,18 @@
 import Card from "../../../components/ui/Card.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
 
-export default function BudgetVsSpendingTable({ rows }) {
+export default function BudgetVsSpendingTable({
+  rows,
+  title = "Budget vs Spending",
+  emptyMessage = "No budget categories for this month.",
+}) {
   return (
     <Card>
-      <SectionHeader title="Budget vs Spending" />
-      {rows.length === 0 ? <Empty message="No budget categories for this month." /> : (
+      <SectionHeader title={title} />
+      {rows.length === 0 ? <Empty message={emptyMessage} /> : (
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
-            <thead className="bg-gray-50 text-xs uppercase text-gray-500">
+            <thead className="bg-app-background text-xs uppercase text-text-muted">
               <tr>
                 <th className="px-5 py-3">Category</th>
                 <th className="px-5 py-3">Budget</th>
@@ -17,17 +21,21 @@ export default function BudgetVsSpendingTable({ rows }) {
                 <th className="px-5 py-3">Percent Used</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-app-border">
               {rows.map((row) => {
                 const over = row.remaining < 0;
                 const near = row.percentUsed >= 90;
                 return (
-                  <tr key={row.category} className={over ? "bg-red-50" : near ? "bg-amber-50" : "bg-white"}>
-                    <td className="px-5 py-4 font-semibold text-gray-950">{row.category}</td>
+                  <tr key={row.category} className="bg-app-surface">
+                    <td className="px-5 py-4 font-semibold text-text-main">{row.category}</td>
                     <td className="px-5 py-4">{formatCurrency(row.budget)}</td>
                     <td className="px-5 py-4">{formatCurrency(row.spent)}</td>
-                    <td className={`px-5 py-4 font-semibold ${over ? "text-red-700" : "text-gray-950"}`}>{formatCurrency(row.remaining)}</td>
-                    <td className="px-5 py-4">{row.percentUsed.toFixed(0)}%</td>
+                    <td className={`px-5 py-4 font-semibold ${over ? "text-status-danger" : "text-text-main"}`}>{formatCurrency(row.remaining)}</td>
+                    <td className="px-5 py-4">
+                      <span className={`rounded-lg px-2 py-1 text-xs font-semibold ${over ? "bg-status-dangerBg text-status-dangerDark" : near ? "bg-status-warningBg text-status-warningDark" : "bg-status-successBg text-status-successDark"}`}>
+                        {row.percentUsed.toFixed(0)}%
+                      </span>
+                    </td>
                   </tr>
                 );
               })}
@@ -40,9 +48,9 @@ export default function BudgetVsSpendingTable({ rows }) {
 }
 
 function SectionHeader({ title }) {
-  return <h3 className="border-b border-gray-200 p-5 text-lg font-semibold text-gray-950">{title}</h3>;
+  return <h3 className="border-b border-app-border p-5 text-lg font-semibold text-text-main">{title}</h3>;
 }
 
 function Empty({ message }) {
-  return <div className="p-8 text-center text-sm text-gray-500">{message}</div>;
+  return <div className="p-8 text-center text-sm text-text-muted">{message}</div>;
 }
