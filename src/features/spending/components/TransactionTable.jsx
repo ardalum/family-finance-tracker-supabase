@@ -51,6 +51,10 @@ export default function TransactionTable({
   }, [cards, categories, filters, sortMode, transactions]);
 
   async function handleDelete(transaction) {
+    if (transaction.source === "recurring") {
+      window.alert("Recurring transactions are managed from Recurring Payments. Mark the bill unpaid there to remove the linked transaction.");
+      return;
+    }
     const confirmed = window.confirm(`Delete transaction from ${transaction.merchant}?`);
     if (confirmed) await onDelete(transaction);
   }
@@ -138,6 +142,7 @@ export default function TransactionTable({
             <tbody className="divide-y divide-gray-100">
               {filteredTransactions.map((transaction) => {
                 const card = cards.find((item) => item.id === transaction.cardId);
+                const isRecurring = transaction.source === "recurring";
                 return (
                   <tr key={transaction.id} className="bg-white transition hover:bg-gray-50">
                     <td className="whitespace-nowrap px-4 py-3 align-middle text-gray-700">
@@ -194,8 +199,9 @@ export default function TransactionTable({
                           variant="secondary"
                           className="min-h-8 px-2"
                           onClick={() => onEdit(transaction)}
-                          disabled={isSaving}
+                          disabled={isSaving || isRecurring}
                           aria-label={`Edit ${transaction.merchant}`}
+                          title={isRecurring ? "Manage from Recurring Payments" : "Edit transaction"}
                         >
                           <Edit size={16} aria-hidden="true" />
                         </Button>
@@ -204,8 +210,9 @@ export default function TransactionTable({
                           variant="danger"
                           className="min-h-8 px-2"
                           onClick={() => handleDelete(transaction)}
-                          disabled={isSaving}
+                          disabled={isSaving || isRecurring}
                           aria-label={`Delete ${transaction.merchant}`}
+                          title={isRecurring ? "Mark unpaid from Recurring Payments" : "Delete transaction"}
                         >
                           <Trash2 size={16} aria-hidden="true" />
                         </Button>

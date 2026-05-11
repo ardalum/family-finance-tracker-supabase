@@ -141,96 +141,240 @@ export async function listRecurringInstances(householdId, templates) {
       ...result,
       [instance.month_key]: {
         ...(result[instance.month_key] ?? {}),
-        [templateId]: instance.status,
+        [templateId]: {
+          status: instance.status === "generated" ? "paid" : instance.status,
+          transactionId: instance.transaction_id,
+          actualAmount: instance.actual_amount === null ? null : Number(instance.actual_amount || 0),
+          paidDate: instance.paid_date,
+        },
       },
     };
   }, {});
 }
 
-export async function generateRecurringPaymentsInSupabase({
+function buildRecurringTransactionPayload({ householdId, monthKey, template, templateId, amount, paidDate, cardsByAppId, categoriesByAppId }) {
+  const card = cardsByAppId.get(template.cardId);
+  return {
+    household_id: householdId,
+    transaction_date: paidDate || getDueDateForMonth(monthKey, template.dueDay).toISOString().slice(0, 10),
+    merchant: template.name,
+    payment_method: template.paymentMethod,
+    credit_card_id: template.paymentMethod === "Credit Card" ? getSupabaseCardId(card) : null,
+    category_id: getSupabaseCategoryId(template.categoryId, categoriesByAppId),
+    amount,
+    notes: template.notes?.trim() || "Paid recurring bill",
+    source: "recurring",
+    recurring_payment_id: templateId,
+    recurring_month: monthKey,
+  };
+}
+
+async function findRecurringTransaction(client, householdId, templateId, monthKey, transactionId) {
+  if (transactionId) {
+    const { data, error } = await client
+      .from("transactions")
+      .select("*")
+      .eq("household_id", householdId)
+      .eq("id", transactionId)
+      .maybeSingle();
+    if (error) throw error;
+    if (data) return data;
+  }
+
+  const { data, error } = await client
+    .from("transactions")
+    .select("*")
+    .eq("household_id", householdId)
+    .eq("source", "recurring")
+    .eq("recurring_payment_id", templateId)
+    .eq("recurring_month", monthKey)
+    .order("created_at", { ascending: true })
+    .limit(1);
+
+  if (error) throw error;
+  return data?.[0] ?? null;
+}
+
+async function upsertRecurringTransaction(client, payload, existingTransactionId) {
+  if (existingTransactionId) {
+    const { data, error } = await client
+      .from("transactions")
+      .update(payload)
+      .eq("id", existingTransactionId)
+      .select("*")
+      .single();
+    if (error) throw error;
+    await client.from("transaction_splits").delete().eq("transaction_id", data.id);
+    return data;
+  }
+
+  const { data, error } = await client.from("transactions").insert(payload).select("*").single();
+  if (error) throw error;
+  return data;
+}
+
+async function deleteRecurringTransaction(client, householdId, templateId, monthKey, transactionId) {
+  const transaction = await findRecurringTransaction(client, householdId, templateId, monthKey, transactionId);
+  if (!transaction) return;
+  const { error } = await client.from("transactions").delete().eq("id", transaction.id);
+  if (error) throw error;
+}
+
+export async function markRecurringPaymentPaidInSupabase({
   householdId,
   monthKey,
-  rows,
+  row,
   cards,
   categories,
 }) {
   const client = requireSupabase();
+  const template = row.template;
+  const templateId = template.supabaseId ?? template.id;
+  const amount = Number(row.actualAmount ?? template.estimatedAmount ?? 0) || 0;
+  const paidDate = row.paidDate || getDueDateForMonth(monthKey, template.dueDay).toISOString().slice(0, 10);
+
+  if (amount <= 0) {
+    throw new Error("Actual amount must be greater than zero before marking paid.");
+  }
+
   const cardsByAppId = new Map(cards.map((card) => [card.id, card]));
   const categoriesByAppId = new Map(categories.map((category) => [category.id, category]));
-  const generatedIds = [];
 
-  for (const row of rows) {
-    const template = row.template;
-    const templateId = template.supabaseId ?? template.id;
-    const amount = Number(row.actualAmount) || 0;
+  const { data: existingInstance, error: instanceLookupError } = await client
+    .from("recurring_payment_instances")
+    .select("*")
+    .eq("recurring_payment_id", templateId)
+    .eq("month_key", monthKey)
+    .maybeSingle();
 
-    const { data: existing } = await client
-      .from("recurring_payment_instances")
-      .select("*")
-      .eq("recurring_payment_id", templateId)
-      .eq("month_key", monthKey)
-      .maybeSingle();
+  if (instanceLookupError) throw instanceLookupError;
 
-    if (existing?.status === "generated") continue;
+  const existingTransaction = await findRecurringTransaction(
+    client,
+    householdId,
+    templateId,
+    monthKey,
+    existingInstance?.transaction_id,
+  );
+  const transactionPayload = buildRecurringTransactionPayload({
+    householdId,
+    monthKey,
+    template,
+    templateId,
+    amount,
+    paidDate,
+    cardsByAppId,
+    categoriesByAppId,
+  });
+  const transaction = await upsertRecurringTransaction(
+    client,
+    transactionPayload,
+    existingTransaction?.id,
+  );
 
-    if (row.action === "skip") {
-      const { error } = await client.from("recurring_payment_instances").upsert(
-        {
-          household_id: householdId,
-          recurring_payment_id: templateId,
-          month_key: monthKey,
-          status: "skipped",
-          transaction_id: null,
-          actual_amount: null,
-        },
-        { onConflict: "recurring_payment_id,month_key" },
-      );
-      if (error) throw error;
-      continue;
-    }
-
-    if (amount <= 0) continue;
-
-    const card = cardsByAppId.get(template.cardId);
-    const { data: transaction, error: transactionError } = await client
-      .from("transactions")
-      .insert({
-        household_id: householdId,
-        transaction_date: getDueDateForMonth(monthKey, template.dueDay).toISOString().slice(0, 10),
-        merchant: template.name,
-        payment_method: template.paymentMethod,
-        credit_card_id: template.paymentMethod === "Credit Card" ? getSupabaseCardId(card) : null,
-        category_id: getSupabaseCategoryId(template.categoryId, categoriesByAppId),
-        amount,
-        notes: template.notes
-          ? `Generated from recurring payment. ${template.notes}`
-          : "Generated from recurring payment.",
-        source: "recurring",
-        recurring_payment_id: templateId,
-        recurring_month: monthKey,
-      })
-      .select("*")
-      .single();
-
-    if (transactionError) throw transactionError;
-
-    const { error: instanceError } = await client.from("recurring_payment_instances").upsert(
+  const { data: instance, error: instanceError } = await client
+    .from("recurring_payment_instances")
+    .upsert(
       {
         household_id: householdId,
         recurring_payment_id: templateId,
         month_key: monthKey,
-        status: "generated",
+        status: "paid",
         transaction_id: transaction.id,
         actual_amount: amount,
+        paid_date: paidDate,
       },
       { onConflict: "recurring_payment_id,month_key" },
-    );
+    )
+    .select("*")
+    .single();
 
-    if (instanceError) throw instanceError;
-    generatedIds.push(transaction.id);
-  }
+  if (instanceError) throw instanceError;
+  return instance;
+}
 
-  return generatedIds;
+export async function markRecurringPaymentUnpaidInSupabase({ householdId, monthKey, template }) {
+  const client = requireSupabase();
+  const templateId = template.supabaseId ?? template.id;
+
+  const { data: existingInstance, error: instanceLookupError } = await client
+    .from("recurring_payment_instances")
+    .select("*")
+    .eq("recurring_payment_id", templateId)
+    .eq("month_key", monthKey)
+    .maybeSingle();
+
+  if (instanceLookupError) throw instanceLookupError;
+
+  await deleteRecurringTransaction(
+    client,
+    householdId,
+    templateId,
+    monthKey,
+    existingInstance?.transaction_id,
+  );
+
+  const { data, error } = await client
+    .from("recurring_payment_instances")
+    .upsert(
+      {
+        household_id: householdId,
+        recurring_payment_id: templateId,
+        month_key: monthKey,
+        status: "unpaid",
+        transaction_id: null,
+        actual_amount: existingInstance?.actual_amount ?? null,
+        paid_date: null,
+      },
+      { onConflict: "recurring_payment_id,month_key" },
+    )
+    .select("*")
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function skipRecurringPaymentInSupabase({ householdId, monthKey, template }) {
+  const client = requireSupabase();
+  const templateId = template.supabaseId ?? template.id;
+
+  const { data: existingInstance, error: instanceLookupError } = await client
+    .from("recurring_payment_instances")
+    .select("*")
+    .eq("recurring_payment_id", templateId)
+    .eq("month_key", monthKey)
+    .maybeSingle();
+
+  if (instanceLookupError) throw instanceLookupError;
+
+  await deleteRecurringTransaction(
+    client,
+    householdId,
+    templateId,
+    monthKey,
+    existingInstance?.transaction_id,
+  );
+
+  const { data, error } = await client
+    .from("recurring_payment_instances")
+    .upsert(
+      {
+        household_id: householdId,
+        recurring_payment_id: templateId,
+        month_key: monthKey,
+        status: "skipped",
+        transaction_id: null,
+        actual_amount: null,
+        paid_date: null,
+      },
+      { onConflict: "recurring_payment_id,month_key" },
+    )
+    .select("*")
+    .single();
+
+  if (error) throw error;
+  return data;
 }
 
 export async function importLocalRecurringPayments(householdId, localTemplates, cards, categories) {

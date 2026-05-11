@@ -2,16 +2,16 @@ import Card from "../../../components/ui/Card.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
 import { getRecurringSummary } from "../recurringService.js";
 
-export default function RecurringSummary({ templates, monthKey, transactions }) {
-  const summary = getRecurringSummary(templates, monthKey, transactions);
+export default function RecurringSummary({ templates, monthKey, recurringStatusByMonth }) {
+  const summary = getRecurringSummary(templates, monthKey, recurringStatusByMonth);
 
   return (
     <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-      <SummaryTile label="Fixed recurring" value={summary.fixedTotal} />
-      <SummaryTile label="Estimated variable" value={summary.variableTotal} />
       <SummaryTile label="Estimated total" value={summary.estimatedTotal} />
-      <SummaryTile label="Actual generated" value={summary.actualTotal} />
-      <SummaryTile label="Difference" value={summary.difference} />
+      <SummaryTile label="Actual total" value={summary.actualTotal} />
+      <SummaryTile label="Paid recurring" value={summary.paidTotal} />
+      <SummaryTile label="Unpaid recurring" value={summary.unpaidTotal} />
+      <SummaryTile label="Remaining to pay" value={summary.remainingTotal} />
     </section>
   );
 }

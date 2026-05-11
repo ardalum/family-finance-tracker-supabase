@@ -275,6 +275,7 @@ export async function exportSupabaseExcel(householdId, activeHousehold) {
           instance.actual_amount === null || instance.actual_amount === undefined
             ? ""
             : Number(instance.actual_amount),
+        "Paid Date": instance.paid_date ?? "",
         "Transaction ID": instance.transaction_id ?? "",
         ID: instance.id,
       })),
@@ -822,6 +823,7 @@ export async function importSupabaseBackupMerge(householdId, backup) {
             instance.actual_amount === null || instance.actual_amount === undefined
               ? null
               : Number(instance.actual_amount),
+          paid_date: instance.paid_date ?? null,
         })
         .select("*")
         .single();
@@ -1499,11 +1501,14 @@ function isValidSupabaseRecurringInstance(instance) {
     isValidUuidLike(instance.id) &&
     isValidUuidLike(instance.recurring_payment_id) &&
     isValidMonthKey(instance.month_key) &&
-    ["generated", "skipped"].includes(instance.status) &&
+    ["generated", "paid", "unpaid", "skipped"].includes(instance.status) &&
     isNullableUuidLike(instance.transaction_id) &&
     (instance.actual_amount === null ||
       instance.actual_amount === undefined ||
-      isNonNegativeNumber(instance.actual_amount))
+      isNonNegativeNumber(instance.actual_amount)) &&
+    (instance.paid_date === null ||
+      instance.paid_date === undefined ||
+      typeof instance.paid_date === "string")
   );
 }
 
@@ -1691,7 +1696,17 @@ function areRecurringStatusesValid(recurringStatusByMonth, recurringPayments) {
     if (!statuses || typeof statuses !== "object" || Array.isArray(statuses)) return false;
 
     return Object.entries(statuses).every(([templateId, status]) => {
-      return templateIds.has(templateId) && status === "skipped";
+      if (!templateIds.has(templateId)) return false;
+      if (typeof status === "string") return ["paid", "unpaid", "skipped", "generated"].includes(status);
+      return (
+        status &&
+        typeof status === "object" &&
+        ["paid", "unpaid", "skipped", "generated"].includes(status.status) &&
+        (status.actualAmount === null ||
+          status.actualAmount === undefined ||
+          isNonNegativeNumber(status.actualAmount)) &&
+        (status.paidDate === null || status.paidDate === undefined || typeof status.paidDate === "string")
+      );
     });
   });
 }

@@ -42,10 +42,12 @@ import RecurringPayments from "../features/recurring/components/RecurringPayment
 import {
   addRecurringPaymentToSupabase,
   deleteRecurringPaymentFromSupabase,
-  generateRecurringPaymentsInSupabase,
   importLocalRecurringPayments,
   listRecurringInstances,
   listRecurringPayments,
+  markRecurringPaymentPaidInSupabase,
+  markRecurringPaymentUnpaidInSupabase,
+  skipRecurringPaymentInSupabase,
   updateRecurringPaymentInSupabase,
 } from "../features/recurring/recurringSupabaseService.js";
 import FirstTimeSetupWizard from "../features/setup/components/FirstTimeSetupWizard.jsx";
@@ -80,7 +82,7 @@ const pageContent = {
   },
   recurring: {
     title: "Recurring Payments",
-    description: "Manage bill templates and generate monthly spending transactions.",
+    description: "Manage recurring bill templates and monthly paid status.",
   },
   backup: {
     title: "Backup / Restore",
@@ -948,24 +950,68 @@ function FinanceTrackerApp() {
     }
   }
 
-  async function generateSupabaseRecurringPayments(rows) {
+  async function markSupabaseRecurringPaid(row) {
     setRecurringSaving(true);
     setRecurringError("");
 
     try {
-      const generated = await generateRecurringPaymentsInSupabase({
+      const instance = await markRecurringPaymentPaidInSupabase({
         householdId: activeHouseholdId,
         monthKey: selectedRecurringMonth,
-        rows,
+        row,
         cards: supabaseCreditCards,
         categories: recurringCategories,
       });
       await loadRecurringData();
       await loadSpendingTransactions();
       await loadDashboardData();
-      return generated;
+      return instance;
     } catch (error) {
-      setRecurringError(error.message || "Could not generate recurring payments.");
+      setRecurringError(error.message || "Could not mark recurring payment paid.");
+      throw error;
+    } finally {
+      setRecurringSaving(false);
+    }
+  }
+
+  async function markSupabaseRecurringUnpaid(template) {
+    setRecurringSaving(true);
+    setRecurringError("");
+
+    try {
+      const instance = await markRecurringPaymentUnpaidInSupabase({
+        householdId: activeHouseholdId,
+        monthKey: selectedRecurringMonth,
+        template,
+      });
+      await loadRecurringData();
+      await loadSpendingTransactions();
+      await loadDashboardData();
+      return instance;
+    } catch (error) {
+      setRecurringError(error.message || "Could not mark recurring payment unpaid.");
+      throw error;
+    } finally {
+      setRecurringSaving(false);
+    }
+  }
+
+  async function skipSupabaseRecurringPayment(template) {
+    setRecurringSaving(true);
+    setRecurringError("");
+
+    try {
+      const instance = await skipRecurringPaymentInSupabase({
+        householdId: activeHouseholdId,
+        monthKey: selectedRecurringMonth,
+        template,
+      });
+      await loadRecurringData();
+      await loadSpendingTransactions();
+      await loadDashboardData();
+      return instance;
+    } catch (error) {
+      setRecurringError(error.message || "Could not skip recurring payment.");
       throw error;
     } finally {
       setRecurringSaving(false);
@@ -1160,7 +1206,9 @@ function FinanceTrackerApp() {
           onCreateRecurringPayment={createSupabaseRecurringPayment}
           onUpdateRecurringPayment={updateSupabaseRecurringPayment}
           onDeleteRecurringPayment={deleteSupabaseRecurringPayment}
-          onGenerateRecurringPayments={generateSupabaseRecurringPayments}
+          onMarkRecurringPaid={markSupabaseRecurringPaid}
+          onMarkRecurringUnpaid={markSupabaseRecurringUnpaid}
+          onSkipRecurringPayment={skipSupabaseRecurringPayment}
           onImportLocalRecurringPayments={importLocalRecurringToSupabase}
         />
       ) : null}

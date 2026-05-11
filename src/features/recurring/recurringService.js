@@ -75,6 +75,38 @@ export function getEligibleRecurringPayments(templates, monthKey) {
   });
 }
 
+export function getRecurringInstance(statusByMonth, monthKey, templateOrId) {
+  const ids =
+    typeof templateOrId === "object"
+      ? [templateOrId.id, templateOrId.supabaseId].filter(Boolean)
+      : [templateOrId];
+  const monthInstances = statusByMonth?.[monthKey] ?? {};
+  const rawInstance = ids.map((id) => monthInstances[id]).find(Boolean);
+  return normalizeRecurringInstance(rawInstance);
+}
+
+export function normalizeRecurringInstance(instance) {
+  if (!instance) return null;
+  if (typeof instance === "string") {
+    return {
+      status: instance === "generated" ? "paid" : instance,
+      transactionId: null,
+      actualAmount: null,
+      paidDate: null,
+    };
+  }
+
+  return {
+    status: instance.status === "generated" ? "paid" : instance.status,
+    transactionId: instance.transactionId ?? null,
+    actualAmount:
+      instance.actualAmount === null || instance.actualAmount === undefined
+        ? null
+        : Number(instance.actualAmount),
+    paidDate: instance.paidDate ?? null,
+  };
+}
+
 export function getRecurringGeneratedTransaction(transactions, templateOrId, monthKey) {
   const templateIds =
     typeof templateOrId === "object"
@@ -90,93 +122,89 @@ export function getRecurringGeneratedTransaction(transactions, templateOrId, mon
 }
 
 export function getRecurringStatus(template, monthKey, transactions, statusByMonth) {
-  if (getRecurringGeneratedTransaction(transactions, template, monthKey)) return "Generated";
-  if (statusByMonth?.[monthKey]?.[template.id] === "skipped") return "Skipped";
-  return "Not generated";
+  const instance = getRecurringInstance(statusByMonth, monthKey, template);
+  if (instance?.status === "paid" || getRecurringGeneratedTransaction(transactions, template, monthKey)) {
+    return "Paid";
+  }
+  if (instance?.status === "skipped") return "Skipped";
+  return "Unpaid";
 }
 
-export function generateRecurringTransactions(monthKey, generationRows) {
-  return updateAppData((data) => {
-    const existing = data.transactions ?? [];
-    const createdAt = timestamp();
-    const newTransactions = [];
-    const nextStatus = {
-      ...(data.recurringStatusByMonth ?? {}),
-      [monthKey]: { ...(data.recurringStatusByMonth?.[monthKey] ?? {}) },
-    };
+export function getRecurringDueDate(monthKey, dueDay) {
+  const [year, month] = monthKey.split("-").map(Number);
+  const lastDay = new Date(year, month, 0).getDate();
+  return `${monthKey}-${String(Math.min(Number(dueDay), lastDay)).padStart(2, "0")}`;
+}
 
-    generationRows.forEach((row) => {
-      if (getRecurringGeneratedTransaction(existing, row.template.id, monthKey)) return;
+export function getRecurringDisplayStatus(template, monthKey, instance, today = new Date()) {
+  if (instance?.status === "paid") return "Paid";
+  if (instance?.status === "skipped") return "Skipped";
 
-      if (row.action === "skip") {
-        nextStatus[monthKey][row.template.id] = "skipped";
-        return;
-      }
+  const dueDate = new Date(`${getRecurringDueDate(monthKey, template.dueDay)}T00:00:00`);
+  const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const msPerDay = 24 * 60 * 60 * 1000;
+  const daysUntilDue = Math.round((dueDate - todayDate) / msPerDay);
 
-      const amount = Number(row.actualAmount) || 0;
-      if (amount <= 0) return;
+  if (daysUntilDue < 0) return "Past due";
+  if (daysUntilDue === 0) return "Due now";
+  if (daysUntilDue <= 7) return "Due soon";
+  return "Upcoming";
+}
 
-      delete nextStatus[monthKey][row.template.id];
-      newTransactions.push({
-        id: createId("txn"),
-        date: getDueDateForMonth(monthKey, row.template.dueDay),
-        merchant: row.template.name,
-        paymentMethod: row.template.paymentMethod,
-        cardId: row.template.paymentMethod === "Credit Card" ? row.template.cardId : "",
+export function getRecurringAmountForMonth(template, instance) {
+  const actualAmount = Number(instance?.actualAmount);
+  if (Number.isFinite(actualAmount) && actualAmount > 0) return actualAmount;
+  return Number(template.estimatedAmount || 0);
+}
+
+export function getMonthlyRecurringRows(templates, monthKey, statusByMonth, today = new Date()) {
+  return getEligibleRecurringPayments(templates, monthKey)
+    .map((template) => {
+      const instance = getRecurringInstance(statusByMonth, monthKey, template);
+      const amount = getRecurringAmountForMonth(template, instance);
+      const dueDate = getRecurringDueDate(monthKey, template.dueDay);
+      const displayStatus = getRecurringDisplayStatus(template, monthKey, instance, today);
+
+      return {
+        template,
+        instance,
+        dueDate,
         amount,
-        notes: row.template.notes
-          ? `Generated from recurring payment. ${row.template.notes}`
-          : "Generated from recurring payment.",
-        source: "recurring",
-        recurringPaymentId: row.template.id,
-        recurringMonth: monthKey,
-        splits: [
-          {
-            id: createId("split"),
-            categoryId: row.template.categoryId || UNCATEGORIZED_ID,
-            amount,
-          },
-        ],
-        createdAt,
-        updatedAt: createdAt,
-      });
-    });
-
-    return {
-      ...data,
-      transactions: [...existing, ...newTransactions],
-      recurringStatusByMonth: nextStatus,
-    };
-  });
+        paidAmount: instance?.status === "paid" ? amount : 0,
+        unpaidAmount: !instance || instance.status === "unpaid" || !["paid", "skipped"].includes(instance.status)
+          ? amount
+          : 0,
+        displayStatus,
+      };
+    })
+    .sort((a, b) => a.dueDate.localeCompare(b.dueDate) || a.template.name.localeCompare(b.template.name));
 }
 
-export function getRecurringSummary(templates, monthKey, transactions) {
-  const eligible = getEligibleRecurringPayments(templates, monthKey);
-  const fixedTotal = eligible
-    .filter((template) => template.billType === "fixed")
-    .reduce((total, template) => total + Number(template.estimatedAmount || 0), 0);
-  const variableTotal = eligible
-    .filter((template) => template.billType === "variable")
-    .reduce((total, template) => total + Number(template.estimatedAmount || 0), 0);
-  const actualTotal = transactions
-    .filter(
-      (transaction) =>
-        transaction.source === "recurring" && transaction.recurringMonth === monthKey,
-    )
-    .reduce((total, transaction) => total + Number(transaction.amount || 0), 0);
-  const estimatedTotal = fixedTotal + variableTotal;
+export function getRecurringSummary(templates, monthKey, statusByMonth) {
+  const rows = getMonthlyRecurringRows(templates, monthKey, statusByMonth);
+  const fixedTotal = rows
+    .filter((row) => row.template.billType === "fixed")
+    .reduce((total, row) => total + Number(row.template.estimatedAmount || 0), 0);
+  const variableTotal = rows
+    .filter((row) => row.template.billType === "variable")
+    .reduce((total, row) => total + Number(row.template.estimatedAmount || 0), 0);
+  const estimatedTotal = rows.reduce((total, row) => total + Number(row.template.estimatedAmount || 0), 0);
+  const actualTotal = rows.reduce((total, row) => total + row.amount, 0);
+  const paidTotal = rows.reduce((total, row) => total + row.paidAmount, 0);
+  const unpaidTotal = rows.reduce((total, row) => total + row.unpaidAmount, 0);
 
   return {
     fixedTotal,
     variableTotal,
     estimatedTotal,
     actualTotal,
+    paidTotal,
+    unpaidTotal,
+    remainingTotal: unpaidTotal,
+    paidCount: rows.filter((row) => row.instance?.status === "paid").length,
+    unpaidCount: rows.filter((row) => row.unpaidAmount > 0).length,
+    upcomingUnpaidCount: rows.filter((row) => ["Due soon", "Upcoming"].includes(row.displayStatus)).length,
+    pastDueUnpaidCount: rows.filter((row) => row.displayStatus === "Past due").length,
     difference: actualTotal - estimatedTotal,
   };
-}
-
-function getDueDateForMonth(monthKey, dueDay) {
-  const [year, month] = monthKey.split("-").map(Number);
-  const lastDay = new Date(year, month, 0).getDate();
-  return `${monthKey}-${String(Math.min(Number(dueDay), lastDay)).padStart(2, "0")}`;
 }

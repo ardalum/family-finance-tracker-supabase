@@ -198,7 +198,7 @@ export default function CreditCardForm({
           label="Credit limit"
           type="number"
           min="0"
-          step="1"
+          step="0.01"
           value={form.creditLimit}
           onChange={(event) => updateField("creditLimit", event.target.value)}
           required

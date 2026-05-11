@@ -5,138 +5,225 @@ import Input from "../../../components/ui/Input.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
 import { getCategoryName } from "../../spending/spendingService.js";
 import {
-  getEligibleRecurringPayments,
-  getRecurringGeneratedTransaction,
-  getRecurringStatus,
+  getMonthlyRecurringRows,
+  getRecurringAmountForMonth,
+  getRecurringDueDate,
 } from "../recurringService.js";
+
+function todayDate() {
+  return new Date().toISOString().slice(0, 10);
+}
 
 export default function RecurringGenerationPanel({
   monthKey,
   templates,
-  transactions,
   recurringStatusByMonth,
   categories,
-  onGenerate,
+  onMarkPaid,
+  onMarkUnpaid,
+  onSkip,
   isSaving = false,
 }) {
-  const eligibleTemplates = useMemo(
-    () => getEligibleRecurringPayments(templates, monthKey),
-    [monthKey, templates],
+  const billRows = useMemo(
+    () => getMonthlyRecurringRows(templates, monthKey, recurringStatusByMonth),
+    [monthKey, recurringStatusByMonth, templates],
   );
-  const [rows, setRows] = useState([]);
+  const [drafts, setDrafts] = useState({});
   const [message, setMessage] = useState("");
 
   useEffect(() => {
     setMessage("");
-    setRows(
-      eligibleTemplates.map((template) => ({
-        template,
-        action: template.billType === "variable" ? "estimate" : "generate",
-        actualAmount: String(template.estimatedAmount),
-      })),
-    );
-  }, [eligibleTemplates]);
-
-  function updateRow(templateId, patch) {
-    setRows((current) =>
-      current.map((row) =>
-        row.template.id === templateId ? { ...row, ...patch } : row,
+    setDrafts(
+      Object.fromEntries(
+        billRows.map((row) => {
+          const actualAmount =
+            row.instance?.actualAmount ?? (row.template.billType === "fixed" ? row.template.estimatedAmount : "");
+          return [
+            row.template.id,
+            {
+              actualAmount: actualAmount === "" ? "" : String(actualAmount),
+              paidDate: row.instance?.paidDate ?? todayDate(),
+            },
+          ];
+        }),
       ),
     );
+  }, [billRows]);
+
+  function updateDraft(templateId, patch) {
+    setDrafts((current) => ({
+      ...current,
+      [templateId]: {
+        ...(current[templateId] ?? {}),
+        ...patch,
+      },
+    }));
   }
 
-  async function handleGenerate() {
-    const candidates = rows.filter((row) => {
-      const status = getRecurringStatus(row.template, monthKey, transactions, recurringStatusByMonth);
-      return status !== "Generated";
-    });
-    const invalid = candidates.find((row) => row.action !== "skip" && Number(row.actualAmount) <= 0);
-    if (invalid) {
-      setMessage("Actual amounts must be greater than zero unless skipped.");
+  async function handleMarkPaid(row) {
+    const draft = drafts[row.template.id] ?? {};
+    const amount = Number(draft.actualAmount);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setMessage("Enter an actual amount greater than zero before marking paid.");
       return;
     }
 
     try {
-      const generated = await onGenerate(candidates);
-      setMessage(
-        generated.length === 0
-          ? "No new recurring transactions generated."
-          : "Recurring transactions generated.",
-      );
+      await onMarkPaid({
+        template: row.template,
+        actualAmount: amount,
+        paidDate: draft.paidDate || getRecurringDueDate(monthKey, row.template.dueDay),
+      });
+      setMessage(`${row.template.name} marked paid.`);
     } catch (error) {
-      setMessage(error.message || "Could not generate recurring transactions.");
+      setMessage(error.message || "Could not mark recurring bill paid.");
+    }
+  }
+
+  async function handleMarkUnpaid(row) {
+    try {
+      await onMarkUnpaid(row.template);
+      setMessage(`${row.template.name} marked unpaid. Linked spending transaction deleted.`);
+    } catch (error) {
+      setMessage(error.message || "Could not mark recurring bill unpaid.");
+    }
+  }
+
+  async function handleSkip(row) {
+    try {
+      await onSkip(row.template);
+      setMessage(`${row.template.name} skipped for this month.`);
+    } catch (error) {
+      setMessage(error.message || "Could not skip recurring bill.");
     }
   }
 
   return (
     <Card>
       <div className="border-b border-gray-200 p-5">
-        <h3 className="text-lg font-semibold text-gray-950">Monthly generation preview</h3>
+        <h3 className="text-lg font-semibold text-gray-950">Monthly recurring bills</h3>
         <p className="mt-1 text-sm text-gray-500">
-          Generate selected recurring bills into Spending Tracker transactions.
+          Mark bills paid one at a time. Paid bills create linked Spending Tracker transactions.
         </p>
-        {message ? <p className="mt-3 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{message}</p> : null}
+        {message ? (
+          <p className="mt-3 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+            {message}
+          </p>
+        ) : null}
       </div>
 
-      {rows.length === 0 ? (
+      {billRows.length === 0 ? (
         <div className="p-8 text-center text-sm text-gray-500">
-          No active recurring payments are eligible for this month.
+          No active recurring payments apply to this month.
         </div>
       ) : (
-        <>
-          <div className="overflow-x-auto">
-            <table className="min-w-full border-separate border-spacing-0 text-left text-sm">
-              <thead className="bg-gray-50 text-xs uppercase tracking-normal text-gray-500">
-                <tr>
-                  <th className="px-5 py-3 font-semibold">Bill</th>
-                  <th className="px-5 py-3 font-semibold">Category</th>
-                  <th className="px-5 py-3 font-semibold">Estimate</th>
-                  <th className="px-5 py-3 font-semibold">Actual</th>
-                  <th className="px-5 py-3 font-semibold">Action</th>
-                  <th className="px-5 py-3 font-semibold">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {rows.map((row) => {
-                  const generated = getRecurringGeneratedTransaction(transactions, row.template, monthKey);
-                  const status = getRecurringStatus(row.template, monthKey, transactions, recurringStatusByMonth);
-                  const disabled = Boolean(generated);
-                  return (
-                    <tr key={row.template.id} className="bg-white">
-                      <td className="px-5 py-4 align-middle font-semibold text-gray-950">{row.template.name}</td>
-                      <td className="px-5 py-4 align-middle text-gray-700">{getCategoryName(row.template.categoryId, categories)}</td>
-                      <td className="px-5 py-4 align-middle text-gray-700">{formatCurrency(row.template.estimatedAmount)}</td>
-                      <td className="px-5 py-4 align-middle">
-                        <Input label="Actual amount" type="number" min="0" step="0.01" value={row.actualAmount} onChange={(event) => updateRow(row.template.id, { actualAmount: event.target.value, action: row.template.billType === "variable" ? "actual" : row.action })} disabled={disabled || row.action === "skip"} />
-                      </td>
-                      <td className="px-5 py-4 align-middle">
-                        {row.template.billType === "fixed" ? (
-                          <span className="text-gray-600">Use estimate</span>
+        <div className="overflow-x-auto">
+          <table className="min-w-full border-separate border-spacing-0 text-left text-sm">
+            <thead className="bg-gray-50 text-xs uppercase tracking-normal text-gray-500">
+              <tr>
+                <th className="px-5 py-3 font-semibold">Bill</th>
+                <th className="px-5 py-3 font-semibold">Due date</th>
+                <th className="px-5 py-3 font-semibold">Category</th>
+                <th className="px-5 py-3 font-semibold">Payment</th>
+                <th className="px-5 py-3 font-semibold">Estimated</th>
+                <th className="px-5 py-3 font-semibold">Actual</th>
+                <th className="px-5 py-3 font-semibold">Status</th>
+                <th className="px-5 py-3 font-semibold">Paid date</th>
+                <th className="px-5 py-3 font-semibold">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {billRows.map((row) => {
+                const draft = drafts[row.template.id] ?? {};
+                const isPaid = row.instance?.status === "paid";
+                const isSkipped = row.instance?.status === "skipped";
+                const amount = getRecurringAmountForMonth(row.template, row.instance);
+
+                return (
+                  <tr key={row.template.id} className={row.displayStatus === "Past due" ? "bg-red-50" : "bg-white"}>
+                    <td className="px-5 py-4 align-middle font-semibold text-gray-950">
+                      {row.template.name}
+                    </td>
+                    <td className="whitespace-nowrap px-5 py-4 align-middle text-gray-700">
+                      {row.dueDate}
+                    </td>
+                    <td className="px-5 py-4 align-middle text-gray-700">
+                      {getCategoryName(row.template.categoryId, categories)}
+                    </td>
+                    <td className="px-5 py-4 align-middle text-gray-700">
+                      {row.template.paymentMethod}
+                    </td>
+                    <td className="px-5 py-4 align-middle text-gray-700">
+                      {formatCurrency(row.template.estimatedAmount)}
+                    </td>
+                    <td className="px-5 py-4 align-middle">
+                      <Input
+                        label="Actual amount"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={draft.actualAmount ?? ""}
+                        onChange={(event) => updateDraft(row.template.id, { actualAmount: event.target.value })}
+                        placeholder={row.template.billType === "variable" ? formatCurrency(row.template.estimatedAmount) : ""}
+                        disabled={isSkipped}
+                      />
+                    </td>
+                    <td className="px-5 py-4 align-middle">
+                      <span className={`rounded-md px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${
+                        isPaid
+                          ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
+                          : isSkipped
+                            ? "bg-amber-50 text-amber-700 ring-amber-200"
+                            : row.displayStatus === "Past due"
+                              ? "bg-red-50 text-red-700 ring-red-200"
+                              : "bg-gray-100 text-gray-600 ring-gray-200"
+                      }`}>
+                        {row.displayStatus}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 align-middle">
+                      <Input
+                        label="Paid date"
+                        type="date"
+                        value={draft.paidDate ?? todayDate()}
+                        onChange={(event) => updateDraft(row.template.id, { paidDate: event.target.value })}
+                        disabled={isSkipped}
+                      />
+                    </td>
+                    <td className="px-5 py-4 align-middle">
+                      <div className="flex flex-wrap gap-2">
+                        {isPaid ? (
+                          <>
+                            <Button type="button" onClick={() => handleMarkPaid(row)} disabled={isSaving}>
+                              Update Paid
+                            </Button>
+                            <Button type="button" variant="secondary" onClick={() => handleMarkUnpaid(row)} disabled={isSaving}>
+                              Mark Unpaid
+                            </Button>
+                          </>
                         ) : (
-                          <select className="h-10 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-950 outline-none focus:border-gray-950 focus:ring-2 focus:ring-gray-950/10" value={row.action} onChange={(event) => updateRow(row.template.id, { action: event.target.value, actualAmount: event.target.value === "estimate" ? String(row.template.estimatedAmount) : row.actualAmount })} disabled={disabled}>
-                            <option value="actual">Use actual</option>
-                            <option value="estimate">Use estimate</option>
-                            <option value="skip">Skip</option>
-                          </select>
+                          <Button type="button" onClick={() => handleMarkPaid(row)} disabled={isSaving || isSkipped}>
+                            Mark Paid
+                          </Button>
                         )}
-                      </td>
-                      <td className="px-5 py-4 align-middle">
-                        <span className={`rounded-md px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${status === "Generated" ? "bg-emerald-50 text-emerald-700 ring-emerald-200" : status === "Skipped" ? "bg-amber-50 text-amber-700 ring-amber-200" : "bg-gray-100 text-gray-600 ring-gray-200"}`}>
-                          {status}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-          <div className="border-t border-gray-200 p-5">
-            <Button type="button" onClick={handleGenerate} disabled={isSaving}>
-              {isSaving ? "Generating..." : "Generate Recurring Transactions"}
-            </Button>
-          </div>
-        </>
+                        {!isPaid ? (
+                          <Button type="button" variant="secondary" onClick={() => handleSkip(row)} disabled={isSaving}>
+                            Skip
+                          </Button>
+                        ) : null}
+                      </div>
+                      {isPaid ? (
+                        <p className="mt-2 text-xs text-gray-500">
+                          Linked spending: {formatCurrency(amount)}
+                        </p>
+                      ) : null}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
     </Card>
   );

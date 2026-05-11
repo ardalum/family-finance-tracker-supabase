@@ -86,7 +86,7 @@ export default function RecurringPaymentForm({
         <h3 className="text-base font-semibold text-gray-950">
           {editingTemplate ? "Edit recurring payment" : "Add recurring payment"}
         </h3>
-        <p className="mt-1 text-sm text-gray-500">Templates generate spending transactions.</p>
+        <p className="mt-1 text-sm text-gray-500">Templates become monthly bills you can mark paid.</p>
       </div>
 
       {categories.length === 0 ? (

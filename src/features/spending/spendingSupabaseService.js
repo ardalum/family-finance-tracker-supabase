@@ -19,6 +19,13 @@ function getSupabaseCategoryId(categoryId, categoriesByAppId) {
   return category?.supabaseId ?? category?.id ?? null;
 }
 
+function getRecurringPaymentId(input) {
+  const value = input.recurringPaymentId;
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value ?? "")
+    ? value
+    : null;
+}
+
 function normalizeTransactionInput(input, cardsByAppId, categoriesByAppId) {
   const card = cardsByAppId.get(input.cardId);
 
@@ -31,7 +38,7 @@ function normalizeTransactionInput(input, cardsByAppId, categoriesByAppId) {
     amount: Number(input.amount) || 0,
     notes: input.notes?.trim() ?? "",
     source: input.source || "manual",
-    recurring_payment_id: null,
+    recurring_payment_id: getRecurringPaymentId(input),
     recurring_month: input.recurringMonth || null,
   };
 }

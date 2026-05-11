@@ -26,7 +26,9 @@ export default function RecurringPayments({
   onCreateRecurringPayment,
   onUpdateRecurringPayment,
   onDeleteRecurringPayment,
-  onGenerateRecurringPayments,
+  onMarkRecurringPaid,
+  onMarkRecurringUnpaid,
+  onSkipRecurringPayment,
   onImportLocalRecurringPayments,
 }) {
   const [editingTemplate, setEditingTemplate] = useState(null);
@@ -75,7 +77,7 @@ export default function RecurringPayments({
               {formatMonthLabel(selectedMonth)}
             </h2>
             <p className="mt-1 text-sm text-gray-500">
-              Manage bill templates and generate monthly spending transactions.
+              Manage bill templates and track what is paid each month.
             </p>
             {loading ? <p className="mt-2 text-sm text-gray-500">Loading recurring payments...</p> : null}
             {categoriesLoading ? <p className="mt-2 text-sm text-gray-500">Loading categories...</p> : null}
@@ -101,16 +103,17 @@ export default function RecurringPayments({
       <RecurringSummary
         templates={recurringPayments}
         monthKey={selectedMonth}
-        transactions={transactions}
+        recurringStatusByMonth={recurringStatusByMonth}
       />
 
       <RecurringGenerationPanel
         monthKey={selectedMonth}
         templates={recurringPayments}
-        transactions={transactions}
         recurringStatusByMonth={recurringStatusByMonth}
         categories={categories}
-        onGenerate={onGenerateRecurringPayments}
+        onMarkPaid={onMarkRecurringPaid}
+        onMarkUnpaid={onMarkRecurringUnpaid}
+        onSkip={onSkipRecurringPayment}
         isSaving={isSaving}
       />
 

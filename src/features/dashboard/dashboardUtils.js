@@ -9,7 +9,7 @@ import {
   UNCATEGORIZED_NAME,
 } from "../spending/spendingService.js";
 import {
-  getEligibleRecurringPayments,
+  getMonthlyRecurringRows,
   getRecurringStatus,
   getRecurringSummary,
 } from "../recurring/recurringService.js";
@@ -31,7 +31,7 @@ export function getDashboardData(appData, monthKey) {
     const balance = Number(entry.balance || 0);
     return entry.paid || balance <= 0 ? sum : sum + balance;
   }, 0);
-  const recurringSummary = getRecurringSummary(appData.recurringPayments, monthKey, recurringTransactions);
+  const recurringSummary = getRecurringSummary(appData.recurringPayments, monthKey, appData.recurringStatusByMonth);
 
   return {
     cards,
@@ -44,7 +44,10 @@ export function getDashboardData(appData, monthKey) {
       spendingTotal,
       remainingBudget: budgetTotal - spendingTotal,
       recurringEstimate: recurringSummary.estimatedTotal,
-      recurringActual: recurringSummary.actualTotal,
+      recurringPaid: recurringSummary.paidTotal,
+      recurringRemaining: recurringSummary.remainingTotal,
+      recurringUpcomingCount: recurringSummary.upcomingUnpaidCount,
+      recurringPastDueCount: recurringSummary.pastDueUnpaidCount,
       totalCreditLimit:
         getOwnerCreditLimitTotal(cards, "Arvin") + getOwnerCreditLimitTotal(cards, "Kristine"),
       statementBalanceTotal,
@@ -89,12 +92,12 @@ export function getAlerts(data) {
   });
 
   data.recurringRows.forEach((row) => {
-    if (row.status !== "Generated" && row.daysUntilDue < 0) {
-      alerts.push({ type: "danger", text: `${row.template.name} is past due and not generated.` });
-    } else if (row.status !== "Generated" && row.daysUntilDue <= 7) {
-      alerts.push({ type: "warning", text: `${row.template.name} is due within 7 days and not generated.` });
+    if (row.displayStatus === "Past due") {
+      alerts.push({ type: "danger", text: `${row.template.name} is past due and unpaid.` });
+    } else if (["Due now", "Due soon"].includes(row.displayStatus)) {
+      alerts.push({ type: "warning", text: `${row.template.name} is due within 7 days and unpaid.` });
     }
-    if (row.template.billType === "variable" && row.status === "Not generated") {
+    if (row.template.billType === "variable" && row.displayStatus !== "Paid" && !row.instance?.actualAmount) {
       alerts.push({ type: "warning", text: `${row.template.name} needs an actual variable amount.` });
     }
   });
@@ -154,13 +157,11 @@ function getCardRows(cards, monthlyBalances, monthKey) {
 }
 
 function getRecurringRows(templates, monthKey, transactions, statusByMonth) {
-  return getEligibleRecurringPayments(templates, monthKey)
-    .map((template) => ({
-      template,
-      status: getRecurringStatus(template, monthKey, transactions, statusByMonth),
-      daysUntilDue: daysBetween(new Date(), getDueDateForMonth(monthKey, template.dueDay)),
-    }))
-    .sort((a, b) => a.daysUntilDue - b.daysUntilDue);
+  return getMonthlyRecurringRows(templates, monthKey, statusByMonth).map((row) => ({
+    ...row,
+    status: getRecurringStatus(row.template, monthKey, transactions, statusByMonth),
+    daysUntilDue: daysBetween(new Date(), getDueDateForMonth(monthKey, row.template.dueDay)),
+  }));
 }
 
 function getRecentTransactions(transactions) {

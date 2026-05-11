@@ -1,5 +1,5 @@
 export function formatCurrency(value, options = {}) {
-  const fractionDigits = options.cents ? 2 : 0;
+  const fractionDigits = options.cents === false ? 0 : 2;
 
   return new Intl.NumberFormat("en-US", {
     style: "currency",
