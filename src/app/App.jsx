@@ -1086,7 +1086,7 @@ function FinanceTrackerApp() {
         <>
           <HouseholdSwitcher />
           <AlertsMenu alerts={headerAlerts} />
-          <AccountMenu />
+          <AccountMenu onNavigate={setActiveView} />
         </>
       }
     >

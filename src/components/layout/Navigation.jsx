@@ -1,8 +1,6 @@
 import {
   CalendarSync,
   CreditCard,
-  DatabaseBackup,
-  Home,
   LayoutDashboard,
   ReceiptText,
   WalletCards,
@@ -33,16 +31,6 @@ const navItems = [
     id: "recurring",
     label: "Recurring Payments",
     icon: CalendarSync,
-  },
-  {
-    id: "backup",
-    label: "Backup / Restore",
-    icon: DatabaseBackup,
-  },
-  {
-    id: "household-settings",
-    label: "Household Settings",
-    icon: Home,
   },
 ];
 
