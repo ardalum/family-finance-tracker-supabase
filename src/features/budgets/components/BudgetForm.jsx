@@ -8,7 +8,13 @@ const emptyForm = {
   notes: "",
 };
 
-export default function BudgetForm({ editingBudget, onCancel, onSaved, isSaving = false }) {
+export default function BudgetForm({
+  editingBudget,
+  onCancel,
+  onSaved,
+  isSaving = false,
+  showHeader = true,
+}) {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
 
@@ -47,17 +53,19 @@ export default function BudgetForm({ editingBudget, onCancel, onSaved, isSaving 
 
   return (
     <form className="grid gap-4" onSubmit={handleSubmit}>
-      <div>
-        <h3 className="text-base font-semibold text-gray-950">
-          {editingBudget ? "Edit budget category" : "Add budget category"}
-        </h3>
-        <p className="mt-1 text-sm text-gray-500">
-          Spending totals will connect here later.
-        </p>
-      </div>
+      {showHeader ? (
+        <div>
+          <h3 className="text-base font-semibold text-[#111827]">
+            {editingBudget ? "Edit budget category" : "Add budget category"}
+          </h3>
+          <p className="mt-1 text-sm text-[#6B7280]">
+            Set the monthly amount and optional notes.
+          </p>
+        </div>
+      ) : null}
 
       {error ? (
-        <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B]">
           {error}
         </div>
       ) : null}
@@ -77,10 +85,10 @@ export default function BudgetForm({ editingBudget, onCancel, onSaved, isSaving 
         onChange={(event) => updateField("monthlyAmount", event.target.value)}
         required
       />
-      <label className="grid min-w-0 gap-1.5 text-sm font-medium text-gray-700">
+      <label className="grid min-w-0 gap-1.5 text-sm font-medium text-[#374151]">
         Notes
         <textarea
-          className="min-h-24 w-full min-w-0 resize-y rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-950 outline-none transition placeholder:text-gray-400 focus:border-gray-950 focus:ring-2 focus:ring-gray-950/10"
+          className="min-h-24 w-full min-w-0 resize-y rounded-xl border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-[#111827] outline-none transition placeholder:text-gray-400 focus:border-[#1F2937] focus:ring-2 focus:ring-[#1F2937]/10"
           value={form.notes}
           onChange={(event) => updateField("notes", event.target.value)}
           placeholder="Optional"

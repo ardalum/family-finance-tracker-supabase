@@ -1,4 +1,4 @@
-import { CreditCard } from "lucide-react";
+import { WalletCards } from "lucide-react";
 import Navigation from "./Navigation.jsx";
 
 export default function AppShell({
@@ -10,20 +10,22 @@ export default function AppShell({
   children,
 }) {
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="border-b border-gray-200 bg-white">
+    <div className="min-h-screen bg-[#F9FAFB] text-[#111827]">
+      <header className="border-b border-[#E5E7EB] bg-white">
         <div className="mx-auto grid max-w-7xl gap-4 px-4 py-4 sm:px-6 lg:px-8">
           <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
             <div className="flex min-w-0 items-center gap-3.5">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-sm">
-                <CreditCard size={19} strokeWidth={2.25} aria-hidden="true" />
+              <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#1F2937] text-white shadow-sm">
+                <WalletCards size={21} strokeWidth={2.2} aria-hidden="true" />
+                <span className="absolute bottom-2 right-2 h-1.5 w-5 rounded-full bg-[#10B981]" />
               </div>
               <div className="min-w-0 leading-tight">
-                <h1 className="truncate text-base font-semibold tracking-normal text-gray-950 sm:text-lg">
-                  Finance Tracker
+                <h1 className="truncate text-base font-semibold tracking-normal sm:text-lg">
+                  <span className="text-[#1F2937]">Wallet</span>
+                  <span className="text-[#10B981]">Flow</span>
                 </h1>
-                <p className="mt-0.5 truncate text-xs text-gray-500 sm:text-sm">
-                  Track cards, budgets, and spending
+                <p className="mt-0.5 truncate text-xs text-[#6B7280] sm:text-sm">
+                  Track your cards, budget, and spending in one clear place.
                 </p>
               </div>
             </div>
@@ -38,8 +40,8 @@ export default function AppShell({
       </header>
       <main className="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:px-8">
         <div>
-          <h2 className="text-2xl font-semibold tracking-normal text-gray-950">{pageTitle}</h2>
-          <p className="mt-1 text-sm text-gray-500">{pageDescription}</p>
+          <h2 className="text-2xl font-semibold tracking-normal text-[#111827]">{pageTitle}</h2>
+          <p className="mt-1 text-sm text-[#6B7280]">{pageDescription}</p>
         </div>
         {children}
       </main>

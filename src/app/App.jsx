@@ -66,26 +66,26 @@ import { readAppData } from "../lib/storage/appStorage.js";
 const pageContent = {
   dashboard: {
     title: "Dashboard",
-    description: "Review monthly budget, spending, cards, recurring bills, and alerts.",
+    description: "A clear view of cards, budget, spending, and bills.",
   },
   "credit-cards": {
-    title: "Credit Card Tracker",
-    description: "Manage cards, monthly balances, due dates, and statement status.",
+    title: "Credit Cards",
+    description: "Manage cards, monthly balances, due dates, and payment status.",
   },
   budgets: {
-    title: "Budget Tracker",
-    description: "Plan monthly budget categories without spending calculations yet.",
+    title: "Monthly Budget",
+    description: "Plan category budgets for each month.",
   },
   spending: {
-    title: "Spending Tracker",
-    description: "Track monthly transactions, splits, and spending summaries.",
+    title: "Transactions",
+    description: "Track spending, payment methods, categories, and notes.",
   },
   recurring: {
-    title: "Recurring Payments",
-    description: "Manage recurring bill templates and monthly paid status.",
+    title: "Insights",
+    description: "Track recurring bills and monthly paid status.",
   },
   backup: {
-    title: "Backup / Restore",
+    title: "Backup & Restore",
     description: "Export Supabase household data and access legacy localStorage backup tools.",
   },
   "household-settings": {
@@ -1052,7 +1052,7 @@ function FinanceTrackerApp() {
 
   if (setupCheckLoading) {
     return (
-      <div className="grid min-h-screen place-items-center bg-gray-100 px-4 text-sm text-gray-600">
+      <div className="grid min-h-screen place-items-center bg-[#F9FAFB] px-4 text-sm text-[#6B7280]">
         Checking setup...
       </div>
     );
@@ -1091,7 +1091,7 @@ function FinanceTrackerApp() {
       }
     >
       {setupCheckError ? (
-        <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+        <div className="mb-4 rounded-xl border border-amber-200 bg-[#FEF3C7] px-3 py-2 text-sm text-[#92400E]">
           {setupCheckError}
         </div>
       ) : null}

@@ -66,13 +66,13 @@ export default function SpendingTracker({
   return (
     <section className="mx-auto grid w-full max-w-7xl gap-6">
       {error ? (
-        <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B]">
           {error}
         </div>
       ) : null}
 
       {categoriesError ? (
-        <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B]">
           {categoriesError}
         </div>
       ) : null}
@@ -88,16 +88,16 @@ export default function SpendingTracker({
       <Card className="p-5">
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto_220px] lg:items-end">
           <div>
-            <p className="text-sm font-medium text-gray-500">Spending tracker</p>
-            <h2 className="mt-1 text-2xl font-semibold tracking-normal text-gray-950">
+            <p className="text-sm font-medium text-[#6B7280]">Transactions</p>
+            <h2 className="mt-1 text-2xl font-semibold tracking-normal text-[#111827]">
               {formatMonthLabel(selectedMonth)}
             </h2>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-[#6B7280]">
               Track transactions separately from cards and budgets.
             </p>
-            {loading ? <p className="mt-2 text-sm text-gray-500">Loading transactions...</p> : null}
-            {categoriesLoading ? <p className="mt-2 text-sm text-gray-500">Loading categories...</p> : null}
-            {isSaving ? <p className="mt-2 text-sm text-gray-500">Saving transaction...</p> : null}
+            {loading ? <p className="mt-2 text-sm text-[#6B7280]">Loading transactions...</p> : null}
+            {categoriesLoading ? <p className="mt-2 text-sm text-[#6B7280]">Loading categories...</p> : null}
+            {isSaving ? <p className="mt-2 text-sm text-[#6B7280]">Saving transaction...</p> : null}
           </div>
           <Button type="button" onClick={openAddModal} disabled={loading || isSaving || categoriesLoading}>
             <Plus size={16} aria-hidden="true" />

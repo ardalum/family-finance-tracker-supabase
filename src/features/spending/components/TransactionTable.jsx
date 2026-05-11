@@ -52,7 +52,7 @@ export default function TransactionTable({
 
   async function handleDelete(transaction) {
     if (transaction.source === "recurring") {
-      window.alert("Recurring transactions are managed from Recurring Payments. Mark the bill unpaid there to remove the linked transaction.");
+      window.alert("Recurring transactions are managed from Insights. Mark the bill unpaid there to remove the linked transaction.");
       return;
     }
     const confirmed = window.confirm(`Delete transaction from ${transaction.merchant}?`);
@@ -61,7 +61,7 @@ export default function TransactionTable({
 
   return (
     <Card className="min-w-0 overflow-hidden">
-      <div className="grid gap-3 border-b border-gray-200 p-4">
+      <div className="grid gap-3 border-b border-[#E5E7EB] p-4">
         <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-[150px_170px_150px_minmax(260px,1fr)] xl:items-end">
           <Select
             label="Card"
@@ -105,8 +105,8 @@ export default function TransactionTable({
           />
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="text-xs font-medium text-gray-500">
-            Showing <span className="font-semibold text-gray-950">{filteredTransactions.length}</span>{" "}
+          <div className="text-xs font-medium text-[#6B7280]">
+            Showing <span className="font-semibold text-[#111827]">{filteredTransactions.length}</span>{" "}
             transaction{filteredTransactions.length === 1 ? "" : "s"}
           </div>
           <Button
@@ -122,7 +122,7 @@ export default function TransactionTable({
       </div>
 
       {filteredTransactions.length === 0 ? (
-        <div className="p-8 text-center text-sm text-gray-500">
+        <div className="p-8 text-center text-sm text-[#6B7280]">
           No transactions match the current filters.
         </div>
       ) : (
@@ -135,42 +135,42 @@ export default function TransactionTable({
             return (
               <article
                 key={transaction.id}
-                className="grid min-w-0 gap-3 rounded-md border border-gray-200 bg-white p-4 transition hover:border-gray-300 hover:bg-gray-50"
+                className="grid min-w-0 gap-3 rounded-2xl border border-[#E5E7EB] bg-white p-4 transition hover:border-gray-300 hover:bg-[#F9FAFB]"
               >
                 <div className="flex min-w-0 items-start justify-between gap-4">
                   <div className="grid min-w-0 gap-1">
                     <div className="flex min-w-0 flex-wrap items-center gap-2">
-                      <h3 className="min-w-0 truncate text-sm font-semibold text-gray-950" title={transaction.merchant}>
+                      <h3 className="min-w-0 truncate text-sm font-semibold text-[#111827]" title={transaction.merchant}>
                         {transaction.merchant}
                       </h3>
                       {isRecurring ? (
-                        <span className="shrink-0 rounded-md bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700 ring-1 ring-inset ring-blue-200">
+                        <span className="shrink-0 rounded-lg bg-[#DBEAFE] px-2 py-0.5 text-xs font-semibold text-[#1E40AF] ring-1 ring-inset ring-[#DBEAFE]">
                           Recurring
                         </span>
                       ) : null}
                     </div>
-                    <p className="text-xs font-medium text-gray-500">{transaction.date}</p>
+                    <p className="text-xs font-medium text-[#6B7280]">{transaction.date}</p>
                   </div>
-                  <p className="shrink-0 text-right text-sm font-semibold text-gray-950">
+                  <p className="shrink-0 text-right text-sm font-semibold text-[#111827]">
                     {formatCurrency(transaction.amount)}
                   </p>
                 </div>
 
-                <div className="grid min-w-0 gap-3 text-sm text-gray-700 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)]">
+                <div className="grid min-w-0 gap-3 text-sm text-[#374151] md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)]">
                   <DetailBlock label="Payment">
-                    <span className="truncate text-xs font-medium text-gray-500" title={transaction.paymentMethod || "No payment method"}>
+                    <span className="truncate text-xs font-medium text-[#6B7280]" title={transaction.paymentMethod || "No payment method"}>
                       {transaction.paymentMethod || "No payment method"}
                     </span>
                     {card ? (
                       <span className="grid min-w-0 gap-0.5">
                         <LinkedCardName card={card} className="text-sm font-medium decoration-transparent" />
-                        <span className="truncate text-xs text-gray-500">
+                        <span className="truncate text-xs text-[#6B7280]">
                           **** {card.lastFour}
-                          {card.owner ? ` · ${card.owner}` : ""}
+                          {card.owner ? ` - ${card.owner}` : ""}
                         </span>
                       </span>
                     ) : (
-                      <span className="truncate text-sm text-gray-600">
+                      <span className="truncate text-sm text-[#374151]">
                         {transaction.paymentMethod === "Credit Card"
                           ? getCardName(transaction.cardId, cards)
                           : "No card"}
@@ -194,9 +194,9 @@ export default function TransactionTable({
 
                   <DetailBlock label="Notes">
                     {transaction.notes ? (
-                      <span className="truncate text-gray-600" title={transaction.notes}>{transaction.notes}</span>
+                      <span className="truncate text-[#374151]" title={transaction.notes}>{transaction.notes}</span>
                     ) : (
-                      <span className="text-gray-400">None</span>
+                      <span className="text-[#6B7280]">None</span>
                     )}
                   </DetailBlock>
                 </div>
@@ -209,7 +209,7 @@ export default function TransactionTable({
                     onClick={() => onEdit(transaction)}
                     disabled={isSaving || isRecurring}
                     aria-label={`Edit ${transaction.merchant}`}
-                    title={isRecurring ? "Manage from Recurring Payments" : "Edit transaction"}
+                    title={isRecurring ? "Manage from Insights" : "Edit transaction"}
                   >
                     <Edit size={16} aria-hidden="true" />
                   </Button>
@@ -220,7 +220,7 @@ export default function TransactionTable({
                     onClick={() => handleDelete(transaction)}
                     disabled={isSaving || isRecurring}
                     aria-label={`Delete ${transaction.merchant}`}
-                    title={isRecurring ? "Mark unpaid from Recurring Payments" : "Delete transaction"}
+                    title={isRecurring ? "Mark unpaid from Insights" : "Delete transaction"}
                   >
                     <Trash2 size={16} aria-hidden="true" />
                   </Button>
@@ -237,7 +237,7 @@ export default function TransactionTable({
 function DetailBlock({ label, children }) {
   return (
     <div className="grid min-w-0 gap-1">
-      <p className="text-xs font-semibold uppercase tracking-normal text-gray-500">{label}</p>
+      <p className="text-xs font-semibold uppercase tracking-normal text-[#6B7280]">{label}</p>
       <div className="grid min-w-0 gap-0.5">{children}</div>
     </div>
   );

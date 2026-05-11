@@ -156,26 +156,26 @@ export default function FirstTimeSetupWizard({
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 px-4 py-6 sm:py-10">
+    <div className="min-h-screen bg-[#F9FAFB] px-4 py-6 sm:py-10">
       <div className="mx-auto grid w-full max-w-3xl gap-5">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[#6B7280]">
               Step {step} of {totalSteps}
             </p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-normal text-gray-950">
+            <h1 className="mt-1 text-2xl font-semibold tracking-normal text-[#111827]">
               First-time setup
             </h1>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-[#6B7280]">
               Set up the basics now. Cards and budgets can always be added later.
             </p>
           </div>
           <AccountMenu />
         </header>
 
-        <div className="h-2 overflow-hidden rounded-full bg-gray-200">
+        <div className="h-2 overflow-hidden rounded-full bg-[#E5E7EB]">
           <div
-            className="h-full bg-gray-950 transition-all"
+            className="h-full bg-[#10B981] transition-all"
             style={{ width: `${(step / totalSteps) * 100}%` }}
           />
         </div>
@@ -188,8 +188,8 @@ export default function FirstTimeSetupWizard({
             {step === 1 ? (
               <div className="grid gap-4">
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-950">Household name</h2>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <h2 className="text-lg font-semibold text-[#111827]">Household name</h2>
+                  <p className="mt-1 text-sm text-[#6B7280]">
                     This is the shared workspace name for your tracker.
                   </p>
                 </div>
@@ -206,8 +206,8 @@ export default function FirstTimeSetupWizard({
             {step === 2 ? (
               <div className="grid gap-4">
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-950">Household profiles</h2>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <h2 className="text-lg font-semibold text-[#111827]">Household profiles</h2>
+                  <p className="mt-1 text-sm text-[#6B7280]">
                     Profiles are people or owner labels inside this household. They are not login accounts.
                   </p>
                 </div>
@@ -305,7 +305,7 @@ export default function FirstTimeSetupWizard({
                 <div>
                   <h2 className="text-lg font-semibold text-gray-950">First credit card</h2>
                   <p className="mt-1 text-sm text-gray-500">
-                    Optional. You can skip this and add cards later from Credit Card Tracker.
+                    Optional. You can skip this and add cards later from Credit Cards.
                   </p>
                 </div>
                 {activeProfiles.length === 0 ? (

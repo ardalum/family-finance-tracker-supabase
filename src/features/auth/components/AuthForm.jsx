@@ -1,4 +1,4 @@
-import { CreditCard } from "lucide-react";
+import { WalletCards } from "lucide-react";
 import { useState } from "react";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
@@ -39,43 +39,47 @@ export default function AuthForm() {
   }
 
   return (
-    <div className="grid min-h-screen place-items-center bg-gray-100 px-4 py-10">
+    <div className="grid min-h-screen place-items-center bg-[#F9FAFB] px-4 py-10">
       <div className="grid w-full max-w-md gap-6">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-gray-950 text-white">
-            <CreditCard size={20} aria-hidden="true" />
+          <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-[#1F2937] text-white shadow-sm">
+            <WalletCards size={21} aria-hidden="true" />
+            <span className="absolute bottom-2 right-2 h-1.5 w-5 rounded-full bg-[#10B981]" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold tracking-normal text-gray-950">Finance Tracker</h1>
-            <p className="text-sm text-gray-500">Sign in to use your personal finance tools</p>
+            <h1 className="text-xl font-semibold tracking-normal">
+              <span className="text-[#1F2937]">Wallet</span>
+              <span className="text-[#10B981]">Flow</span>
+            </h1>
+            <p className="text-sm text-[#6B7280]">Track your cards, budget, and spending in one clear place.</p>
           </div>
         </div>
 
         <Card>
           <form className="grid gap-4 p-5" onSubmit={handleSubmit}>
             <div>
-              <h2 className="text-lg font-semibold tracking-normal text-gray-950">
+              <h2 className="text-lg font-semibold tracking-normal text-[#111827]">
                 {isSignUp ? "Create account" : "Sign in"}
               </h2>
-              <p className="mt-1 text-sm text-gray-500">
-                Your tracker data stays in this browser for now after you sign in.
+              <p className="mt-1 text-sm text-[#6B7280]">
+                Sign in to continue to your household finance tracker.
               </p>
             </div>
 
             {!isSupabaseConfigured ? (
-              <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+              <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B]">
                 Supabase environment variables are missing.
               </div>
             ) : null}
 
             {error ? (
-              <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+              <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B]">
                 {error}
               </div>
             ) : null}
 
             {status ? (
-              <div className="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
+              <div className="rounded-xl border border-green-200 bg-[#DCFCE7] px-3 py-2 text-sm text-[#166534]">
                 {status}
               </div>
             ) : null}

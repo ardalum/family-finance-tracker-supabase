@@ -5,7 +5,7 @@ export default function RecurringOverview({ rows, summary }) {
   return (
     <Card>
       <div className="border-b border-gray-200 p-5">
-        <h3 className="text-lg font-semibold text-gray-950">Recurring Payments Overview</h3>
+        <h3 className="text-lg font-semibold text-[#111827]">Recurring Bills Overview</h3>
         <p className="mt-1 text-sm text-gray-500">
           Total {formatCurrency(summary.estimatedTotal)} / Paid {formatCurrency(summary.paidTotal)} / Remaining {formatCurrency(summary.remainingTotal)}
         </p>

@@ -9,8 +9,8 @@ export function getRowStatus(card, monthKey, entry) {
     return {
       label: "No balance",
       rowClass: "bg-white",
-      badgeClass: "bg-gray-100 text-gray-700 ring-gray-200",
-      balanceClass: "text-gray-900",
+      badgeClass: "bg-[#FEE2E2] text-[#991B1B] ring-[#FEE2E2]",
+      balanceClass: "text-[#111827]",
       isNoBalance: true,
     };
   }
@@ -19,8 +19,8 @@ export function getRowStatus(card, monthKey, entry) {
     return {
       label: "Paid",
       rowClass: "bg-white",
-      badgeClass: "bg-emerald-100 text-emerald-700 ring-emerald-200",
-      balanceClass: "text-gray-900",
+      badgeClass: "bg-[#DCFCE7] text-[#166534] ring-[#DCFCE7]",
+      balanceClass: "text-[#111827]",
       isNoBalance: false,
     };
   }
@@ -28,9 +28,9 @@ export function getRowStatus(card, monthKey, entry) {
   if (daysUntilDue < 0) {
     return {
       label: "Past due",
-      rowClass: "bg-red-200 ring-2 ring-inset ring-red-500",
-      badgeClass: "bg-red-800 text-white ring-red-900",
-      balanceClass: "text-red-950",
+      rowClass: "bg-white",
+      badgeClass: "bg-[#FEE2E2] text-[#991B1B] ring-[#FEE2E2]",
+      balanceClass: "text-[#991B1B]",
       isNoBalance: false,
     };
   }
@@ -38,9 +38,9 @@ export function getRowStatus(card, monthKey, entry) {
   if (daysUntilDue === 0) {
     return {
       label: "Due now",
-      rowClass: "bg-red-100 ring-1 ring-inset ring-red-300",
-      badgeClass: "bg-red-700 text-white ring-red-800",
-      balanceClass: "text-red-950",
+      rowClass: "bg-white",
+      badgeClass: "bg-[#FEE2E2] text-[#991B1B] ring-[#FEE2E2]",
+      balanceClass: "text-[#991B1B]",
       isNoBalance: false,
     };
   }
@@ -48,9 +48,9 @@ export function getRowStatus(card, monthKey, entry) {
   if (daysUntilDue <= 7) {
     return {
       label: "Due soon",
-      rowClass: "bg-red-50 ring-1 ring-inset ring-red-200",
-      badgeClass: "bg-red-100 text-red-700 ring-red-200",
-      balanceClass: "text-red-900",
+      rowClass: "bg-white",
+      badgeClass: "bg-[#FEF3C7] text-[#92400E] ring-[#FEF3C7]",
+      balanceClass: "text-[#92400E]",
       isNoBalance: false,
     };
   }
@@ -58,8 +58,8 @@ export function getRowStatus(card, monthKey, entry) {
   return {
     label: "Upcoming",
     rowClass: "bg-white",
-    badgeClass: "bg-amber-100 text-amber-700 ring-amber-200",
-    balanceClass: "text-gray-900",
+    badgeClass: "bg-[#DBEAFE] text-[#1E40AF] ring-[#DBEAFE]",
+    balanceClass: "text-[#111827]",
     isNoBalance: false,
   };
 }

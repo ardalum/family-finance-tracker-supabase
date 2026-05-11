@@ -145,28 +145,28 @@ export default function TransactionForm({
     <form className="grid gap-4" onSubmit={handleSubmit}>
       {showHeader ? (
         <div>
-          <h3 className="text-base font-semibold text-gray-950">
+          <h3 className="text-base font-semibold text-[#111827]">
             {editingTransaction ? "Edit transaction" : "Add transaction"}
           </h3>
-          <p className="mt-1 text-sm text-gray-500">Use category split only when needed.</p>
+          <p className="mt-1 text-sm text-[#6B7280]">Use category split only when needed.</p>
         </div>
       ) : null}
 
       {categories.length === 0 ? (
-        <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+        <div className="rounded-xl border border-amber-200 bg-[#FEF3C7] px-3 py-2 text-sm text-[#92400E]">
           No budget categories exist for this month. Create budget categories first, or use
           Uncategorized.
         </div>
       ) : null}
 
       {cards.length === 0 ? (
-        <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B]">
           Add a credit card before adding transactions.
         </div>
       ) : null}
 
       {error ? (
-        <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B]">
           {error}
         </div>
       ) : null}
@@ -239,9 +239,9 @@ export default function TransactionForm({
         </Select>
       </div>
 
-      <label className="inline-flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700">
+      <label className="inline-flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-3 py-2 text-sm font-medium text-[#374151]">
         <input
-          className="h-4 w-4 rounded border-gray-300 text-gray-950 focus:ring-gray-950"
+          className="h-4 w-4 rounded border-gray-300 text-[#1F2937] focus:ring-[#1F2937]"
           type="checkbox"
           checked={form.splitMode}
           onChange={(event) => toggleSplitMode(event.target.checked)}
@@ -250,11 +250,11 @@ export default function TransactionForm({
       </label>
 
       {form.splitMode ? (
-        <div className="grid gap-3 rounded-md border border-gray-200 bg-gray-50 p-3">
+        <div className="grid gap-3 rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-3">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold text-gray-950">Category split</p>
-              <p className="mt-0.5 text-xs text-gray-500">
+              <p className="text-sm font-semibold text-[#111827]">Category split</p>
+              <p className="mt-0.5 text-xs text-[#6B7280]">
                 Split amounts must match the transaction total.
               </p>
             </div>
@@ -296,16 +296,16 @@ export default function TransactionForm({
               </Button>
             </div>
           ))}
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-[#6B7280]">
             Split total: ${getSplitTotal(form.splits).toFixed(2)}
           </p>
         </div>
       ) : null}
 
-      <label className="grid min-w-0 gap-1.5 text-sm font-medium text-gray-700">
+      <label className="grid min-w-0 gap-1.5 text-sm font-medium text-[#374151]">
         Notes
         <textarea
-          className="min-h-20 w-full min-w-0 resize-y rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-950 outline-none transition placeholder:text-gray-400 focus:border-gray-950 focus:ring-2 focus:ring-gray-950/10"
+          className="min-h-20 w-full min-w-0 resize-y rounded-xl border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-[#111827] outline-none transition placeholder:text-gray-400 focus:border-[#1F2937] focus:ring-2 focus:ring-[#1F2937]/10"
           value={form.notes}
           onChange={(event) => updateField("notes", event.target.value)}
           placeholder="Optional"
@@ -327,8 +327,8 @@ export default function TransactionForm({
 }
 
 function getCardOptionLabel(card, showOwner) {
-  const lastFour = card.lastFour ? ` •••• ${card.lastFour}` : "";
-  const owner = showOwner && card.owner ? ` — ${card.owner}` : "";
+  const lastFour = card.lastFour ? ` **** ${card.lastFour}` : "";
+  const owner = showOwner && card.owner ? ` - ${card.owner}` : "";
   return `${card.name}${lastFour}${owner}`;
 }
 

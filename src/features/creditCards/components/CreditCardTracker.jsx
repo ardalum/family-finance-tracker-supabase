@@ -61,7 +61,7 @@ export default function CreditCardTracker({
   return (
     <section className="grid gap-6">
       {error ? (
-        <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B]">
           {error}
         </div>
       ) : null}
@@ -69,7 +69,7 @@ export default function CreditCardTracker({
       <CreditLimitSummary cards={creditCards} />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        {loading ? <div className="text-sm text-gray-500">Loading credit cards...</div> : null}
+        {loading ? <div className="text-sm text-[#6B7280]">Loading credit cards...</div> : null}
         <Button
           type="button"
           onClick={openAddModal}

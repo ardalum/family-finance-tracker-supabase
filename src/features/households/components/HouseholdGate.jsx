@@ -6,7 +6,7 @@ function HouseholdGateContent({ children }) {
 
   if (loading) {
     return (
-      <div className="grid min-h-screen place-items-center bg-gray-100 px-4 text-sm text-gray-600">
+      <div className="grid min-h-screen place-items-center bg-[#F9FAFB] px-4 text-sm text-[#6B7280]">
         Loading household...
       </div>
     );
@@ -18,8 +18,8 @@ function HouseholdGateContent({ children }) {
 
   if (!activeHouseholdId) {
     return (
-      <div className="grid min-h-screen place-items-center bg-gray-100 px-4">
-        <div className="max-w-md rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+      <div className="grid min-h-screen place-items-center bg-[#F9FAFB] px-4">
+        <div className="max-w-md rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-[#991B1B]">
           {error || "Could not choose an active household."}
         </div>
       </div>

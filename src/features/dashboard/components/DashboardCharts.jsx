@@ -16,7 +16,7 @@ import {
 import Card from "../../../components/ui/Card.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
 
-const colors = ["#0f766e", "#2563eb", "#16a34a", "#f59e0b", "#e11d48", "#8b5cf6", "#0891b2", "#64748b"];
+const colors = ["#10B981", "#4F46E5", "#06B6D4", "#22C55E", "#F97316", "#DC2626", "#1F2937", "#6B7280"];
 
 export default function DashboardCharts({ chartData }) {
   const spendingByCategory = withPercentages(chartData.spendingByCategory);
@@ -54,8 +54,8 @@ export default function DashboardCharts({ chartData }) {
               <YAxis tickFormatter={(value) => `$${value}`} />
               <Tooltip formatter={(value) => formatCurrency(value)} />
               <Legend />
-              <Bar dataKey="budget" fill="#9ca3af" />
-              <Bar dataKey="spent" fill="#0f766e" />
+              <Bar dataKey="budget" fill="#4F46E5" />
+              <Bar dataKey="spent" fill="#10B981" />
             </BarChart>
           </ResponsiveContainer>
         )}
@@ -69,7 +69,7 @@ export default function DashboardCharts({ chartData }) {
               <XAxis dataKey="month" />
               <YAxis tickFormatter={(value) => `$${value}`} />
               <Tooltip formatter={(value) => formatCurrency(value)} />
-              <Line type="monotone" dataKey="total" stroke="#0f766e" strokeWidth={2} />
+              <Line type="monotone" dataKey="total" stroke="#10B981" strokeWidth={2} />
             </LineChart>
           </ResponsiveContainer>
         )}
@@ -92,7 +92,7 @@ function withPercentages(items) {
 function ChartCard({ title, children }) {
   return (
     <Card className="p-5">
-      <h3 className="text-lg font-semibold text-gray-950">{title}</h3>
+      <h3 className="text-lg font-semibold text-[#111827]">{title}</h3>
       <div className="mt-4">{children}</div>
     </Card>
   );
@@ -100,7 +100,7 @@ function ChartCard({ title, children }) {
 
 function EmptyChart() {
   return (
-    <div className="flex h-64 items-center justify-center rounded-md border border-dashed border-gray-300 text-sm text-gray-500">
+    <div className="flex h-64 items-center justify-center rounded-2xl border border-dashed border-[#E5E7EB] text-sm text-[#6B7280]">
       No data for this chart yet.
     </div>
   );

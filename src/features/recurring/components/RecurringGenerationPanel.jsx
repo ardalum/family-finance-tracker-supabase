@@ -103,7 +103,7 @@ export default function RecurringGenerationPanel({
       <div className="border-b border-gray-200 p-5">
         <h3 className="text-lg font-semibold text-gray-950">Monthly recurring bills</h3>
         <p className="mt-1 text-sm text-gray-500">
-          Mark bills paid one at a time. Paid bills create linked Spending Tracker transactions.
+          Mark bills paid one at a time. Paid bills create linked transaction records.
         </p>
         {message ? (
           <p className="mt-3 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">

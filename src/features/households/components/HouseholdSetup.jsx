@@ -1,4 +1,4 @@
-import { Home } from "lucide-react";
+import { WalletCards } from "lucide-react";
 import { useState } from "react";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
@@ -26,18 +26,19 @@ export default function HouseholdSetup() {
   }
 
   return (
-    <div className="grid min-h-screen place-items-center bg-gray-100 px-4 py-10">
+    <div className="grid min-h-screen place-items-center bg-[#F9FAFB] px-4 py-10">
       <div className="grid w-full max-w-md gap-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-gray-950 text-white">
-              <Home size={20} aria-hidden="true" />
+            <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-[#1F2937] text-white shadow-sm">
+              <WalletCards size={21} aria-hidden="true" />
+              <span className="absolute bottom-2 right-2 h-1.5 w-5 rounded-full bg-[#10B981]" />
             </div>
             <div>
-              <h1 className="text-xl font-semibold tracking-normal text-gray-950">
+              <h1 className="text-xl font-semibold tracking-normal text-[#111827]">
                 Set up household
               </h1>
-              <p className="text-sm text-gray-500">Create a private workspace for your tracker</p>
+              <p className="text-sm text-[#6B7280]">Create a private workspace for WalletFlow.</p>
             </div>
           </div>
           <AccountMenu />
@@ -46,16 +47,16 @@ export default function HouseholdSetup() {
         <Card>
           <form className="grid gap-4 p-5" onSubmit={handleSubmit}>
             <div>
-              <h2 className="text-lg font-semibold tracking-normal text-gray-950">
+              <h2 className="text-lg font-semibold tracking-normal text-[#111827]">
                 First household
               </h2>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-[#6B7280]">
                 Your current tracker data will remain in this browser.
               </p>
             </div>
 
             {error ? (
-              <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+              <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B]">
                 {error}
               </div>
             ) : null}

@@ -14,22 +14,22 @@ const navItems = [
   },
   {
     id: "credit-cards",
-    label: "Cards",
+    label: "Credit Cards",
     icon: CreditCard,
   },
   {
     id: "budgets",
-    label: "Budget",
+    label: "Monthly Budget",
     icon: WalletCards,
   },
   {
     id: "spending",
-    label: "Spending",
+    label: "Transactions",
     icon: ReceiptText,
   },
   {
     id: "recurring",
-    label: "Bills",
+    label: "Insights",
     icon: CalendarSync,
   },
 ];
@@ -45,10 +45,10 @@ export default function Navigation({ activeView, onChange }) {
           <button
             key={item.id}
             type="button"
-            className={`inline-flex min-h-10 items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition ${
+            className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-semibold transition ${
               isActive
-                ? "bg-gray-950 text-white"
-                : "bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                ? "bg-[#1F2937] text-white shadow-sm"
+                : "bg-white text-[#374151] ring-1 ring-inset ring-[#E5E7EB] hover:bg-[#F9FAFB]"
             }`}
             onClick={() => onChange(item.id)}
             aria-current={isActive ? "page" : undefined}

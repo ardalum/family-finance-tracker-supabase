@@ -6,7 +6,7 @@ export default function AuthGate({ children }) {
 
   if (loading) {
     return (
-      <div className="grid min-h-screen place-items-center bg-gray-100 px-4 text-sm text-gray-600">
+      <div className="grid min-h-screen place-items-center bg-[#F9FAFB] px-4 text-sm text-[#6B7280]">
         Loading session...
       </div>
     );
@@ -16,7 +16,7 @@ export default function AuthGate({ children }) {
     return (
       <>
         {error ? (
-          <div className="fixed left-1/2 top-4 z-10 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 shadow-sm">
+          <div className="fixed left-1/2 top-4 z-10 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B] shadow-sm">
             {error}
           </div>
         ) : null}
