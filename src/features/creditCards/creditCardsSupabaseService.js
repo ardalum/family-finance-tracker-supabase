@@ -25,7 +25,7 @@ function normalizeCardInput(input) {
 
 function toAppCreditCard(row) {
   return {
-    id: row.imported_local_id ?? row.id,
+    id: row.id,
     supabaseId: row.id,
     name: row.name,
     url: row.url,
@@ -37,7 +37,6 @@ function toAppCreditCard(row) {
     statementClosingDay: row.statement_closing_day,
     dueDay: row.due_day,
     isActive: row.is_active,
-    importedLocalId: row.imported_local_id,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -90,36 +89,4 @@ export async function deleteCreditCardFromSupabase(cardId) {
   const { error } = await client.from("credit_cards").delete().eq("id", cardId);
 
   if (error) throw error;
-}
-
-export async function importLocalCreditCards(householdId, localCards) {
-  if (!householdId || localCards.length === 0) return [];
-
-  const client = requireSupabase();
-  const rows = localCards.map((card) => ({
-    household_id: householdId,
-    imported_local_id: card.id,
-    name: card.name,
-    url: card.url,
-    network: card.network,
-    owner_name: card.owner,
-    last_four: card.lastFour,
-    credit_limit: Number(card.creditLimit) || 0,
-    statement_closing_day: Number(card.statementClosingDay) || Number(card.dueDay) || 1,
-    due_day: Number(card.dueDay) || 1,
-    is_active: card.isActive ?? true,
-    created_at: card.createdAt ?? undefined,
-    updated_at: card.updatedAt ?? undefined,
-  }));
-
-  const { data, error } = await client
-    .from("credit_cards")
-    .upsert(rows, {
-      onConflict: "household_id,imported_local_id",
-      ignoreDuplicates: true,
-    })
-    .select("*, household_profiles (display_name)");
-
-  if (error) throw error;
-  return (data ?? []).map(toAppCreditCard);
 }

@@ -1,19 +1,15 @@
 import { useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 import Button from "../../../components/ui/Button.jsx";
-import CreditCardMigrationPanel from "./CreditCardMigrationPanel.jsx";
 import CreditCardModal from "./CreditCardModal.jsx";
 import CreditCardList from "./CreditCardList.jsx";
 import CreditLimitSummary from "./CreditLimitSummary.jsx";
-import MonthlyBalanceMigrationPanel from "./MonthlyBalanceMigrationPanel.jsx";
 import MonthlyBalanceGraph from "./MonthlyBalanceGraph.jsx";
 import MonthlyBalanceTable from "./MonthlyBalanceTable.jsx";
 
 export default function CreditCardTracker({
   creditCards,
-  localCreditCards,
   monthlyBalances,
-  localMonthlyBalances,
   selectedBalanceMonth,
   loading = false,
   error = "",
@@ -26,10 +22,8 @@ export default function CreditCardTracker({
   onCreateCard,
   onUpdateCard,
   onDeleteCard,
-  onImportLocalCards,
   onBalanceMonthChange,
   onMonthlyBalanceChange,
-  onImportLocalMonthlyBalances,
 }) {
   const [editingCard, setEditingCard] = useState(null);
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
@@ -71,21 +65,6 @@ export default function CreditCardTracker({
           {error}
         </div>
       ) : null}
-
-      <CreditCardMigrationPanel
-        localCards={localCreditCards}
-        supabaseCards={creditCards}
-        onImport={onImportLocalCards}
-        disabled={loading || isSaving}
-      />
-
-      <MonthlyBalanceMigrationPanel
-        cards={creditCards}
-        localMonthlyBalances={localMonthlyBalances}
-        supabaseMonthlyBalances={monthlyBalances}
-        onImport={onImportLocalMonthlyBalances}
-        disabled={monthlyBalancesLoading || monthlyBalancesSaving}
-      />
 
       <CreditLimitSummary cards={creditCards} />
 

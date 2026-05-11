@@ -90,39 +90,3 @@ export async function upsertMonthlyBalance(householdId, monthKey, card, patch) {
   if (error) throw error;
   return data;
 }
-
-export async function importLocalMonthlyBalances(householdId, localMonthlyBalances, cards) {
-  if (!householdId || !localMonthlyBalances || cards.length === 0) return [];
-
-  const cardsByAppId = new Map(cards.map((card) => [card.id, card]));
-  const rows = [];
-
-  Object.entries(localMonthlyBalances).forEach(([monthKey, balances]) => {
-    Object.entries(balances ?? {}).forEach(([cardId, entry]) => {
-      const card = cardsByAppId.get(cardId);
-      if (!card) return;
-
-      rows.push({
-        household_id: householdId,
-        credit_card_id: getSupabaseCardId(card),
-        month_key: monthKey,
-        balance: Number(entry?.balance ?? 0) || 0,
-        paid: Boolean(entry?.paid),
-      });
-    });
-  });
-
-  if (rows.length === 0) return [];
-
-  const client = requireSupabase();
-  const { data, error } = await client
-    .from("monthly_card_balances")
-    .upsert(rows, {
-      onConflict: "credit_card_id,month_key",
-      ignoreDuplicates: true,
-    })
-    .select("*");
-
-  if (error) throw error;
-  return data ?? [];
-}
