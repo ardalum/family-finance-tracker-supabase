@@ -12,14 +12,7 @@ import {
 
 export default function AppSettings() {
   const [settings, setSettings] = useState(() => readAppSettings());
-  const [currencySearch, setCurrencySearch] = useState("");
   const [saved, setSaved] = useState(false);
-  const filteredCurrencies = currencies.filter((currency) => {
-    const query = currencySearch.trim().toLowerCase();
-    if (!query) return true;
-    return [currency.code, currency.name, currency.symbol]
-      .some((value) => value.toLowerCase().includes(query));
-  });
 
   useEffect(() => {
     try {
@@ -38,7 +31,6 @@ export default function AppSettings() {
 
   function resetSettings() {
     setSettings(defaultAppSettings);
-    setCurrencySearch("");
   }
 
   function updateCurrency(code) {
@@ -73,10 +65,7 @@ export default function AppSettings() {
           description="Control how money values are displayed."
         >
           <CurrencyPicker
-            search={currencySearch}
-            onSearchChange={setCurrencySearch}
             selectedCurrency={settings.currency}
-            filteredCurrencies={filteredCurrencies}
             onChange={updateCurrency}
           />
           <ToggleRow
@@ -148,28 +137,13 @@ export default function AppSettings() {
 }
 
 function CurrencyPicker({
-  search,
-  onSearchChange,
   selectedCurrency,
-  filteredCurrencies,
   onChange,
 }) {
   const selected = selectedCurrency ?? defaultAppSettings.currency;
-  const visibleCurrencies = filteredCurrencies.some((currency) => currency.code === selected.code)
-    ? filteredCurrencies
-    : [selected, ...filteredCurrencies];
 
   return (
     <div className="grid gap-3">
-      <label className="grid min-w-0 gap-1.5 text-sm font-medium text-text-soft">
-        Search currency
-        <input
-          className="h-10 w-full min-w-0 rounded-xl border border-app-border bg-app-surface px-3 text-sm text-text-main outline-none transition placeholder:text-text-muted focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/10"
-          value={search}
-          onChange={(event) => onSearchChange(event.target.value)}
-          placeholder="Search code, name, or symbol"
-        />
-      </label>
       <label className="grid min-w-0 gap-1.5 text-sm font-medium text-text-soft">
         Currency
         <select
@@ -177,17 +151,11 @@ function CurrencyPicker({
           value={selected.code}
           onChange={(event) => onChange(event.target.value)}
         >
-          {visibleCurrencies.length === 0 ? (
-            <option value={selected.code}>
-              No matching currencies
+          {currencies.map((currency) => (
+            <option key={currency.code} value={currency.code}>
+              {getCurrencyLabel(currency)}
             </option>
-          ) : (
-            visibleCurrencies.map((currency) => (
-              <option key={currency.code} value={currency.code}>
-                {getCurrencyLabel(currency)}
-              </option>
-            ))
-          )}
+          ))}
         </select>
       </label>
       <p className="text-sm text-text-muted">
