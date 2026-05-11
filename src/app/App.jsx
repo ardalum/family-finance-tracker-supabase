@@ -540,7 +540,7 @@ function FinanceTrackerApp() {
     loadRecurringData();
   }, [loadRecurringData]);
 
-  async function createSupabaseCreditCard(input) {
+  const createSupabaseCreditCard = useCallback(async (input) => {
     setCreditCardsSaving(true);
     setCreditCardsError("");
 
@@ -554,9 +554,9 @@ function FinanceTrackerApp() {
     } finally {
       setCreditCardsSaving(false);
     }
-  }
+  }, [activeHouseholdId]);
 
-  async function createHouseholdProfile(input) {
+  const createHouseholdProfile = useCallback(async (input) => {
     setHouseholdProfilesSaving(true);
     setHouseholdProfilesError("");
 
@@ -572,9 +572,9 @@ function FinanceTrackerApp() {
     } finally {
       setHouseholdProfilesSaving(false);
     }
-  }
+  }, [activeHouseholdId]);
 
-  async function saveHouseholdProfile(profileId, input) {
+  const saveHouseholdProfile = useCallback(async (profileId, input) => {
     setHouseholdProfilesSaving(true);
     setHouseholdProfilesError("");
 
@@ -593,9 +593,9 @@ function FinanceTrackerApp() {
     } finally {
       setHouseholdProfilesSaving(false);
     }
-  }
+  }, [loadSupabaseCreditCards]);
 
-  async function deactivateProfile(profileId) {
+  const deactivateProfile = useCallback(async (profileId) => {
     setHouseholdProfilesSaving(true);
     setHouseholdProfilesError("");
 
@@ -612,9 +612,9 @@ function FinanceTrackerApp() {
     } finally {
       setHouseholdProfilesSaving(false);
     }
-  }
+  }, [loadSupabaseCreditCards]);
 
-  async function addDefaultProfiles() {
+  const addDefaultProfiles = useCallback(async () => {
     setHouseholdProfilesSaving(true);
     setHouseholdProfilesError("");
 
@@ -649,9 +649,9 @@ function FinanceTrackerApp() {
     } finally {
       setHouseholdProfilesSaving(false);
     }
-  }
+  }, [activeHouseholdId, householdProfiles, supabaseCreditCards]);
 
-  async function updateSupabaseCreditCard(cardId, input) {
+  const updateSupabaseCreditCard = useCallback(async (cardId, input) => {
     setCreditCardsSaving(true);
     setCreditCardsError("");
 
@@ -667,9 +667,9 @@ function FinanceTrackerApp() {
     } finally {
       setCreditCardsSaving(false);
     }
-  }
+  }, []);
 
-  async function deleteSupabaseCreditCard(cardId) {
+  const deleteSupabaseCreditCard = useCallback(async (cardId) => {
     setCreditCardsSaving(true);
     setCreditCardsError("");
 
@@ -682,9 +682,9 @@ function FinanceTrackerApp() {
     } finally {
       setCreditCardsSaving(false);
     }
-  }
+  }, []);
 
-  async function saveSupabaseMonthlyBalance(monthKey, cardId, entry) {
+  const saveSupabaseMonthlyBalance = useCallback(async (monthKey, cardId, entry) => {
     const card = supabaseCreditCards.find((currentCard) => currentCard.id === cardId);
     if (!card) return;
 
@@ -712,9 +712,9 @@ function FinanceTrackerApp() {
     } finally {
       setMonthlyBalancesSaving(false);
     }
-  }
+  }, [activeHouseholdId, loadSupabaseMonthlyBalances, supabaseCreditCards]);
 
-  async function createSupabaseBudget(input) {
+  const createSupabaseBudget = useCallback(async (input) => {
     setBudgetsSaving(true);
     setBudgetsError("");
 
@@ -734,9 +734,9 @@ function FinanceTrackerApp() {
     } finally {
       setBudgetsSaving(false);
     }
-  }
+  }, [activeHouseholdId, loadDashboardData, loadInsightsData, selectedBudgetMonth]);
 
-  async function updateSupabaseBudget(budgetId, input) {
+  const updateSupabaseBudget = useCallback(async (budgetId, input) => {
     setBudgetsSaving(true);
     setBudgetsError("");
 
@@ -754,9 +754,9 @@ function FinanceTrackerApp() {
     } finally {
       setBudgetsSaving(false);
     }
-  }
+  }, [loadDashboardData, loadInsightsData]);
 
-  async function deleteSupabaseBudget(budgetId) {
+  const deleteSupabaseBudget = useCallback(async (budgetId) => {
     setBudgetsSaving(true);
     setBudgetsError("");
 
@@ -773,9 +773,9 @@ function FinanceTrackerApp() {
     } finally {
       setBudgetsSaving(false);
     }
-  }
+  }, [loadDashboardData, loadInsightsData]);
 
-  async function importLocalBudgetsToSupabase() {
+  const importLocalBudgetsToSupabase = useCallback(async () => {
     setBudgetsSaving(true);
     setBudgetsError("");
 
@@ -796,9 +796,9 @@ function FinanceTrackerApp() {
     } finally {
       setBudgetsSaving(false);
     }
-  }
+  }, [activeHouseholdId, appData.budgetsByMonth, loadDashboardData, loadInsightsData, loadSupabaseBudgets, selectedBudgetMonth]);
 
-  async function addDefaultBudgetsToSupabase() {
+  const addDefaultBudgetsToSupabase = useCallback(async () => {
     setBudgetsSaving(true);
     setBudgetsError("");
 
@@ -832,9 +832,9 @@ function FinanceTrackerApp() {
     } finally {
       setBudgetsSaving(false);
     }
-  }
+  }, [activeHouseholdId, loadDashboardData, loadInsightsData, selectedBudgetMonth, supabaseBudgets]);
 
-  async function createSupabaseTransaction(input) {
+  const createSupabaseTransaction = useCallback(async (input) => {
     setSpendingSaving(true);
     setSpendingError("");
 
@@ -854,9 +854,9 @@ function FinanceTrackerApp() {
     } finally {
       setSpendingSaving(false);
     }
-  }
+  }, [activeHouseholdId, loadDashboardData, loadInsightsData, loadSpendingTransactions, spendingCategories, supabaseCreditCards]);
 
-  async function updateSupabaseTransaction(transactionId, input) {
+  const updateSupabaseTransaction = useCallback(async (transactionId, input) => {
     setSpendingSaving(true);
     setSpendingError("");
 
@@ -876,9 +876,9 @@ function FinanceTrackerApp() {
     } finally {
       setSpendingSaving(false);
     }
-  }
+  }, [loadDashboardData, loadInsightsData, loadSpendingTransactions, spendingCategories, supabaseCreditCards]);
 
-  async function deleteSupabaseTransaction(transactionId) {
+  const deleteSupabaseTransaction = useCallback(async (transactionId) => {
     setSpendingSaving(true);
     setSpendingError("");
 
@@ -895,9 +895,9 @@ function FinanceTrackerApp() {
     } finally {
       setSpendingSaving(false);
     }
-  }
+  }, [loadDashboardData, loadInsightsData]);
 
-  async function importLocalSpendingToSupabase(localMonthTransactions) {
+  const importLocalSpendingToSupabase = useCallback(async (localMonthTransactions) => {
     setSpendingSaving(true);
     setSpendingError("");
 
@@ -917,9 +917,9 @@ function FinanceTrackerApp() {
     } finally {
       setSpendingSaving(false);
     }
-  }
+  }, [activeHouseholdId, loadDashboardData, loadSpendingTransactions, spendingCategories, supabaseCreditCards]);
 
-  async function createSupabaseRecurringPayment(input) {
+  const createSupabaseRecurringPayment = useCallback(async (input) => {
     setRecurringSaving(true);
     setRecurringError("");
 
@@ -939,9 +939,9 @@ function FinanceTrackerApp() {
     } finally {
       setRecurringSaving(false);
     }
-  }
+  }, [activeHouseholdId, loadDashboardData, loadInsightsData, loadRecurringData, recurringCategories, supabaseCreditCards]);
 
-  async function updateSupabaseRecurringPayment(templateId, input) {
+  const updateSupabaseRecurringPayment = useCallback(async (templateId, input) => {
     setRecurringSaving(true);
     setRecurringError("");
 
@@ -961,9 +961,9 @@ function FinanceTrackerApp() {
     } finally {
       setRecurringSaving(false);
     }
-  }
+  }, [loadDashboardData, loadInsightsData, loadRecurringData, recurringCategories, supabaseCreditCards]);
 
-  async function deleteSupabaseRecurringPayment(templateId) {
+  const deleteSupabaseRecurringPayment = useCallback(async (templateId) => {
     setRecurringSaving(true);
     setRecurringError("");
 
@@ -978,9 +978,9 @@ function FinanceTrackerApp() {
     } finally {
       setRecurringSaving(false);
     }
-  }
+  }, [loadDashboardData, loadInsightsData, loadRecurringData]);
 
-  async function markSupabaseRecurringPaid(row) {
+  const markSupabaseRecurringPaid = useCallback(async (row) => {
     setRecurringSaving(true);
     setRecurringError("");
 
@@ -1003,9 +1003,9 @@ function FinanceTrackerApp() {
     } finally {
       setRecurringSaving(false);
     }
-  }
+  }, [activeHouseholdId, loadDashboardData, loadInsightsData, loadRecurringData, loadSpendingTransactions, recurringCategories, selectedRecurringMonth, supabaseCreditCards]);
 
-  async function markSupabaseRecurringUnpaid(template) {
+  const markSupabaseRecurringUnpaid = useCallback(async (template) => {
     setRecurringSaving(true);
     setRecurringError("");
 
@@ -1026,9 +1026,9 @@ function FinanceTrackerApp() {
     } finally {
       setRecurringSaving(false);
     }
-  }
+  }, [activeHouseholdId, loadDashboardData, loadInsightsData, loadRecurringData, loadSpendingTransactions, selectedRecurringMonth]);
 
-  async function skipSupabaseRecurringPayment(template) {
+  const skipSupabaseRecurringPayment = useCallback(async (template) => {
     setRecurringSaving(true);
     setRecurringError("");
 
@@ -1049,9 +1049,9 @@ function FinanceTrackerApp() {
     } finally {
       setRecurringSaving(false);
     }
-  }
+  }, [activeHouseholdId, loadDashboardData, loadInsightsData, loadRecurringData, loadSpendingTransactions, selectedRecurringMonth]);
 
-  async function importLocalRecurringToSupabase() {
+  const importLocalRecurringToSupabase = useCallback(async () => {
     setRecurringSaving(true);
     setRecurringError("");
 
@@ -1072,9 +1072,9 @@ function FinanceTrackerApp() {
     } finally {
       setRecurringSaving(false);
     }
-  }
+  }, [activeHouseholdId, appData.recurringPayments, loadDashboardData, loadInsightsData, loadRecurringData, recurringCategories, supabaseCreditCards]);
 
-  async function refreshSupabaseDataAfterImport() {
+  const refreshSupabaseDataAfterImport = useCallback(async () => {
     await loadSupabaseCreditCards();
     await loadSupabaseMonthlyBalances();
     await loadSupabaseBudgets();
@@ -1084,12 +1084,12 @@ function FinanceTrackerApp() {
     await loadInsightsData();
     await loadRecurringCategories();
     await loadRecurringData();
-  }
+  }, [loadDashboardData, loadInsightsData, loadRecurringCategories, loadRecurringData, loadSpendingCategories, loadSpendingTransactions, loadSupabaseBudgets, loadSupabaseCreditCards, loadSupabaseMonthlyBalances]);
 
-  async function finishFirstTimeSetup() {
+  const finishFirstTimeSetup = useCallback(async () => {
     await completeActiveHouseholdSetup();
     setActiveView("dashboard");
-  }
+  }, [completeActiveHouseholdSetup, setActiveView]);
 
   const dashboardAppData = useMemo(
     () => ({
