@@ -1,27 +1,29 @@
 import { useEffect, useState } from "react";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
-import Input from "../../../components/ui/Input.jsx";
 import Select from "../../../components/ui/Select.jsx";
-
-const STORAGE_KEY = "walletflow:appSettings:v1";
-
-const defaultSettings = {
-  currencySymbol: "$",
-  showCents: true,
-  defaultMonthBehavior: "current",
-  dateFormat: "MM/DD/YYYY",
-  tableDensity: "comfortable",
-  showZeroBalanceWarning: true,
-};
+import {
+  currencies,
+  defaultAppSettings,
+  getCurrencyLabel,
+  readAppSettings,
+  writeAppSettings,
+} from "../appSettings.js";
 
 export default function AppSettings() {
-  const [settings, setSettings] = useState(() => readSettings());
+  const [settings, setSettings] = useState(() => readAppSettings());
+  const [currencySearch, setCurrencySearch] = useState("");
   const [saved, setSaved] = useState(false);
+  const filteredCurrencies = currencies.filter((currency) => {
+    const query = currencySearch.trim().toLowerCase();
+    if (!query) return true;
+    return [currency.code, currency.name, currency.symbol]
+      .some((value) => value.toLowerCase().includes(query));
+  });
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+      writeAppSettings(settings);
       setSaved(true);
       const timer = window.setTimeout(() => setSaved(false), 1400);
       return () => window.clearTimeout(timer);
@@ -35,7 +37,13 @@ export default function AppSettings() {
   }
 
   function resetSettings() {
-    setSettings(defaultSettings);
+    setSettings(defaultAppSettings);
+    setCurrencySearch("");
+  }
+
+  function updateCurrency(code) {
+    const currency = currencies.find((item) => item.code === code) ?? defaultAppSettings.currency;
+    updateSetting("currency", currency);
   }
 
   return (
@@ -64,11 +72,12 @@ export default function AppSettings() {
           title="Currency Settings"
           description="Control how money values are displayed."
         >
-          <Input
-            label="Currency symbol"
-            maxLength={4}
-            value={settings.currencySymbol}
-            onChange={(event) => updateSetting("currencySymbol", event.target.value)}
+          <CurrencyPicker
+            search={currencySearch}
+            onSearchChange={setCurrencySearch}
+            selectedCurrency={settings.currency}
+            filteredCurrencies={filteredCurrencies}
+            onChange={updateCurrency}
           />
           <ToggleRow
             label="Show cents"
@@ -138,6 +147,56 @@ export default function AppSettings() {
   );
 }
 
+function CurrencyPicker({
+  search,
+  onSearchChange,
+  selectedCurrency,
+  filteredCurrencies,
+  onChange,
+}) {
+  const selected = selectedCurrency ?? defaultAppSettings.currency;
+  const visibleCurrencies = filteredCurrencies.some((currency) => currency.code === selected.code)
+    ? filteredCurrencies
+    : [selected, ...filteredCurrencies];
+
+  return (
+    <div className="grid gap-3">
+      <label className="grid min-w-0 gap-1.5 text-sm font-medium text-text-soft">
+        Search currency
+        <input
+          className="h-10 w-full min-w-0 rounded-xl border border-app-border bg-app-surface px-3 text-sm text-text-main outline-none transition placeholder:text-text-muted focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/10"
+          value={search}
+          onChange={(event) => onSearchChange(event.target.value)}
+          placeholder="Search code, name, or symbol"
+        />
+      </label>
+      <label className="grid min-w-0 gap-1.5 text-sm font-medium text-text-soft">
+        Currency
+        <select
+          className="h-10 w-full min-w-0 rounded-xl border border-app-border bg-app-surface px-3 text-sm text-text-main outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/10"
+          value={selected.code}
+          onChange={(event) => onChange(event.target.value)}
+        >
+          {visibleCurrencies.length === 0 ? (
+            <option value={selected.code}>
+              No matching currencies
+            </option>
+          ) : (
+            visibleCurrencies.map((currency) => (
+              <option key={currency.code} value={currency.code}>
+                {getCurrencyLabel(currency)}
+              </option>
+            ))
+          )}
+        </select>
+      </label>
+      <p className="text-sm text-text-muted">
+        Selected: {getCurrencyLabel(selected)}
+      </p>
+    </div>
+  );
+}
+
 function SettingsSection({ title, description, children }) {
   return (
     <Card className="grid gap-4 p-5">
@@ -165,14 +224,4 @@ function ToggleRow({ label, description, checked, onChange }) {
       />
     </label>
   );
-}
-
-function readSettings() {
-  try {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (!stored) return defaultSettings;
-    return { ...defaultSettings, ...JSON.parse(stored) };
-  } catch {
-    return defaultSettings;
-  }
 }

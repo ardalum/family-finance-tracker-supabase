@@ -53,16 +53,13 @@ export default function Insights({
       <InsightsSummaryCards summary={data.summary} />
       <DashboardCharts chartData={data.chartData} />
 
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid gap-6">
         <BudgetVsSpendingTable rows={data.budgetRows} title="Budget vs Actual" />
         <CreditCardPaymentOverview
           rows={data.cardRows}
           totalUnpaid={data.summary.unpaidBalanceTotal}
           title="Credit Card Payment Insights"
         />
-      </div>
-
-      <div className="grid gap-6 xl:grid-cols-2">
         <RecurringOverview
           rows={data.recurringRows}
           summary={data.recurringSummary}

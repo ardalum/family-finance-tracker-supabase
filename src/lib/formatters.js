@@ -1,9 +1,28 @@
+import { readAppSettings } from "../features/settings/appSettings.js";
+
 export function formatCurrency(value, options = {}) {
-  const fractionDigits = options.cents === false ? 0 : 2;
+  const settings = options.settings ?? readAppSettings();
+  const currency = settings.currency ?? { code: "USD", symbol: "$" };
+  const showCents = options.cents ?? settings.showCents;
+  const fractionDigits = showCents === false ? 0 : 2;
+
+  const formattedNumber = new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
+  }).format(Number(value) || 0);
+
+  return `${currency.symbol}${formattedNumber}`;
+}
+
+export function formatCurrencyWithCode(value, options = {}) {
+  const settings = options.settings ?? readAppSettings();
+  const currency = settings.currency ?? { code: "USD" };
+  const showCents = options.cents ?? settings.showCents;
+  const fractionDigits = showCents === false ? 0 : 2;
 
   return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "USD",
+    currency: currency.code ?? "USD",
     minimumFractionDigits: fractionDigits,
     maximumFractionDigits: fractionDigits,
   }).format(Number(value) || 0);
