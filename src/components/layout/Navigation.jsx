@@ -14,22 +14,22 @@ const navItems = [
   },
   {
     id: "credit-cards",
-    label: "Credit Card Tracker",
+    label: "Cards",
     icon: CreditCard,
   },
   {
     id: "budgets",
-    label: "Budget Tracker",
+    label: "Budget",
     icon: WalletCards,
   },
   {
     id: "spending",
-    label: "Spending Tracker",
+    label: "Spending",
     icon: ReceiptText,
   },
   {
     id: "recurring",
-    label: "Recurring Payments",
+    label: "Bills",
     icon: CalendarSync,
   },
 ];
