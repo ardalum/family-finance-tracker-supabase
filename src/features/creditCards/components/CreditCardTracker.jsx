@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 import Button from "../../../components/ui/Button.jsx";
 import CreditCardModal from "./CreditCardModal.jsx";
@@ -29,34 +29,34 @@ export default function CreditCardTracker({
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
   const activeCards = useMemo(() => creditCards.filter((card) => card.isActive), [creditCards]);
 
-  function openAddModal() {
+  const openAddModal = useCallback(() => {
     setEditingCard(null);
     setIsCardModalOpen(true);
-  }
+  }, []);
 
-  function openEditModal(card) {
+  const openEditModal = useCallback((card) => {
     setEditingCard(card);
     setIsCardModalOpen(true);
-  }
+  }, []);
 
-  function closeCardModal() {
+  const closeCardModal = useCallback(() => {
     setIsCardModalOpen(false);
     setEditingCard(null);
-  }
+  }, []);
 
-  async function handleSave(form, card) {
+  const handleSave = useCallback(async (form, card) => {
     if (card) {
       await onUpdateCard(card.supabaseId ?? card.id, form);
     } else {
       await onCreateCard(form);
     }
     closeCardModal();
-  }
+  }, [onUpdateCard, onCreateCard, closeCardModal]);
 
-  async function handleDelete(card) {
+  const handleDelete = useCallback(async (card) => {
     await onDeleteCard(card.supabaseId ?? card.id);
-    if (editingCard?.id === card.id) setEditingCard(null);
-  }
+    setEditingCard((current) => (current?.id === card.id ? null : current));
+  }, [onDeleteCard]);
 
   return (
     <section className="grid gap-6">
@@ -96,7 +96,7 @@ export default function CreditCardTracker({
         />
         <MonthlyBalanceGraph monthlyBalances={monthlyBalances} />
         <CreditCardList
-          cards={activeCards}
+          cards={creditCards}
           onEdit={openEditModal}
           onDelete={handleDelete}
           isSaving={isSaving}
