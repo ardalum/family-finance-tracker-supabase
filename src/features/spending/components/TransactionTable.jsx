@@ -126,106 +126,120 @@ export default function TransactionTable({
           No transactions match the current filters.
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full border-separate border-spacing-0 text-left text-sm">
-            <thead className="bg-gray-50 text-xs uppercase tracking-normal text-gray-500">
-              <tr>
-                <th className="px-4 py-2.5 font-semibold">Date</th>
-                <th className="px-4 py-2.5 font-semibold">Store</th>
-                <th className="px-4 py-2.5 font-semibold">Payment</th>
-                <th className="px-4 py-2.5 font-semibold">Category</th>
-                <th className="px-4 py-2.5 text-right font-semibold">Amount</th>
-                <th className="px-4 py-2.5 font-semibold">Notes</th>
-                <th className="px-4 py-2.5 font-semibold">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {filteredTransactions.map((transaction) => {
-                const card = cards.find((item) => item.id === transaction.cardId);
-                const isRecurring = transaction.source === "recurring";
-                return (
-                  <tr key={transaction.id} className="bg-white transition hover:bg-gray-50">
-                    <td className="whitespace-nowrap px-4 py-3 align-middle text-gray-700">
-                      {transaction.date}
-                    </td>
-                    <td className="px-4 py-3 align-middle font-semibold text-gray-950">
-                      <div className="grid gap-0.5">
-                        <span>{transaction.merchant}</span>
-                        {transaction.source === "recurring" ? (
-                          <span className="w-fit rounded-md bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700 ring-1 ring-inset ring-blue-200">
-                            Recurring
-                          </span>
-                        ) : null}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 align-middle">
-                      <div className="grid min-w-36 gap-0.5">
-                        <span className="text-xs font-medium text-gray-500">
-                          {transaction.paymentMethod || "No payment method"}
+        <div className="grid gap-3 p-4">
+          {filteredTransactions.map((transaction) => {
+            const card = cards.find((item) => item.id === transaction.cardId);
+            const isRecurring = transaction.source === "recurring";
+            const categoryRows = getTransactionCategoryRows(transaction);
+
+            return (
+              <article
+                key={transaction.id}
+                className="grid min-w-0 gap-3 rounded-md border border-gray-200 bg-white p-4 transition hover:border-gray-300 hover:bg-gray-50"
+              >
+                <div className="flex min-w-0 items-start justify-between gap-4">
+                  <div className="grid min-w-0 gap-1">
+                    <div className="flex min-w-0 flex-wrap items-center gap-2">
+                      <h3 className="min-w-0 truncate text-sm font-semibold text-gray-950" title={transaction.merchant}>
+                        {transaction.merchant}
+                      </h3>
+                      {isRecurring ? (
+                        <span className="shrink-0 rounded-md bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700 ring-1 ring-inset ring-blue-200">
+                          Recurring
                         </span>
-                        {card ? (
-                          <LinkedCardName card={card} className="text-sm font-medium decoration-transparent" />
-                        ) : (
-                          <span className="text-sm text-gray-500">
-                            {transaction.paymentMethod === "Credit Card"
-                              ? getCardName(transaction.cardId, cards)
-                              : "No card"}
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 align-middle text-gray-700">
-                      {getTransactionCategoryRows(transaction).map((row) => (
-                        <div key={row.id} className="whitespace-nowrap">
-                          {getCategoryName(row.categoryId, categories)}
+                      ) : null}
+                    </div>
+                    <p className="text-xs font-medium text-gray-500">{transaction.date}</p>
+                  </div>
+                  <p className="shrink-0 text-right text-sm font-semibold text-gray-950">
+                    {formatCurrency(transaction.amount)}
+                  </p>
+                </div>
+
+                <div className="grid min-w-0 gap-3 text-sm text-gray-700 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)]">
+                  <DetailBlock label="Payment">
+                    <span className="truncate text-xs font-medium text-gray-500" title={transaction.paymentMethod || "No payment method"}>
+                      {transaction.paymentMethod || "No payment method"}
+                    </span>
+                    {card ? (
+                      <span className="grid min-w-0 gap-0.5">
+                        <LinkedCardName card={card} className="text-sm font-medium decoration-transparent" />
+                        <span className="truncate text-xs text-gray-500">
+                          **** {card.lastFour}
+                          {card.owner ? ` · ${card.owner}` : ""}
+                        </span>
+                      </span>
+                    ) : (
+                      <span className="truncate text-sm text-gray-600">
+                        {transaction.paymentMethod === "Credit Card"
+                          ? getCardName(transaction.cardId, cards)
+                          : "No card"}
+                      </span>
+                    )}
+                  </DetailBlock>
+
+                  <DetailBlock label="Category">
+                    {categoryRows.map((row) => {
+                      const categoryName = getCategoryName(row.categoryId, categories);
+                      return (
+                        <span key={row.id} className="truncate" title={categoryName}>
+                          {categoryName}
                           {transaction.splitMode ? (
-                            <>
-                              : <span className="font-semibold">{formatCurrency(row.amount)}</span>
-                            </>
+                            <>: <span className="font-semibold">{formatCurrency(row.amount)}</span></>
                           ) : null}
-                        </div>
-                      ))}
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-3 text-right align-middle font-semibold text-gray-950">
-                      {formatCurrency(transaction.amount)}
-                    </td>
-                    <td className="max-w-xs px-4 py-3 align-middle text-gray-600">
-                      {transaction.notes || <span className="text-gray-400">None</span>}
-                    </td>
-                    <td className="px-4 py-3 align-middle">
-                      <div className="flex items-center gap-1.5">
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          className="min-h-8 px-2"
-                          onClick={() => onEdit(transaction)}
-                          disabled={isSaving || isRecurring}
-                          aria-label={`Edit ${transaction.merchant}`}
-                          title={isRecurring ? "Manage from Recurring Payments" : "Edit transaction"}
-                        >
-                          <Edit size={16} aria-hidden="true" />
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="danger"
-                          className="min-h-8 px-2"
-                          onClick={() => handleDelete(transaction)}
-                          disabled={isSaving || isRecurring}
-                          aria-label={`Delete ${transaction.merchant}`}
-                          title={isRecurring ? "Mark unpaid from Recurring Payments" : "Delete transaction"}
-                        >
-                          <Trash2 size={16} aria-hidden="true" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                        </span>
+                      );
+                    })}
+                  </DetailBlock>
+
+                  <DetailBlock label="Notes">
+                    {transaction.notes ? (
+                      <span className="truncate text-gray-600" title={transaction.notes}>{transaction.notes}</span>
+                    ) : (
+                      <span className="text-gray-400">None</span>
+                    )}
+                  </DetailBlock>
+                </div>
+
+                <div className="flex items-center justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="min-h-8 px-2"
+                    onClick={() => onEdit(transaction)}
+                    disabled={isSaving || isRecurring}
+                    aria-label={`Edit ${transaction.merchant}`}
+                    title={isRecurring ? "Manage from Recurring Payments" : "Edit transaction"}
+                  >
+                    <Edit size={16} aria-hidden="true" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="danger"
+                    className="min-h-8 px-2"
+                    onClick={() => handleDelete(transaction)}
+                    disabled={isSaving || isRecurring}
+                    aria-label={`Delete ${transaction.merchant}`}
+                    title={isRecurring ? "Mark unpaid from Recurring Payments" : "Delete transaction"}
+                  >
+                    <Trash2 size={16} aria-hidden="true" />
+                  </Button>
+                </div>
+              </article>
+            );
+          })}
         </div>
       )}
     </Card>
+  );
+}
+
+function DetailBlock({ label, children }) {
+  return (
+    <div className="grid min-w-0 gap-1">
+      <p className="text-xs font-semibold uppercase tracking-normal text-gray-500">{label}</p>
+      <div className="grid min-w-0 gap-0.5">{children}</div>
+    </div>
   );
 }
 

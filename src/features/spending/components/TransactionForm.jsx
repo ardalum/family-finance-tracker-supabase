@@ -39,12 +39,17 @@ export default function TransactionForm({
   onCancel,
   onSaved,
   isSaving = false,
+  showHeader = true,
 }) {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
   const categoryOptions = useMemo(
     () => [{ id: UNCATEGORIZED_ID, name: "Uncategorized" }, ...categories],
     [categories],
+  );
+  const showCardOwner = useMemo(
+    () => new Set(cards.map((card) => card.owner).filter(Boolean)).size >= 2,
+    [cards],
   );
 
   useEffect(() => {
@@ -138,12 +143,14 @@ export default function TransactionForm({
 
   return (
     <form className="grid gap-4" onSubmit={handleSubmit}>
-      <div>
-        <h3 className="text-base font-semibold text-gray-950">
-          {editingTransaction ? "Edit transaction" : "Add transaction"}
-        </h3>
-        <p className="mt-1 text-sm text-gray-500">Use category split only when needed.</p>
-      </div>
+      {showHeader ? (
+        <div>
+          <h3 className="text-base font-semibold text-gray-950">
+            {editingTransaction ? "Edit transaction" : "Add transaction"}
+          </h3>
+          <p className="mt-1 text-sm text-gray-500">Use category split only when needed.</p>
+        </div>
+      ) : null}
 
       {categories.length === 0 ? (
         <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
@@ -193,23 +200,23 @@ export default function TransactionForm({
           <option>Cash</option>
           <option>Other</option>
         </Select>
-      {form.paymentMethod === "Credit Card" ? (
-        <Select
-          label="Card used"
-          value={form.cardId}
-          onChange={(event) => updateField("cardId", event.target.value)}
-          required
-        >
-          <option value="" disabled>
-            Select card
-          </option>
-          {cards.map((card) => (
-            <option key={card.id} value={card.id}>
-              {card.name}
+        {form.paymentMethod === "Credit Card" ? (
+          <Select
+            label="Card used"
+            value={form.cardId}
+            onChange={(event) => updateField("cardId", event.target.value)}
+            required
+          >
+            <option value="" disabled>
+              Select card
             </option>
-          ))}
-        </Select>
-      ) : null}
+            {cards.map((card) => (
+              <option key={card.id} value={card.id}>
+                {getCardOptionLabel(card, showCardOwner)}
+              </option>
+            ))}
+          </Select>
+        ) : null}
         <Input
           label="Amount"
           type="number"
@@ -317,6 +324,12 @@ export default function TransactionForm({
       </div>
     </form>
   );
+}
+
+function getCardOptionLabel(card, showOwner) {
+  const lastFour = card.lastFour ? ` •••• ${card.lastFour}` : "";
+  const owner = showOwner && card.owner ? ` — ${card.owner}` : "";
+  return `${card.name}${lastFour}${owner}`;
 }
 
 function validateForm(form, cards) {

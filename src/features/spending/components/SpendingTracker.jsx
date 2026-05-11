@@ -1,11 +1,13 @@
 import { useMemo, useState } from "react";
+import { Plus } from "lucide-react";
+import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { buildMonthOptions, getCurrentMonthKey } from "../../../lib/dates.js";
 import { formatMonthLabel } from "../../../lib/formatters.js";
 import SpendingMigrationPanel from "./SpendingMigrationPanel.jsx";
 import SpendingSummary from "./SpendingSummary.jsx";
-import TransactionForm from "./TransactionForm.jsx";
+import TransactionModal from "./TransactionModal.jsx";
 import TransactionTable from "./TransactionTable.jsx";
 
 export default function SpendingTracker({
@@ -26,6 +28,7 @@ export default function SpendingTracker({
   onImportLocalTransactions,
 }) {
   const [editingTransaction, setEditingTransaction] = useState(null);
+  const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [filters, setFilters] = useState({ cardId: "", categoryId: "", store: "" });
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const activeCards = creditCards.filter((card) => card.isActive);
@@ -37,11 +40,27 @@ export default function SpendingTracker({
       await onCreateTransaction(form);
     }
     setEditingTransaction(null);
+    setIsTransactionModalOpen(false);
   }
 
   async function handleDelete(transaction) {
     await onDeleteTransaction(transaction.supabaseId ?? transaction.id);
     if (editingTransaction?.id === transaction.id) setEditingTransaction(null);
+  }
+
+  function openAddModal() {
+    setEditingTransaction(null);
+    setIsTransactionModalOpen(true);
+  }
+
+  function openEditModal(transaction) {
+    setEditingTransaction(transaction);
+    setIsTransactionModalOpen(true);
+  }
+
+  function closeTransactionModal() {
+    setIsTransactionModalOpen(false);
+    setEditingTransaction(null);
   }
 
   return (
@@ -67,7 +86,7 @@ export default function SpendingTracker({
       />
 
       <Card className="p-5">
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-end">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto_220px] lg:items-end">
           <div>
             <p className="text-sm font-medium text-gray-500">Spending tracker</p>
             <h2 className="mt-1 text-2xl font-semibold tracking-normal text-gray-950">
@@ -80,11 +99,16 @@ export default function SpendingTracker({
             {categoriesLoading ? <p className="mt-2 text-sm text-gray-500">Loading categories...</p> : null}
             {isSaving ? <p className="mt-2 text-sm text-gray-500">Saving transaction...</p> : null}
           </div>
+          <Button type="button" onClick={openAddModal} disabled={loading || isSaving || categoriesLoading}>
+            <Plus size={16} aria-hidden="true" />
+            Add Transaction
+          </Button>
           <Select
             label="Spending month"
             value={selectedMonth}
             onChange={(event) => {
               setEditingTransaction(null);
+              setIsTransactionModalOpen(false);
               setFilters({ cardId: "", categoryId: "", store: "" });
               onMonthChange(event.target.value);
             }}
@@ -104,32 +128,27 @@ export default function SpendingTracker({
         categories={categories}
       />
 
-      <div className="grid min-w-0 gap-8 2xl:grid-cols-[minmax(0,1fr)_380px] 2xl:items-start">
-        <div className="min-w-0">
-          <TransactionTable
-            transactions={transactions}
-            cards={activeCards}
-            categories={categories}
-            filters={filters}
-            onFiltersChange={setFilters}
-            onEdit={setEditingTransaction}
-            onDelete={handleDelete}
-            isSaving={isSaving}
-          />
-        </div>
+      <TransactionTable
+        transactions={transactions}
+        cards={activeCards}
+        categories={categories}
+        filters={filters}
+        onFiltersChange={setFilters}
+        onEdit={openEditModal}
+        onDelete={handleDelete}
+        isSaving={isSaving}
+      />
 
-        <Card className="h-fit min-w-0 p-5 2xl:sticky 2xl:top-6">
-          <TransactionForm
-            monthKey={selectedMonth}
-            cards={activeCards}
-            categories={categories}
-            editingTransaction={editingTransaction}
-            onCancel={() => setEditingTransaction(null)}
-            onSaved={handleSave}
-            isSaving={isSaving}
-          />
-        </Card>
-      </div>
+      <TransactionModal
+        open={isTransactionModalOpen}
+        monthKey={selectedMonth}
+        cards={activeCards}
+        categories={categories}
+        editingTransaction={editingTransaction}
+        onClose={closeTransactionModal}
+        onSaved={handleSave}
+        isSaving={isSaving}
+      />
     </section>
   );
 }
