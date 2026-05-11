@@ -1,4 +1,4 @@
-import { ChevronDown, DatabaseBackup, Home, LogOut, Settings, UserCircle } from "lucide-react";
+import { ChevronDown, DatabaseBackup, Home, Info, LogOut, Settings, UserCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../AuthProvider.jsx";
 import { signOut } from "../authService.js";
@@ -63,6 +63,7 @@ export default function AccountMenu({ onNavigate }) {
             <MenuButton icon={Home} label="Household Settings" onClick={() => navigate("household-settings")} />
             <MenuButton icon={DatabaseBackup} label="Backup & Restore" onClick={() => navigate("backup")} />
             <MenuButton icon={Settings} label="App Settings" onClick={() => navigate("app-settings")} />
+            <MenuButton icon={Info} label="About WalletFlow" onClick={() => navigate("about")} />
           </div>
           <div className="border-t border-app-border p-2">
             <button

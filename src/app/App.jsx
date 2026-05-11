@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AppShell from "../components/layout/AppShell.jsx";
+import AboutWalletFlow from "../features/about/components/AboutWalletFlow.jsx";
 import { AuthProvider } from "../features/auth/AuthProvider.jsx";
 import AccountMenu from "../features/auth/components/AccountMenu.jsx";
 import AuthGate from "../features/auth/components/AuthGate.jsx";
@@ -101,6 +102,10 @@ const pageContent = {
   "app-settings": {
     title: "App Settings",
     description: "Customize display and app preferences.",
+  },
+  about: {
+    title: "About WalletFlow",
+    description: "Learn more about WalletFlow.",
   },
 };
 
@@ -1312,6 +1317,8 @@ function FinanceTrackerApp() {
       ) : null}
 
       {activeView === "app-settings" ? <AppSettings /> : null}
+
+      {activeView === "about" ? <AboutWalletFlow /> : null}
     </AppShell>
   );
 }

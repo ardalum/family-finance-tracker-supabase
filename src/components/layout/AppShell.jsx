@@ -55,7 +55,7 @@ export default function AppShell({
             <span className="text-app-border" aria-hidden="true">·</span>
             <FooterLink targetView="terms-of-use">Terms of Use</FooterLink>
             <span className="text-app-border" aria-hidden="true">·</span>
-            <FooterLink targetView="about">About</FooterLink>
+            <FooterLink targetView="about" onNavigate={onViewChange}>About</FooterLink>
           </nav>
         </div>
       </footer>
@@ -63,15 +63,20 @@ export default function AppShell({
   );
 }
 
-function FooterLink({ targetView, children }) {
+function FooterLink({ targetView, onNavigate, children }) {
+  const isEnabled = Boolean(onNavigate);
+
   return (
     <button
       type="button"
       className="text-left font-semibold text-brand-primary transition hover:text-brand-accent focus:text-brand-accent focus:outline-none"
       data-target-view={targetView}
-      title="Coming soon"
-      aria-disabled="true"
-      onClick={(event) => event.preventDefault()}
+      title={isEnabled ? undefined : "Coming soon"}
+      aria-disabled={isEnabled ? undefined : "true"}
+      onClick={(event) => {
+        event.preventDefault();
+        onNavigate?.(targetView);
+      }}
     >
       {children}
     </button>
