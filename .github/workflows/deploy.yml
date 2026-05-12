@@ -32,18 +32,18 @@ jobs:
         run: npm ci
 
       - name: Build
-  run: |
-    npm run build
-    echo "----- BUILT DIST INDEX -----"
-    cat dist/index.html
-    echo "----- CHECK FOR BAD SOURCE SCRIPT -----"
-    if grep -q "/src/main.jsx" dist/index.html; then
-      echo "ERROR: dist/index.html still points to /src/main.jsx"
-      exit 1
-    fi
-  env:
-    VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-    VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          npm run build
+          echo "----- BUILT DIST INDEX -----"
+          cat dist/index.html
+          echo "----- CHECK FOR BAD SOURCE SCRIPT -----"
+          if grep -q "/src/main.jsx" dist/index.html; then
+            echo "ERROR: dist/index.html still points to /src/main.jsx"
+            exit 1
+          fi
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
