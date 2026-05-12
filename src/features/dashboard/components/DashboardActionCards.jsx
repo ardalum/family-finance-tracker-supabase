@@ -48,7 +48,7 @@ export default function DashboardActionCards({ summary, cardRows, recurringRows,
       {items.map((item) => (
         <Card key={item.label} className="p-5">
           <p className="text-sm font-medium text-text-muted">{item.label}</p>
-          <p className={`mt-2 text-2xl font-semibold tracking-normal ${toneClass(item.tone)}`}>
+          <p className={`mt-2 text-xl font-semibold tracking-normal break-words sm:text-2xl ${toneClass(item.tone)}`}>
             {item.value}
           </p>
         </Card>

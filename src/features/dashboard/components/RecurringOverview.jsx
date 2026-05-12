@@ -17,15 +17,15 @@ export default function RecurringOverview({
       </div>
       {rows.length === 0 ? <Empty message={emptyMessage} /> : (
         <div className="overflow-x-auto">
-          <table className="min-w-full text-left text-sm">
+          <table className="min-w-full table-fixed text-left text-sm">
             <thead className="bg-app-background text-xs uppercase text-text-muted">
               <tr>
-                <th className="px-5 py-3">Bill</th>
-                <th className="px-5 py-3">Type</th>
-                <th className="px-5 py-3">Estimate</th>
-                <th className="px-5 py-3">Actual</th>
-                <th className="px-5 py-3">Due</th>
-                <th className="px-5 py-3">Status</th>
+                <th className="w-1/6 px-5 py-3">Bill</th>
+                <th className="w-1/6 px-5 py-3">Type</th>
+                <th className="w-1/6 px-5 py-3">Estimate</th>
+                <th className="w-1/6 px-5 py-3">Actual</th>
+                <th className="w-1/6 px-5 py-3">Due</th>
+                <th className="w-1/6 px-5 py-3">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-app-border">
@@ -35,7 +35,9 @@ export default function RecurringOverview({
                 const pastDue = row.displayStatus === "Past due";
                 return (
                   <tr key={row.template.id} className="bg-app-surface">
-                    <td className="px-5 py-4 font-semibold text-text-main">{row.template.name}</td>
+                    <td className="px-5 py-4 font-semibold text-text-main min-w-0">
+                      <span className="truncate block">{row.template.name}</span>
+                    </td>
                     <td className="px-5 py-4 capitalize">{row.template.billType}</td>
                     <td className="px-5 py-4">{formatCurrency(row.template.estimatedAmount)}</td>
                     <td className="px-5 py-4">{formatCurrency(row.amount)}</td>
