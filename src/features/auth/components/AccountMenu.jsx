@@ -85,14 +85,16 @@ export default function AccountMenu({ onNavigate }) {
     <div ref={menuRef} className="relative min-w-0">
       <button
         type="button"
-        className="inline-flex h-10 max-w-64 items-center gap-2 rounded-xl border border-app-border bg-app-surface px-2.5 text-xs font-semibold text-text-soft transition hover:bg-app-background focus:outline-none focus:ring-2 focus:ring-brand-primary/10"
+        className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-app-border bg-app-surface text-text-soft transition hover:bg-app-background focus:outline-none focus:ring-2 focus:ring-brand-primary/10 sm:w-auto sm:max-w-64 sm:justify-start sm:gap-2 sm:px-2.5 sm:text-xs sm:font-semibold"
         onClick={() => setOpen((current) => !current)}
+        aria-label={user?.email ? `Account menu for ${user.email}` : "Account menu"}
         aria-haspopup="menu"
         aria-expanded={open}
+        title={user?.email || "Account menu"}
       >
         <UserCircle size={16} className="shrink-0" aria-hidden="true" />
-        <span className="min-w-0 truncate">{user?.email}</span>
-        <ChevronDown size={14} className="shrink-0" aria-hidden="true" />
+        <span className="hidden min-w-0 truncate sm:inline">{user?.email}</span>
+        <ChevronDown size={14} className="hidden shrink-0 sm:inline" aria-hidden="true" />
       </button>
 
       {open ? (
