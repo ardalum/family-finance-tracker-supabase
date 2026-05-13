@@ -16,6 +16,25 @@ function defaultDateForMonth(monthKey) {
   return `${monthKey}-01`;
 }
 
+function getInitialSplit(categoryId = UNCATEGORIZED_ID, amount = "") {
+  return { id: crypto.randomUUID(), categoryId, amount };
+}
+
+function getEditingSplits(transaction) {
+  if (transaction.splits?.length > 0) {
+    return transaction.splits.map((split) => ({
+      ...split,
+      amount: String(split.amount),
+    }));
+  }
+
+  return [getInitialSplit(transaction.categoryId || UNCATEGORIZED_ID, String(transaction.amount ?? ""))];
+}
+
+function roundMoney(value) {
+  return Math.round(Number(value || 0) * 100) / 100;
+}
+
 const emptyForm = {
   date: todayDate(),
   merchant: "",
@@ -52,6 +71,9 @@ export default function TransactionForm({
     () => new Set(cards.map((card) => card.owner).filter(Boolean)).size >= 2,
     [cards],
   );
+  const splitTotal = useMemo(() => getSplitTotal(form.splits), [form.splits]);
+  const splitDifference = useMemo(() => roundMoney(Number(form.amount || 0) - splitTotal), [form.amount, splitTotal]);
+  const isEditingRecurring = editingTransaction?.source === "recurring";
 
   useEffect(() => {
     setError("");
@@ -61,28 +83,27 @@ export default function TransactionForm({
             date: editingTransaction.date,
             merchant: editingTransaction.merchant,
             paymentMethod: editingTransaction.paymentMethod || "",
-            cardId: editingTransaction.cardId,
+            cardId: editingTransaction.cardId || "",
             transactionType: editingTransaction.transactionType || "expense",
             categoryId: editingTransaction.categoryId || UNCATEGORIZED_ID,
-            amount: String(editingTransaction.amount),
+            amount: String(editingTransaction.amount ?? ""),
             notes: editingTransaction.notes ?? "",
             splitMode: Boolean(editingTransaction.splitMode || editingTransaction.splits?.length),
             source: editingTransaction.source || "manual",
             recurringPaymentId: editingTransaction.recurringPaymentId || null,
             recurringMonth: editingTransaction.recurringMonth || null,
-            splits: editingTransaction.splits.map((split) => ({
-              ...split,
-              amount: String(split.amount),
-            })),
+            splits: getEditingSplits(editingTransaction),
           }
         : {
             ...emptyForm,
             date: defaultDateForMonth(monthKey),
+            splits: [getInitialSplit()],
           },
     );
   }, [editingTransaction, monthKey]);
 
   function updateField(field, value) {
+    setError("");
     setForm((current) => ({
       ...current,
       [field]: value,
@@ -91,6 +112,7 @@ export default function TransactionForm({
   }
 
   function updateSplit(splitId, field, value) {
+    setError("");
     setForm((current) => ({
       ...current,
       splits: current.splits.map((split) =>
@@ -100,27 +122,30 @@ export default function TransactionForm({
   }
 
   function addSplit() {
+    setError("");
     setForm((current) => ({
       ...current,
       splits: [
         ...current.splits,
-        { id: crypto.randomUUID(), categoryId: UNCATEGORIZED_ID, amount: "" },
+        getInitialSplit(UNCATEGORIZED_ID, ""),
       ],
     }));
   }
 
   function toggleSplitMode(checked) {
+    setError("");
     setForm((current) => ({
       ...current,
       splitMode: checked,
       splits:
         checked && current.splits.length === 0
-          ? [{ id: crypto.randomUUID(), categoryId: current.categoryId, amount: current.amount }]
+          ? [getInitialSplit(current.categoryId, current.amount)]
           : current.splits,
     }));
   }
 
   function removeSplit(splitId) {
+    setError("");
     setForm((current) => ({
       ...current,
       splits: current.splits.filter((split) => split.id !== splitId),
@@ -129,28 +154,34 @@ export default function TransactionForm({
 
   async function handleSubmit(event) {
     event.preventDefault();
-    const validationError = validateForm(form, cards);
+    const validationError = validateForm(form, cards, isEditingRecurring);
     if (validationError) {
       setError(validationError);
       return;
     }
 
     try {
-      await onSaved(form, editingTransaction);
-      setForm(emptyForm);
+      await onSaved(getPreparedForm(form), editingTransaction);
+      setForm({ ...emptyForm, date: defaultDateForMonth(monthKey), splits: [getInitialSplit()] });
     } catch (currentError) {
       setError(currentError.message || "Could not save transaction.");
     }
   }
 
   return (
-    <form className="grid gap-4" onSubmit={handleSubmit}>
+    <form className="grid gap-4" onSubmit={handleSubmit} noValidate>
       {showHeader ? (
         <div>
           <h3 className="text-base font-semibold text-text-main">
             {editingTransaction ? "Edit transaction" : "Add transaction"}
           </h3>
           <p className="mt-1 text-sm text-text-muted">Use category split only when needed.</p>
+        </div>
+      ) : null}
+
+      {isEditingRecurring ? (
+        <div className="rounded-xl border border-status-warningBg bg-status-warningBg px-3 py-2 text-sm text-status-warningDark">
+          Recurring-linked transactions should be managed from Recurring Payments.
         </div>
       ) : null}
 
@@ -173,18 +204,12 @@ export default function TransactionForm({
         </div>
       ) : null}
 
-      <div className="grid gap-4">
+      <div className="grid gap-4 sm:grid-cols-2">
         <Input
           label="Date"
           type="date"
           value={form.date}
           onChange={(event) => updateField("date", event.target.value)}
-          required
-        />
-        <Input
-          label="Store or merchant"
-          value={form.merchant}
-          onChange={(event) => updateField("merchant", event.target.value)}
           required
         />
         <Select
@@ -199,6 +224,15 @@ export default function TransactionForm({
             </option>
           ))}
         </Select>
+        <div className="sm:col-span-2">
+          <Input
+            label="Store or merchant"
+            value={form.merchant}
+            onChange={(event) => updateField("merchant", event.target.value)}
+            placeholder="Example: Walmart, Duke Energy, Chase payment"
+            required
+          />
+        </div>
         <Select
           label="Payment method"
           value={form.paymentMethod}
@@ -230,20 +264,24 @@ export default function TransactionForm({
               </option>
             ))}
           </Select>
-        ) : null}
+        ) : (
+          <div className="hidden sm:block" aria-hidden="true" />
+        )}
         <Input
           label="Amount"
           type="number"
-          min="0"
+          min="0.01"
           step="0.01"
           value={form.amount}
           onChange={(event) => updateField("amount", event.target.value)}
+          placeholder="0.00"
           required
         />
         <Select
           label="Category"
           value={form.categoryId}
           onChange={(event) => updateField("categoryId", event.target.value)}
+          disabled={form.splitMode}
         >
           {categoryOptions.map((category) => (
             <option key={category.id} value={category.id}>
@@ -265,7 +303,7 @@ export default function TransactionForm({
 
       {form.splitMode ? (
         <div className="grid gap-3 rounded-2xl border border-app-border bg-app-background p-3">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-sm font-semibold text-text-main">Category split</p>
               <p className="mt-0.5 text-xs text-text-muted">
@@ -293,10 +331,11 @@ export default function TransactionForm({
               <Input
                 label="Amount"
                 type="number"
-                min="0"
+                min="0.01"
                 step="0.01"
                 value={split.amount}
                 onChange={(event) => updateSplit(split.id, "amount", event.target.value)}
+                placeholder="0.00"
               />
               <Button
                 type="button"
@@ -310,9 +349,17 @@ export default function TransactionForm({
               </Button>
             </div>
           ))}
-          <p className="text-xs text-text-muted">
-            Split total: ${getSplitTotal(form.splits).toFixed(2)}
-          </p>
+          <div className="grid gap-1 rounded-xl bg-app-surface px-3 py-2 text-xs text-text-muted sm:grid-cols-3">
+            <p>
+              Transaction: <span className="font-semibold text-text-main">${Number(form.amount || 0).toFixed(2)}</span>
+            </p>
+            <p>
+              Split total: <span className="font-semibold text-text-main">${splitTotal.toFixed(2)}</span>
+            </p>
+            <p className={splitDifference === 0 ? "font-semibold text-status-successDark" : "font-semibold text-status-dangerDark"}>
+              Difference: ${splitDifference.toFixed(2)}
+            </p>
+          </div>
         </div>
       ) : null}
 
@@ -327,7 +374,7 @@ export default function TransactionForm({
       </label>
 
       <div className="flex flex-wrap gap-3">
-        <Button type="submit" disabled={isSaving}>
+        <Button type="submit" disabled={isSaving || isEditingRecurring}>
           {isSaving ? "Saving..." : editingTransaction ? "Save transaction" : "Add transaction"}
         </Button>
         {editingTransaction ? (
@@ -340,25 +387,42 @@ export default function TransactionForm({
   );
 }
 
+function getPreparedForm(form) {
+  return {
+    ...form,
+    merchant: form.merchant.trim(),
+    notes: form.notes.trim(),
+    amount: Number(form.amount),
+    splits: form.splitMode
+      ? form.splits.map((split) => ({
+          ...split,
+          amount: Number(split.amount),
+        }))
+      : [],
+  };
+}
+
 function getCardOptionLabel(card, showOwner) {
   const lastFour = card.lastFour ? ` **** ${card.lastFour}` : "";
   const owner = showOwner && card.owner ? ` - ${card.owner}` : "";
   return `${card.name}${lastFour}${owner}`;
 }
 
-function validateForm(form, cards) {
+function validateForm(form, cards, isEditingRecurring = false) {
+  if (isEditingRecurring) return "Recurring-linked transactions must be edited from Recurring Payments.";
   if (!form.date) return "Date is required.";
   if (!form.merchant.trim()) return "Store or merchant is required.";
   if (!form.transactionType) return "Transaction type is required.";
   if (!form.paymentMethod) return "Payment method is required.";
   if (form.paymentMethod === "Credit Card" && !form.cardId) return "Card used is required.";
   if (form.paymentMethod === "Credit Card" && !cards.some((card) => card.id === form.cardId)) return "Select a valid card.";
-  if (Number(form.amount) <= 0) return "Amount must be greater than zero.";
+  if (!Number.isFinite(Number(form.amount)) || Number(form.amount) <= 0) return "Amount must be greater than zero.";
   if (!form.splitMode && !form.categoryId) return "Category is required.";
   if (!form.splitMode) return "";
   if (form.splits.length === 0) return "At least one category split is required.";
-  if (form.splits.some((split) => Number(split.amount) < 0)) {
-    return "Split amounts cannot be negative.";
+  if (form.splits.some((split) => !split.categoryId)) return "Every split needs a category.";
+  if (form.splits.some((split) => !Number.isFinite(Number(split.amount)) || Number(split.amount) <= 0)) {
+    return "Every split amount must be greater than zero.";
   }
 
   const amount = Math.round(Number(form.amount) * 100);
