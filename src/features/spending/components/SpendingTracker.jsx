@@ -10,6 +10,8 @@ import SpendingSummary from "./SpendingSummary.jsx";
 import TransactionModal from "./TransactionModal.jsx";
 import TransactionTable from "./TransactionTable.jsx";
 
+const emptyFilters = { cardId: "", categoryId: "", transactionType: "", store: "" };
+
 export default function SpendingTracker({
   creditCards,
   categories,
@@ -29,7 +31,7 @@ export default function SpendingTracker({
 }) {
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
-  const [filters, setFilters] = useState({ cardId: "", categoryId: "", store: "" });
+  const [filters, setFilters] = useState(emptyFilters);
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const activeCards = creditCards.filter((card) => card.isActive);
 
@@ -109,7 +111,7 @@ export default function SpendingTracker({
             onChange={(event) => {
               setEditingTransaction(null);
               setIsTransactionModalOpen(false);
-              setFilters({ cardId: "", categoryId: "", store: "" });
+              setFilters(emptyFilters);
               onMonthChange(event.target.value);
             }}
           >

@@ -3,6 +3,24 @@ import { updateAppData } from "../../lib/storage/appStorage.js";
 export const UNCATEGORIZED_ID = "uncategorized";
 export const UNCATEGORIZED_NAME = "Uncategorized";
 
+export const TRANSACTION_TYPES = [
+  "expense",
+  "refund",
+  "income",
+  "payment",
+  "transfer",
+  "adjustment",
+];
+
+export const TRANSACTION_TYPE_OPTIONS = [
+  { value: "expense", label: "Expense" },
+  { value: "refund", label: "Refund / Return" },
+  { value: "income", label: "Income" },
+  { value: "payment", label: "Card payment" },
+  { value: "transfer", label: "Transfer" },
+  { value: "adjustment", label: "Adjustment" },
+];
+
 function createId(prefix) {
   return `${prefix}_${crypto.randomUUID()}`;
 }
@@ -11,12 +29,31 @@ function timestamp() {
   return new Date().toISOString();
 }
 
+export function normalizeTransactionType(type) {
+  return TRANSACTION_TYPES.includes(type) ? type : "expense";
+}
+
+export function getTransactionTypeLabel(type) {
+  const normalizedType = normalizeTransactionType(type);
+  return TRANSACTION_TYPE_OPTIONS.find((option) => option.value === normalizedType)?.label ?? "Expense";
+}
+
+export function getTransactionImpactAmount(transaction) {
+  const amount = Number(transaction.amount || 0);
+  const type = normalizeTransactionType(transaction.transactionType);
+
+  if (type === "refund") return -amount;
+  if (type === "payment" || type === "transfer" || type === "income") return 0;
+  return amount;
+}
+
 function normalizeTransaction(input) {
   return {
     date: input.date,
     merchant: input.merchant.trim(),
     paymentMethod: input.paymentMethod || "Credit Card",
     cardId: input.cardId || "",
+    transactionType: normalizeTransactionType(input.transactionType),
     amount: Number(input.amount) || 0,
     notes: input.notes.trim(),
     categoryId: input.categoryId || UNCATEGORIZED_ID,
@@ -93,16 +130,19 @@ export function getMonthTransactions(transactions, monthKey) {
 }
 
 export function getTotalSpending(transactions) {
-  return transactions.reduce((total, transaction) => total + Number(transaction.amount || 0), 0);
+  return transactions.reduce((total, transaction) => total + getTransactionImpactAmount(transaction), 0);
 }
 
 export function summarizeByCategory(transactions, categories) {
   const totals = new Map();
 
   transactions.forEach((transaction) => {
+    const multiplier = getTransactionImpactAmount(transaction) < 0 ? -1 : 1;
+    if (getTransactionImpactAmount(transaction) === 0) return;
+
     getTransactionCategoryRows(transaction).forEach((row) => {
       const name = getCategoryName(row.categoryId, categories);
-      totals.set(name, (totals.get(name) ?? 0) + Number(row.amount || 0));
+      totals.set(name, (totals.get(name) ?? 0) + Number(row.amount || 0) * multiplier);
     });
   });
 
@@ -113,8 +153,10 @@ export function summarizeByCard(transactions, cards) {
   const totals = new Map();
 
   transactions.forEach((transaction) => {
+    const impactAmount = getTransactionImpactAmount(transaction);
+    if (impactAmount === 0) return;
     const name = getCardName(transaction.cardId, cards);
-    totals.set(name, (totals.get(name) ?? 0) + Number(transaction.amount || 0));
+    totals.set(name, (totals.get(name) ?? 0) + impactAmount);
   });
 
   return sortSummary(totals);
@@ -124,9 +166,11 @@ export function summarizeByMerchant(transactions) {
   const totals = new Map();
 
   transactions.forEach((transaction) => {
+    const impactAmount = getTransactionImpactAmount(transaction);
+    if (impactAmount === 0) return;
     totals.set(
       transaction.merchant,
-      (totals.get(transaction.merchant) ?? 0) + Number(transaction.amount || 0),
+      (totals.get(transaction.merchant) ?? 0) + impactAmount,
     );
   });
 
@@ -136,7 +180,7 @@ export function summarizeByMerchant(transactions) {
 function sortSummary(totals) {
   return Array.from(totals.entries())
     .map(([name, amount]) => ({ name, amount }))
-    .sort((a, b) => b.amount - a.amount || a.name.localeCompare(b.name));
+    .sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount) || a.name.localeCompare(b.name));
 }
 
 export function getSplitTotal(splits) {

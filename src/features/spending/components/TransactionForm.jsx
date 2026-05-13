@@ -3,7 +3,7 @@ import { Plus, Trash2 } from "lucide-react";
 import Button from "../../../components/ui/Button.jsx";
 import Input from "../../../components/ui/Input.jsx";
 import Select from "../../../components/ui/Select.jsx";
-import { getSplitTotal, UNCATEGORIZED_ID } from "../spendingService.js";
+import { getSplitTotal, TRANSACTION_TYPE_OPTIONS, UNCATEGORIZED_ID } from "../spendingService.js";
 
 function todayDate() {
   return new Date().toISOString().slice(0, 10);
@@ -21,6 +21,7 @@ const emptyForm = {
   merchant: "",
   paymentMethod: "",
   cardId: "",
+  transactionType: "expense",
   categoryId: UNCATEGORIZED_ID,
   amount: "",
   notes: "",
@@ -61,6 +62,7 @@ export default function TransactionForm({
             merchant: editingTransaction.merchant,
             paymentMethod: editingTransaction.paymentMethod || "",
             cardId: editingTransaction.cardId,
+            transactionType: editingTransaction.transactionType || "expense",
             categoryId: editingTransaction.categoryId || UNCATEGORIZED_ID,
             amount: String(editingTransaction.amount),
             notes: editingTransaction.notes ?? "",
@@ -185,6 +187,18 @@ export default function TransactionForm({
           onChange={(event) => updateField("merchant", event.target.value)}
           required
         />
+        <Select
+          label="Transaction type"
+          value={form.transactionType}
+          onChange={(event) => updateField("transactionType", event.target.value)}
+          required
+        >
+          {TRANSACTION_TYPE_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </Select>
         <Select
           label="Payment method"
           value={form.paymentMethod}
@@ -335,6 +349,7 @@ function getCardOptionLabel(card, showOwner) {
 function validateForm(form, cards) {
   if (!form.date) return "Date is required.";
   if (!form.merchant.trim()) return "Store or merchant is required.";
+  if (!form.transactionType) return "Transaction type is required.";
   if (!form.paymentMethod) return "Payment method is required.";
   if (form.paymentMethod === "Credit Card" && !form.cardId) return "Card used is required.";
   if (form.paymentMethod === "Credit Card" && !cards.some((card) => card.id === form.cardId)) return "Select a valid card.";
