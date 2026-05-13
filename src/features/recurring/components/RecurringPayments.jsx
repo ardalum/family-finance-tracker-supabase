@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { X } from "lucide-react";
+import { CalendarCheck2, ListChecks, X } from "lucide-react";
 import Card from "../../../components/ui/Card.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { buildMonthOptions, getCurrentMonthKey } from "../../../lib/dates.js";
@@ -9,6 +9,21 @@ import RecurringMigrationPanel from "./RecurringMigrationPanel.jsx";
 import RecurringPaymentForm from "./RecurringPaymentForm.jsx";
 import RecurringPaymentTable from "./RecurringPaymentTable.jsx";
 import RecurringSummary from "./RecurringSummary.jsx";
+
+const recurringSections = [
+  {
+    id: "this-month",
+    label: "This Month",
+    description: "Review bills for the selected month and mark them paid, unpaid, or skipped.",
+    icon: CalendarCheck2,
+  },
+  {
+    id: "templates",
+    label: "Templates",
+    description: "Add, edit, deactivate, or delete recurring bill templates.",
+    icon: ListChecks,
+  },
+];
 
 export default function RecurringPayments({
   creditCards,
@@ -34,8 +49,10 @@ export default function RecurringPayments({
 }) {
   const [editingTemplate, setEditingTemplate] = useState(null);
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("this-month");
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const activeCards = creditCards.filter((card) => card.isActive);
+  const currentSection = recurringSections.find((section) => section.id === activeSection) ?? recurringSections[0];
 
   useEffect(() => {
     if (!isTemplateModalOpen) return undefined;
@@ -139,26 +156,59 @@ export default function RecurringPayments({
         recurringStatusByMonth={recurringStatusByMonth}
       />
 
-      <RecurringGenerationPanel
-        monthKey={selectedMonth}
-        templates={recurringPayments}
-        recurringStatusByMonth={recurringStatusByMonth}
-        categories={categories}
-        onMarkPaid={onMarkRecurringPaid}
-        onMarkUnpaid={onMarkRecurringUnpaid}
-        onSkip={onSkipRecurringPayment}
-        isSaving={isSaving}
-      />
+      <div className="grid gap-1">
+        <h2 className="text-lg font-semibold text-text-main">Recurring workspace</h2>
+        <p className="text-sm text-text-muted">{currentSection.description}</p>
+      </div>
 
-      <RecurringPaymentTable
-        templates={recurringPayments}
-        cards={activeCards}
-        categories={categories}
-        onAdd={openAddTemplateModal}
-        onEdit={openEditTemplateModal}
-        onDelete={handleDelete}
-        isSaving={isSaving}
-      />
+      <div className="overflow-x-auto rounded-2xl border border-app-border bg-app-surface p-2">
+        <div className="flex min-w-max gap-2">
+          {recurringSections.map((section) => {
+            const Icon = section.icon;
+            const isActive = activeSection === section.id;
+            return (
+              <button
+                key={section.id}
+                type="button"
+                className={`inline-flex min-h-11 items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                  isActive
+                    ? "bg-text-main text-white shadow-sm"
+                    : "text-text-soft hover:bg-app-muted hover:text-text-main"
+                }`}
+                onClick={() => setActiveSection(section.id)}
+              >
+                <Icon size={16} aria-hidden="true" />
+                {section.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {activeSection === "this-month" ? (
+        <RecurringGenerationPanel
+          monthKey={selectedMonth}
+          templates={recurringPayments}
+          recurringStatusByMonth={recurringStatusByMonth}
+          categories={categories}
+          onMarkPaid={onMarkRecurringPaid}
+          onMarkUnpaid={onMarkRecurringUnpaid}
+          onSkip={onSkipRecurringPayment}
+          isSaving={isSaving}
+        />
+      ) : null}
+
+      {activeSection === "templates" ? (
+        <RecurringPaymentTable
+          templates={recurringPayments}
+          cards={activeCards}
+          categories={categories}
+          onAdd={openAddTemplateModal}
+          onEdit={openEditTemplateModal}
+          onDelete={handleDelete}
+          isSaving={isSaving}
+        />
+      ) : null}
 
       {isTemplateModalOpen ? (
         <div
