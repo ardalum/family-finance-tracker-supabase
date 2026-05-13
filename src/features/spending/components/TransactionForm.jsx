@@ -32,10 +32,50 @@ const emptyForm = {
   splits: [{ id: "split_initial", categoryId: UNCATEGORIZED_ID, amount: "" }],
 };
 
+function buildMerchantProfiles(transactions) {
+  const profiles = new Map();
+
+  transactions.forEach((transaction) => {
+    const merchant = transaction.merchant?.trim();
+    if (!merchant) return;
+
+    const key = merchant.toLowerCase();
+    const current = profiles.get(key) ?? {
+      merchant,
+      count: 0,
+      latestDate: "",
+      paymentMethod: "",
+      cardId: "",
+      transactionType: "expense",
+      categoryId: UNCATEGORIZED_ID,
+      notes: "",
+    };
+
+    const isNewer = !current.latestDate || transaction.date > current.latestDate;
+
+    profiles.set(key, {
+      ...current,
+      merchant: current.merchant || merchant,
+      count: current.count + 1,
+      latestDate: isNewer ? transaction.date : current.latestDate,
+      paymentMethod: isNewer ? transaction.paymentMethod || "" : current.paymentMethod,
+      cardId: isNewer ? transaction.cardId || "" : current.cardId,
+      transactionType: isNewer ? transaction.transactionType || "expense" : current.transactionType,
+      categoryId: isNewer ? transaction.categoryId || UNCATEGORIZED_ID : current.categoryId,
+      notes: isNewer ? transaction.notes || "" : current.notes,
+    });
+  });
+
+  return Array.from(profiles.values())
+    .sort((a, b) => b.count - a.count || b.latestDate.localeCompare(a.latestDate) || a.merchant.localeCompare(b.merchant))
+    .slice(0, 50);
+}
+
 export default function TransactionForm({
   monthKey,
   cards,
   categories,
+  transactions = [],
   editingTransaction,
   onCancel,
   onSaved,
@@ -48,6 +88,7 @@ export default function TransactionForm({
     () => [{ id: UNCATEGORIZED_ID, name: "Uncategorized" }, ...categories],
     [categories],
   );
+  const merchantProfiles = useMemo(() => buildMerchantProfiles(transactions), [transactions]);
   const showCardOwner = useMemo(
     () => new Set(cards.map((card) => card.owner).filter(Boolean)).size >= 2,
     [cards],
@@ -87,6 +128,22 @@ export default function TransactionForm({
       ...current,
       [field]: value,
       ...(field === "paymentMethod" && value !== "Credit Card" ? { cardId: "" } : {}),
+    }));
+  }
+
+  function applyMerchantSuggestion(value) {
+    const profile = merchantProfiles.find(
+      (item) => item.merchant.toLowerCase() === value.trim().toLowerCase(),
+    );
+    if (!profile || editingTransaction) return;
+
+    setForm((current) => ({
+      ...current,
+      merchant: profile.merchant,
+      paymentMethod: profile.paymentMethod || current.paymentMethod,
+      cardId: profile.paymentMethod === "Credit Card" ? profile.cardId || current.cardId : "",
+      transactionType: profile.transactionType || current.transactionType,
+      categoryId: profile.categoryId || current.categoryId,
     }));
   }
 
@@ -173,6 +230,14 @@ export default function TransactionForm({
         </div>
       ) : null}
 
+      <datalist id="merchant-suggestions">
+        {merchantProfiles.map((profile) => (
+          <option key={profile.merchant} value={profile.merchant}>
+            {profile.count > 1 ? `Used ${profile.count} times` : "Previous transaction"}
+          </option>
+        ))}
+      </datalist>
+
       <div className="grid gap-4">
         <Input
           label="Date"
@@ -185,8 +250,19 @@ export default function TransactionForm({
           label="Store or merchant"
           value={form.merchant}
           onChange={(event) => updateField("merchant", event.target.value)}
+          onBlur={(event) => applyMerchantSuggestion(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") applyMerchantSuggestion(event.currentTarget.value);
+          }}
+          list="merchant-suggestions"
+          placeholder="Start typing to reuse a previous merchant"
           required
         />
+        {!editingTransaction && merchantProfiles.length > 0 ? (
+          <p className="-mt-2 text-xs text-text-muted">
+            Choosing a previous merchant can autofill payment method, card, type, and category.
+          </p>
+        ) : null}
         <Select
           label="Transaction type"
           value={form.transactionType}
