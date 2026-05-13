@@ -26,7 +26,12 @@ const statusConfig = {
   },
 };
 
-export default function AuthStatusScreen({ status = AUTH_STATUS_TYPES.inbox, email = "", actionSlot = null }) {
+export default function AuthStatusScreen({
+  status = AUTH_STATUS_TYPES.inbox,
+  email = "",
+  message = "",
+  actionSlot = null,
+}) {
   const { authEvent } = useAuth();
   const config = statusConfig[status] ?? statusConfig[AUTH_STATUS_TYPES.problem];
   const Icon = config.icon;
@@ -39,6 +44,11 @@ export default function AuthStatusScreen({ status = AUTH_STATUS_TYPES.inbox, ema
         </div>
         <h2 className="mt-4 text-xl font-semibold text-text-main">{config.title}</h2>
         <p className="mt-2 text-sm text-text-muted">{config.description}</p>
+        {message ? (
+          <p className="mt-4 rounded-xl border border-app-border bg-app-background px-3 py-2 text-sm text-text-main">
+            {message}
+          </p>
+        ) : null}
         {email ? (
           <p className="mt-4 rounded-xl bg-app-background px-3 py-2 text-sm font-semibold text-text-main">
             {email}
