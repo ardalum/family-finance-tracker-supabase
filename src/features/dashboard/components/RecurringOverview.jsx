@@ -1,14 +1,19 @@
 import Card from "../../../components/ui/Card.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
 
+const MAX_PREVIEW_ROWS = 5;
+
 export default function RecurringOverview({
   rows,
   summary,
   title = "Recurring Bills Overview",
   emptyMessage = "No recurring payments due this month.",
 }) {
+  const previewRows = rows.slice(0, MAX_PREVIEW_ROWS);
+  const hiddenCount = Math.max(rows.length - previewRows.length, 0);
+
   return (
-    <Card>
+    <Card className="overflow-hidden">
       <div className="border-b border-app-border p-5">
         <h3 className="text-lg font-semibold text-text-main">{title}</h3>
         <p className="mt-1 text-sm text-text-muted">
@@ -16,42 +21,41 @@ export default function RecurringOverview({
         </p>
       </div>
       {rows.length === 0 ? <Empty message={emptyMessage} /> : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full table-fixed text-left text-sm">
-            <thead className="bg-app-background text-xs uppercase text-text-muted">
-              <tr>
-                <th className="w-1/6 px-5 py-3">Bill</th>
-                <th className="w-1/6 px-5 py-3">Type</th>
-                <th className="w-1/6 px-5 py-3">Estimate</th>
-                <th className="w-1/6 px-5 py-3">Actual</th>
-                <th className="w-1/6 px-5 py-3">Due</th>
-                <th className="w-1/6 px-5 py-3">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-app-border">
-              {rows.map((row) => {
-                const variableNeedsActual = row.template.billType === "variable" && row.displayStatus !== "Paid" && !row.instance?.actualAmount;
-                const dueSoon = ["Due now", "Due soon"].includes(row.displayStatus);
-                const pastDue = row.displayStatus === "Past due";
-                return (
-                  <tr key={row.template.id} className="bg-app-surface">
-                    <td className="px-5 py-4 font-semibold text-text-main min-w-0">
-                      <span className="truncate block">{row.template.name}</span>
-                    </td>
-                    <td className="px-5 py-4 capitalize">{row.template.billType}</td>
-                    <td className="px-5 py-4">{formatCurrency(row.template.estimatedAmount)}</td>
-                    <td className="px-5 py-4">{formatCurrency(row.amount)}</td>
-                    <td className="px-5 py-4">{row.dueDate}</td>
-                    <td className="px-5 py-4">
-                      <span className={`rounded-lg px-2 py-1 text-xs font-semibold ${getStatusBadgeClass(row.displayStatus, variableNeedsActual)}`}>
+        <div className="grid gap-3 p-4">
+          {previewRows.map((row) => {
+            const variableNeedsActual = row.template.billType === "variable" && row.displayStatus !== "Paid" && !row.instance?.actualAmount;
+            return (
+              <article key={row.template.id} className="rounded-2xl border border-app-border bg-app-surface px-4 py-3">
+                <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex min-w-0 flex-wrap items-center gap-2">
+                      <h4 className="truncate text-sm font-semibold text-text-main">{row.template.name}</h4>
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${getStatusBadgeClass(row.displayStatus, variableNeedsActual)}`}>
                         {row.displayStatus}
                       </span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                    </div>
+                    <p className="mt-1 text-xs text-text-muted">
+                      {row.template.billType === "fixed" ? "Fixed" : "Variable"} · Due {row.dueDate}
+                    </p>
+                  </div>
+                  <div className="text-left sm:text-right">
+                    <p className="text-sm font-semibold text-text-main">{formatCurrency(row.amount)}</p>
+                    <p className="text-xs text-text-muted">Actual / expected</p>
+                  </div>
+                </div>
+                {variableNeedsActual ? (
+                  <p className="mt-2 rounded-xl bg-status-warningBg px-3 py-2 text-xs font-medium text-status-warningDark">
+                    Needs actual amount before payment tracking.
+                  </p>
+                ) : null}
+              </article>
+            );
+          })}
+          {hiddenCount > 0 ? (
+            <p className="px-1 text-xs font-medium text-text-muted">
+              Showing {previewRows.length} of {rows.length}. Open Recurring Payments to review the rest.
+            </p>
+          ) : null}
         </div>
       )}
     </Card>
