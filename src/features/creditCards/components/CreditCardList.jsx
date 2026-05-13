@@ -1,10 +1,46 @@
-import { Edit, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Edit, RotateCcw, Trash2 } from "lucide-react";
 import LinkedCardName from "../../../components/shared/LinkedCardName.jsx";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
+import Input from "../../../components/ui/Input.jsx";
+import Select from "../../../components/ui/Select.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
 
+const defaultFilters = {
+  search: "",
+  owner: "",
+  status: "active",
+};
+
+function getCardSearchText(card) {
+  return [card.name, card.owner, card.network, card.lastFour, card.creditLimit]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+}
+
 export default function CreditCardList({ cards, onEdit, onDelete, isSaving = false }) {
+  const [filters, setFilters] = useState(defaultFilters);
+  const ownerOptions = useMemo(
+    () => Array.from(new Set(cards.map((card) => card.owner).filter(Boolean))).sort(),
+    [cards],
+  );
+  const visibleCards = useMemo(() => {
+    const searchTerm = filters.search.trim().toLowerCase();
+    return cards.filter((card) => {
+      const matchesSearch = !searchTerm || getCardSearchText(card).includes(searchTerm);
+      const matchesOwner = !filters.owner || card.owner === filters.owner;
+      const matchesStatus =
+        filters.status === "all"
+          ? true
+          : filters.status === "inactive"
+            ? !card.isActive
+            : card.isActive;
+      return matchesSearch && matchesOwner && matchesStatus;
+    });
+  }, [cards, filters]);
+
   async function handleDelete(card) {
     const confirmed = window.confirm(
       `Delete ${card.name}? This removes the card from Supabase for this household.`,
@@ -14,23 +50,60 @@ export default function CreditCardList({ cards, onEdit, onDelete, isSaving = fal
 
   return (
     <Card>
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 p-5">
-        <div>
-          <h2 className="text-lg font-semibold text-gray-950">Credit cards</h2>
-          <p className="text-sm text-gray-500">Stored in Supabase for the active household.</p>
+      <div className="grid gap-4 border-b border-gray-200 p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-950">Credit cards</h2>
+            <p className="text-sm text-gray-500">Stored in Supabase for the active household.</p>
+          </div>
+          <span className="rounded-md bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">
+            Showing {visibleCards.length} of {cards.length}
+          </span>
         </div>
-        <span className="rounded-md bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">
-          {cards.length} active
-        </span>
+        <div className="grid gap-3 lg:grid-cols-[minmax(240px,1fr)_180px_180px_auto] lg:items-end">
+          <Input
+            label="Search cards"
+            value={filters.search}
+            onChange={(event) => setFilters((current) => ({ ...current, search: event.target.value }))}
+            placeholder="Card name, network, owner, last 4, or limit"
+          />
+          <Select
+            label="Owner"
+            value={filters.owner}
+            onChange={(event) => setFilters((current) => ({ ...current, owner: event.target.value }))}
+          >
+            <option value="">All owners</option>
+            {ownerOptions.map((owner) => (
+              <option key={owner} value={owner}>{owner}</option>
+            ))}
+          </Select>
+          <Select
+            label="Status"
+            value={filters.status}
+            onChange={(event) => setFilters((current) => ({ ...current, status: event.target.value }))}
+          >
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="all">All cards</option>
+          </Select>
+          <Button type="button" variant="secondary" onClick={() => setFilters(defaultFilters)}>
+            <RotateCcw size={16} aria-hidden="true" />
+            Reset
+          </Button>
+        </div>
       </div>
 
       {cards.length === 0 ? (
         <div className="p-8 text-center text-sm text-gray-500">
           Add your first card to start tracking monthly balances.
         </div>
+      ) : visibleCards.length === 0 ? (
+        <div className="p-8 text-center text-sm text-gray-500">
+          No cards match the current filters.
+        </div>
       ) : (
         <div className="divide-y divide-gray-100">
-          {cards.map((card) => (
+          {visibleCards.map((card) => (
             <article
               key={card.id}
               className="grid gap-4 p-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-center"
@@ -43,6 +116,7 @@ export default function CreditCardList({ cards, onEdit, onDelete, isSaving = fal
                   <span>**** {card.lastFour}</span>
                   <span>Closes day {card.statementClosingDay ?? card.dueDay}</span>
                   <span>Due day {card.dueDay}</span>
+                  <span>{card.isActive ? "Active" : "Inactive"}</span>
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-3">
