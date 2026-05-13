@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabase/client.js";
+import { getSignUpConfirmationRedirectUrl } from "./authEmailRedirects.js";
 
 function requireSupabase() {
   if (!supabase) {
@@ -27,7 +28,13 @@ export function onAuthStateChange(callback) {
 
 export async function signUpWithEmail({ email, password }) {
   const client = requireSupabase();
-  const { data, error } = await client.auth.signUp({ email, password });
+  const { data, error } = await client.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: getSignUpConfirmationRedirectUrl(email),
+    },
+  });
 
   if (error) throw error;
   return data;
