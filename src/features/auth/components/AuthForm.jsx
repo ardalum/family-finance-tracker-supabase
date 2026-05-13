@@ -17,6 +17,9 @@ export default function AuthForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isSignUp = mode === "sign-up";
+  const authModeDescription = isSignUp
+    ? "Create an account to start managing your household finance tracker."
+    : "Sign in to continue to your household finance tracker.";
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -63,9 +66,7 @@ export default function AuthForm() {
               <h2 className="text-lg font-semibold tracking-normal text-[#111827]">
                 {isSignUp ? "Create account" : "Sign in"}
               </h2>
-              <p className="mt-1 text-sm text-[#6B7280]">
-                Sign in to continue to your household finance tracker.
-              </p>
+              <p className="mt-1 text-sm text-[#6B7280]">{authModeDescription}</p>
             </div>
 
             {!isSupabaseConfigured ? (
