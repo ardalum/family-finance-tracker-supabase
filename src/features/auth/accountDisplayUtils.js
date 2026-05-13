@@ -1,5 +1,4 @@
-export const SESSION_WARNING_THRESHOLD_MS = 5 * 60 * 1000;
-export const SESSION_CHECK_INTERVAL_MS = 30 * 1000;
+import { SESSION_WARNING_THRESHOLD_MS } from "./authSessionConfig.js";
 
 const authEventLabels = {
   INITIAL_SESSION: "Initial session loaded",
