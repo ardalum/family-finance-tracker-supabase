@@ -18,8 +18,8 @@ export async function getCurrentSession() {
 
 export function onAuthStateChange(callback) {
   const client = requireSupabase();
-  const { data } = client.auth.onAuthStateChange((_event, session) => {
-    callback(session);
+  const { data } = client.auth.onAuthStateChange((event, session) => {
+    callback(session, event);
   });
 
   return () => data.subscription.unsubscribe();

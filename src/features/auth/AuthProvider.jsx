@@ -6,6 +6,7 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
+  const [authEvent, setAuthEvent] = useState("INITIAL_SESSION");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -16,6 +17,7 @@ export function AuthProvider({ children }) {
       .then((currentSession) => {
         if (!isMounted) return;
         setSession(currentSession);
+        setAuthEvent("INITIAL_SESSION");
         setError("");
       })
       .catch((currentError) => {
@@ -29,8 +31,9 @@ export function AuthProvider({ children }) {
     let unsubscribe = () => {};
 
     try {
-      unsubscribe = onAuthStateChange((nextSession) => {
+      unsubscribe = onAuthStateChange((nextSession, nextEvent) => {
         setSession(nextSession);
+        setAuthEvent(nextEvent || "AUTH_STATE_CHANGED");
         setError("");
         setLoading(false);
       });
@@ -48,12 +51,13 @@ export function AuthProvider({ children }) {
   const value = useMemo(
     () => ({
       session,
+      authEvent,
       user: session?.user ?? null,
       loading,
       error,
       setError,
     }),
-    [error, loading, session],
+    [authEvent, error, loading, session],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
