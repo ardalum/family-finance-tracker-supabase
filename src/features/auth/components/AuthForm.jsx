@@ -4,6 +4,7 @@ import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import Input from "../../../components/ui/Input.jsx";
 import { isSupabaseConfigured } from "../../../lib/supabase/client.js";
+import { getFriendlyAuthError } from "../authErrors.js";
 import { signInWithEmail, signUpWithEmail } from "../authService.js";
 
 export default function AuthForm() {
@@ -32,7 +33,7 @@ export default function AuthForm() {
         await signInWithEmail({ email, password });
       }
     } catch (currentError) {
-      setError(currentError.message || "Authentication failed.");
+      setError(getFriendlyAuthError(currentError, "Authentication failed."));
     } finally {
       setIsSubmitting(false);
     }
