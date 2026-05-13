@@ -29,6 +29,8 @@ export default function SessionTimeoutWarning() {
   if (!expiresAtMs || dismissedExpiry === expiresAtMs) return null;
 
   const timeRemainingMs = getSessionTimeRemainingMs(session, now);
+  if (timeRemainingMs === null) return null;
+
   const isExpired = timeRemainingMs <= 0;
   const isNearExpiry = timeRemainingMs > 0 && timeRemainingMs <= WARNING_THRESHOLD_MS;
 
