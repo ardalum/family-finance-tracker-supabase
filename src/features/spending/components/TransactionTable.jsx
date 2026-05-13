@@ -10,6 +10,9 @@ import {
   getCardName,
   getCategoryName,
   getTransactionCategoryRows,
+  getTransactionImpactAmount,
+  getTransactionTypeLabel,
+  TRANSACTION_TYPE_OPTIONS,
   UNCATEGORIZED_ID,
 } from "../spendingService.js";
 
@@ -31,12 +34,13 @@ export default function TransactionTable({
 
   function resetFilters() {
     setSortMode("date-desc");
-    onFiltersChange({ cardId: "", categoryId: "", store: "" });
+    onFiltersChange({ cardId: "", categoryId: "", transactionType: "", store: "" });
   }
 
   const filteredTransactions = useMemo(() => {
     return transactions
       .filter((transaction) => !filters.cardId || transaction.cardId === filters.cardId)
+      .filter((transaction) => !filters.transactionType || (transaction.transactionType || "expense") === filters.transactionType)
       .filter((transaction) => {
         if (!filters.categoryId) return true;
         return getTransactionCategoryRows(transaction).some(
@@ -62,7 +66,7 @@ export default function TransactionTable({
   return (
     <Card className="min-w-0 overflow-hidden">
       <div className="grid gap-3 border-b border-app-border p-4">
-        <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-[150px_170px_150px_minmax(260px,1fr)] xl:items-end">
+        <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-[150px_170px_170px_150px_minmax(220px,1fr)] xl:items-end">
           <Select
             label="Card"
             value={filters.cardId}
@@ -84,6 +88,18 @@ export default function TransactionTable({
             {categoryOptions.map((category) => (
               <option key={category.id} value={category.id}>
                 {category.name}
+              </option>
+            ))}
+          </Select>
+          <Select
+            label="Type"
+            value={filters.transactionType}
+            onChange={(event) => onFiltersChange({ ...filters, transactionType: event.target.value })}
+          >
+            <option value="">All types</option>
+            {TRANSACTION_TYPE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
               </option>
             ))}
           </Select>
@@ -131,6 +147,7 @@ export default function TransactionTable({
             const card = cards.find((item) => item.id === transaction.cardId);
             const isRecurring = transaction.source === "recurring";
             const categoryRows = getTransactionCategoryRows(transaction);
+            const impactAmount = getTransactionImpactAmount(transaction);
 
             return (
               <article
@@ -143,6 +160,9 @@ export default function TransactionTable({
                       <h3 className="min-w-0 truncate text-sm font-semibold text-text-main" title={transaction.merchant}>
                         {transaction.merchant}
                       </h3>
+                      <span className="shrink-0 rounded-lg bg-app-background px-2 py-0.5 text-xs font-semibold text-text-muted ring-1 ring-inset ring-app-border">
+                        {getTransactionTypeLabel(transaction.transactionType)}
+                      </span>
                       {isRecurring ? (
                         <span className="shrink-0 rounded-lg bg-status-infoBg px-2 py-0.5 text-xs font-semibold text-status-infoDark ring-1 ring-inset ring-status-infoBg">
                           Recurring
@@ -151,9 +171,16 @@ export default function TransactionTable({
                     </div>
                     <p className="text-xs font-medium text-text-muted">{transaction.date}</p>
                   </div>
-                  <p className="shrink-0 text-right text-sm font-semibold text-text-main">
-                    {formatCurrency(transaction.amount)}
-                  </p>
+                  <div className="shrink-0 text-right">
+                    <p className="text-sm font-semibold text-text-main">
+                      {formatCurrency(transaction.amount)}
+                    </p>
+                    {impactAmount !== Number(transaction.amount || 0) ? (
+                      <p className="text-xs font-medium text-text-muted">
+                        Spending impact: {formatCurrency(impactAmount)}
+                      </p>
+                    ) : null}
+                  </div>
                 </div>
 
                 <div className="grid min-w-0 gap-3 text-sm text-text-soft md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)]">
