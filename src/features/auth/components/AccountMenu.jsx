@@ -1,7 +1,7 @@
 import { Clock3, DatabaseBackup, Home, Info, LogOut, Settings, UserCircle } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useHouseholds } from "../../households/HouseholdProvider.jsx";
-import { getAccountIdentity } from "../accountDisplayUtils.js";
+import { getAccountIdentity } from "../authAccountDisplayUtils.js";
 import { useAuth } from "../AuthProvider.jsx";
 import { signOut, signOutEverywhere } from "../authService.js";
 import { getSessionSummary } from "../authSessionUtils.js";
