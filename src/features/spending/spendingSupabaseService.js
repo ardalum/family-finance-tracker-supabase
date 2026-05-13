@@ -1,5 +1,5 @@
 import { supabase } from "../../lib/supabase/client.js";
-import { UNCATEGORIZED_ID } from "./spendingService.js";
+import { normalizeTransactionType, UNCATEGORIZED_ID } from "./spendingService.js";
 
 function requireSupabase() {
   if (!supabase) {
@@ -35,6 +35,7 @@ function normalizeTransactionInput(input, cardsByAppId, categoriesByAppId) {
     payment_method: input.paymentMethod || "Credit Card",
     credit_card_id: input.paymentMethod === "Credit Card" ? getSupabaseCardId(card) : null,
     category_id: input.splitMode ? null : getSupabaseCategoryId(input.categoryId, categoriesByAppId),
+    transaction_type: normalizeTransactionType(input.transactionType),
     amount: Number(input.amount) || 0,
     notes: input.notes?.trim() ?? "",
     source: input.source || "manual",
@@ -65,6 +66,7 @@ function toAppTransaction(row, cardsBySupabaseId, categoriesBySupabaseId) {
     paymentMethod: row.payment_method,
     cardId: card?.id ?? "",
     categoryId: row.category_id ? category?.id ?? row.category_id : UNCATEGORIZED_ID,
+    transactionType: normalizeTransactionType(row.transaction_type),
     amount: Number(row.amount || 0),
     notes: row.notes ?? "",
     source: row.source ?? "manual",
@@ -204,6 +206,7 @@ export async function importLocalTransactions(householdId, localTransactions, ca
         ...normalizeTransactionInput(
           {
             ...transaction,
+            transactionType: transaction.transactionType || "expense",
             splitMode: Boolean(transaction.splits?.length),
             categoryId: transaction.splits?.[0]?.categoryId ?? UNCATEGORIZED_ID,
           },
