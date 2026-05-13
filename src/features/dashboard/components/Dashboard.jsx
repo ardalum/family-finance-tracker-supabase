@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
-import { AlertTriangle, BarChart3, CheckCircle2, Clock3, CreditCard, ListChecks, ReceiptText, Repeat, WalletCards } from "lucide-react";
+import { AlertTriangle, BarChart3, CheckCircle2, Clock3, CreditCard, ReceiptText, Repeat, WalletCards } from "lucide-react";
 import Card from "../../../components/ui/Card.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { buildMonthOptions, getCurrentMonthKey } from "../../../lib/dates.js";
 import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
+import { dispatchNavigation } from "../../../lib/navigationTargets.js";
 import BudgetVsSpendingTable from "./BudgetVsSpendingTable.jsx";
 import CreditCardPaymentOverview from "./CreditCardPaymentOverview.jsx";
 import DashboardActionCards from "./DashboardActionCards.jsx";
@@ -12,7 +13,6 @@ import RecurringOverview from "./RecurringOverview.jsx";
 import { getAlerts, getDashboardData } from "../dashboardUtils.js";
 
 const ACTIVE_VIEW_KEY = "personalFinanceApp:activeView:v1";
-const NAVIGATE_EVENT = "walletflow:navigate";
 
 const dashboardSections = [
   {
@@ -38,26 +38,30 @@ const dashboardSections = [
 const quickActions = [
   {
     label: "Update card balances",
-    description: "Enter statement balances and mark cards paid.",
+    description: "Go straight to monthly balances.",
     view: "credit-cards",
+    target: "monthly-balances",
     icon: CreditCard,
   },
   {
     label: "Add transactions",
-    description: "Record spending, payments, refunds, or income.",
+    description: "Open the add transaction form.",
     view: "spending",
+    target: "add-transaction",
     icon: ReceiptText,
   },
   {
     label: "Open recurring bills",
-    description: "Mark monthly bills paid, unpaid, or skipped.",
+    description: "Go straight to this month’s bills.",
     view: "recurring",
+    target: "this-month",
     icon: Repeat,
   },
   {
     label: "Review budget",
-    description: "Adjust categories and monthly budget amounts.",
+    description: "Open the monthly budget workspace.",
     view: "budgets",
+    target: "budget-table",
     icon: WalletCards,
   },
 ];
@@ -204,7 +208,7 @@ function DashboardQuickActions() {
       <div className="border-b border-app-border p-5">
         <h3 className="text-base font-semibold text-text-main">Quick actions</h3>
         <p className="mt-1 text-sm text-text-muted">
-          Jump to the workspace where you can fix the numbers.
+          Jump to the exact workspace where you can fix the numbers.
         </p>
       </div>
       <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -215,7 +219,7 @@ function DashboardQuickActions() {
               key={action.view}
               type="button"
               className="grid gap-2 rounded-2xl border border-app-border bg-app-surface p-4 text-left transition hover:border-brand-primary/40 hover:bg-app-background focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
-              onClick={() => navigateToView(action.view)}
+              onClick={() => navigateToView(action.view, action.target)}
             >
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-app-background text-text-main ring-1 ring-inset ring-app-border">
                 <Icon size={18} aria-hidden="true" />
@@ -316,12 +320,12 @@ function ActivityMetric({ label, value, isCount = false }) {
   );
 }
 
-function navigateToView(view) {
+function navigateToView(view, target = "") {
   try {
     window.localStorage.setItem(ACTIVE_VIEW_KEY, view);
   } catch {
     // Navigation should still happen even if storage is unavailable.
   }
 
-  window.dispatchEvent(new CustomEvent(NAVIGATE_EVENT, { detail: { view } }));
+  dispatchNavigation(view, target);
 }
