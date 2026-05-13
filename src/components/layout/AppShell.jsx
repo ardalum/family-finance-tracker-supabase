@@ -30,7 +30,7 @@ export default function AppShell({
               </div>
             </div>
             {accountSlot ? (
-              <div className="flex min-w-0 flex-wrap items-center gap-3 lg:justify-end">
+              <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 lg:flex lg:flex-wrap lg:justify-end lg:gap-3">
                 {accountSlot}
               </div>
             ) : null}

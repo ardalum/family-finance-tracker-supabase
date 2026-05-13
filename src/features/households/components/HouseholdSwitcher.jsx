@@ -7,14 +7,17 @@ export default function HouseholdSwitcher() {
   if (households.length === 0) return null;
 
   return (
-    <div className="flex min-w-0 items-center gap-2 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 py-1.5">
-      <Home size={15} className="shrink-0 text-[#6B7280]" aria-hidden="true" />
-      <label className="flex min-w-0 items-center gap-2 text-xs font-semibold text-[#6B7280]">
-        <span className="shrink-0">Household</span>
+    <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-app-border bg-app-surface px-3 py-2 shadow-sm sm:flex-none">
+      <Home size={16} className="shrink-0 text-text-muted" aria-hidden="true" />
+      <label className="grid min-w-0 flex-1 gap-0.5 sm:flex sm:items-center sm:gap-2">
+        <span className="text-[0.68rem] font-semibold uppercase tracking-wide text-text-muted sm:text-xs sm:normal-case sm:tracking-normal">
+          Household
+        </span>
         <select
           value={activeHouseholdId ?? ""}
           onChange={(event) => setActiveHouseholdId(event.target.value)}
-          className="h-7 max-w-44 min-w-0 rounded-lg border border-[#E5E7EB] bg-white px-2 text-sm font-semibold text-[#374151] outline-none transition focus:border-[#1F2937] focus:ring-2 focus:ring-[#1F2937]/10 sm:max-w-56"
+          className="h-6 min-w-0 appearance-none border-0 bg-transparent p-0 pr-5 text-sm font-semibold text-text-main outline-none sm:h-7 sm:max-w-56 sm:rounded-lg sm:border sm:border-app-border sm:bg-white sm:px-2 sm:pr-8 sm:text-sm sm:text-text-soft sm:focus:border-brand-primary sm:focus:ring-2 sm:focus:ring-brand-primary/10"
+          aria-label="Active household"
         >
           {households.map((household) => (
             <option key={household.id} value={household.id}>
