@@ -1,4 +1,4 @@
-import { DatabaseBackup, Home, Info, LogOut, Settings, UserCircle } from "lucide-react";
+import { Clock3, DatabaseBackup, Home, Info, LogOut, Settings, UserCircle } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useHouseholds } from "../../households/HouseholdProvider.jsx";
 import { useAuth } from "../AuthProvider.jsx";
@@ -47,7 +47,7 @@ const menuSections = [
 ];
 
 export default function AccountMenu({ onNavigate }) {
-  const { user, setError } = useAuth();
+  const { session, user, setError } = useAuth();
   const { activeHousehold, activeMembership } = useHouseholds();
   const [signingOutMode, setSigningOutMode] = useState("");
   const [open, setOpen] = useState(false);
@@ -56,6 +56,7 @@ export default function AccountMenu({ onNavigate }) {
     () => getAccountIdentity(user, activeMembership, activeHousehold),
     [activeHousehold, activeMembership, user],
   );
+  const sessionStatus = useMemo(() => getSessionStatus(session), [session]);
   const isSigningOut = Boolean(signingOutMode);
 
   useEffect(() => {
@@ -130,6 +131,15 @@ export default function AccountMenu({ onNavigate }) {
                     {identity.role}
                   </p>
                 ) : null}
+              </div>
+            </div>
+          </div>
+          <div className="border-b border-app-border px-4 py-3">
+            <div className="flex items-start gap-3 rounded-xl bg-app-background px-3 py-2.5">
+              <Clock3 size={16} className="mt-0.5 shrink-0 text-text-muted" aria-hidden="true" />
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-text-main">{sessionStatus.label}</p>
+                <p className="mt-0.5 text-xs leading-snug text-text-muted">{sessionStatus.description}</p>
               </div>
             </div>
           </div>
@@ -214,6 +224,30 @@ function getAccountIdentity(user, activeMembership, activeHousehold) {
   };
 }
 
+function getSessionStatus(session) {
+  if (!session?.expires_at) {
+    return {
+      label: "Session active",
+      description: "No session expiration time is available.",
+    };
+  }
+
+  const expiresAtMs = Number(session.expires_at) * 1000;
+  const timeRemainingMs = expiresAtMs - Date.now();
+
+  if (timeRemainingMs <= 0) {
+    return {
+      label: "Session may be expired",
+      description: "Refresh the app or sign in again if something stops updating.",
+    };
+  }
+
+  return {
+    label: "Session active",
+    description: `Expires in about ${formatRemainingTime(timeRemainingMs)}.`,
+  };
+}
+
 function formatNameFromEmail(email) {
   const fallback = "Account";
   const localPart = email?.split("@")[0]?.trim();
@@ -231,6 +265,16 @@ function formatNameFromEmail(email) {
     .split(" ")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
+}
+
+function formatRemainingTime(milliseconds) {
+  const totalMinutes = Math.max(1, Math.ceil(milliseconds / 60000));
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  if (hours <= 0) return `${totalMinutes} minute${totalMinutes === 1 ? "" : "s"}`;
+  if (minutes === 0) return `${hours} hour${hours === 1 ? "" : "s"}`;
+  return `${hours} hour${hours === 1 ? "" : "s"} ${minutes} minute${minutes === 1 ? "" : "s"}`;
 }
 
 function formatRole(role) {
