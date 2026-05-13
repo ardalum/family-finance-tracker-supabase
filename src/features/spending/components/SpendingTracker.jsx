@@ -51,12 +51,19 @@ export default function SpendingTracker({
     }
   }, []);
 
-  async function handleSave(form, transaction) {
+  async function handleSave(form, transaction, options = {}) {
     if (transaction) {
       await onUpdateTransaction(transaction.supabaseId ?? transaction.id, form);
     } else {
       await onCreateTransaction(form);
     }
+
+    if (options.keepOpen) {
+      setEditingTransaction(null);
+      setIsTransactionModalOpen(true);
+      return;
+    }
+
     setEditingTransaction(null);
     setIsTransactionModalOpen(false);
   }
