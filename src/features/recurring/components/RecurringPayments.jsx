@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { CalendarCheck2, ListChecks, X } from "lucide-react";
 import Card from "../../../components/ui/Card.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { buildMonthOptions, getCurrentMonthKey } from "../../../lib/dates.js";
@@ -8,6 +9,21 @@ import RecurringMigrationPanel from "./RecurringMigrationPanel.jsx";
 import RecurringPaymentForm from "./RecurringPaymentForm.jsx";
 import RecurringPaymentTable from "./RecurringPaymentTable.jsx";
 import RecurringSummary from "./RecurringSummary.jsx";
+
+const recurringSections = [
+  {
+    id: "this-month",
+    label: "This Month",
+    description: "Review bills for the selected month and mark them paid, unpaid, or skipped.",
+    icon: CalendarCheck2,
+  },
+  {
+    id: "templates",
+    label: "Templates",
+    description: "Add, edit, deactivate, or delete recurring bill templates.",
+    icon: ListChecks,
+  },
+];
 
 export default function RecurringPayments({
   creditCards,
@@ -32,8 +48,38 @@ export default function RecurringPayments({
   onImportLocalRecurringPayments,
 }) {
   const [editingTemplate, setEditingTemplate] = useState(null);
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("this-month");
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const activeCards = creditCards.filter((card) => card.isActive);
+  const currentSection = recurringSections.find((section) => section.id === activeSection) ?? recurringSections[0];
+
+  useEffect(() => {
+    if (!isTemplateModalOpen) return undefined;
+
+    function handleKeyDown(event) {
+      if (event.key === "Escape" && !isSaving) closeTemplateModal();
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isSaving, isTemplateModalOpen]);
+
+  function openAddTemplateModal() {
+    setEditingTemplate(null);
+    setIsTemplateModalOpen(true);
+  }
+
+  function openEditTemplateModal(template) {
+    setEditingTemplate(template);
+    setIsTemplateModalOpen(true);
+  }
+
+  function closeTemplateModal() {
+    if (isSaving) return;
+    setEditingTemplate(null);
+    setIsTemplateModalOpen(false);
+  }
 
   async function handleSave(form, template) {
     if (template) {
@@ -42,11 +88,15 @@ export default function RecurringPayments({
       await onCreateRecurringPayment(form);
     }
     setEditingTemplate(null);
+    setIsTemplateModalOpen(false);
   }
 
   async function handleDelete(template) {
     await onDeleteRecurringPayment(template.supabaseId ?? template.id);
-    if (editingTemplate?.id === template.id) setEditingTemplate(null);
+    if (editingTemplate?.id === template.id) {
+      setEditingTemplate(null);
+      setIsTemplateModalOpen(false);
+    }
   }
 
   return (
@@ -87,7 +137,7 @@ export default function RecurringPayments({
             label="Generation month"
             value={selectedMonth}
             onChange={(event) => {
-              setEditingTemplate(null);
+              closeTemplateModal();
               onMonthChange(event.target.value);
             }}
           >
@@ -106,38 +156,101 @@ export default function RecurringPayments({
         recurringStatusByMonth={recurringStatusByMonth}
       />
 
-      <RecurringGenerationPanel
-        monthKey={selectedMonth}
-        templates={recurringPayments}
-        recurringStatusByMonth={recurringStatusByMonth}
-        categories={categories}
-        onMarkPaid={onMarkRecurringPaid}
-        onMarkUnpaid={onMarkRecurringUnpaid}
-        onSkip={onSkipRecurringPayment}
-        isSaving={isSaving}
-      />
+      <div className="grid gap-1">
+        <h2 className="text-lg font-semibold text-text-main">Recurring workspace</h2>
+        <p className="text-sm text-text-muted">{currentSection.description}</p>
+      </div>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_390px]">
+      <div className="overflow-x-auto rounded-2xl border border-app-border bg-app-surface p-2">
+        <div className="flex min-w-max gap-2">
+          {recurringSections.map((section) => {
+            const Icon = section.icon;
+            const isActive = activeSection === section.id;
+            return (
+              <button
+                key={section.id}
+                type="button"
+                className={`inline-flex min-h-11 items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                  isActive
+                    ? "bg-text-main text-white shadow-sm"
+                    : "text-text-soft hover:bg-app-muted hover:text-text-main"
+                }`}
+                onClick={() => setActiveSection(section.id)}
+              >
+                <Icon size={16} aria-hidden="true" />
+                {section.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {activeSection === "this-month" ? (
+        <RecurringGenerationPanel
+          monthKey={selectedMonth}
+          templates={recurringPayments}
+          recurringStatusByMonth={recurringStatusByMonth}
+          categories={categories}
+          onMarkPaid={onMarkRecurringPaid}
+          onMarkUnpaid={onMarkRecurringUnpaid}
+          onSkip={onSkipRecurringPayment}
+          isSaving={isSaving}
+        />
+      ) : null}
+
+      {activeSection === "templates" ? (
         <RecurringPaymentTable
           templates={recurringPayments}
           cards={activeCards}
           categories={categories}
-          onEdit={setEditingTemplate}
+          onAdd={openAddTemplateModal}
+          onEdit={openEditTemplateModal}
           onDelete={handleDelete}
           isSaving={isSaving}
         />
+      ) : null}
 
-        <Card className="h-fit p-5">
-          <RecurringPaymentForm
-            cards={activeCards}
-            categories={categories}
-            editingTemplate={editingTemplate}
-            onCancel={() => setEditingTemplate(null)}
-            onSaved={handleSave}
-            isSaving={isSaving}
-          />
-        </Card>
-      </div>
+      {isTemplateModalOpen ? (
+        <div
+          className="fixed inset-0 z-50 flex min-h-screen items-end justify-center overflow-y-auto bg-gray-950/40 px-3 py-3 sm:items-center sm:px-4 sm:py-6"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="recurring-template-modal-title"
+        >
+          <div className="flex max-h-[calc(100dvh-1.5rem)] min-h-0 w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl sm:max-h-[calc(100dvh-3rem)]">
+            <div className="flex shrink-0 items-start justify-between gap-4 border-b border-gray-200 px-5 py-4">
+              <div>
+                <h2 id="recurring-template-modal-title" className="text-lg font-semibold text-gray-950">
+                  {editingTemplate ? "Edit recurring payment" : "Add recurring payment"}
+                </h2>
+                <p className="mt-1 text-sm text-gray-500">
+                  Templates become monthly bills you can mark paid.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-gray-500 transition hover:bg-gray-100 hover:text-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+                onClick={closeTemplateModal}
+                aria-label="Close recurring template modal"
+                disabled={isSaving}
+              >
+                <X size={18} aria-hidden="true" />
+              </button>
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 pb-8">
+              <RecurringPaymentForm
+                cards={activeCards}
+                categories={categories}
+                editingTemplate={editingTemplate}
+                onCancel={closeTemplateModal}
+                onSaved={handleSave}
+                isSaving={isSaving}
+                showHeader={false}
+              />
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
