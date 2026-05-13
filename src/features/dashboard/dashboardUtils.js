@@ -137,14 +137,6 @@ export function getAlerts(data) {
         text: `${row.card.name} has autopay enabled but no autopay date.`,
       });
     }
-
-    if (row.balance > 0 && row.paid && !row.confirmationNumber) {
-      alerts.push({
-        type: "info",
-        category: "Credit Card Statements",
-        text: `${row.card.name} is paid but has no confirmation number.`,
-      });
-    }
   });
 
   data.recurringRows.forEach((row) => {
@@ -205,7 +197,6 @@ function getCardRows(cards, monthlyBalances, monthKey) {
         paidDate: entry.paidDate ?? null,
         autopayEnabled: Boolean(entry.autopayEnabled),
         autopayDate: entry.autopayDate ?? null,
-        confirmationNumber: entry.confirmationNumber ?? "",
         statementStatus: entry.statementStatus ?? (paid ? "paid" : "unpaid"),
         hasPaymentDue: balance > 0 && !paid,
         daysUntilDue: daysBetween(new Date(), dueDate),
