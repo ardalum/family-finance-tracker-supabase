@@ -4,6 +4,7 @@ import Card from "../../../components/ui/Card.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { buildMonthOptions, getCurrentMonthKey } from "../../../lib/dates.js";
 import { formatMonthLabel } from "../../../lib/formatters.js";
+import { consumeNavigationTarget } from "../../../lib/navigationTargets.js";
 import RecurringGenerationPanel from "./RecurringGenerationPanel.jsx";
 import RecurringMigrationPanel from "./RecurringMigrationPanel.jsx";
 import RecurringPaymentForm from "./RecurringPaymentForm.jsx";
@@ -53,6 +54,14 @@ export default function RecurringPayments({
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const activeCards = creditCards.filter((card) => card.isActive);
   const currentSection = recurringSections.find((section) => section.id === activeSection) ?? recurringSections[0];
+
+  useEffect(() => {
+    const target = consumeNavigationTarget("recurring");
+    if (!target) return;
+    if (recurringSections.some((section) => section.id === target)) {
+      setActiveSection(target);
+    }
+  }, []);
 
   useEffect(() => {
     if (!isTemplateModalOpen) return undefined;

@@ -1,6 +1,7 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { BarChart3, CreditCard, ListChecks, Plus, ReceiptText } from "lucide-react";
 import Button from "../../../components/ui/Button.jsx";
+import { consumeNavigationTarget } from "../../../lib/navigationTargets.js";
 import CreditCardModal from "./CreditCardModal.jsx";
 import CreditCardList from "./CreditCardList.jsx";
 import CreditLimitSummary from "./CreditLimitSummary.jsx";
@@ -59,6 +60,14 @@ export default function CreditCardTracker({
   const [activeSection, setActiveSection] = useState("monthly-balances");
   const activeCards = useMemo(() => creditCards.filter((card) => card.isActive), [creditCards]);
   const currentSection = creditCardSections.find((section) => section.id === activeSection) ?? creditCardSections[0];
+
+  useEffect(() => {
+    const target = consumeNavigationTarget("credit-cards");
+    if (!target) return;
+    if (creditCardSections.some((section) => section.id === target)) {
+      setActiveSection(target);
+    }
+  }, []);
 
   const openAddModal = useCallback(() => {
     setEditingCard(null);
