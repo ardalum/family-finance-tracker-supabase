@@ -46,41 +46,6 @@ function getTransactionSearchText(transaction, cards, categories) {
     .toLowerCase();
 }
 
-function addSuggestion(map, value, type) {
-  const cleanValue = String(value ?? "").trim();
-  if (!cleanValue) return;
-  const key = cleanValue.toLowerCase();
-  const current = map.get(key) ?? { value: cleanValue, type, count: 0 };
-  map.set(key, { ...current, count: current.count + 1 });
-}
-
-function buildSearchSuggestions(transactions, cards, categories) {
-  const suggestions = new Map();
-
-  transactions.forEach((transaction) => {
-    addSuggestion(suggestions, transaction.merchant, "Merchant");
-    addSuggestion(suggestions, transaction.notes, "Notes");
-    addSuggestion(suggestions, transaction.paymentMethod, "Payment method");
-    addSuggestion(suggestions, getTransactionTypeLabel(transaction.transactionType), "Type");
-    addSuggestion(suggestions, getCardName(transaction.cardId, cards), "Card");
-    getTransactionCategoryRows(transaction).forEach((row) => {
-      addSuggestion(suggestions, getCategoryName(row.categoryId, categories), "Category");
-    });
-  });
-
-  return Array.from(suggestions.values())
-    .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value))
-    .slice(0, 40);
-}
-
-function getVisibleSuggestions(suggestions, search) {
-  const searchTerm = search.trim().toLowerCase();
-  if (!searchTerm) return [];
-  return suggestions
-    .filter((suggestion) => suggestion.value.toLowerCase().includes(searchTerm))
-    .slice(0, 8);
-}
-
 export default function TransactionTable({
   transactions,
   cards,
@@ -101,22 +66,10 @@ export default function TransactionTable({
     () => Array.from(new Set(transactions.map((transaction) => transaction.paymentMethod).filter(Boolean))).sort(),
     [transactions],
   );
-  const searchSuggestions = useMemo(
-    () => buildSearchSuggestions(transactions, cards, categories),
-    [cards, categories, transactions],
-  );
-  const visibleSearchSuggestions = useMemo(
-    () => getVisibleSuggestions(searchSuggestions, filters.search),
-    [filters.search, searchSuggestions],
-  );
 
   function resetFilters() {
     setSortMode("date-desc");
     onFiltersChange(emptyFilters);
-  }
-
-  function applySearchSuggestion(value) {
-    onFiltersChange({ ...filters, search: value });
   }
 
   const filteredTransactions = useMemo(() => {
@@ -160,35 +113,16 @@ export default function TransactionTable({
 
   return (
     <>
-      <Card className="min-w-0">
+      <Card className="min-w-0 overflow-hidden">
         <div className="grid gap-4 border-b border-app-border p-4">
-          <div className="grid min-w-0 gap-3 lg:grid-cols-[minmax(260px,1fr)_180px_180px] lg:items-start">
-            <div className="grid min-w-0 gap-2">
-              <Input
-                label="Search transactions"
-                value={filters.search}
-                onChange={(event) => onFiltersChange({ ...filters, search: event.target.value })}
-                placeholder="Merchant, notes, card, category, payment method"
-                className="min-w-0"
-              />
-              {visibleSearchSuggestions.length > 0 ? (
-                <div className="grid max-h-64 gap-1 overflow-y-auto rounded-xl border border-app-border bg-app-surface p-1 shadow-sm">
-                  {visibleSearchSuggestions.map((suggestion) => (
-                    <button
-                      key={`${suggestion.type}-${suggestion.value}`}
-                      type="button"
-                      className="flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-sm transition hover:bg-app-background"
-                      onClick={() => applySearchSuggestion(suggestion.value)}
-                    >
-                      <span className="min-w-0 truncate font-medium text-text-main">{suggestion.value}</span>
-                      <span className="shrink-0 text-xs text-text-muted">{suggestion.type}</span>
-                    </button>
-                  ))}
-                </div>
-              ) : filters.search.trim() ? (
-                <p className="text-xs text-text-muted">No search suggestions match that text.</p>
-              ) : null}
-            </div>
+          <div className="grid min-w-0 gap-3 lg:grid-cols-[minmax(260px,1fr)_180px_180px] lg:items-end">
+            <Input
+              label="Search transactions"
+              value={filters.search}
+              onChange={(event) => onFiltersChange({ ...filters, search: event.target.value })}
+              placeholder="Merchant, notes, card, category, payment method"
+              className="min-w-0"
+            />
             <Select label="Sort" value={sortMode} onChange={(event) => setSortMode(event.target.value)}>
               <option value="date-desc">Date newest</option>
               <option value="date-asc">Date oldest</option>
@@ -201,7 +135,7 @@ export default function TransactionTable({
             <Button
               type="button"
               variant="secondary"
-              className="min-h-10 px-3 py-2 text-sm lg:mt-[1.625rem]"
+              className="min-h-10 px-3 py-2 text-sm"
               onClick={resetFilters}
             >
               <RotateCcw size={16} aria-hidden="true" />
