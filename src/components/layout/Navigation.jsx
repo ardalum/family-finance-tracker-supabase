@@ -13,31 +13,37 @@ const navItems = [
   {
     id: "dashboard",
     label: "Dashboard",
+    shortLabel: "Home",
     icon: LayoutDashboard,
   },
   {
     id: "credit-cards",
     label: "Credit Cards",
+    shortLabel: "Cards",
     icon: CreditCard,
   },
   {
     id: "budgets",
     label: "Monthly Budget",
+    shortLabel: "Budget",
     icon: WalletCards,
   },
   {
     id: "spending",
     label: "Transactions",
+    shortLabel: "Txns",
     icon: ReceiptText,
   },
   {
     id: "recurring",
     label: "Recurring Payments",
+    shortLabel: "Bills",
     icon: CalendarSync,
   },
   {
     id: "insights",
     label: "Insights",
+    shortLabel: "Insights",
     icon: ChartNoAxesCombined,
   },
 ];
@@ -57,7 +63,10 @@ export default function Navigation({ activeView, onChange }) {
   }, [onChange]);
 
   return (
-    <nav className="flex flex-wrap gap-2" aria-label="Primary navigation">
+    <nav
+      className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap"
+      aria-label="Primary navigation"
+    >
       {navItems.map((item) => {
         const Icon = item.icon;
         const isActive = activeView === item.id;
@@ -71,7 +80,7 @@ export default function Navigation({ activeView, onChange }) {
           <button
             key={item.id}
             type="button"
-            className="inline-flex min-h-10 items-center gap-2 rounded-xl border px-3.5 py-2 text-sm font-semibold shadow-none transition disabled:cursor-not-allowed"
+            className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold shadow-none transition disabled:cursor-not-allowed sm:w-auto sm:justify-start sm:px-3.5"
             style={tabStyle}
             onClick={() => onChange(item.id)}
             onMouseEnter={() => setHoveredId(item.id)}
@@ -79,9 +88,11 @@ export default function Navigation({ activeView, onChange }) {
             onFocus={() => setHoveredId(item.id)}
             onBlur={() => setHoveredId("")}
             aria-current={isActive ? "page" : undefined}
+            title={item.label}
           >
             <Icon size={16} style={iconStyle} aria-hidden="true" />
-            {item.label}
+            <span className="sm:hidden">{item.shortLabel}</span>
+            <span className="hidden sm:inline">{item.label}</span>
           </button>
         );
       })}
