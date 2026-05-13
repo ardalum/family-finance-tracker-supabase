@@ -7,8 +7,7 @@ import {
   WalletCards,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-
-const NAVIGATE_EVENT = "walletflow:navigate";
+import { NAVIGATE_EVENT } from "../../lib/navigationTargets.js";
 
 const navItems = [
   {
