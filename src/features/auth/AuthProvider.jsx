@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { getFriendlyAuthError } from "./authErrors.js";
 import { getCurrentSession, onAuthStateChange } from "./authService.js";
 
 const AuthContext = createContext(null);
@@ -19,7 +20,7 @@ export function AuthProvider({ children }) {
       })
       .catch((currentError) => {
         if (!isMounted) return;
-        setError(currentError.message || "Could not load your session.");
+        setError(getFriendlyAuthError(currentError, "Could not load your session."));
       })
       .finally(() => {
         if (isMounted) setLoading(false);
@@ -34,7 +35,7 @@ export function AuthProvider({ children }) {
         setLoading(false);
       });
     } catch (currentError) {
-      setError(currentError.message || "Could not listen for auth changes.");
+      setError(getFriendlyAuthError(currentError, "Could not listen for auth changes."));
       setLoading(false);
     }
 
