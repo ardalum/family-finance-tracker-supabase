@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Edit, RotateCcw, Trash2, X } from "lucide-react";
+import { ChevronDown, Edit, RotateCcw, SlidersHorizontal, Trash2, X } from "lucide-react";
 import LinkedCardName from "../../../components/shared/LinkedCardName.jsx";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
@@ -23,6 +23,21 @@ const emptyFilters = {
   transactionType: "",
   paymentMethod: "",
   source: "",
+};
+
+const sortLabels = {
+  "date-desc": "Date newest",
+  "date-asc": "Date oldest",
+  store: "Merchant",
+  category: "Category",
+  card: "Card",
+  "amount-desc": "Amount high",
+  "amount-asc": "Amount low",
+};
+
+const sourceLabels = {
+  manual: "Manual",
+  recurring: "Recurring",
 };
 
 function getTransactionSearchText(transaction, cards, categories) {
@@ -57,6 +72,7 @@ export default function TransactionTable({
   isSaving = false,
 }) {
   const [sortMode, setSortMode] = useState("date-desc");
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [transactionPendingDelete, setTransactionPendingDelete] = useState(null);
   const categoryOptions = useMemo(
     () => [{ id: UNCATEGORIZED_ID, name: "Uncategorized" }, ...categories],
@@ -67,9 +83,55 @@ export default function TransactionTable({
     [transactions],
   );
 
+  const activeFilterChips = useMemo(() => {
+    const chips = [];
+    const searchTerm = filters.search.trim();
+
+    if (searchTerm) {
+      chips.push({ key: "search", label: `Search: ${searchTerm}`, type: "filter" });
+    }
+
+    if (filters.cardId) {
+      chips.push({ key: "cardId", label: `Card: ${getCardName(filters.cardId, cards)}`, type: "filter" });
+    }
+
+    if (filters.categoryId) {
+      chips.push({ key: "categoryId", label: `Category: ${getCategoryName(filters.categoryId, categories)}`, type: "filter" });
+    }
+
+    if (filters.transactionType) {
+      chips.push({ key: "transactionType", label: `Type: ${getTransactionTypeLabel(filters.transactionType)}`, type: "filter" });
+    }
+
+    if (filters.paymentMethod) {
+      chips.push({ key: "paymentMethod", label: `Payment: ${filters.paymentMethod}`, type: "filter" });
+    }
+
+    if (filters.source) {
+      chips.push({ key: "source", label: `Source: ${sourceLabels[filters.source] ?? filters.source}`, type: "filter" });
+    }
+
+    if (sortMode !== "date-desc") {
+      chips.push({ key: "sort", label: `Sort: ${sortLabels[sortMode] ?? sortMode}`, type: "sort" });
+    }
+
+    return chips;
+  }, [cards, categories, filters, sortMode]);
+
+  const hasActiveControls = activeFilterChips.length > 0;
+
   function resetFilters() {
     setSortMode("date-desc");
     onFiltersChange(emptyFilters);
+  }
+
+  function clearChip(chip) {
+    if (chip.type === "sort") {
+      setSortMode("date-desc");
+      return;
+    }
+
+    onFiltersChange({ ...filters, [chip.key]: "" });
   }
 
   const filteredTransactions = useMemo(() => {
@@ -115,7 +177,7 @@ export default function TransactionTable({
     <>
       <Card className="min-w-0 overflow-hidden">
         <div className="grid gap-4 border-b border-app-border p-4">
-          <div className="grid min-w-0 gap-3 lg:grid-cols-[minmax(260px,1fr)_180px_180px] lg:items-end">
+          <div className="grid min-w-0 gap-3 lg:grid-cols-[minmax(260px,1fr)_180px_auto] lg:items-end">
             <Input
               label="Search transactions"
               value={filters.search}
@@ -132,18 +194,42 @@ export default function TransactionTable({
               <option value="amount-desc">Amount high</option>
               <option value="amount-asc">Amount low</option>
             </Select>
-            <Button
-              type="button"
-              variant="secondary"
-              className="min-h-10 px-3 py-2 text-sm"
-              onClick={resetFilters}
-            >
-              <RotateCcw size={16} aria-hidden="true" />
-              Reset filters
-            </Button>
+            <div className="grid grid-cols-2 gap-2 lg:grid-cols-none">
+              <Button
+                type="button"
+                variant="secondary"
+                className="min-h-10 px-3 py-2 text-sm md:hidden"
+                onClick={() => setShowMobileFilters((current) => !current)}
+                aria-expanded={showMobileFilters}
+              >
+                <SlidersHorizontal size={16} aria-hidden="true" />
+                Filters
+                <ChevronDown
+                  size={16}
+                  aria-hidden="true"
+                  className={`transition ${showMobileFilters ? "rotate-180" : ""}`}
+                />
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                className="min-h-10 px-3 py-2 text-sm"
+                onClick={resetFilters}
+                disabled={!hasActiveControls}
+              >
+                <RotateCcw size={16} aria-hidden="true" />
+                Reset
+              </Button>
+            </div>
           </div>
 
-          <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-5 xl:items-end">
+          <div
+            className={
+              showMobileFilters
+                ? "grid min-w-0 gap-3 md:grid md:grid-cols-2 xl:grid-cols-5 xl:items-end"
+                : "hidden min-w-0 gap-3 md:grid md:grid-cols-2 xl:grid-cols-5 xl:items-end"
+            }
+          >
             <Select
               label="Card"
               value={filters.cardId}
@@ -203,13 +289,30 @@ export default function TransactionTable({
             </Select>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-app-background px-3 py-2">
-            <div className="text-xs font-medium text-text-muted">
+          {hasActiveControls ? (
+            <div className="flex flex-wrap gap-2">
+              {activeFilterChips.map((chip) => (
+                <button
+                  key={`${chip.type}-${chip.key}`}
+                  type="button"
+                  className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-app-border bg-app-surface px-3 py-1 text-xs font-semibold text-text-soft transition hover:border-brand-primary/40 hover:text-text-main"
+                  onClick={() => clearChip(chip)}
+                  title={`Clear ${chip.label}`}
+                >
+                  <span className="truncate">{chip.label}</span>
+                  <X size={13} aria-hidden="true" />
+                </button>
+              ))}
+            </div>
+          ) : null}
+
+          <div className="grid gap-2 rounded-xl bg-app-background px-3 py-2 text-xs font-medium text-text-muted sm:grid-cols-2 sm:items-center">
+            <div>
               Showing <span className="font-semibold text-text-main">{filteredTransactions.length}</span>{" "}
               of <span className="font-semibold text-text-main">{transactions.length}</span>{" "}
               transaction{transactions.length === 1 ? "" : "s"}
             </div>
-            <div className="text-xs font-medium text-text-muted">
+            <div className="sm:text-right">
               Filtered spending impact:{" "}
               <span className="font-semibold text-text-main">{formatCurrency(filteredImpactTotal)}</span>
             </div>
@@ -217,8 +320,19 @@ export default function TransactionTable({
         </div>
 
         {filteredTransactions.length === 0 ? (
-          <div className="p-8 text-center text-sm text-text-muted">
-            No transactions match the current filters.
+          <div className="grid gap-2 p-8 text-center text-sm text-text-muted">
+            <p className="font-semibold text-text-main">No matching transactions</p>
+            <p>
+              Try clearing a filter or searching by merchant, note, card, category, payment method, type, or source.
+            </p>
+            {hasActiveControls ? (
+              <div className="mt-2 flex justify-center">
+                <Button type="button" variant="secondary" className="min-h-9 px-3 py-1.5 text-sm" onClick={resetFilters}>
+                  <RotateCcw size={16} aria-hidden="true" />
+                  Reset filters
+                </Button>
+              </div>
+            ) : null}
           </div>
         ) : (
           <div className="grid gap-3 p-4">
