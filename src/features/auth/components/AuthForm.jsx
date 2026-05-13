@@ -31,7 +31,7 @@ export default function AuthForm() {
       if (isSignUp) {
         const result = await signUpWithEmail({ email, password });
         if (!result.session) {
-          setStatus("Account created. Check your email to confirm your address, then sign in.");
+          setStatus("Account created. Check your email to confirm your address and finish setup.");
         }
       } else {
         await signInWithEmail({ email, password });
