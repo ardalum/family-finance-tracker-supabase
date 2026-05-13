@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { formatRemainingTime } from "../accountDisplayUtils.js";
 import { useAuth } from "../AuthProvider.jsx";
 
 const WARNING_THRESHOLD_MS = 5 * 60 * 1000;
@@ -57,9 +58,4 @@ export default function SessionTimeoutWarning() {
 function getSessionExpiryMs(session) {
   if (!session?.expires_at) return null;
   return Number(session.expires_at) * 1000;
-}
-
-function formatRemainingTime(milliseconds) {
-  const minutes = Math.max(1, Math.ceil(milliseconds / 60000));
-  return `${minutes} minute${minutes === 1 ? "" : "s"}`;
 }
