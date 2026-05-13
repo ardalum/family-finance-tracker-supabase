@@ -1,33 +1,34 @@
 import { CheckCircle2, MailCheck, ShieldAlert, UserCircle } from "lucide-react";
 import Card from "../../../components/ui/Card.jsx";
 import { useAuth } from "../AuthProvider.jsx";
+import { AUTH_STATUS_TYPES } from "../authViewTargets.js";
 
 const statusConfig = {
-  inbox: {
+  [AUTH_STATUS_TYPES.inbox]: {
     icon: MailCheck,
     title: "Check your inbox",
     description: "Open the email from WalletFlow and follow the link to finish setting up your account.",
   },
-  verified: {
+  [AUTH_STATUS_TYPES.verified]: {
     icon: CheckCircle2,
     title: "Account verified",
     description: "Your account is ready. You can continue using WalletFlow.",
   },
-  signedOut: {
+  [AUTH_STATUS_TYPES.signedOut]: {
     icon: UserCircle,
     title: "Sign in required",
     description: "Sign in again to continue managing your household finance data.",
   },
-  problem: {
+  [AUTH_STATUS_TYPES.problem]: {
     icon: ShieldAlert,
     title: "Auth status needs attention",
     description: "Something about the sign-in state needs attention. Try refreshing or signing in again.",
   },
 };
 
-export default function AuthStatusScreen({ status = "inbox", email = "", actionSlot = null }) {
+export default function AuthStatusScreen({ status = AUTH_STATUS_TYPES.inbox, email = "", actionSlot = null }) {
   const { authEvent } = useAuth();
-  const config = statusConfig[status] ?? statusConfig.problem;
+  const config = statusConfig[status] ?? statusConfig[AUTH_STATUS_TYPES.problem];
   const Icon = config.icon;
 
   return (
