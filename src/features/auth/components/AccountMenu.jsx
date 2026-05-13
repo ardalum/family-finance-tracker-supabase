@@ -4,8 +4,20 @@ import { useHouseholds } from "../../households/HouseholdProvider.jsx";
 import { getAccountIdentity, getSessionSummary } from "../accountDisplayUtils.js";
 import { useAuth } from "../AuthProvider.jsx";
 import { signOut, signOutEverywhere } from "../authService.js";
+import { AUTH_VIEW_TARGETS } from "../authViewTargets.js";
 
 const menuSections = [
+  {
+    title: "Account",
+    items: [
+      {
+        icon: UserCircle,
+        label: "Account Settings",
+        description: "Profile identity, session details, and planned security controls.",
+        view: AUTH_VIEW_TARGETS.accountSettings,
+      },
+    ],
+  },
   {
     title: "Household",
     items: [
