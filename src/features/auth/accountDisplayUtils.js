@@ -24,6 +24,8 @@ export function getAccountIdentity(user, activeMembership, activeHousehold) {
 }
 
 export function getSessionSummary(session, authEvent) {
+  const authEventLabel = formatAuthEventLabel(authEvent);
+
   if (!session) {
     return {
       label: "No active session",
@@ -34,8 +36,8 @@ export function getSessionSummary(session, authEvent) {
   if (!session.expires_at) {
     return {
       label: "Session active",
-      description: authEvent
-        ? `Latest auth event: ${formatAuthEventLabel(authEvent)}.`
+      description: authEventLabel
+        ? `Latest auth event: ${authEventLabel}. No expiration time is available for this session.`
         : "No expiration time is available for this session.",
     };
   }
@@ -44,13 +46,17 @@ export function getSessionSummary(session, authEvent) {
   if (timeRemainingMs <= 0) {
     return {
       label: "Session may be expired",
-      description: "Refresh the app or sign in again if changes stop saving.",
+      description: authEventLabel
+        ? `Latest auth event: ${authEventLabel}. Refresh the app or sign in again if changes stop saving.`
+        : "Refresh the app or sign in again if changes stop saving.",
     };
   }
 
   return {
     label: "Session active",
-    description: `Expires in about ${formatRemainingTime(timeRemainingMs)}.`,
+    description: authEventLabel
+      ? `Expires in about ${formatRemainingTime(timeRemainingMs)}. Latest auth event: ${authEventLabel}.`
+      : `Expires in about ${formatRemainingTime(timeRemainingMs)}.`,
   };
 }
 
