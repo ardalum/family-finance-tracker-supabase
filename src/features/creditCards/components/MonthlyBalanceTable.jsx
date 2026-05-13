@@ -3,6 +3,7 @@ import { Pencil, RotateCcw } from "lucide-react";
 import LinkedCardName from "../../../components/shared/LinkedCardName.jsx";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
+import Input from "../../../components/ui/Input.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import {
   buildMonthOptions,
@@ -15,6 +16,27 @@ import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
 import { getRowStatus } from "../creditCardStatus.js";
 import { getSortedCards } from "../creditCardSort.js";
 import { getMonthTotal } from "../creditCardsService.js";
+
+const defaultFilters = {
+  search: "",
+  owner: "",
+  status: "",
+};
+
+function getCardSearchText(card) {
+  return [card.name, card.owner, card.network, card.lastFour]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+}
+
+function getStatusFilterValue(status) {
+  if (status.isNoBalance) return "no-balance";
+  if (status.label === "Paid") return "paid";
+  if (status.label === "Past due") return "past-due";
+  if (status.label === "Due soon") return "due-soon";
+  return "unpaid";
+}
 
 export default function MonthlyBalanceTable({
   cards,
@@ -29,6 +51,7 @@ export default function MonthlyBalanceTable({
   isCardSaving = false,
 }) {
   const [sortMode, setSortMode] = useState("default");
+  const [filters, setFilters] = useState(defaultFilters);
   const monthBalances = monthlyBalances[selectedMonth] ?? {};
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const monthTotal = getMonthTotal(monthBalances);
@@ -36,10 +59,26 @@ export default function MonthlyBalanceTable({
     (total, entry) => total + (entry?.paid ? 0 : Number(entry?.balance || 0)),
     0,
   );
+  const ownerOptions = useMemo(
+    () => Array.from(new Set(cards.map((card) => card.owner).filter(Boolean))).sort(),
+    [cards],
+  );
   const sortedCards = useMemo(
     () => getSortedCards(cards, monthBalances, selectedMonth, sortMode),
     [cards, monthBalances, selectedMonth, sortMode],
   );
+  const visibleCards = useMemo(() => {
+    const searchTerm = filters.search.trim().toLowerCase();
+    return sortedCards.filter((card) => {
+      const entry = monthBalances[card.id] ?? { balance: 0, paid: false };
+      const status = getRowStatus(card, selectedMonth, entry);
+      const statusValue = getStatusFilterValue(status);
+      const matchesSearch = !searchTerm || getCardSearchText(card).includes(searchTerm);
+      const matchesOwner = !filters.owner || card.owner === filters.owner;
+      const matchesStatus = !filters.status || statusValue === filters.status;
+      return matchesSearch && matchesOwner && matchesStatus;
+    });
+  }, [filters, monthBalances, selectedMonth, sortedCards]);
 
   function handleBalanceChange(cardId, value) {
     const currentEntry = monthBalances[cardId] ?? { balance: 0, paid: false };
@@ -58,60 +97,105 @@ export default function MonthlyBalanceTable({
     });
   }
 
+  function resetControls() {
+    setSortMode("default");
+    setFilters(defaultFilters);
+  }
+
   return (
     <Card>
-      <div className="grid gap-4 border-b border-app-border p-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-        <div>
-          <h2 className="text-lg font-semibold text-text-main">Monthly balance table</h2>
-          <p className="mt-1 text-sm text-text-muted">
-            {formatMonthLabel(selectedMonth)} total statement balance:{" "}
-            <span className="font-semibold text-text-main">
-              {formatCurrency(monthTotal, { cents: true })}
-            </span>
-          </p>
-          <p className="mt-1 text-sm text-text-muted">
-            Total unpaid balance:{" "}
-            <span className="font-semibold text-status-danger">
-              {formatCurrency(unpaidTotal, { cents: true })}
-            </span>
-          </p>
-          {loading ? <p className="mt-2 text-sm text-text-muted">Loading monthly balances...</p> : null}
-          {saving ? <p className="mt-2 text-sm text-text-muted">Saving monthly balance...</p> : null}
-          {error ? <p className="mt-2 text-sm font-medium text-status-danger">{error}</p> : null}
+      <div className="grid gap-4 border-b border-app-border p-5">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+          <div>
+            <h2 className="text-lg font-semibold text-text-main">Monthly balance table</h2>
+            <p className="mt-1 text-sm text-text-muted">
+              {formatMonthLabel(selectedMonth)} total statement balance:{" "}
+              <span className="font-semibold text-text-main">
+                {formatCurrency(monthTotal, { cents: true })}
+              </span>
+            </p>
+            <p className="mt-1 text-sm text-text-muted">
+              Total unpaid balance:{" "}
+              <span className="font-semibold text-status-danger">
+                {formatCurrency(unpaidTotal, { cents: true })}
+              </span>
+            </p>
+            {loading ? <p className="mt-2 text-sm text-text-muted">Loading monthly balances...</p> : null}
+            {saving ? <p className="mt-2 text-sm text-text-muted">Saving monthly balance...</p> : null}
+            {error ? <p className="mt-2 text-sm font-medium text-status-danger">{error}</p> : null}
+          </div>
+          <div className="grid gap-3 sm:grid-cols-[160px_180px_auto] sm:items-end">
+            <Select
+              label="Month"
+              value={selectedMonth}
+              onChange={(event) => onMonthChange(event.target.value)}
+            >
+              {monthOptions.map((month) => (
+                <option key={month} value={month}>
+                  {formatMonthLabel(month)}
+                </option>
+              ))}
+            </Select>
+            <Select
+              label="Sort"
+              value={sortMode}
+              onChange={(event) => setSortMode(event.target.value)}
+            >
+              <option value="default">Default</option>
+              <option value="name">Card name</option>
+              <option value="owner">Owner</option>
+              <option value="limit-desc">Highest limit</option>
+              <option value="balance-desc">Highest balance</option>
+            </Select>
+            <Button type="button" variant="secondary" onClick={resetControls}>
+              <RotateCcw size={16} aria-hidden="true" />
+              Reset
+            </Button>
+          </div>
         </div>
-        <div className="grid gap-3 sm:grid-cols-[160px_180px_auto] sm:items-end">
+
+        <div className="grid gap-3 lg:grid-cols-[minmax(240px,1fr)_180px_180px_auto] lg:items-end">
+          <Input
+            label="Search cards"
+            value={filters.search}
+            onChange={(event) => setFilters((current) => ({ ...current, search: event.target.value }))}
+            placeholder="Card name, network, owner, or last 4"
+          />
           <Select
-            label="Month"
-            value={selectedMonth}
-            onChange={(event) => onMonthChange(event.target.value)}
+            label="Owner"
+            value={filters.owner}
+            onChange={(event) => setFilters((current) => ({ ...current, owner: event.target.value }))}
           >
-            {monthOptions.map((month) => (
-              <option key={month} value={month}>
-                {formatMonthLabel(month)}
-              </option>
+            <option value="">All owners</option>
+            {ownerOptions.map((owner) => (
+              <option key={owner} value={owner}>{owner}</option>
             ))}
           </Select>
           <Select
-            label="Sort"
-            value={sortMode}
-            onChange={(event) => setSortMode(event.target.value)}
+            label="Status"
+            value={filters.status}
+            onChange={(event) => setFilters((current) => ({ ...current, status: event.target.value }))}
           >
-            <option value="default">Default</option>
-            <option value="name">Card name</option>
-            <option value="owner">Owner</option>
-            <option value="limit-desc">Highest limit</option>
-            <option value="balance-desc">Highest balance</option>
+            <option value="">All statuses</option>
+            <option value="paid">Paid</option>
+            <option value="unpaid">Unpaid</option>
+            <option value="due-soon">Due soon</option>
+            <option value="past-due">Past due</option>
+            <option value="no-balance">No balance</option>
           </Select>
-          <Button type="button" variant="secondary" onClick={() => setSortMode("default")}>
-            <RotateCcw size={16} aria-hidden="true" />
-            Reset sorting
-          </Button>
+          <div className="text-sm font-medium text-text-muted lg:pb-2">
+            Showing <span className="font-semibold text-text-main">{visibleCards.length}</span> of {cards.length}
+          </div>
         </div>
       </div>
 
       {cards.length === 0 ? (
         <div className="p-8 text-center text-sm text-text-muted">
           Add a credit card before entering monthly balances.
+        </div>
+      ) : visibleCards.length === 0 ? (
+        <div className="p-8 text-center text-sm text-text-muted">
+          No cards match the current filters.
         </div>
       ) : (
         <div className="overflow-x-auto">
@@ -127,7 +211,7 @@ export default function MonthlyBalanceTable({
               </tr>
             </thead>
             <tbody className="divide-y divide-app-border">
-              {sortedCards.map((card) => {
+              {visibleCards.map((card) => {
                 const entry = monthBalances[card.id] ?? { balance: 0, paid: false };
                 const status = getRowStatus(card, selectedMonth, entry);
                 const statementClosingDay = card.statementClosingDay ?? card.dueDay;
