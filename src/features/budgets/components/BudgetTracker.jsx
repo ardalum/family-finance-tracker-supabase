@@ -1,11 +1,13 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, CheckCircle2, DollarSign, Plus, WalletCards } from "lucide-react";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import Select from "../../../components/ui/Select.jsx";
+import { useHouseholds } from "../../households/HouseholdProvider.jsx";
 import { buildMonthOptions, getCurrentMonthKey } from "../../../lib/dates.js";
 import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
 import { getTransactionCategoryRows, getTransactionImpactAmount, UNCATEGORIZED_ID } from "../../spending/spendingService.js";
+import { listTransactions } from "../../spending/spendingSupabaseService.js";
 import BudgetMigrationPanel from "./BudgetMigrationPanel.jsx";
 import BudgetModal from "./BudgetModal.jsx";
 import BudgetTable from "./BudgetTable.jsx";
@@ -13,7 +15,7 @@ import { getTotalMonthlyBudget } from "../budgetsService.js";
 
 export default function BudgetTracker({
   budgets,
-  transactions = [],
+  transactions = null,
   localBudgetsByMonth,
   selectedMonth = getCurrentMonthKey(),
   loading = false,
@@ -26,12 +28,51 @@ export default function BudgetTracker({
   onAddDefaultBudgets,
   onImportLocalBudgets,
 }) {
+  const { activeHouseholdId } = useHouseholds();
   const [editingBudget, setEditingBudget] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [budgetTransactions, setBudgetTransactions] = useState([]);
+  const [transactionsLoading, setTransactionsLoading] = useState(false);
+  const [transactionsError, setTransactionsError] = useState("");
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const totalBudget = getTotalMonthlyBudget(budgets);
-  const budgetRows = useMemo(() => buildBudgetRows(budgets, transactions), [budgets, transactions]);
+  const transactionsForBudget = transactions ?? budgetTransactions;
+  const budgetRows = useMemo(() => buildBudgetRows(budgets, transactionsForBudget), [budgets, transactionsForBudget]);
   const summary = useMemo(() => getBudgetSummary(budgetRows), [budgetRows]);
+
+  useEffect(() => {
+    if (transactions) return undefined;
+    if (!activeHouseholdId || !selectedMonth) {
+      setBudgetTransactions([]);
+      setTransactionsLoading(false);
+      return undefined;
+    }
+
+    let isCurrent = true;
+
+    async function loadBudgetTransactions() {
+      setTransactionsLoading(true);
+      setTransactionsError("");
+
+      try {
+        const rows = await listTransactions(activeHouseholdId, selectedMonth, [], budgets);
+        if (isCurrent) setBudgetTransactions(rows);
+      } catch (currentError) {
+        if (isCurrent) {
+          setBudgetTransactions([]);
+          setTransactionsError(currentError.message || "Could not load budget spending.");
+        }
+      } finally {
+        if (isCurrent) setTransactionsLoading(false);
+      }
+    }
+
+    loadBudgetTransactions();
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [activeHouseholdId, budgets, selectedMonth, transactions]);
 
   async function handleSave(form, budget) {
     if (budget) {
@@ -71,6 +112,11 @@ export default function BudgetTracker({
           {error}
         </div>
       ) : null}
+      {transactionsError ? (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B]">
+          {transactionsError}
+        </div>
+      ) : null}
 
       <BudgetMigrationPanel
         localBudgetsByMonth={localBudgetsByMonth}
@@ -91,6 +137,7 @@ export default function BudgetTracker({
               Total monthly budget for {formatMonthLabel(selectedMonth)}
             </p>
             {loading ? <p className="mt-2 text-sm text-[#6B7280]">Loading budget categories...</p> : null}
+            {transactionsLoading ? <p className="mt-2 text-sm text-[#6B7280]">Loading budget spending...</p> : null}
             {isSaving ? <p className="mt-2 text-sm text-[#6B7280]">Saving budget category...</p> : null}
           </div>
           <Select
