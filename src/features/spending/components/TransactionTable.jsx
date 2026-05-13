@@ -25,6 +25,19 @@ const emptyFilters = {
   source: "",
 };
 
+const LARGE_AMOUNT_THRESHOLD = 100;
+
+const quickFilters = [
+  { id: "all", label: "All", description: "Show everything" },
+  { id: "manual", label: "Manual", description: "Manual entries" },
+  { id: "recurring", label: "Recurring", description: "Recurring-linked" },
+  { id: "expense", label: "Expenses", description: "Spending only" },
+  { id: "payment", label: "Payments", description: "Card payments" },
+  { id: "refund", label: "Refunds", description: "Returns/refunds" },
+  { id: "income", label: "Income", description: "Income entries" },
+  { id: "large", label: "$100+", description: "Large amounts" },
+];
+
 const sortLabels = {
   "date-desc": "Date newest",
   "date-asc": "Date oldest",
@@ -74,6 +87,7 @@ export default function TransactionTable({
   const [sortMode, setSortMode] = useState("date-desc");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [transactionPendingDelete, setTransactionPendingDelete] = useState(null);
+  const [quickFilter, setQuickFilter] = useState("all");
   const categoryOptions = useMemo(
     () => [{ id: UNCATEGORIZED_ID, name: "Uncategorized" }, ...categories],
     [categories],
@@ -111,17 +125,22 @@ export default function TransactionTable({
       chips.push({ key: "source", label: `Source: ${sourceLabels[filters.source] ?? filters.source}`, type: "filter" });
     }
 
+    if (quickFilter === "large") {
+      chips.push({ key: "quick-large", label: `Quick: $${LARGE_AMOUNT_THRESHOLD}+`, type: "quick" });
+    }
+
     if (sortMode !== "date-desc") {
       chips.push({ key: "sort", label: `Sort: ${sortLabels[sortMode] ?? sortMode}`, type: "sort" });
     }
 
     return chips;
-  }, [cards, categories, filters, sortMode]);
+  }, [cards, categories, filters, quickFilter, sortMode]);
 
   const hasActiveControls = activeFilterChips.length > 0;
 
   function resetFilters() {
     setSortMode("date-desc");
+    setQuickFilter("all");
     onFiltersChange(emptyFilters);
   }
 
@@ -131,7 +150,53 @@ export default function TransactionTable({
       return;
     }
 
+    if (chip.type === "quick") {
+      setQuickFilter("all");
+      return;
+    }
+
     onFiltersChange({ ...filters, [chip.key]: "" });
+    const clearedQuickFilter = getQuickFilterAfterFieldClear(quickFilter, chip.key);
+    if (clearedQuickFilter !== quickFilter) setQuickFilter(clearedQuickFilter);
+  }
+
+  function applyQuickFilter(filterId) {
+    setQuickFilter(filterId);
+
+    if (filterId === "all") {
+      onFiltersChange({
+        ...filters,
+        transactionType: "",
+        source: "",
+      });
+      return;
+    }
+
+    if (filterId === "manual" || filterId === "recurring") {
+      onFiltersChange({
+        ...filters,
+        source: filterId,
+        transactionType: "",
+      });
+      return;
+    }
+
+    if (["expense", "payment", "refund", "income"].includes(filterId)) {
+      onFiltersChange({
+        ...filters,
+        transactionType: filterId,
+        source: "",
+      });
+      return;
+    }
+
+    if (filterId === "large") {
+      onFiltersChange({
+        ...filters,
+        transactionType: "",
+        source: "",
+      });
+    }
   }
 
   const filteredTransactions = useMemo(() => {
@@ -141,6 +206,10 @@ export default function TransactionTable({
       .filter((transaction) => !filters.transactionType || (transaction.transactionType || "expense") === filters.transactionType)
       .filter((transaction) => !filters.paymentMethod || transaction.paymentMethod === filters.paymentMethod)
       .filter((transaction) => !filters.source || (transaction.source || "manual") === filters.source)
+      .filter((transaction) => {
+        if (quickFilter !== "large") return true;
+        return Number(transaction.amount || 0) >= LARGE_AMOUNT_THRESHOLD;
+      })
       .filter((transaction) => {
         if (!filters.categoryId) return true;
         return getTransactionCategoryRows(transaction).some(
@@ -152,7 +221,12 @@ export default function TransactionTable({
         return getTransactionSearchText(transaction, cards, categories).includes(searchTerm);
       })
       .sort((a, b) => sortTransactions(a, b, sortMode, cards, categories));
-  }, [cards, categories, filters, sortMode, transactions]);
+  }, [cards, categories, filters, quickFilter, sortMode, transactions]);
+
+  const quickFilterCounts = useMemo(
+    () => getQuickFilterCounts(transactions),
+    [transactions],
+  );
 
   const filteredImpactTotal = useMemo(
     () => filteredTransactions.reduce((total, transaction) => total + getTransactionImpactAmount(transaction), 0),
@@ -225,6 +299,34 @@ export default function TransactionTable({
             </div>
           </div>
 
+          <div className="grid gap-2">
+            <p className="text-xs font-semibold uppercase tracking-normal text-text-muted">Quick filters</p>
+            <div className="flex gap-2 overflow-x-auto pb-1 md:flex-wrap md:overflow-visible md:pb-0">
+              {quickFilters.map((option) => {
+                const isActive = quickFilter === option.id;
+                const count = quickFilterCounts[option.id] ?? 0;
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                      isActive
+                        ? "border-text-main bg-text-main text-white shadow-sm"
+                        : "border-app-border bg-app-surface text-text-soft hover:border-brand-primary/40 hover:text-text-main"
+                    }`}
+                    onClick={() => applyQuickFilter(option.id)}
+                    title={option.description}
+                  >
+                    {option.label}
+                    <span className={`rounded-full px-1.5 py-0.5 text-[10px] ${isActive ? "bg-white/15 text-white" : "bg-app-background text-text-muted"}`}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div
             className={
               showMobileFilters
@@ -259,7 +361,10 @@ export default function TransactionTable({
             <Select
               label="Type"
               value={filters.transactionType}
-              onChange={(event) => onFiltersChange({ ...filters, transactionType: event.target.value })}
+              onChange={(event) => {
+                setQuickFilter("all");
+                onFiltersChange({ ...filters, transactionType: event.target.value });
+              }}
             >
               <option value="">All types</option>
               {TRANSACTION_TYPE_OPTIONS.map((option) => (
@@ -283,7 +388,10 @@ export default function TransactionTable({
             <Select
               label="Source"
               value={filters.source}
-              onChange={(event) => onFiltersChange({ ...filters, source: event.target.value })}
+              onChange={(event) => {
+                setQuickFilter("all");
+                onFiltersChange({ ...filters, source: event.target.value });
+              }}
             >
               <option value="">All sources</option>
               <option value="manual">Manual</option>
@@ -575,6 +683,36 @@ function groupTransactionsByDate(transactions) {
   });
 
   return groups;
+}
+
+function getQuickFilterAfterFieldClear(currentQuickFilter, clearedKey) {
+  if (["manual", "recurring"].includes(currentQuickFilter) && clearedKey === "source") return "all";
+  if (["expense", "payment", "refund", "income"].includes(currentQuickFilter) && clearedKey === "transactionType") return "all";
+  return currentQuickFilter;
+}
+
+function getQuickFilterCounts(transactions) {
+  return transactions.reduce((counts, transaction) => {
+    const source = transaction.source || "manual";
+    const transactionType = transaction.transactionType || "expense";
+
+    counts.all += 1;
+    if (source === "manual") counts.manual += 1;
+    if (source === "recurring") counts.recurring += 1;
+    if (transactionType in counts) counts[transactionType] += 1;
+    if (Number(transaction.amount || 0) >= LARGE_AMOUNT_THRESHOLD) counts.large += 1;
+
+    return counts;
+  }, {
+    all: 0,
+    manual: 0,
+    recurring: 0,
+    expense: 0,
+    payment: 0,
+    refund: 0,
+    income: 0,
+    large: 0,
+  });
 }
 
 function sortTransactions(a, b, sortMode, cards, categories) {
