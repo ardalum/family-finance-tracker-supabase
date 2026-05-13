@@ -2,6 +2,7 @@ import { Clock3, DatabaseBackup, Home, Info, LogOut, Settings, UserCircle } from
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useHouseholds } from "../../households/HouseholdProvider.jsx";
 import { getAccountIdentity } from "../authAccountDisplayUtils.js";
+import { getFriendlyAuthError } from "../authErrors.js";
 import { useAuth } from "../AuthProvider.jsx";
 import { signOut, signOutEverywhere } from "../authService.js";
 import { getSessionSummary } from "../authSessionUtils.js";
@@ -93,7 +94,7 @@ export default function AccountMenu({ onNavigate }) {
     try {
       await signOut();
     } catch (error) {
-      setError(error.message || "Could not sign out.");
+      setError(getFriendlyAuthError(error, "Could not sign out."));
       setSigningOutMode("");
     }
   }
@@ -105,7 +106,7 @@ export default function AccountMenu({ onNavigate }) {
     try {
       await signOutEverywhere();
     } catch (error) {
-      setError(error.message || "Could not sign out from all devices.");
+      setError(getFriendlyAuthError(error, "Could not sign out from all devices."));
       setSigningOutMode("");
     }
   }
