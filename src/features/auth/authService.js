@@ -47,3 +47,10 @@ export async function signOut() {
 
   if (error) throw error;
 }
+
+export async function signOutEverywhere() {
+  const client = requireSupabase();
+  const { error } = await client.auth.signOut({ scope: "global" });
+
+  if (error) throw error;
+}

@@ -2,7 +2,7 @@ import { DatabaseBackup, Home, Info, LogOut, Settings, UserCircle } from "lucide
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useHouseholds } from "../../households/HouseholdProvider.jsx";
 import { useAuth } from "../AuthProvider.jsx";
-import { signOut } from "../authService.js";
+import { signOut, signOutEverywhere } from "../authService.js";
 
 const menuSections = [
   {
@@ -49,13 +49,14 @@ const menuSections = [
 export default function AccountMenu({ onNavigate }) {
   const { user, setError } = useAuth();
   const { activeHousehold, activeMembership } = useHouseholds();
-  const [isSigningOut, setIsSigningOut] = useState(false);
+  const [signingOutMode, setSigningOutMode] = useState("");
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
   const identity = useMemo(
     () => getAccountIdentity(user, activeMembership, activeHousehold),
     [activeHousehold, activeMembership, user],
   );
+  const isSigningOut = Boolean(signingOutMode);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -71,14 +72,26 @@ export default function AccountMenu({ onNavigate }) {
   }, [open]);
 
   async function handleSignOut() {
-    setIsSigningOut(true);
+    setSigningOutMode("current");
     setError("");
 
     try {
       await signOut();
     } catch (error) {
       setError(error.message || "Could not sign out.");
-      setIsSigningOut(false);
+      setSigningOutMode("");
+    }
+  }
+
+  async function handleSignOutEverywhere() {
+    setSigningOutMode("everywhere");
+    setError("");
+
+    try {
+      await signOutEverywhere();
+    } catch (error) {
+      setError(error.message || "Could not sign out from all devices.");
+      setSigningOutMode("");
     }
   }
 
@@ -140,7 +153,7 @@ export default function AccountMenu({ onNavigate }) {
               </div>
             ))}
           </div>
-          <div className="border-t border-app-border p-2">
+          <div className="grid gap-1 border-t border-app-border p-2">
             <button
               type="button"
               className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-status-danger transition hover:bg-status-dangerBg disabled:cursor-not-allowed disabled:opacity-50"
@@ -149,7 +162,17 @@ export default function AccountMenu({ onNavigate }) {
               role="menuitem"
             >
               <LogOut size={16} aria-hidden="true" />
-              {isSigningOut ? "Signing out..." : "Sign out"}
+              {signingOutMode === "current" ? "Signing out..." : "Sign out"}
+            </button>
+            <button
+              type="button"
+              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-status-danger transition hover:bg-status-dangerBg disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={handleSignOutEverywhere}
+              disabled={isSigningOut}
+              role="menuitem"
+            >
+              <LogOut size={16} aria-hidden="true" />
+              {signingOutMode === "everywhere" ? "Signing out everywhere..." : "Sign out from all devices"}
             </button>
           </div>
         </div>
