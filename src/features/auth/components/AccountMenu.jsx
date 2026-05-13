@@ -1,6 +1,7 @@
 import { Clock3, DatabaseBackup, Home, Info, LogOut, Settings, UserCircle } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useHouseholds } from "../../households/HouseholdProvider.jsx";
+import { getAccountIdentity, getSessionSummary } from "../accountDisplayUtils.js";
 import { useAuth } from "../AuthProvider.jsx";
 import { signOut, signOutEverywhere } from "../authService.js";
 
@@ -56,7 +57,7 @@ export default function AccountMenu({ onNavigate }) {
     () => getAccountIdentity(user, activeMembership, activeHousehold),
     [activeHousehold, activeMembership, user],
   );
-  const sessionStatus = useMemo(() => getSessionStatus(session), [session]);
+  const sessionStatus = useMemo(() => getSessionSummary(session), [session]);
   const isSigningOut = Boolean(signingOutMode);
 
   useEffect(() => {
@@ -206,83 +207,4 @@ function MenuButton({ icon: Icon, label, description, onClick }) {
       </span>
     </button>
   );
-}
-
-function getAccountIdentity(user, activeMembership, activeHousehold) {
-  const email = user?.email ?? "Unknown email";
-  const metadata = user?.user_metadata ?? {};
-  const metadataName =
-    metadata.display_name || metadata.full_name || metadata.name || metadata.preferred_name;
-  const displayName = metadataName?.trim() || formatNameFromEmail(email);
-  const role = formatRole(activeMembership?.role);
-  const householdName = activeHousehold?.name?.trim();
-
-  return {
-    displayName,
-    email,
-    role: role && householdName ? `${role} · ${householdName}` : role,
-  };
-}
-
-function getSessionStatus(session) {
-  if (!session?.expires_at) {
-    return {
-      label: "Session active",
-      description: "No session expiration time is available.",
-    };
-  }
-
-  const expiresAtMs = Number(session.expires_at) * 1000;
-  const timeRemainingMs = expiresAtMs - Date.now();
-
-  if (timeRemainingMs <= 0) {
-    return {
-      label: "Session may be expired",
-      description: "Refresh the app or sign in again if something stops updating.",
-    };
-  }
-
-  return {
-    label: "Session active",
-    description: `Expires in about ${formatRemainingTime(timeRemainingMs)}.`,
-  };
-}
-
-function formatNameFromEmail(email) {
-  const fallback = "Account";
-  const localPart = email?.split("@")[0]?.trim();
-  if (!localPart) return fallback;
-
-  const cleaned = localPart
-    .replace(/[._-]+/g, " ")
-    .replace(/\d+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  if (!cleaned) return localPart;
-
-  return cleaned
-    .split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(" ");
-}
-
-function formatRemainingTime(milliseconds) {
-  const totalMinutes = Math.max(1, Math.ceil(milliseconds / 60000));
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-
-  if (hours <= 0) return `${totalMinutes} minute${totalMinutes === 1 ? "" : "s"}`;
-  if (minutes === 0) return `${hours} hour${hours === 1 ? "" : "s"}`;
-  return `${hours} hour${hours === 1 ? "" : "s"} ${minutes} minute${minutes === 1 ? "" : "s"}`;
-}
-
-function formatRole(role) {
-  if (!role) return "";
-
-  return role
-    .split(/[\s_-]+/g)
-    .filter(Boolean)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(" ");
 }
