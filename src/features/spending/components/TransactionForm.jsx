@@ -32,66 +32,10 @@ const emptyForm = {
   splits: [{ id: "split_initial", categoryId: UNCATEGORIZED_ID, amount: "" }],
 };
 
-function buildMerchantProfiles(transactions) {
-  const profiles = new Map();
-
-  transactions.forEach((transaction) => {
-    const merchant = transaction.merchant?.trim();
-    if (!merchant) return;
-
-    const key = merchant.toLowerCase();
-    const current = profiles.get(key) ?? {
-      merchant,
-      count: 0,
-      latestDate: "",
-      paymentMethod: "",
-      cardId: "",
-      transactionType: "expense",
-      categoryId: UNCATEGORIZED_ID,
-      notes: "",
-    };
-
-    const isNewer = !current.latestDate || transaction.date > current.latestDate;
-
-    profiles.set(key, {
-      ...current,
-      merchant: current.merchant || merchant,
-      count: current.count + 1,
-      latestDate: isNewer ? transaction.date : current.latestDate,
-      paymentMethod: isNewer ? transaction.paymentMethod || "" : current.paymentMethod,
-      cardId: isNewer ? transaction.cardId || "" : current.cardId,
-      transactionType: isNewer ? transaction.transactionType || "expense" : current.transactionType,
-      categoryId: isNewer ? transaction.categoryId || UNCATEGORIZED_ID : current.categoryId,
-      notes: isNewer ? transaction.notes || "" : current.notes,
-    });
-  });
-
-  return Array.from(profiles.values())
-    .sort((a, b) => b.count - a.count || b.latestDate.localeCompare(a.latestDate) || a.merchant.localeCompare(b.merchant))
-    .slice(0, 50);
-}
-
-function getVisibleMerchantProfiles(merchantProfiles, merchantValue) {
-  const searchTerm = merchantValue.trim().toLowerCase();
-  if (!searchTerm) return merchantProfiles.slice(0, 8);
-  return merchantProfiles
-    .filter((profile) => profile.merchant.toLowerCase().includes(searchTerm))
-    .slice(0, 8);
-}
-
-function getCategoryLabel(categoryId, categories) {
-  return categories.find((category) => category.id === categoryId)?.name ?? "Uncategorized";
-}
-
-function getCardLabel(cardId, cards) {
-  return cards.find((card) => card.id === cardId)?.name ?? "No card";
-}
-
 export default function TransactionForm({
   monthKey,
   cards,
   categories,
-  transactions = [],
   editingTransaction,
   onCancel,
   onSaved,
@@ -100,15 +44,9 @@ export default function TransactionForm({
 }) {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
-  const [isMerchantFocused, setIsMerchantFocused] = useState(false);
   const categoryOptions = useMemo(
     () => [{ id: UNCATEGORIZED_ID, name: "Uncategorized" }, ...categories],
     [categories],
-  );
-  const merchantProfiles = useMemo(() => buildMerchantProfiles(transactions), [transactions]);
-  const visibleMerchantProfiles = useMemo(
-    () => getVisibleMerchantProfiles(merchantProfiles, form.merchant),
-    [form.merchant, merchantProfiles],
   );
   const showCardOwner = useMemo(
     () => new Set(cards.map((card) => card.owner).filter(Boolean)).size >= 2,
@@ -117,7 +55,6 @@ export default function TransactionForm({
 
   useEffect(() => {
     setError("");
-    setIsMerchantFocused(false);
     setForm(
       editingTransaction
         ? {
@@ -151,27 +88,6 @@ export default function TransactionForm({
       [field]: value,
       ...(field === "paymentMethod" && value !== "Credit Card" ? { cardId: "" } : {}),
     }));
-  }
-
-  function applyMerchantProfile(profile) {
-    if (!profile || editingTransaction) return;
-
-    setForm((current) => ({
-      ...current,
-      merchant: profile.merchant,
-      paymentMethod: profile.paymentMethod || current.paymentMethod,
-      cardId: profile.paymentMethod === "Credit Card" ? profile.cardId || current.cardId : "",
-      transactionType: profile.transactionType || current.transactionType,
-      categoryId: profile.categoryId || current.categoryId,
-    }));
-    setIsMerchantFocused(false);
-  }
-
-  function applyMerchantSuggestion(value) {
-    const profile = merchantProfiles.find(
-      (item) => item.merchant.toLowerCase() === value.trim().toLowerCase(),
-    );
-    applyMerchantProfile(profile);
   }
 
   function updateSplit(splitId, field, value) {
@@ -265,54 +181,12 @@ export default function TransactionForm({
           onChange={(event) => updateField("date", event.target.value)}
           required
         />
-        <div className="relative min-w-0">
-          <Input
-            label="Store or merchant"
-            value={form.merchant}
-            onChange={(event) => {
-              setIsMerchantFocused(true);
-              updateField("merchant", event.target.value);
-            }}
-            onFocus={() => setIsMerchantFocused(true)}
-            onBlur={(event) => {
-              window.setTimeout(() => setIsMerchantFocused(false), 150);
-              applyMerchantSuggestion(event.target.value);
-            }}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") applyMerchantSuggestion(event.currentTarget.value);
-            }}
-            placeholder="Start typing to reuse a previous merchant"
-            required
-          />
-          {!editingTransaction && isMerchantFocused && visibleMerchantProfiles.length > 0 ? (
-            <div className="absolute z-30 mt-1 max-h-72 w-full overflow-y-auto rounded-xl border border-app-border bg-app-surface p-1 shadow-lg">
-              {visibleMerchantProfiles.map((profile) => (
-                <button
-                  key={profile.merchant}
-                  type="button"
-                  className="grid w-full gap-1 rounded-lg px-3 py-2 text-left text-sm transition hover:bg-app-background"
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => applyMerchantProfile(profile)}
-                >
-                  <span className="font-semibold text-text-main">{profile.merchant}</span>
-                  <span className="text-xs text-text-muted">
-                    {profile.paymentMethod || "No method"}
-                    {profile.paymentMethod === "Credit Card" && profile.cardId
-                      ? ` · ${getCardLabel(profile.cardId, cards)}`
-                      : ""}
-                    {` · ${getCategoryLabel(profile.categoryId, categoryOptions)}`}
-                    {profile.count > 1 ? ` · used ${profile.count} times` : ""}
-                  </span>
-                </button>
-              ))}
-            </div>
-          ) : null}
-        </div>
-        {!editingTransaction && merchantProfiles.length > 0 ? (
-          <p className="-mt-2 text-xs text-text-muted">
-            Choosing a previous merchant can autofill payment method, card, type, and category.
-          </p>
-        ) : null}
+        <Input
+          label="Store or merchant"
+          value={form.merchant}
+          onChange={(event) => updateField("merchant", event.target.value)}
+          required
+        />
         <Select
           label="Transaction type"
           value={form.transactionType}
