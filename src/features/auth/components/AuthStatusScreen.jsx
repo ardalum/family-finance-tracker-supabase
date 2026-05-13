@@ -1,6 +1,6 @@
 import { CheckCircle2, MailCheck, ShieldAlert, UserCircle } from "lucide-react";
 import Card from "../../../components/ui/Card.jsx";
-import { formatAuthEventLabel } from "../accountDisplayUtils.js";
+import { formatAuthEventLabel } from "../authAccountDisplayUtils.js";
 import { useAuth } from "../AuthProvider.jsx";
 import { AUTH_STATUS_TYPES } from "../authViewTargets.js";
 
