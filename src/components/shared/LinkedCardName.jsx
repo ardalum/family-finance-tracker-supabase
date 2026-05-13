@@ -1,13 +1,8 @@
 export default function LinkedCardName({ card, className = "" }) {
-  const faviconUrl = getFaviconUrl(card.url);
-
-  return (
-    <a
-      className={`inline-flex min-w-0 items-center gap-2 font-semibold text-gray-950 underline decoration-gray-300 underline-offset-4 hover:decoration-gray-950 ${className}`}
-      href={card.url}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
+  const safeUrl = getSafeExternalUrl(card.url);
+  const faviconUrl = getFaviconUrl(safeUrl);
+  const content = (
+    <>
       {faviconUrl ? (
         <img
           className="h-4 w-4 shrink-0 rounded-sm"
@@ -21,8 +16,37 @@ export default function LinkedCardName({ card, className = "" }) {
         />
       ) : null}
       <span className="min-w-0 truncate">{card.name}</span>
+    </>
+  );
+
+  if (!safeUrl) {
+    return (
+      <span className={`inline-flex min-w-0 items-center gap-2 font-semibold text-gray-950 ${className}`}>
+        {content}
+      </span>
+    );
+  }
+
+  return (
+    <a
+      className={`inline-flex min-w-0 items-center gap-2 font-semibold text-gray-950 underline decoration-gray-300 underline-offset-4 hover:decoration-gray-950 ${className}`}
+      href={safeUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {content}
     </a>
   );
+}
+
+function getSafeExternalUrl(url) {
+  try {
+    const parsedUrl = new URL(url);
+    if (!["https:", "http:"].includes(parsedUrl.protocol)) return "";
+    return parsedUrl.toString();
+  } catch {
+    return "";
+  }
 }
 
 function getFaviconUrl(url) {

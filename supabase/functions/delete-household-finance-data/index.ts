@@ -6,7 +6,18 @@ const defaultAllowedOrigins = [
   "https://ardalum.github.io",
 ];
 
-type DeleteAccountBody = {
+const deleteOrder = [
+  "recurring_payment_instances",
+  "transaction_splits",
+  "transactions",
+  "monthly_card_balances",
+  "recurring_payments",
+  "credit_cards",
+  "budget_categories",
+  "household_profiles",
+];
+
+type DeleteHouseholdFinanceDataBody = {
   householdId?: string;
   confirmation?: string;
 };
@@ -30,9 +41,9 @@ Deno.serve(async (request) => {
       return jsonResponse(request, { error: "Missing Authorization header." }, 401);
     }
 
-    const body = (await request.json()) as DeleteAccountBody;
-    if (body.confirmation !== "DELETE") {
-      return jsonResponse(request, { error: "Confirmation phrase is required." }, 400);
+    const body = (await request.json()) as DeleteHouseholdFinanceDataBody;
+    if (body.confirmation !== "DELETE FINANCE DATA") {
+      return jsonResponse(request, { error: "Type DELETE FINANCE DATA to confirm." }, 400);
     }
 
     if (!body.householdId) {
@@ -58,7 +69,7 @@ Deno.serve(async (request) => {
       },
     });
 
-    const { data: activeMembership, error: membershipError } = await adminClient
+    const { data: membership, error: membershipError } = await adminClient
       .from("household_members")
       .select("role,status")
       .eq("household_id", body.householdId)
@@ -67,75 +78,28 @@ Deno.serve(async (request) => {
 
     if (membershipError) throw membershipError;
 
-    if (
-      !activeMembership ||
-      activeMembership.status !== "active" ||
-      activeMembership.role !== "owner"
-    ) {
+    if (!membership || membership.status !== "active" || membership.role !== "owner") {
       return jsonResponse(
         request,
-        { error: "Only an active household owner can delete this account." },
+        { error: "Only an active household owner can delete household finance data." },
         403,
       );
     }
 
-    const { data: activeHousehold, error: activeHouseholdError } = await adminClient
-      .from("households")
-      .select("id,created_by")
-      .eq("id", body.householdId)
-      .maybeSingle();
-
-    if (activeHouseholdError) throw activeHouseholdError;
-
-    if (!activeHousehold || activeHousehold.created_by !== user.id) {
-      return jsonResponse(
-        request,
-        { error: "Account deletion can only delete a household created by the signed-in owner." },
-        403,
-      );
+    for (const table of deleteOrder) {
+      const { error } = await adminClient.from(table).delete().eq("household_id", body.householdId);
+      if (error) throw error;
     }
 
-    const { count: activeMemberCount, error: activeMemberCountError } = await adminClient
-      .from("household_members")
-      .select("id", { count: "exact", head: true })
-      .eq("household_id", body.householdId)
-      .eq("status", "active");
-
-    if (activeMemberCountError) throw activeMemberCountError;
-
-    if (activeMemberCount !== 1) {
-      return jsonResponse(
-        request,
-        { error: "Account deletion is blocked because the active household has other active members." },
-        409,
-      );
-    }
-
-    const { data: ownedHouseholds, error: ownedHouseholdsError } = await adminClient
+    const { error: householdError } = await adminClient
       .from("households")
-      .select("id")
-      .eq("created_by", user.id)
-      .neq("id", body.householdId);
-
-    if (ownedHouseholdsError) throw ownedHouseholdsError;
-
-    if ((ownedHouseholds ?? []).length > 0) {
-      return jsonResponse(
-        request,
-        { error: "Account deletion is blocked because this user created other households." },
-        409,
-      );
-    }
-
-    const { error: deleteHouseholdError } = await adminClient
-      .from("households")
-      .delete()
+      .update({
+        setup_complete: false,
+        setup_completed_at: null,
+      })
       .eq("id", body.householdId);
 
-    if (deleteHouseholdError) throw deleteHouseholdError;
-
-    const { error: deleteUserError } = await adminClient.auth.admin.deleteUser(user.id);
-    if (deleteUserError) throw deleteUserError;
+    if (householdError) throw householdError;
 
     return jsonResponse(request, {
       ok: true,
@@ -149,7 +113,7 @@ Deno.serve(async (request) => {
         error:
           error instanceof Error
             ? error.message
-            : "Could not delete account.",
+            : "Could not delete household finance data.",
       },
       500,
     );
