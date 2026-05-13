@@ -7,6 +7,7 @@ import CreditLimitSummary from "./CreditLimitSummary.jsx";
 import MonthlyBalanceGraph from "./MonthlyBalanceGraph.jsx";
 import MonthlyBalanceTable from "./MonthlyBalanceTable.jsx";
 import StatementCycleSummary from "./StatementCycleSummary.jsx";
+import StatementDetailsEditor from "./StatementDetailsEditor.jsx";
 
 export default function CreditCardTracker({
   creditCards,
@@ -99,6 +100,13 @@ export default function CreditCardTracker({
           cards={activeCards}
           monthlyBalances={monthlyBalances}
           selectedMonth={selectedBalanceMonth}
+        />
+        <StatementDetailsEditor
+          cards={activeCards}
+          monthlyBalances={monthlyBalances}
+          selectedMonth={selectedBalanceMonth}
+          onStatementChange={onMonthlyBalanceChange}
+          saving={monthlyBalancesSaving}
         />
         <MonthlyBalanceGraph monthlyBalances={monthlyBalances} />
         <CreditCardList
