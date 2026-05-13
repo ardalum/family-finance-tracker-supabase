@@ -153,6 +153,7 @@ export default function SpendingTracker({
         monthKey={selectedMonth}
         cards={activeCards}
         categories={categories}
+        transactions={transactions}
         editingTransaction={editingTransaction}
         onClose={closeTransactionModal}
         onSaved={handleSave}
