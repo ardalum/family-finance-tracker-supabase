@@ -6,7 +6,9 @@ import {
   ReceiptText,
   WalletCards,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+const NAVIGATE_EVENT = "walletflow:navigate";
 
 const navItems = [
   {
@@ -43,6 +45,17 @@ const navItems = [
 
 export default function Navigation({ activeView, onChange }) {
   const [hoveredId, setHoveredId] = useState("");
+
+  useEffect(() => {
+    function handleNavigate(event) {
+      const view = event.detail?.view;
+      if (!navItems.some((item) => item.id === view)) return;
+      onChange(view);
+    }
+
+    window.addEventListener(NAVIGATE_EVENT, handleNavigate);
+    return () => window.removeEventListener(NAVIGATE_EVENT, handleNavigate);
+  }, [onChange]);
 
   return (
     <nav className="flex flex-wrap gap-2" aria-label="Primary navigation">
