@@ -3,8 +3,8 @@ import { supabase } from "../../lib/supabase/client.js";
 
 const BACKUP_APP_NAME = "Credit Card Tracker";
 const SUPPORTED_SCHEMA_VERSION = 1;
-const SUPABASE_BACKUP_VERSION = 2;
-const SUPPORTED_SUPABASE_BACKUP_VERSIONS = [1, 2];
+const SUPABASE_BACKUP_VERSION = 3;
+const SUPPORTED_SUPABASE_BACKUP_VERSIONS = [1, 2, 3];
 const EXPECTED_SUPABASE_SECTIONS = [
   "household",
   "householdProfiles",
@@ -40,6 +40,7 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
       householdProfilesResult,
       creditCardsResult,
       monthlyBalancesResult,
+      cardStatementsResult,
       budgetCategoriesResult,
       transactionsResult,
       transactionSplitsResult,
@@ -59,6 +60,11 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
       client.from("credit_cards").select("*").eq("household_id", householdId).order("created_at", { ascending: true }),
       client
         .from("monthly_card_balances")
+        .select("*")
+        .eq("household_id", householdId)
+        .order("month_key", { ascending: true }),
+      client
+        .from("card_statements")
         .select("*")
         .eq("household_id", householdId)
         .order("month_key", { ascending: true }),
@@ -96,6 +102,7 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
       householdProfilesResult,
       creditCardsResult,
       monthlyBalancesResult,
+      cardStatementsResult,
       budgetCategoriesResult,
       transactionsResult,
       transactionSplitsResult,
@@ -113,6 +120,7 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
       householdProfiles: householdProfilesResult.data ?? [],
       creditCards: creditCardsResult.data ?? [],
       monthlyCardBalances: monthlyBalancesResult.data ?? [],
+      cardStatements: cardStatementsResult.data ?? [],
       budgetCategories: budgetCategoriesResult.data ?? [],
       transactions: transactionsResult.data ?? [],
       transactionSplits: transactionSplitsResult.data ?? [],
@@ -201,6 +209,27 @@ export async function exportSupabaseExcel(householdId, activeHousehold) {
         Paid: balance.paid ? "Yes" : "No",
         "Updated At": formatDateTime(balance.updated_at),
         ID: balance.id,
+      })),
+    );
+
+    appendSheet(
+      workbook,
+      "Card Statements",
+      data.cardStatements.map((statement) => ({
+        Month: statement.month_key,
+        Card: statement.credit_cards?.name ?? statement.credit_card_id,
+        "Statement Close Date": statement.statement_close_date ?? "",
+        "Payment Due Date": statement.payment_due_date ?? "",
+        "Statement Balance": Number(statement.statement_balance || 0),
+        "Minimum Payment": Number(statement.minimum_payment || 0),
+        "Paid Amount": Number(statement.paid_amount || 0),
+        "Paid Date": statement.paid_date ?? "",
+        "Autopay Enabled": statement.autopay_enabled ? "Yes" : "No",
+        "Autopay Date": statement.autopay_date ?? "",
+        "Confirmation Number": statement.confirmation_number ?? "",
+        Status: statement.status ?? "",
+        "Updated At": formatDateTime(statement.updated_at),
+        ID: statement.id,
       })),
     );
 
@@ -395,6 +424,7 @@ async function loadHouseholdExportData(householdId, activeHousehold) {
     householdProfilesResult,
     creditCardsResult,
     monthlyBalancesResult,
+    cardStatementsResult,
     budgetCategoriesResult,
     transactionsResult,
     transactionSplitsResult,
@@ -418,6 +448,11 @@ async function loadHouseholdExportData(householdId, activeHousehold) {
       .order("created_at", { ascending: true }),
     client
       .from("monthly_card_balances")
+      .select("*, credit_cards (name)")
+      .eq("household_id", householdId)
+      .order("month_key", { ascending: true }),
+    client
+      .from("card_statements")
       .select("*, credit_cards (name)")
       .eq("household_id", householdId)
       .order("month_key", { ascending: true }),
@@ -455,6 +490,7 @@ async function loadHouseholdExportData(householdId, activeHousehold) {
     householdProfilesResult,
     creditCardsResult,
     monthlyBalancesResult,
+    cardStatementsResult,
     budgetCategoriesResult,
     transactionsResult,
     transactionSplitsResult,
@@ -469,6 +505,7 @@ async function loadHouseholdExportData(householdId, activeHousehold) {
     householdProfiles: householdProfilesResult.data ?? [],
     creditCards: creditCardsResult.data ?? [],
     monthlyCardBalances: monthlyBalancesResult.data ?? [],
+    cardStatements: cardStatementsResult.data ?? [],
     budgetCategories: budgetCategoriesResult.data ?? [],
     transactions: transactionsResult.data ?? [],
     transactionSplits: transactionSplitsResult.data ?? [],
@@ -775,6 +812,48 @@ export async function importSupabaseBackupMerge(householdId, backup) {
       counts.monthlyCardBalances.imported += 1;
     }
 
+    const statementRows = [...context.cardStatements];
+    for (const statement of normalizedBackup.cardStatements) {
+      const mappedCardId = getMappedId(maps.creditCards, statement.credit_card_id);
+      if (!mappedCardId) {
+        counts.cardStatements.skipped += 1;
+        continue;
+      }
+
+      const existing = statementRows.find(
+        (row) => row.credit_card_id === mappedCardId && row.month_key === statement.month_key,
+      );
+      if (existing) {
+        counts.cardStatements.skipped += 1;
+        continue;
+      }
+
+      const { data, error } = await client
+        .from("card_statements")
+        .insert({
+          household_id: householdId,
+          credit_card_id: mappedCardId,
+          month_key: statement.month_key,
+          statement_close_date: statement.statement_close_date,
+          payment_due_date: statement.payment_due_date,
+          statement_balance: Number(statement.statement_balance || 0),
+          minimum_payment: Number(statement.minimum_payment || 0),
+          paid_amount: Number(statement.paid_amount || 0),
+          paid_date: statement.paid_date ?? null,
+          autopay_enabled: Boolean(statement.autopay_enabled),
+          autopay_date: statement.autopay_date ?? null,
+          confirmation_number: statement.confirmation_number ?? "",
+          status: statement.status ?? "unpaid",
+          imported_local_id: statement.imported_local_id ?? statement.id,
+        })
+        .select("*")
+        .single();
+
+      if (error) throw error;
+      statementRows.push(data);
+      counts.cardStatements.imported += 1;
+    }
+
     const splitRows = [...context.transactionSplits];
     for (const split of normalizedBackup.transactionSplits) {
       const mappedTransactionId = getMappedId(maps.transactions, split.transaction_id);
@@ -935,6 +1014,7 @@ function validateSupabaseBackup(backup) {
   const normalizedBackup = {
     ...backup,
     householdProfiles: Array.isArray(backup.householdProfiles) ? backup.householdProfiles : [],
+    cardStatements: Array.isArray(backup.cardStatements) ? backup.cardStatements : [],
   };
 
   const missingSection = EXPECTED_SUPABASE_SECTIONS.find((section) => !(section in normalizedBackup));
@@ -1094,6 +1174,7 @@ async function loadSupabaseImportContext(householdId) {
     householdProfiles: householdProfilesResult.data ?? [],
     creditCards: creditCardsResult.data ?? [],
     monthlyCardBalances: monthlyBalancesResult.data ?? [],
+    cardStatements: cardStatementsResult?.data ?? [],
     budgetCategories: budgetCategoriesResult.data ?? [],
     transactions: transactionsResult.data ?? [],
     transactionSplits: transactionSplitsResult.data ?? [],
@@ -1253,6 +1334,7 @@ function createImportCounts() {
     householdProfiles: { imported: 0, skipped: 0 },
     creditCards: { imported: 0, skipped: 0 },
     monthlyCardBalances: { imported: 0, skipped: 0 },
+    cardStatements: { imported: 0, skipped: 0 },
     budgetCategories: { imported: 0, skipped: 0 },
     transactions: { imported: 0, skipped: 0 },
     transactionSplits: { imported: 0, skipped: 0 },
