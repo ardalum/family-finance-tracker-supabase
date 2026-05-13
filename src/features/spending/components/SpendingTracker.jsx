@@ -10,7 +10,14 @@ import SpendingSummary from "./SpendingSummary.jsx";
 import TransactionModal from "./TransactionModal.jsx";
 import TransactionTable from "./TransactionTable.jsx";
 
-const emptyFilters = { cardId: "", categoryId: "", transactionType: "", store: "" };
+const emptyFilters = {
+  search: "",
+  cardId: "",
+  categoryId: "",
+  transactionType: "",
+  paymentMethod: "",
+  source: "",
+};
 
 export default function SpendingTracker({
   creditCards,
@@ -95,7 +102,7 @@ export default function SpendingTracker({
               {formatMonthLabel(selectedMonth)}
             </h2>
             <p className="mt-1 text-sm text-[#6B7280]">
-              Track transactions separately from cards and budgets.
+              Search, filter, and manage card spending, refunds, payments, transfers, and recurring-linked transactions.
             </p>
             {loading ? <p className="mt-2 text-sm text-[#6B7280]">Loading transactions...</p> : null}
             {categoriesLoading ? <p className="mt-2 text-sm text-[#6B7280]">Loading categories...</p> : null}
