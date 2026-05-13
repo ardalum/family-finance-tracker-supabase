@@ -18,16 +18,16 @@ export default function CreditCardPaymentOverview({
       </div>
       {rows.length === 0 ? <Empty message={emptyMessage} /> : (
         <div className="overflow-x-auto">
-          <table className="min-w-full text-left text-sm">
+          <table className="min-w-full table-fixed text-left text-sm">
             <thead className="bg-app-background text-xs uppercase text-text-muted">
               <tr>
-                <th className="px-5 py-3">Card name</th>
-                <th className="px-5 py-3">Owner</th>
-                <th className="px-5 py-3">Bank</th>
-                <th className="px-5 py-3">Due day</th>
-                <th className="px-5 py-3">Statement balance</th>
-                <th className="px-5 py-3">Paid status</th>
-                <th className="px-5 py-3">Days until due</th>
+                <th className="w-1/6 px-5 py-3">Card name</th>
+                <th className="w-1/6 px-5 py-3">Owner</th>
+                <th className="w-1/6 px-5 py-3">Bank</th>
+                <th className="w-1/6 px-5 py-3">Due day</th>
+                <th className="w-1/6 px-5 py-3">Statement balance</th>
+                <th className="w-1/6 px-5 py-3">Paid status</th>
+                <th className="w-1/6 px-5 py-3">Days until due</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-app-border">
@@ -37,8 +37,8 @@ export default function CreditCardPaymentOverview({
                 return (
                   <tr key={row.card.id} className="bg-app-surface">
                     <td className="px-5 py-4"><LinkedCardName card={row.card} /></td>
-                    <td className="px-5 py-4">{row.card.owner}</td>
-                    <td className="px-5 py-4">{row.card.bank ?? "N/A"}</td>
+                    <td className="px-5 py-4 min-w-0"><span className="truncate block">{row.card.owner}</span></td>
+                    <td className="px-5 py-4 min-w-0"><span className="truncate block">{row.card.bank ?? "N/A"}</span></td>
                     <td className="px-5 py-4">Day {row.card.dueDay}</td>
                     <td className="px-5 py-4 font-semibold">
                       {formatCurrency(row.balance, { cents: true })}

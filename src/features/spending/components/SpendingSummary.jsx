@@ -14,7 +14,7 @@ export default function SpendingSummary({ transactions, cards, categories }) {
     <section className="grid gap-4 lg:grid-cols-4">
       <Card className="p-5">
         <p className="text-sm font-medium text-gray-500">Total spending</p>
-        <p className="mt-2 text-3xl font-semibold tracking-normal text-gray-950">
+        <p className="mt-2 text-2xl font-semibold tracking-normal break-words text-gray-950 sm:text-3xl">
           {formatCurrency(total)}
         </p>
       </Card>
@@ -34,9 +34,9 @@ function SummaryList({ title, items }) {
       ) : (
         <div className="mt-3 grid gap-2">
           {items.slice(0, 5).map((item) => (
-            <div key={item.name} className="flex items-center justify-between gap-3 text-sm">
+            <div key={item.name} className="grid grid-cols-[1fr_auto] gap-3 text-sm">
               <span className="min-w-0 truncate text-gray-600">{item.name}</span>
-              <span className="shrink-0 font-semibold text-gray-950">
+              <span className="text-right font-semibold text-gray-950" style={{ fontVariantNumeric: 'tabular-nums' }}>
                 {formatCurrency(item.amount)}
               </span>
             </div>

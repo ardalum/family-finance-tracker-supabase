@@ -11,14 +11,14 @@ export default function BudgetVsSpendingTable({
       <SectionHeader title={title} />
       {rows.length === 0 ? <Empty message={emptyMessage} /> : (
         <div className="overflow-x-auto">
-          <table className="min-w-full text-left text-sm">
+          <table className="min-w-full table-fixed text-left text-sm">
             <thead className="bg-app-background text-xs uppercase text-text-muted">
               <tr>
-                <th className="px-5 py-3">Category</th>
-                <th className="px-5 py-3">Budget</th>
-                <th className="px-5 py-3">Spent</th>
-                <th className="px-5 py-3">Remaining</th>
-                <th className="px-5 py-3">Percent Used</th>
+                <th className="w-1/3 px-5 py-3">Category</th>
+                <th className="w-1/6 px-5 py-3">Budget</th>
+                <th className="w-1/6 px-5 py-3">Spent</th>
+                <th className="w-1/6 px-5 py-3">Remaining</th>
+                <th className="w-1/6 px-5 py-3">Percent Used</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-app-border">
@@ -27,7 +27,9 @@ export default function BudgetVsSpendingTable({
                 const near = row.percentUsed >= 90;
                 return (
                   <tr key={row.category} className="bg-app-surface">
-                    <td className="px-5 py-4 font-semibold text-text-main">{row.category}</td>
+                    <td className="px-5 py-4 font-semibold text-text-main min-w-0">
+                      <span className="truncate block">{row.category}</span>
+                    </td>
                     <td className="px-5 py-4">{formatCurrency(row.budget)}</td>
                     <td className="px-5 py-4">{formatCurrency(row.spent)}</td>
                     <td className={`px-5 py-4 font-semibold ${over ? "text-status-danger" : "text-text-main"}`}>{formatCurrency(row.remaining)}</td>
