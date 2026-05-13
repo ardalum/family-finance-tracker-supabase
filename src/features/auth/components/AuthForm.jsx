@@ -1,4 +1,4 @@
-import { WalletCards } from "lucide-react";
+import { Eye, EyeOff, WalletCards } from "lucide-react";
 import { useState } from "react";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
@@ -11,6 +11,7 @@ export default function AuthForm() {
   const [mode, setMode] = useState("sign-in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -93,15 +94,26 @@ export default function AuthForm() {
               onChange={(event) => setEmail(event.target.value)}
               required
             />
-            <Input
-              label="Password"
-              type="password"
-              autoComplete={isSignUp ? "new-password" : "current-password"}
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              minLength={6}
-              required
-            />
+            <div className="grid gap-1.5">
+              <Input
+                label="Password"
+                type={showPassword ? "text" : "password"}
+                autoComplete={isSignUp ? "new-password" : "current-password"}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                minLength={6}
+                required
+              />
+              <button
+                type="button"
+                className="inline-flex w-fit items-center gap-1.5 rounded-lg px-1 text-xs font-semibold text-[#6B7280] transition hover:text-[#111827]"
+                onClick={() => setShowPassword((current) => !current)}
+                aria-pressed={showPassword}
+              >
+                {showPassword ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
+                {showPassword ? "Hide password" : "Show password"}
+              </button>
+            </div>
 
             <Button type="submit" disabled={isSubmitting || !isSupabaseConfigured}>
               {isSubmitting ? "Working..." : isSignUp ? "Create account" : "Sign in"}
