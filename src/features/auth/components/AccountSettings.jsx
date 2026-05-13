@@ -1,13 +1,10 @@
 import { UserCircle } from "lucide-react";
 import Card from "../../../components/ui/Card.jsx";
 import { useHouseholds } from "../../households/HouseholdProvider.jsx";
-import {
-  formatAuthEventLabel,
-  getAccountIdentity,
-  getSessionSummary,
-} from "../accountDisplayUtils.js";
+import { formatAuthEventLabel, getAccountIdentity } from "../accountDisplayUtils.js";
 import { ACCOUNT_SECURITY_ACTIONS } from "../accountSecurityActions.js";
 import { useAuth } from "../AuthProvider.jsx";
+import { getSessionSummary } from "../authSessionUtils.js";
 
 export default function AccountSettings() {
   const { session, user, authEvent } = useAuth();
