@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { AlertTriangle, BarChart3, CheckCircle2, Clock3, ReceiptText } from "lucide-react";
+import { AlertTriangle, BarChart3, CheckCircle2, Clock3, CreditCard, ListChecks, ReceiptText, Repeat, WalletCards } from "lucide-react";
 import Card from "../../../components/ui/Card.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { buildMonthOptions, getCurrentMonthKey } from "../../../lib/dates.js";
@@ -10,6 +10,8 @@ import DashboardActionCards from "./DashboardActionCards.jsx";
 import RecentTransactionsTable from "./RecentTransactionsTable.jsx";
 import RecurringOverview from "./RecurringOverview.jsx";
 import { getAlerts, getDashboardData } from "../dashboardUtils.js";
+
+const ACTIVE_VIEW_KEY = "personalFinanceApp:activeView:v1";
 
 const dashboardSections = [
   {
@@ -29,6 +31,33 @@ const dashboardSections = [
     label: "All Sections",
     description: "Show attention items and recent activity together.",
     icon: BarChart3,
+  },
+];
+
+const quickActions = [
+  {
+    label: "Update card balances",
+    description: "Enter statement balances and mark cards paid.",
+    view: "credit-cards",
+    icon: CreditCard,
+  },
+  {
+    label: "Add transactions",
+    description: "Record spending, payments, refunds, or income.",
+    view: "spending",
+    icon: ReceiptText,
+  },
+  {
+    label: "Open recurring bills",
+    description: "Mark monthly bills paid, unpaid, or skipped.",
+    view: "recurring",
+    icon: Repeat,
+  },
+  {
+    label: "Review budget",
+    description: "Adjust categories and monthly budget amounts.",
+    view: "budgets",
+    icon: WalletCards,
   },
 ];
 
@@ -93,6 +122,8 @@ export default function Dashboard({
         recurringRows={data.recurringRows}
         budgetRows={data.budgetRows}
       />
+
+      <DashboardQuickActions />
 
       <DashboardPriorityPanel alerts={priorityAlerts} totalAlertCount={alerts.length} />
 
@@ -163,6 +194,38 @@ export default function Dashboard({
         </div>
       ) : null}
     </section>
+  );
+}
+
+function DashboardQuickActions() {
+  return (
+    <Card className="overflow-hidden">
+      <div className="border-b border-app-border p-5">
+        <h3 className="text-base font-semibold text-text-main">Quick actions</h3>
+        <p className="mt-1 text-sm text-text-muted">
+          Jump to the workspace where you can fix the numbers.
+        </p>
+      </div>
+      <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-4">
+        {quickActions.map((action) => {
+          const Icon = action.icon;
+          return (
+            <button
+              key={action.view}
+              type="button"
+              className="grid gap-2 rounded-2xl border border-app-border bg-app-surface p-4 text-left transition hover:border-brand-primary/40 hover:bg-app-background focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+              onClick={() => navigateToView(action.view)}
+            >
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-app-background text-text-main ring-1 ring-inset ring-app-border">
+                <Icon size={18} aria-hidden="true" />
+              </span>
+              <span className="text-sm font-semibold text-text-main">{action.label}</span>
+              <span className="text-xs text-text-muted">{action.description}</span>
+            </button>
+          );
+        })}
+      </div>
+    </Card>
   );
 }
 
@@ -250,4 +313,13 @@ function ActivityMetric({ label, value, isCount = false }) {
       </p>
     </div>
   );
+}
+
+function navigateToView(view) {
+  try {
+    window.localStorage.setItem(ACTIVE_VIEW_KEY, view);
+    window.location.reload();
+  } catch {
+    window.location.reload();
+  }
 }
