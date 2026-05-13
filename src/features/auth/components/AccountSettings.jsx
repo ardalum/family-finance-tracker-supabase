@@ -1,26 +1,9 @@
-import { KeyRound, Mail, ShieldCheck, UserCircle } from "lucide-react";
+import { UserCircle } from "lucide-react";
 import Card from "../../../components/ui/Card.jsx";
 import { useHouseholds } from "../../households/HouseholdProvider.jsx";
 import { getAccountIdentity, getSessionSummary } from "../accountDisplayUtils.js";
+import { ACCOUNT_SECURITY_ACTIONS } from "../accountSecurityActions.js";
 import { useAuth } from "../AuthProvider.jsx";
-
-const plannedSecurityActions = [
-  {
-    title: "Change email",
-    description: "Update the email address used to sign in. This will need email verification before it becomes active.",
-    icon: Mail,
-  },
-  {
-    title: "Change password",
-    description: "Create a new password for this account after confirming the current account session.",
-    icon: KeyRound,
-  },
-  {
-    title: "Password reset",
-    description: "Send a recovery link when the user cannot sign in. This belongs on the auth screen later.",
-    icon: ShieldCheck,
-  },
-];
 
 export default function AccountSettings() {
   const { session, user, authEvent } = useAuth();
@@ -69,15 +52,22 @@ export default function AccountSettings() {
             </p>
           </div>
           <div className="divide-y divide-app-border">
-            {plannedSecurityActions.map((action) => {
+            {ACCOUNT_SECURITY_ACTIONS.map((action) => {
               const Icon = action.icon;
               return (
-                <div key={action.title} className="flex items-start gap-3 p-5">
+                <div key={action.id} className="flex items-start gap-3 p-5">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-app-background text-text-muted">
                     <Icon size={18} aria-hidden="true" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-text-main">{action.title}</p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-sm font-semibold text-text-main">{action.title}</p>
+                      {action.status ? (
+                        <span className="rounded-full border border-app-border bg-app-background px-2 py-0.5 text-[0.68rem] font-semibold uppercase tracking-wide text-text-muted">
+                          {action.status}
+                        </span>
+                      ) : null}
+                    </div>
                     <p className="mt-1 text-sm text-text-muted">{action.description}</p>
                   </div>
                 </div>
