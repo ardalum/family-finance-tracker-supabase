@@ -20,12 +20,28 @@ const summaryLabels = {
   householdProfiles: "Household profiles",
   creditCards: "Credit cards",
   monthlyCardBalances: "Monthly balances",
+  cardStatements: "Card statements",
   budgetCategories: "Budget categories",
   transactions: "Transactions",
   transactionSplits: "Transaction splits",
   recurringPayments: "Recurring payments",
   recurringPaymentInstances: "Recurring instances",
 };
+
+function getCountTotals(counts) {
+  return Object.keys(summaryLabels).reduce(
+    (totals, key) => ({
+      imported: totals.imported + Number(counts?.[key]?.imported || 0),
+      skipped: totals.skipped + Number(counts?.[key]?.skipped || 0),
+    }),
+    { imported: 0, skipped: 0 },
+  );
+}
+
+function getImportResultMessage(counts) {
+  const totals = getCountTotals(counts);
+  return `Import completed. ${totals.imported} record${totals.imported === 1 ? "" : "s"} imported and ${totals.skipped} skipped.`;
+}
 
 export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) {
   const { activeHouseholdId, activeHousehold } = useHouseholds();
@@ -40,6 +56,7 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
   const [isDeletingData, setIsDeletingData] = useState(false);
   const [deletePhrase, setDeletePhrase] = useState("");
   const [cloudImport, setCloudImport] = useState(null);
+  const [importAcknowledged, setImportAcknowledged] = useState(false);
 
   function showMessage(result) {
     setMessage({
@@ -87,6 +104,7 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
     event.target.value = "";
 
     setCloudImport(null);
+    setImportAcknowledged(false);
     setMessage(null);
     setIsPreviewingCloudImport(true);
 
@@ -111,24 +129,32 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
   async function handleCloudImportConfirm() {
     if (!cloudImport?.backup) return;
 
-    const confirmed = window.confirm(
-      "Import this backup into the current household? Existing data will not be deleted. Obvious duplicates will be skipped.",
-    );
-    if (!confirmed) return;
+    if (!importAcknowledged) {
+      setMessage({
+        type: "error",
+        text: "Review the preview and confirm that you want to merge this backup before importing.",
+      });
+      return;
+    }
 
     setIsImportingCloud(true);
     setMessage(null);
 
     try {
       const result = await importSupabaseBackupMerge(activeHouseholdId, cloudImport.backup);
-      showMessage(result);
 
       if (result.ok) {
         setCloudImport({
           ...cloudImport,
           result: result.counts,
         });
+        setMessage({
+          type: "success",
+          text: getImportResultMessage(result.counts),
+        });
         await onSupabaseImportComplete?.();
+      } else {
+        showMessage(result);
       }
     } finally {
       setIsImportingCloud(false);
@@ -199,8 +225,8 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
             </h2>
             <p className="mt-1 max-w-3xl text-sm text-gray-600">
               Export the finance data for your active household from Supabase. This includes cards,
-              monthly balances, budgets, transactions, splits, recurring payments, and recurring
-              instances. Auth tokens, passwords, and secret keys are not included.
+              monthly balances, card statements, budgets, transactions, splits, recurring payments,
+              and recurring instances. Auth tokens, passwords, and secret keys are not included.
             </p>
           </div>
 
@@ -238,7 +264,7 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
                   Import Supabase Backup
                 </h3>
                 <p className="mt-1 max-w-2xl text-sm text-gray-500">
-                  Merge mode only. This will add missing records and avoid obvious duplicates.
+                  Merge mode adds missing records and skips records that are already present.
                   It will not delete existing data.
                 </p>
                 <p className="mt-2 text-xs text-amber-700">
@@ -269,34 +295,55 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
             </div>
 
             {cloudImport ? (
-              <div className="mt-4 grid gap-3">
+              <div className="mt-4 grid gap-4">
                 <div className="rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-600">
                   Preview for <span className="font-medium text-gray-900">{cloudImport.fileName}</span>
                 </div>
-                <ImportSummary counts={cloudImport.preview} />
+                <ImportSummary counts={cloudImport.preview} mode="preview" />
                 {cloudImport.result ? (
-                  <div className="grid gap-2">
-                    <p className="text-sm font-semibold text-gray-950">Import result</p>
-                    <ImportSummary counts={cloudImport.result} />
+                  <div className="grid gap-3 rounded-md border border-emerald-200 bg-emerald-50 p-3">
+                    <div>
+                      <p className="text-sm font-semibold text-emerald-900">Import completed</p>
+                      <p className="mt-1 text-sm text-emerald-700">
+                        Records shown as skipped were already present or safely matched during merge.
+                      </p>
+                    </div>
+                    <ImportSummary counts={cloudImport.result} mode="result" />
                   </div>
                 ) : (
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      type="button"
-                      onClick={handleCloudImportConfirm}
-                      disabled={isImportingCloud}
-                    >
-                      <Upload size={16} aria-hidden="true" />
-                      {isImportingCloud ? "Importing..." : "Import backup in merge mode"}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={() => setCloudImport(null)}
-                      disabled={isImportingCloud}
-                    >
-                      Cancel
-                    </Button>
+                  <div className="grid gap-3">
+                    <label className="flex gap-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                      <input
+                        className="mt-0.5 h-4 w-4 rounded border-amber-300 text-sky-700 focus:ring-sky-700"
+                        type="checkbox"
+                        checked={importAcknowledged}
+                        onChange={(event) => setImportAcknowledged(event.target.checked)}
+                      />
+                      <span>
+                        I reviewed the preview and understand this will merge the backup into the current household without deleting existing data.
+                      </span>
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        type="button"
+                        onClick={handleCloudImportConfirm}
+                        disabled={isImportingCloud || !importAcknowledged}
+                      >
+                        <Upload size={16} aria-hidden="true" />
+                        {isImportingCloud ? "Importing..." : "Merge backup"}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => {
+                          setCloudImport(null);
+                          setImportAcknowledged(false);
+                        }}
+                        disabled={isImportingCloud}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -448,13 +495,17 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
   );
 }
 
-function ImportSummary({ counts }) {
+function ImportSummary({ counts, mode = "preview" }) {
+  const totals = getCountTotals(counts);
+  const importedLabel = mode === "result" ? "Imported" : "To import";
+  const skippedLabel = mode === "result" ? "Skipped" : "Already present";
+
   return (
-    <div className="overflow-hidden rounded-md border border-gray-200">
+    <div className="overflow-hidden rounded-md border border-gray-200 bg-white">
       <div className="grid grid-cols-[1fr_auto_auto] bg-gray-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
         <span>Data type</span>
-        <span className="text-right">To import</span>
-        <span className="text-right">Skipped</span>
+        <span className="text-right">{importedLabel}</span>
+        <span className="text-right">{skippedLabel}</span>
       </div>
       {Object.entries(summaryLabels).map(([key, label]) => (
         <div
@@ -470,6 +521,11 @@ function ImportSummary({ counts }) {
           </span>
         </div>
       ))}
+      <div className="grid grid-cols-[1fr_auto_auto] gap-4 border-t border-gray-200 bg-gray-50 px-3 py-2 text-sm font-semibold">
+        <span className="text-gray-900">Total</span>
+        <span className="min-w-12 text-right text-gray-950">{totals.imported}</span>
+        <span className="min-w-12 text-right text-gray-600">{totals.skipped}</span>
+      </div>
     </div>
   );
 }
