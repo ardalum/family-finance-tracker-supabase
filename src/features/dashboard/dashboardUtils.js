@@ -75,35 +75,91 @@ export function getAlerts(data) {
 
   data.budgetRows.forEach((row) => {
     if (row.remaining < 0) {
-      alerts.push({ type: "danger", text: `${row.category} is over budget by ${Math.abs(row.remaining).toFixed(2)}.` });
+      alerts.push({
+        type: "danger",
+        category: "Budgets",
+        text: `${row.category} is over budget by ${Math.abs(row.remaining).toFixed(2)}.`,
+      });
     } else if (row.percentUsed >= 90) {
-      alerts.push({ type: "warning", text: `${row.category} has used ${row.percentUsed.toFixed(0)}% of its budget.` });
+      alerts.push({
+        type: "warning",
+        category: "Budgets",
+        text: `${row.category} has used ${row.percentUsed.toFixed(0)}% of its budget.`,
+      });
     }
   });
 
   data.cardRows.forEach((row) => {
-    if (!row.hasPaymentDue) return;
+    if (row.hasPaymentDue) {
+      if (row.daysUntilDue < 0) {
+        alerts.push({
+          type: "danger",
+          category: "Credit Card Statements",
+          text: `${row.card.name} is past due with an unpaid balance.`,
+        });
+      } else if (row.daysUntilDue <= 7) {
+        alerts.push({
+          type: "warning",
+          category: "Credit Card Statements",
+          text: `${row.card.name} is due within 7 days.`,
+        });
+      }
+    }
 
-    if (row.daysUntilDue < 0) {
-      alerts.push({ type: "danger", text: `${row.card.name} is past due with an unpaid balance.` });
-    } else if (row.daysUntilDue <= 7) {
-      alerts.push({ type: "warning", text: `${row.card.name} is due within 7 days.` });
+    if (row.balance > 0 && !row.paid && row.minimumPayment > 0 && row.paidAmount < row.minimumPayment) {
+      alerts.push({
+        type: row.daysUntilDue <= 7 ? "danger" : "warning",
+        category: "Credit Card Statements",
+        text: `${row.card.name} has not met the minimum payment of ${row.minimumPayment.toFixed(2)}.`,
+      });
+    }
+
+    if (row.balance > 0 && row.paidAmount > 0 && row.paidAmount < row.balance) {
+      alerts.push({
+        type: "warning",
+        category: "Credit Card Statements",
+        text: `${row.card.name} has a partial payment of ${row.paidAmount.toFixed(2)} on a ${row.balance.toFixed(2)} statement.`,
+      });
+    }
+
+    if (row.balance > 0 && row.paid && row.paidAmount < row.balance) {
+      alerts.push({
+        type: "warning",
+        category: "Credit Card Statements",
+        text: `${row.card.name} is marked paid, but paid amount is less than the statement balance.`,
+      });
+    }
+
+    if (row.autopayEnabled && !row.autopayDate) {
+      alerts.push({
+        type: "warning",
+        category: "Credit Card Statements",
+        text: `${row.card.name} has autopay enabled but no autopay date.`,
+      });
+    }
+
+    if (row.balance > 0 && row.paid && !row.confirmationNumber) {
+      alerts.push({
+        type: "info",
+        category: "Credit Card Statements",
+        text: `${row.card.name} is paid but has no confirmation number.`,
+      });
     }
   });
 
   data.recurringRows.forEach((row) => {
     if (row.displayStatus === "Past due") {
-      alerts.push({ type: "danger", text: `${row.template.name} is past due and unpaid.` });
+      alerts.push({ type: "danger", category: "Recurring Payments", text: `${row.template.name} is past due and unpaid.` });
     } else if (["Due now", "Due soon"].includes(row.displayStatus)) {
-      alerts.push({ type: "warning", text: `${row.template.name} is due within 7 days and unpaid.` });
+      alerts.push({ type: "warning", category: "Recurring Payments", text: `${row.template.name} is due within 7 days and unpaid.` });
     }
     if (row.template.billType === "variable" && row.displayStatus !== "Paid" && !row.instance?.actualAmount) {
-      alerts.push({ type: "warning", text: `${row.template.name} needs an actual variable amount.` });
+      alerts.push({ type: "warning", category: "Data Cleanup", text: `${row.template.name} needs an actual variable amount.` });
     }
   });
 
   if (data.summary.spendingTotal > data.summary.budgetTotal && data.summary.budgetTotal > 0) {
-    alerts.push({ type: "danger", text: "Total spending is higher than total budget." });
+    alerts.push({ type: "danger", category: "Budgets", text: "Total spending is higher than total budget." });
   }
 
   return alerts;
@@ -137,11 +193,20 @@ function getCardRows(cards, monthlyBalances, monthKey) {
       const dueDate = getDueDateForMonth(monthKey, card.dueDay);
       const entry = monthlyBalances[card.id] ?? { balance: 0, paid: false };
       const balance = Number(entry.balance || 0);
-      const paid = Boolean(entry.paid);
+      const paidAmount = Number(entry.paidAmount || 0);
+      const paid = Boolean(entry.paid) || (balance > 0 && paidAmount >= balance);
+      const minimumPayment = Number(entry.minimumPayment || 0);
       return {
         card,
         balance,
         paid,
+        minimumPayment,
+        paidAmount,
+        paidDate: entry.paidDate ?? null,
+        autopayEnabled: Boolean(entry.autopayEnabled),
+        autopayDate: entry.autopayDate ?? null,
+        confirmationNumber: entry.confirmationNumber ?? "",
+        statementStatus: entry.statementStatus ?? (paid ? "paid" : "unpaid"),
         hasPaymentDue: balance > 0 && !paid,
         daysUntilDue: daysBetween(new Date(), dueDate),
       };
