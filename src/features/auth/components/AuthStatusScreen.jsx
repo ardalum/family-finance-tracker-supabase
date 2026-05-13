@@ -1,5 +1,6 @@
 import { CheckCircle2, MailCheck, ShieldAlert, UserCircle } from "lucide-react";
 import Card from "../../../components/ui/Card.jsx";
+import { formatAuthEventLabel } from "../accountDisplayUtils.js";
 import { useAuth } from "../AuthProvider.jsx";
 import { AUTH_STATUS_TYPES } from "../authViewTargets.js";
 
@@ -34,6 +35,7 @@ export default function AuthStatusScreen({
 }) {
   const { authEvent } = useAuth();
   const config = statusConfig[status] ?? statusConfig[AUTH_STATUS_TYPES.problem];
+  const authEventLabel = formatAuthEventLabel(authEvent);
   const Icon = config.icon;
 
   return (
@@ -54,8 +56,8 @@ export default function AuthStatusScreen({
             {email}
           </p>
         ) : null}
-        {authEvent ? (
-          <p className="mt-3 text-xs text-text-muted">Latest auth event: {authEvent}</p>
+        {authEventLabel ? (
+          <p className="mt-3 text-xs text-text-muted">Latest auth event: {authEventLabel}</p>
         ) : null}
         {actionSlot ? <div className="mt-5">{actionSlot}</div> : null}
       </Card>
