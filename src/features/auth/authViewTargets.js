@@ -17,3 +17,7 @@ export function isAuthViewTarget(view) {
 export function isAuthStatusType(status) {
   return Object.values(AUTH_STATUS_TYPES).includes(status);
 }
+
+export function getAuthViewOrFallback(view, fallback = "") {
+  return isAuthViewTarget(view) ? view : fallback;
+}
