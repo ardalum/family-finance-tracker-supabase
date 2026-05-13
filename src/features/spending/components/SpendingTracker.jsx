@@ -1,10 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { buildMonthOptions, getCurrentMonthKey } from "../../../lib/dates.js";
 import { formatMonthLabel } from "../../../lib/formatters.js";
+import { consumeNavigationTarget } from "../../../lib/navigationTargets.js";
 import SpendingMigrationPanel from "./SpendingMigrationPanel.jsx";
 import SpendingSummary from "./SpendingSummary.jsx";
 import TransactionModal from "./TransactionModal.jsx";
@@ -41,6 +42,14 @@ export default function SpendingTracker({
   const [filters, setFilters] = useState(emptyFilters);
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const activeCards = creditCards.filter((card) => card.isActive);
+
+  useEffect(() => {
+    const target = consumeNavigationTarget("spending");
+    if (target === "add-transaction") {
+      setEditingTransaction(null);
+      setIsTransactionModalOpen(true);
+    }
+  }, []);
 
   async function handleSave(form, transaction) {
     if (transaction) {
