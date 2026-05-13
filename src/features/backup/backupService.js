@@ -224,6 +224,7 @@ export async function exportSupabaseExcel(householdId, activeHousehold) {
         Date: transaction.transaction_date,
         Merchant: transaction.merchant,
         "Payment Method": transaction.payment_method,
+        "Transaction Type": formatTransactionType(transaction.transaction_type),
         Card: transaction.credit_cards?.name ?? "",
         Category: transaction.budget_categories?.name ?? "",
         Amount: Number(transaction.amount || 0),
@@ -515,6 +516,26 @@ function formatDateTime(value) {
   return date.toISOString().replace("T", " ").slice(0, 19);
 }
 
+function normalizeTransactionType(value) {
+  const type = String(value ?? "expense").trim();
+  return ["expense", "refund", "income", "payment", "transfer", "adjustment"].includes(type)
+    ? type
+    : "expense";
+}
+
+function formatTransactionType(value) {
+  const labels = {
+    expense: "Expense",
+    refund: "Refund / Return",
+    income: "Income",
+    payment: "Card payment",
+    transfer: "Transfer",
+    adjustment: "Adjustment",
+  };
+
+  return labels[normalizeTransactionType(value)] ?? "Expense";
+}
+
 export async function previewSupabaseBackupImport(file, householdId) {
   if (!householdId) {
     return {
@@ -704,6 +725,7 @@ export async function importSupabaseBackupMerge(householdId, backup) {
           payment_method: transaction.payment_method ?? "Other",
           credit_card_id: mappedTransaction.credit_card_id,
           category_id: mappedTransaction.category_id,
+          transaction_type: normalizeTransactionType(transaction.transaction_type),
           amount: Number(transaction.amount || 0),
           notes: transaction.notes ?? "",
           source: transaction.source ?? "manual",
