@@ -108,7 +108,7 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
       transactionSplitsResult,
       recurringPaymentsResult,
       recurringInstancesResult,
-    ].find((result) => result.error)?.error;
+    ].find((result) => result?.error)?.error;
 
     if (error) throw error;
 
@@ -116,16 +116,16 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
       version: SUPABASE_BACKUP_VERSION,
       source: "supabase",
       exportedAt: new Date().toISOString(),
-      household: householdResult.data ?? activeHousehold,
-      householdProfiles: householdProfilesResult.data ?? [],
-      creditCards: creditCardsResult.data ?? [],
-      monthlyCardBalances: monthlyBalancesResult.data ?? [],
-      cardStatements: cardStatementsResult.data ?? [],
-      budgetCategories: budgetCategoriesResult.data ?? [],
-      transactions: transactionsResult.data ?? [],
-      transactionSplits: transactionSplitsResult.data ?? [],
-      recurringPayments: recurringPaymentsResult.data ?? [],
-      recurringPaymentInstances: recurringInstancesResult.data ?? [],
+      household: householdResult?.data ?? activeHousehold,
+      householdProfiles: householdProfilesResult?.data ?? [],
+      creditCards: creditCardsResult?.data ?? [],
+      monthlyCardBalances: monthlyBalancesResult?.data ?? [],
+      cardStatements: cardStatementsResult?.data ?? [],
+      budgetCategories: budgetCategoriesResult?.data ?? [],
+      transactions: transactionsResult?.data ?? [],
+      transactionSplits: transactionSplitsResult?.data ?? [],
+      recurringPayments: recurringPaymentsResult?.data ?? [],
+      recurringPaymentInstances: recurringInstancesResult?.data ?? [],
     };
 
     downloadJson(backup, `finance-tracker-supabase-backup-${getDateStamp()}.json`);
@@ -496,21 +496,21 @@ async function loadHouseholdExportData(householdId, activeHousehold) {
     transactionSplitsResult,
     recurringPaymentsResult,
     recurringInstancesResult,
-  ].find((result) => result.error)?.error;
+  ].find((result) => result?.error)?.error;
 
   if (error) throw error;
 
   return {
-    household: householdResult.data ?? activeHousehold,
-    householdProfiles: householdProfilesResult.data ?? [],
-    creditCards: creditCardsResult.data ?? [],
-    monthlyCardBalances: monthlyBalancesResult.data ?? [],
-    cardStatements: cardStatementsResult.data ?? [],
-    budgetCategories: budgetCategoriesResult.data ?? [],
-    transactions: transactionsResult.data ?? [],
-    transactionSplits: transactionSplitsResult.data ?? [],
-    recurringPayments: recurringPaymentsResult.data ?? [],
-    recurringPaymentInstances: recurringInstancesResult.data ?? [],
+    household: householdResult?.data ?? activeHousehold,
+    householdProfiles: householdProfilesResult?.data ?? [],
+    creditCards: creditCardsResult?.data ?? [],
+    monthlyCardBalances: monthlyBalancesResult?.data ?? [],
+    cardStatements: cardStatementsResult?.data ?? [],
+    budgetCategories: budgetCategoriesResult?.data ?? [],
+    transactions: transactionsResult?.data ?? [],
+    transactionSplits: transactionSplitsResult?.data ?? [],
+    recurringPayments: recurringPaymentsResult?.data ?? [],
+    recurringPaymentInstances: recurringInstancesResult?.data ?? [],
   };
 }
 
@@ -680,11 +680,47 @@ export async function importSupabaseBackupMerge(householdId, backup) {
       counts.creditCards.imported += 1;
     }
 
-    const categoryRows = [...context.budgetCategories];
-    for (const category of normalizedBackup.budgetCategories) {
+    const categoryRows = [...(context.budgetCategories ?? [])];
+    for (const category of normalizedBackup.budgetCategories ?? []) {
       const existing = findBudgetCategoryMatch(category, categoryRows);
       if (existing) {
         maps.budgetCategories.set(category.id, existing.id);
+        counts.budgetCategories.skipped += 1;
+        continue;
+      }
+
+      const importedLocalId = category.imported_local_id ?? category.id;
+
+      let existingCategory = null;
+
+      if (importedLocalId) {
+        const { data: importedMatch, error: importedMatchError } = await client
+          .from("budget_categories")
+          .select("*")
+          .eq("household_id", householdId)
+          .eq("imported_local_id", importedLocalId)
+          .maybeSingle();
+
+        if (importedMatchError) throw importedMatchError;
+        existingCategory = importedMatch;
+      }
+
+      if (!existingCategory) {
+        const { data: naturalMatch, error: naturalMatchError } = await client
+          .from("budget_categories")
+          .select("*")
+          .eq("household_id", householdId)
+          .eq("month_key", category.month_key)
+          .eq("name", category.name)
+          .maybeSingle();
+
+        if (naturalMatchError) throw naturalMatchError;
+        existingCategory = naturalMatch;
+      }
+
+      if (existingCategory) {
+        categoryRows.push(existingCategory);
+        maps.budgetCategories.set(category.id, existingCategory.id);
         counts.budgetCategories.skipped += 1;
         continue;
       }
@@ -697,7 +733,7 @@ export async function importSupabaseBackupMerge(householdId, backup) {
           name: category.name,
           monthly_amount: Number(category.monthly_amount || 0),
           notes: category.notes ?? "",
-          imported_local_id: category.imported_local_id ?? category.id,
+          imported_local_id: importedLocalId,
         })
         .select("*")
         .single();
@@ -708,11 +744,47 @@ export async function importSupabaseBackupMerge(householdId, backup) {
       counts.budgetCategories.imported += 1;
     }
 
-    const recurringRows = [...context.recurringPayments];
-    for (const recurringPayment of normalizedBackup.recurringPayments) {
+    const recurringRows = [...(context.recurringPayments ?? [])];
+    for (const recurringPayment of normalizedBackup.recurringPayments ?? []) {
       const existing = findRecurringPaymentMatch(recurringPayment, recurringRows);
       if (existing) {
         maps.recurringPayments.set(recurringPayment.id, existing.id);
+        counts.recurringPayments.skipped += 1;
+        continue;
+      }
+
+      const importedLocalId = recurringPayment.imported_local_id ?? recurringPayment.id;
+
+      let existingRecurringPayment = null;
+
+      if (importedLocalId) {
+        const { data: importedMatch, error: importedMatchError } = await client
+          .from("recurring_payments")
+          .select("*")
+          .eq("household_id", householdId)
+          .eq("imported_local_id", importedLocalId)
+          .maybeSingle();
+
+        if (importedMatchError) throw importedMatchError;
+        existingRecurringPayment = importedMatch;
+      }
+
+      if (!existingRecurringPayment) {
+        const { data: naturalMatch, error: naturalMatchError } = await client
+          .from("recurring_payments")
+          .select("*")
+          .eq("household_id", householdId)
+          .eq("name", recurringPayment.name)
+          .eq("start_month", recurringPayment.start_month)
+          .maybeSingle();
+
+        if (naturalMatchError) throw naturalMatchError;
+        existingRecurringPayment = naturalMatch;
+      }
+
+      if (existingRecurringPayment) {
+        recurringRows.push(existingRecurringPayment);
+        maps.recurringPayments.set(recurringPayment.id, existingRecurringPayment.id);
         counts.recurringPayments.skipped += 1;
         continue;
       }
@@ -732,7 +804,7 @@ export async function importSupabaseBackupMerge(householdId, backup) {
           end_month: recurringPayment.end_month || null,
           active: recurringPayment.active ?? true,
           notes: recurringPayment.notes ?? "",
-          imported_local_id: recurringPayment.imported_local_id ?? recurringPayment.id,
+          imported_local_id: importedLocalId,
         })
         .select("*")
         .single();
@@ -743,12 +815,49 @@ export async function importSupabaseBackupMerge(householdId, backup) {
       counts.recurringPayments.imported += 1;
     }
 
-    const transactionRows = [...context.transactions];
-    for (const transaction of normalizedBackup.transactions) {
+    const transactionRows = [...(context.transactions ?? [])];
+    for (const transaction of normalizedBackup.transactions ?? []) {
       const mappedTransaction = mapTransactionReferences(transaction, maps);
       const existing = findTransactionMatch(mappedTransaction, transactionRows);
       if (existing) {
         maps.transactions.set(transaction.id, existing.id);
+        counts.transactions.skipped += 1;
+        continue;
+      }
+
+      const importedLocalId = transaction.imported_local_id ?? transaction.id;
+
+      let existingTransaction = null;
+
+      if (importedLocalId) {
+        const { data: importedMatch, error: importedMatchError } = await client
+          .from("transactions")
+          .select("*")
+          .eq("household_id", householdId)
+          .eq("imported_local_id", importedLocalId)
+          .maybeSingle();
+
+        if (importedMatchError) throw importedMatchError;
+        existingTransaction = importedMatch;
+      }
+
+      if (!existingTransaction) {
+        const { data: naturalMatch, error: naturalMatchError } = await client
+          .from("transactions")
+          .select("*")
+          .eq("household_id", householdId)
+          .eq("transaction_date", transaction.transaction_date)
+          .eq("merchant", transaction.merchant)
+          .eq("amount", Number(transaction.amount || 0))
+          .maybeSingle();
+
+        if (naturalMatchError) throw naturalMatchError;
+        existingTransaction = naturalMatch;
+      }
+
+      if (existingTransaction) {
+        transactionRows.push(existingTransaction);
+        maps.transactions.set(transaction.id, existingTransaction.id);
         counts.transactions.skipped += 1;
         continue;
       }
@@ -768,7 +877,7 @@ export async function importSupabaseBackupMerge(householdId, backup) {
           source: transaction.source ?? "manual",
           recurring_payment_id: getMappedId(maps.recurringPayments, transaction.recurring_payment_id),
           recurring_month: transaction.recurring_month || null,
-          imported_local_id: transaction.imported_local_id ?? transaction.id,
+          imported_local_id: importedLocalId,
         })
         .select("*")
         .single();
@@ -812,8 +921,8 @@ export async function importSupabaseBackupMerge(householdId, backup) {
       counts.monthlyCardBalances.imported += 1;
     }
 
-    const statementRows = [...context.cardStatements];
-    for (const statement of normalizedBackup.cardStatements) {
+    const statementRows = [...(context.cardStatements ?? [])];
+    for (const statement of normalizedBackup.cardStatements ?? []) {
       const mappedCardId = getMappedId(maps.creditCards, statement.credit_card_id);
       if (!mappedCardId) {
         counts.cardStatements.skipped += 1;
@@ -824,6 +933,21 @@ export async function importSupabaseBackupMerge(householdId, backup) {
         (row) => row.credit_card_id === mappedCardId && row.month_key === statement.month_key,
       );
       if (existing) {
+        counts.cardStatements.skipped += 1;
+        continue;
+      }
+
+      const { data: existingStatement, error: existingStatementError } = await client
+        .from("card_statements")
+        .select("*")
+        .eq("credit_card_id", mappedCardId)
+        .eq("month_key", statement.month_key)
+        .maybeSingle();
+
+      if (existingStatementError) throw existingStatementError;
+
+      if (existingStatement) {
+        statementRows.push(existingStatement);
         counts.cardStatements.skipped += 1;
         continue;
       }
@@ -894,8 +1018,8 @@ export async function importSupabaseBackupMerge(householdId, backup) {
       counts.transactionSplits.imported += 1;
     }
 
-    const instanceRows = [...context.recurringPaymentInstances];
-    for (const instance of normalizedBackup.recurringPaymentInstances) {
+    const instanceRows = [...(context.recurringPaymentInstances ?? [])];
+    for (const instance of normalizedBackup.recurringPaymentInstances ?? []) {
       const mappedRecurringPaymentId = getMappedId(maps.recurringPayments, instance.recurring_payment_id);
       if (!mappedRecurringPaymentId) {
         counts.recurringPaymentInstances.skipped += 1;
@@ -908,6 +1032,21 @@ export async function importSupabaseBackupMerge(householdId, backup) {
           row.month_key === instance.month_key,
       );
       if (existing) {
+        counts.recurringPaymentInstances.skipped += 1;
+        continue;
+      }
+
+      const { data: existingInstance, error: existingInstanceError } = await client
+        .from("recurring_payment_instances")
+        .select("*")
+        .eq("recurring_payment_id", mappedRecurringPaymentId)
+        .eq("month_key", instance.month_key)
+        .maybeSingle();
+
+      if (existingInstanceError) throw existingInstanceError;
+
+      if (existingInstance) {
+        instanceRows.push(existingInstance);
         counts.recurringPaymentInstances.skipped += 1;
         continue;
       }
@@ -1141,6 +1280,7 @@ async function loadSupabaseImportContext(householdId) {
     householdProfilesResult,
     creditCardsResult,
     monthlyBalancesResult,
+    cardStatementsResult,
     budgetCategoriesResult,
     transactionsResult,
     transactionSplitsResult,
@@ -1161,25 +1301,26 @@ async function loadSupabaseImportContext(householdId) {
     householdProfilesResult,
     creditCardsResult,
     monthlyBalancesResult,
+    cardStatementsResult,
     budgetCategoriesResult,
     transactionsResult,
     transactionSplitsResult,
     recurringPaymentsResult,
     recurringInstancesResult,
-  ].find((result) => result.error)?.error;
+  ].find((result) => result?.error)?.error;
 
   if (error) throw error;
 
   return {
-    householdProfiles: householdProfilesResult.data ?? [],
-    creditCards: creditCardsResult.data ?? [],
-    monthlyCardBalances: monthlyBalancesResult.data ?? [],
+    householdProfiles: householdProfilesResult?.data ?? [],
+    creditCards: creditCardsResult?.data ?? [],
+    monthlyCardBalances: monthlyBalancesResult?.data ?? [],
     cardStatements: cardStatementsResult?.data ?? [],
-    budgetCategories: budgetCategoriesResult.data ?? [],
-    transactions: transactionsResult.data ?? [],
-    transactionSplits: transactionSplitsResult.data ?? [],
-    recurringPayments: recurringPaymentsResult.data ?? [],
-    recurringPaymentInstances: recurringInstancesResult.data ?? [],
+    budgetCategories: budgetCategoriesResult?.data ?? [],
+    transactions: transactionsResult?.data ?? [],
+    transactionSplits: transactionSplitsResult?.data ?? [],
+    recurringPayments: recurringPaymentsResult?.data ?? [],
+    recurringPaymentInstances: recurringInstancesResult?.data ?? [],
   };
 }
 
