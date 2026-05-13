@@ -27,6 +27,7 @@ export function renderAuthView(view, options = {}) {
       <AuthStatusScreen
         status={options.status ?? AUTH_STATUS_TYPES.inbox}
         email={options.email ?? ""}
+        message={options.message ?? ""}
         actionSlot={options.actionSlot ?? null}
       />
     );
