@@ -3,8 +3,9 @@ import {
   formatRemainingTime,
   getSessionExpiryMs,
   getSessionState,
-} from "../accountDisplayUtils.js";
-import { SESSION_CHECK_INTERVAL_MS, SESSION_WARNING_THRESHOLD_MS } from "../authSessionConfig.js";
+  SESSION_CHECK_INTERVAL_MS,
+  SESSION_WARNING_THRESHOLD_MS,
+} from "../authSessionUtils.js";
 import { useAuth } from "../AuthProvider.jsx";
 
 export default function SessionTimeoutWarning() {
