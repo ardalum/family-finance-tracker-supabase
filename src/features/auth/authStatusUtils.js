@@ -34,6 +34,24 @@ export function getAuthStatusFromLocation(location = getWindowLocation()) {
   };
 }
 
+export function getAuthStatusScreenProps(location = getWindowLocation()) {
+  const authStatus = getAuthStatusFromLocation(location);
+
+  if (!authStatus) {
+    return {
+      status: AUTH_STATUS_TYPES.inbox,
+      email: "",
+      message: "",
+    };
+  }
+
+  return {
+    status: authStatus.status,
+    email: authStatus.email,
+    message: authStatus.message,
+  };
+}
+
 export function normalizeAuthStatus(status) {
   if (!status) return "";
 
