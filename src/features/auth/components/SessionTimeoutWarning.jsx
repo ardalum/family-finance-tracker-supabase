@@ -3,10 +3,10 @@ import {
   formatRemainingTime,
   getSessionExpiryMs,
   getSessionState,
+  SESSION_WARNING_THRESHOLD_MS,
 } from "../accountDisplayUtils.js";
 import { useAuth } from "../AuthProvider.jsx";
 
-const WARNING_THRESHOLD_MS = 5 * 60 * 1000;
 const CHECK_INTERVAL_MS = 30 * 1000;
 
 export default function SessionTimeoutWarning() {
@@ -28,7 +28,7 @@ export default function SessionTimeoutWarning() {
 
   if (!expiresAtMs || dismissedExpiry === expiresAtMs) return null;
 
-  const sessionState = getSessionState(session, now, WARNING_THRESHOLD_MS);
+  const sessionState = getSessionState(session, now, SESSION_WARNING_THRESHOLD_MS);
   if (sessionState.timeRemainingMs === null) return null;
 
   if (!sessionState.isExpired && !sessionState.isNearExpiry) return null;
