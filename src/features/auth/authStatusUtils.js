@@ -1,18 +1,20 @@
+import { AUTH_STATUS_TYPES } from "./authViewTargets.js";
+
 const AUTH_STATUS_PARAM = "authStatus";
 const AUTH_MESSAGE_PARAM = "message";
 const AUTH_EMAIL_PARAM = "email";
 
 const statusAliases = {
-  confirm: "inbox",
-  confirmation: "inbox",
-  inbox: "inbox",
-  verified: "verified",
-  success: "verified",
-  signedout: "signedOut",
-  "signed-out": "signedOut",
-  signedOut: "signedOut",
-  problem: "problem",
-  error: "problem",
+  confirm: AUTH_STATUS_TYPES.inbox,
+  confirmation: AUTH_STATUS_TYPES.inbox,
+  inbox: AUTH_STATUS_TYPES.inbox,
+  verified: AUTH_STATUS_TYPES.verified,
+  success: AUTH_STATUS_TYPES.verified,
+  signedout: AUTH_STATUS_TYPES.signedOut,
+  "signed-out": AUTH_STATUS_TYPES.signedOut,
+  signedOut: AUTH_STATUS_TYPES.signedOut,
+  problem: AUTH_STATUS_TYPES.problem,
+  error: AUTH_STATUS_TYPES.problem,
 };
 
 export function getAuthStatusFromLocation(location = getWindowLocation()) {
@@ -38,12 +40,12 @@ export function normalizeAuthStatus(status) {
   const normalized = String(status).trim();
   if (!normalized) return "";
 
-  return statusAliases[normalized] || statusAliases[normalized.toLowerCase()] || "problem";
+  return statusAliases[normalized] || statusAliases[normalized.toLowerCase()] || AUTH_STATUS_TYPES.problem;
 }
 
-export function buildAuthStatusPath({ status = "inbox", email = "", message = "" } = {}) {
+export function buildAuthStatusPath({ status = AUTH_STATUS_TYPES.inbox, email = "", message = "" } = {}) {
   const params = new URLSearchParams();
-  params.set(AUTH_STATUS_PARAM, normalizeAuthStatus(status) || "problem");
+  params.set(AUTH_STATUS_PARAM, normalizeAuthStatus(status) || AUTH_STATUS_TYPES.problem);
 
   if (email) params.set(AUTH_EMAIL_PARAM, email);
   if (message) params.set(AUTH_MESSAGE_PARAM, message);
