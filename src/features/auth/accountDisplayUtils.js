@@ -71,6 +71,20 @@ export function getSessionTimeRemainingMs(session, now = Date.now()) {
   return expiresAtMs - now;
 }
 
+export function getSessionState(session, now = Date.now(), warningThresholdMs = 5 * 60 * 1000) {
+  const expiresAtMs = getSessionExpiryMs(session);
+  const timeRemainingMs = getSessionTimeRemainingMs(session, now);
+
+  return {
+    expiresAtMs,
+    timeRemainingMs,
+    hasExpiry: expiresAtMs !== null,
+    isExpired: timeRemainingMs !== null && timeRemainingMs <= 0,
+    isNearExpiry:
+      timeRemainingMs !== null && timeRemainingMs > 0 && timeRemainingMs <= warningThresholdMs,
+  };
+}
+
 export function formatAuthEventLabel(event) {
   if (!event) return "";
 
