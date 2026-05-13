@@ -51,6 +51,15 @@ const emptyForm = {
   splits: [{ id: "split_initial", categoryId: UNCATEGORIZED_ID, amount: "" }],
 };
 
+const defaultSmartDefaults = {
+  paymentMethod: "",
+  cardId: "",
+  transactionType: "expense",
+  categoryId: UNCATEGORIZED_ID,
+  splitMode: false,
+  splits: null,
+};
+
 export default function TransactionForm({
   monthKey,
   cards,
@@ -63,6 +72,7 @@ export default function TransactionForm({
 }) {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
+  const [smartDefaults, setSmartDefaults] = useState(defaultSmartDefaults);
   const categoryOptions = useMemo(
     () => [{ id: UNCATEGORIZED_ID, name: "Uncategorized" }, ...categories],
     [categories],
@@ -94,13 +104,9 @@ export default function TransactionForm({
             recurringMonth: editingTransaction.recurringMonth || null,
             splits: getEditingSplits(editingTransaction),
           }
-        : {
-            ...emptyForm,
-            date: defaultDateForMonth(monthKey),
-            splits: [getInitialSplit()],
-          },
+        : getNewTransactionForm(monthKey, smartDefaults),
     );
-  }, [editingTransaction, monthKey]);
+  }, [editingTransaction, monthKey, smartDefaults]);
 
   function updateField(field, value) {
     setError("");
@@ -154,15 +160,27 @@ export default function TransactionForm({
 
   async function handleSubmit(event) {
     event.preventDefault();
+    await saveTransaction({ keepOpen: false });
+  }
+
+  async function handleSaveAndAddAnother() {
+    await saveTransaction({ keepOpen: true });
+  }
+
+  async function saveTransaction({ keepOpen }) {
     const validationError = validateForm(form, cards, isEditingRecurring);
     if (validationError) {
       setError(validationError);
       return;
     }
 
+    const preparedForm = getPreparedForm(form);
+
     try {
-      await onSaved(getPreparedForm(form), editingTransaction);
-      setForm({ ...emptyForm, date: defaultDateForMonth(monthKey), splits: [getInitialSplit()] });
+      await onSaved(preparedForm, editingTransaction, { keepOpen });
+      const nextDefaults = getSmartDefaults(preparedForm);
+      setSmartDefaults(nextDefaults);
+      setForm(getNewTransactionForm(monthKey, nextDefaults));
     } catch (currentError) {
       setError(currentError.message || "Could not save transaction.");
     }
@@ -182,6 +200,12 @@ export default function TransactionForm({
       {isEditingRecurring ? (
         <div className="rounded-xl border border-status-warningBg bg-status-warningBg px-3 py-2 text-sm text-status-warningDark">
           Recurring-linked transactions should be managed from Recurring Payments.
+        </div>
+      ) : null}
+
+      {!editingTransaction ? (
+        <div className="rounded-xl border border-app-border bg-app-background px-3 py-2 text-xs text-text-muted">
+          Smart defaults remember the last payment method, card, type, and category during this session. Merchant, amount, and notes stay blank.
         </div>
       ) : null}
 
@@ -377,6 +401,11 @@ export default function TransactionForm({
         <Button type="submit" disabled={isSaving || isEditingRecurring}>
           {isSaving ? "Saving..." : editingTransaction ? "Save transaction" : "Add transaction"}
         </Button>
+        {!editingTransaction ? (
+          <Button type="button" variant="secondary" onClick={handleSaveAndAddAnother} disabled={isSaving || isEditingRecurring}>
+            {isSaving ? "Saving..." : "Save and add another"}
+          </Button>
+        ) : null}
         {editingTransaction ? (
           <Button type="button" variant="secondary" onClick={onCancel} disabled={isSaving}>
             Cancel
@@ -399,6 +428,36 @@ function getPreparedForm(form) {
           amount: Number(split.amount),
         }))
       : [],
+  };
+}
+
+function getNewTransactionForm(monthKey, smartDefaults = defaultSmartDefaults) {
+  const splitDefaults = smartDefaults.splitMode && smartDefaults.splits?.length
+    ? smartDefaults.splits.map((split) => getInitialSplit(split.categoryId, ""))
+    : [getInitialSplit(smartDefaults.categoryId || UNCATEGORIZED_ID, "")];
+
+  return {
+    ...emptyForm,
+    date: defaultDateForMonth(monthKey),
+    paymentMethod: smartDefaults.paymentMethod || "",
+    cardId: smartDefaults.paymentMethod === "Credit Card" ? smartDefaults.cardId || "" : "",
+    transactionType: smartDefaults.transactionType || "expense",
+    categoryId: smartDefaults.categoryId || UNCATEGORIZED_ID,
+    splitMode: Boolean(smartDefaults.splitMode),
+    splits: splitDefaults,
+  };
+}
+
+function getSmartDefaults(form) {
+  return {
+    paymentMethod: form.paymentMethod || "",
+    cardId: form.paymentMethod === "Credit Card" ? form.cardId || "" : "",
+    transactionType: form.transactionType || "expense",
+    categoryId: form.categoryId || UNCATEGORIZED_ID,
+    splitMode: Boolean(form.splitMode),
+    splits: form.splitMode
+      ? form.splits.map((split) => ({ categoryId: split.categoryId || UNCATEGORIZED_ID }))
+      : null,
   };
 }
 
