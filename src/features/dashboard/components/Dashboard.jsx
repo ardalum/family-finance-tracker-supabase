@@ -12,6 +12,7 @@ import RecurringOverview from "./RecurringOverview.jsx";
 import { getAlerts, getDashboardData } from "../dashboardUtils.js";
 
 const ACTIVE_VIEW_KEY = "personalFinanceApp:activeView:v1";
+const NAVIGATE_EVENT = "walletflow:navigate";
 
 const dashboardSections = [
   {
@@ -318,8 +319,9 @@ function ActivityMetric({ label, value, isCount = false }) {
 function navigateToView(view) {
   try {
     window.localStorage.setItem(ACTIVE_VIEW_KEY, view);
-    window.location.reload();
   } catch {
-    window.location.reload();
+    // Navigation should still happen even if storage is unavailable.
   }
+
+  window.dispatchEvent(new CustomEvent(NAVIGATE_EVENT, { detail: { view } }));
 }
