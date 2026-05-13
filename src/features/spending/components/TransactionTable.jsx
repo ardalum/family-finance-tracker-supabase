@@ -37,7 +37,7 @@ function getTransactionSearchText(transaction, cards, categories) {
     transaction.paymentMethod,
     transaction.transactionType,
     getTransactionTypeLabel(transaction.transactionType),
-    transaction.source,
+    transaction.source || "manual",
     cardName,
     categoryNames,
   ]
