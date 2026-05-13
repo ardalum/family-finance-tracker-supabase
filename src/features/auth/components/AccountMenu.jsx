@@ -1,5 +1,6 @@
 import { DatabaseBackup, Home, Info, LogOut, Settings, UserCircle } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useHouseholds } from "../../households/HouseholdProvider.jsx";
 import { useAuth } from "../AuthProvider.jsx";
 import { signOut } from "../authService.js";
 
@@ -47,9 +48,14 @@ const menuSections = [
 
 export default function AccountMenu({ onNavigate }) {
   const { user, setError } = useAuth();
+  const { activeHousehold, activeMembership } = useHouseholds();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
+  const identity = useMemo(
+    () => getAccountIdentity(user, activeMembership, activeHousehold),
+    [activeHousehold, activeMembership, user],
+  );
 
   useEffect(() => {
     if (!open) return undefined;
@@ -87,10 +93,10 @@ export default function AccountMenu({ onNavigate }) {
         type="button"
         className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-app-border bg-app-surface text-text-soft transition hover:bg-app-background focus:outline-none focus:ring-2 focus:ring-brand-primary/10"
         onClick={() => setOpen((current) => !current)}
-        aria-label={user?.email ? `Account menu for ${user.email}` : "Account menu"}
+        aria-label={identity.email ? `Account menu for ${identity.email}` : "Account menu"}
         aria-haspopup="menu"
         aria-expanded={open}
-        title={user?.email || "Account menu"}
+        title={identity.email || "Account menu"}
       >
         <UserCircle size={18} className="shrink-0" aria-hidden="true" />
       </button>
@@ -99,7 +105,20 @@ export default function AccountMenu({ onNavigate }) {
         <div className="absolute right-0 z-30 mt-2 w-[calc(100vw-2rem)] max-w-80 overflow-hidden rounded-2xl border border-app-border bg-app-surface shadow-lg" role="menu">
           <div className="border-b border-app-border px-4 py-3">
             <p className="text-xs font-medium uppercase tracking-normal text-text-muted">Signed in as</p>
-            <p className="mt-1 truncate text-sm font-semibold text-text-main">{user?.email}</p>
+            <div className="mt-2 flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-app-background text-text-muted">
+                <UserCircle size={20} aria-hidden="true" />
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-text-main">{identity.displayName}</p>
+                <p className="mt-0.5 truncate text-xs text-text-muted">{identity.email}</p>
+                {identity.role ? (
+                  <p className="mt-1 inline-flex rounded-full border border-app-border bg-app-background px-2 py-0.5 text-[0.68rem] font-semibold text-text-muted">
+                    {identity.role}
+                  </p>
+                ) : null}
+              </div>
+            </div>
           </div>
           <div className="grid gap-2 p-2">
             {menuSections.map((section) => (
@@ -154,4 +173,49 @@ function MenuButton({ icon: Icon, label, description, onClick }) {
       </span>
     </button>
   );
+}
+
+function getAccountIdentity(user, activeMembership, activeHousehold) {
+  const email = user?.email ?? "Unknown email";
+  const metadata = user?.user_metadata ?? {};
+  const metadataName =
+    metadata.display_name || metadata.full_name || metadata.name || metadata.preferred_name;
+  const displayName = metadataName?.trim() || formatNameFromEmail(email);
+  const role = formatRole(activeMembership?.role);
+  const householdName = activeHousehold?.name?.trim();
+
+  return {
+    displayName,
+    email,
+    role: role && householdName ? `${role} · ${householdName}` : role,
+  };
+}
+
+function formatNameFromEmail(email) {
+  const fallback = "Account";
+  const localPart = email?.split("@")[0]?.trim();
+  if (!localPart) return fallback;
+
+  const cleaned = localPart
+    .replace(/[._-]+/g, " ")
+    .replace(/\d+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!cleaned) return localPart;
+
+  return cleaned
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}
+
+function formatRole(role) {
+  if (!role) return "";
+
+  return role
+    .split(/[\s_-]+/g)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
 }
