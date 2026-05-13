@@ -26,6 +26,70 @@ function toMonthBalanceEntry(row, cardsBySupabaseId) {
   ];
 }
 
+function getDaysInMonth(year, month) {
+  return new Date(year, month, 0).getDate();
+}
+
+function clampDay(year, month, day) {
+  return Math.min(Math.max(Number(day) || 1, 1), getDaysInMonth(year, month));
+}
+
+function toIsoDate(year, month, day) {
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+function getNextMonth(year, month) {
+  return month === 12 ? { year: year + 1, month: 1 } : { year, month: month + 1 };
+}
+
+function getStatementDates(monthKey, card) {
+  const [year, month] = monthKey.split("-").map(Number);
+  const closeDay = clampDay(year, month, card?.statementClosingDay ?? card?.dueDay ?? 1);
+  const statementCloseDate = toIsoDate(year, month, closeDay);
+
+  const nextMonth = getNextMonth(year, month);
+  const dueDay = clampDay(nextMonth.year, nextMonth.month, card?.dueDay ?? 1);
+  const paymentDueDate = toIsoDate(nextMonth.year, nextMonth.month, dueDay);
+
+  return {
+    statementCloseDate,
+    paymentDueDate,
+  };
+}
+
+function getStatementStatus(patch) {
+  const balance = Number(patch.balance ?? 0) || 0;
+  if (Boolean(patch.paid)) return "paid";
+  if (balance === 0) return "paid";
+  return "unpaid";
+}
+
+async function upsertCardStatement(client, householdId, monthKey, card, patch) {
+  const creditCardId = getSupabaseCardId(card);
+  const balance = Number(patch.balance ?? 0) || 0;
+  const paid = Boolean(patch.paid);
+  const { statementCloseDate, paymentDueDate } = getStatementDates(monthKey, card);
+
+  const { error } = await client
+    .from("card_statements")
+    .upsert(
+      {
+        household_id: householdId,
+        credit_card_id: creditCardId,
+        month_key: monthKey,
+        statement_close_date: statementCloseDate,
+        payment_due_date: paymentDueDate,
+        statement_balance: balance,
+        paid_amount: paid ? balance : 0,
+        paid_date: paid ? new Date().toISOString().slice(0, 10) : null,
+        status: getStatementStatus(patch),
+      },
+      { onConflict: "credit_card_id,month_key" },
+    );
+
+  if (error) throw error;
+}
+
 export async function listMonthlyBalances(householdId, monthKey, cards) {
   if (!householdId || !monthKey) return {};
 
@@ -71,6 +135,10 @@ export async function listAllMonthlyBalances(householdId, cards) {
 export async function upsertMonthlyBalance(householdId, monthKey, card, patch) {
   const client = requireSupabase();
   const creditCardId = getSupabaseCardId(card);
+  const normalizedPatch = {
+    balance: Number(patch.balance ?? 0) || 0,
+    paid: Boolean(patch.paid),
+  };
 
   const { data, error } = await client
     .from("monthly_card_balances")
@@ -79,8 +147,8 @@ export async function upsertMonthlyBalance(householdId, monthKey, card, patch) {
         household_id: householdId,
         credit_card_id: creditCardId,
         month_key: monthKey,
-        balance: Number(patch.balance ?? 0) || 0,
-        paid: Boolean(patch.paid),
+        balance: normalizedPatch.balance,
+        paid: normalizedPatch.paid,
       },
       { onConflict: "credit_card_id,month_key" },
     )
@@ -88,5 +156,7 @@ export async function upsertMonthlyBalance(householdId, monthKey, card, patch) {
     .single();
 
   if (error) throw error;
+
+  await upsertCardStatement(client, householdId, monthKey, card, normalizedPatch);
   return data;
 }
