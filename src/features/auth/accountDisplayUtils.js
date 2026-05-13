@@ -25,7 +25,7 @@ export function getAccountIdentity(user, activeMembership, activeHousehold) {
 
 export function getSessionSummary(session, authEvent, now = Date.now()) {
   const authEventLabel = formatAuthEventLabel(authEvent);
-  const timeRemainingMs = getSessionTimeRemainingMs(session, now);
+  const sessionState = getSessionState(session, now);
 
   if (!session) {
     return {
@@ -34,7 +34,7 @@ export function getSessionSummary(session, authEvent, now = Date.now()) {
     };
   }
 
-  if (timeRemainingMs === null) {
+  if (sessionState.timeRemainingMs === null) {
     return {
       label: "Session active",
       description: authEventLabel
@@ -43,7 +43,7 @@ export function getSessionSummary(session, authEvent, now = Date.now()) {
     };
   }
 
-  if (timeRemainingMs <= 0) {
+  if (sessionState.isExpired) {
     return {
       label: "Session may be expired",
       description: authEventLabel
@@ -55,8 +55,8 @@ export function getSessionSummary(session, authEvent, now = Date.now()) {
   return {
     label: "Session active",
     description: authEventLabel
-      ? `Expires in about ${formatRemainingTime(timeRemainingMs)}. Latest auth event: ${authEventLabel}.`
-      : `Expires in about ${formatRemainingTime(timeRemainingMs)}.`,
+      ? `Expires in about ${formatRemainingTime(sessionState.timeRemainingMs)}. Latest auth event: ${authEventLabel}.`
+      : `Expires in about ${formatRemainingTime(sessionState.timeRemainingMs)}.`,
   };
 }
 
