@@ -1,3 +1,12 @@
+const authEventLabels = {
+  INITIAL_SESSION: "Initial session loaded",
+  SIGNED_IN: "Signed in",
+  SIGNED_OUT: "Signed out",
+  TOKEN_REFRESHED: "Session refreshed",
+  USER_UPDATED: "Account updated",
+  PASSWORD_RECOVERY: "Account recovery started",
+};
+
 export function getAccountIdentity(user, activeMembership, activeHousehold) {
   const email = user?.email ?? "Unknown email";
   const metadata = user?.user_metadata ?? {};
@@ -25,7 +34,9 @@ export function getSessionSummary(session, authEvent) {
   if (!session.expires_at) {
     return {
       label: "Session active",
-      description: authEvent ? `Latest auth event: ${authEvent}.` : "No expiration time is available for this session.",
+      description: authEvent
+        ? `Latest auth event: ${formatAuthEventLabel(authEvent)}.`
+        : "No expiration time is available for this session.",
     };
   }
 
@@ -41,6 +52,15 @@ export function getSessionSummary(session, authEvent) {
     label: "Session active",
     description: `Expires in about ${formatRemainingTime(timeRemainingMs)}.`,
   };
+}
+
+export function formatAuthEventLabel(event) {
+  if (!event) return "";
+
+  const normalizedEvent = String(event).trim();
+  if (!normalizedEvent) return "";
+
+  return authEventLabels[normalizedEvent] || formatMachineLabel(normalizedEvent);
 }
 
 export function formatNameFromEmail(email) {
@@ -76,6 +96,14 @@ export function formatRole(role) {
   if (!role) return "";
 
   return role
+    .split(/[\s_-]+/g)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}
+
+function formatMachineLabel(value) {
+  return value
     .split(/[\s_-]+/g)
     .filter(Boolean)
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
