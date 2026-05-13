@@ -1,3 +1,5 @@
+export const SESSION_WARNING_THRESHOLD_MS = 5 * 60 * 1000;
+
 const authEventLabels = {
   INITIAL_SESSION: "Initial session loaded",
   SIGNED_IN: "Signed in",
@@ -71,7 +73,11 @@ export function getSessionTimeRemainingMs(session, now = Date.now()) {
   return expiresAtMs - now;
 }
 
-export function getSessionState(session, now = Date.now(), warningThresholdMs = 5 * 60 * 1000) {
+export function getSessionState(
+  session,
+  now = Date.now(),
+  warningThresholdMs = SESSION_WARNING_THRESHOLD_MS,
+) {
   const expiresAtMs = getSessionExpiryMs(session);
   const timeRemainingMs = getSessionTimeRemainingMs(session, now);
 
