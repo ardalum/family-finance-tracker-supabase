@@ -75,7 +75,7 @@ function buildSearchSuggestions(transactions, cards, categories) {
 
 function getVisibleSuggestions(suggestions, search) {
   const searchTerm = search.trim().toLowerCase();
-  if (!searchTerm) return suggestions.slice(0, 8);
+  if (!searchTerm) return [];
   return suggestions
     .filter((suggestion) => suggestion.value.toLowerCase().includes(searchTerm))
     .slice(0, 8);
@@ -93,7 +93,6 @@ export default function TransactionTable({
 }) {
   const [sortMode, setSortMode] = useState("date-desc");
   const [transactionPendingDelete, setTransactionPendingDelete] = useState(null);
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const categoryOptions = useMemo(
     () => [{ id: UNCATEGORIZED_ID, name: "Uncategorized" }, ...categories],
     [categories],
@@ -118,7 +117,6 @@ export default function TransactionTable({
 
   function applySearchSuggestion(value) {
     onFiltersChange({ ...filters, search: value });
-    setIsSearchFocused(false);
   }
 
   const filteredTransactions = useMemo(() => {
@@ -162,30 +160,24 @@ export default function TransactionTable({
 
   return (
     <>
-      <Card className="min-w-0 overflow-hidden">
+      <Card className="min-w-0">
         <div className="grid gap-4 border-b border-app-border p-4">
-          <div className="grid min-w-0 gap-3 lg:grid-cols-[minmax(260px,1fr)_180px_180px] lg:items-end">
-            <div className="relative min-w-0">
+          <div className="grid min-w-0 gap-3 lg:grid-cols-[minmax(260px,1fr)_180px_180px] lg:items-start">
+            <div className="grid min-w-0 gap-2">
               <Input
                 label="Search transactions"
                 value={filters.search}
-                onChange={(event) => {
-                  setIsSearchFocused(true);
-                  onFiltersChange({ ...filters, search: event.target.value });
-                }}
-                onFocus={() => setIsSearchFocused(true)}
-                onBlur={() => window.setTimeout(() => setIsSearchFocused(false), 150)}
+                onChange={(event) => onFiltersChange({ ...filters, search: event.target.value })}
                 placeholder="Merchant, notes, card, category, payment method"
                 className="min-w-0"
               />
-              {isSearchFocused && visibleSearchSuggestions.length > 0 ? (
-                <div className="absolute z-20 mt-1 max-h-64 w-full overflow-y-auto rounded-xl border border-app-border bg-app-surface p-1 shadow-lg">
+              {visibleSearchSuggestions.length > 0 ? (
+                <div className="grid max-h-64 gap-1 overflow-y-auto rounded-xl border border-app-border bg-app-surface p-1 shadow-sm">
                   {visibleSearchSuggestions.map((suggestion) => (
                     <button
                       key={`${suggestion.type}-${suggestion.value}`}
                       type="button"
                       className="flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-sm transition hover:bg-app-background"
-                      onMouseDown={(event) => event.preventDefault()}
                       onClick={() => applySearchSuggestion(suggestion.value)}
                     >
                       <span className="min-w-0 truncate font-medium text-text-main">{suggestion.value}</span>
@@ -193,6 +185,8 @@ export default function TransactionTable({
                     </button>
                   ))}
                 </div>
+              ) : filters.search.trim() ? (
+                <p className="text-xs text-text-muted">No search suggestions match that text.</p>
               ) : null}
             </div>
             <Select label="Sort" value={sortMode} onChange={(event) => setSortMode(event.target.value)}>
@@ -207,7 +201,7 @@ export default function TransactionTable({
             <Button
               type="button"
               variant="secondary"
-              className="min-h-10 px-3 py-2 text-sm"
+              className="min-h-10 px-3 py-2 text-sm lg:mt-[1.625rem]"
               onClick={resetFilters}
             >
               <RotateCcw size={16} aria-hidden="true" />
