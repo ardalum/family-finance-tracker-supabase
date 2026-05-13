@@ -27,6 +27,7 @@ export default function RecurringPaymentForm({
   onCancel,
   onSaved,
   isSaving = false,
+  showHeader = true,
 }) {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
@@ -57,6 +58,7 @@ export default function RecurringPaymentForm({
   }, [editingTemplate]);
 
   function updateField(field, value) {
+    setError("");
     setForm((current) => ({
       ...current,
       [field]: value,
@@ -73,7 +75,7 @@ export default function RecurringPaymentForm({
     }
 
     try {
-      await onSaved(form, editingTemplate);
+      await onSaved(getPreparedForm(form), editingTemplate);
       setForm(emptyForm);
     } catch (currentError) {
       setError(currentError.message || "Could not save recurring payment.");
@@ -81,13 +83,15 @@ export default function RecurringPaymentForm({
   }
 
   return (
-    <form className="grid gap-4" onSubmit={handleSubmit}>
-      <div>
-        <h3 className="text-base font-semibold text-gray-950">
-          {editingTemplate ? "Edit recurring payment" : "Add recurring payment"}
-        </h3>
-        <p className="mt-1 text-sm text-gray-500">Templates become monthly bills you can mark paid.</p>
-      </div>
+    <form className="grid gap-4" onSubmit={handleSubmit} noValidate>
+      {showHeader ? (
+        <div>
+          <h3 className="text-base font-semibold text-gray-950">
+            {editingTemplate ? "Edit recurring payment" : "Add recurring payment"}
+          </h3>
+          <p className="mt-1 text-sm text-gray-500">Templates become monthly bills you can mark paid.</p>
+        </div>
+      ) : null}
 
       {categories.length === 0 ? (
         <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
@@ -102,56 +106,77 @@ export default function RecurringPaymentForm({
         </div>
       ) : null}
 
-      <Input label="Name" value={form.name} onChange={(event) => updateField("name", event.target.value)} required />
-      <Select label="Category" value={form.categoryId} onChange={(event) => updateField("categoryId", event.target.value)}>
-        {categoryOptions.map((category) => (
-          <option key={category.id} value={category.id}>{category.name}</option>
-        ))}
-      </Select>
-      <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="sm:col-span-2">
+          <Input
+            label="Name"
+            value={form.name}
+            onChange={(event) => updateField("name", event.target.value)}
+            placeholder="Example: Rent, Duke Energy, Amazon Prime"
+            required
+          />
+        </div>
+        <div className="sm:col-span-2">
+          <Select label="Category" value={form.categoryId} onChange={(event) => updateField("categoryId", event.target.value)}>
+            {categoryOptions.map((category) => (
+              <option key={category.id} value={category.id}>{category.name}</option>
+            ))}
+          </Select>
+        </div>
         <Select label="Bill type" value={form.billType} onChange={(event) => updateField("billType", event.target.value)}>
           <option value="fixed">Fixed</option>
           <option value="variable">Variable</option>
         </Select>
-        <Input label="Estimated amount" type="number" min="0" step="0.01" value={form.estimatedAmount} onChange={(event) => updateField("estimatedAmount", event.target.value)} required />
-      </div>
-      <Input label="Due day" type="number" min="1" max="31" step="1" value={form.dueDay} onChange={(event) => updateField("dueDay", event.target.value)} required />
-      <Select label="Payment method" value={form.paymentMethod} onChange={(event) => updateField("paymentMethod", event.target.value)} required>
-        <option value="" disabled>Select payment method</option>
-        {paymentMethods.map((method) => <option key={method}>{method}</option>)}
-      </Select>
-      {form.paymentMethod === "Credit Card" ? (
-        <Select label="Credit card used" value={form.cardId} onChange={(event) => updateField("cardId", event.target.value)} required>
-          <option value="" disabled>Select card</option>
-          {cards.map((card) => <option key={card.id} value={card.id}>{card.name}</option>)}
+        <Input label="Estimated amount" type="number" min="0.01" step="0.01" value={form.estimatedAmount} onChange={(event) => updateField("estimatedAmount", event.target.value)} placeholder="0.00" required />
+        <Input label="Due day" type="number" min="1" max="31" step="1" value={form.dueDay} onChange={(event) => updateField("dueDay", event.target.value)} required />
+        <Select label="Payment method" value={form.paymentMethod} onChange={(event) => updateField("paymentMethod", event.target.value)} required>
+          <option value="" disabled>Select payment method</option>
+          {paymentMethods.map((method) => <option key={method}>{method}</option>)}
         </Select>
-      ) : null}
-      <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        {form.paymentMethod === "Credit Card" ? (
+          <div className="sm:col-span-2">
+            <Select label="Credit card used" value={form.cardId} onChange={(event) => updateField("cardId", event.target.value)} required>
+              <option value="" disabled>Select card</option>
+              {cards.map((card) => <option key={card.id} value={card.id}>{card.name}</option>)}
+            </Select>
+          </div>
+        ) : null}
         <Input label="Start month" type="month" value={form.startMonth} onChange={(event) => updateField("startMonth", event.target.value)} required />
         <Input label="End month" type="month" value={form.endMonth} onChange={(event) => updateField("endMonth", event.target.value)} />
       </div>
-      <label className="inline-flex items-center gap-2 text-sm font-medium text-gray-700">
+
+      <label className="inline-flex items-center gap-2 rounded-xl border border-app-border bg-app-background px-3 py-2 text-sm font-medium text-gray-700">
         <input type="checkbox" checked={form.active} onChange={(event) => updateField("active", event.target.checked)} />
         Active
       </label>
       <label className="grid min-w-0 gap-1.5 text-sm font-medium text-gray-700">
         Notes
-        <textarea className="min-h-20 w-full min-w-0 resize-y rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-950 outline-none transition placeholder:text-gray-400 focus:border-gray-950 focus:ring-2 focus:ring-gray-950/10" value={form.notes} onChange={(event) => updateField("notes", event.target.value)} placeholder="Optional" />
+        <textarea className="min-h-20 w-full min-w-0 resize-y rounded-xl border border-app-border bg-white px-3 py-2 text-sm text-gray-950 outline-none transition placeholder:text-gray-400 focus:border-gray-950 focus:ring-2 focus:ring-gray-950/10" value={form.notes} onChange={(event) => updateField("notes", event.target.value)} placeholder="Optional" />
       </label>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap justify-end gap-3 border-t border-app-border pt-4">
+        {editingTemplate ? <Button type="button" variant="secondary" onClick={onCancel} disabled={isSaving}>Cancel</Button> : null}
         <Button type="submit" disabled={isSaving}>
           {isSaving ? "Saving..." : editingTemplate ? "Save template" : "Add template"}
         </Button>
-        {editingTemplate ? <Button type="button" variant="secondary" onClick={onCancel} disabled={isSaving}>Cancel</Button> : null}
       </div>
     </form>
   );
 }
 
+function getPreparedForm(form) {
+  return {
+    ...form,
+    name: form.name.trim(),
+    estimatedAmount: Number(form.estimatedAmount),
+    dueDay: Number(form.dueDay),
+    notes: form.notes.trim(),
+  };
+}
+
 function validateForm(form, cards) {
   if (!form.name.trim()) return "Name is required.";
-  if (Number(form.estimatedAmount) < 0) return "Estimated amount cannot be negative.";
+  if (!Number.isFinite(Number(form.estimatedAmount)) || Number(form.estimatedAmount) <= 0) return "Estimated amount must be greater than zero.";
   if (Number(form.dueDay) < 1 || Number(form.dueDay) > 31) return "Due day must be between 1 and 31.";
   if (!form.paymentMethod) return "Payment method is required.";
   if (form.paymentMethod === "Credit Card" && !cards.some((card) => card.id === form.cardId)) {
