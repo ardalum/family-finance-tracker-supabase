@@ -3,11 +3,10 @@ import {
   formatRemainingTime,
   getSessionExpiryMs,
   getSessionState,
+  SESSION_CHECK_INTERVAL_MS,
   SESSION_WARNING_THRESHOLD_MS,
 } from "../accountDisplayUtils.js";
 import { useAuth } from "../AuthProvider.jsx";
-
-const CHECK_INTERVAL_MS = 30 * 1000;
 
 export default function SessionTimeoutWarning() {
   const { session } = useAuth();
@@ -22,7 +21,7 @@ export default function SessionTimeoutWarning() {
   useEffect(() => {
     if (!expiresAtMs) return undefined;
 
-    const intervalId = window.setInterval(() => setNow(Date.now()), CHECK_INTERVAL_MS);
+    const intervalId = window.setInterval(() => setNow(Date.now()), SESSION_CHECK_INTERVAL_MS);
     return () => window.clearInterval(intervalId);
   }, [expiresAtMs]);
 
