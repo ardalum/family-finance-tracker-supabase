@@ -22,8 +22,8 @@ Deno.serve(async (request) => {
 
   try {
     const supabaseUrl = requireEnv("SUPABASE_URL");
-    const supabaseAnonKey = requireEnv("SUPABASE_ANON_KEY");
-    const serviceRoleKey = requireEnv("SUPABASE_SERVICE_ROLE_KEY");
+    const supabaseAnonKey = getSupabasePublishableKey();
+    const serviceRoleKey = getSupabaseSecretKey();
     const authorization = request.headers.get("Authorization");
 
     if (!authorization) {
@@ -160,6 +160,36 @@ function requireEnv(name: string) {
   const value = Deno.env.get(name);
   if (!value) throw new Error(`${name} is not configured.`);
   return value;
+}
+
+function getJsonDefaultKey(envName: string) {
+  const rawValue = Deno.env.get(envName);
+  if (!rawValue) return "";
+
+  try {
+    const parsed = JSON.parse(rawValue) as Record<string, string>;
+    return parsed.default ?? Object.values(parsed)[0] ?? "";
+  } catch {
+    return rawValue;
+  }
+}
+
+function getSupabasePublishableKey() {
+  return (
+    getJsonDefaultKey("SUPABASE_PUBLISHABLE_KEYS") ||
+    Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ||
+    Deno.env.get("SUPABASE_ANON_KEY") ||
+    requireEnv("SUPABASE_ANON_KEY")
+  );
+}
+
+function getSupabaseSecretKey() {
+  return (
+    getJsonDefaultKey("SUPABASE_SECRET_KEYS") ||
+    Deno.env.get("SUPABASE_SECRET_KEY") ||
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ||
+    requireEnv("SUPABASE_SERVICE_ROLE_KEY")
+  );
 }
 
 function getAllowedOrigins() {
