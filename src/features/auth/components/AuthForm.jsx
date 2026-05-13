@@ -92,6 +92,7 @@ export default function AuthForm() {
               autoComplete="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
+              disabled={isSubmitting}
               required
             />
             <div className="grid gap-1.5">
@@ -102,13 +103,15 @@ export default function AuthForm() {
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 minLength={6}
+                disabled={isSubmitting}
                 required
               />
               <button
                 type="button"
-                className="inline-flex w-fit items-center gap-1.5 rounded-lg px-1 text-xs font-semibold text-[#6B7280] transition hover:text-[#111827]"
+                className="inline-flex w-fit items-center gap-1.5 rounded-lg px-1 text-xs font-semibold text-[#6B7280] transition hover:text-[#111827] disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={() => setShowPassword((current) => !current)}
                 aria-pressed={showPassword}
+                disabled={isSubmitting}
               >
                 {showPassword ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
                 {showPassword ? "Hide password" : "Show password"}
@@ -127,6 +130,7 @@ export default function AuthForm() {
                 setError("");
                 setStatus("");
               }}
+              disabled={isSubmitting}
             >
               {isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up"}
             </Button>
