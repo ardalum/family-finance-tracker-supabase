@@ -46,6 +46,41 @@ function getTransactionSearchText(transaction, cards, categories) {
     .toLowerCase();
 }
 
+function addSuggestion(map, value, type) {
+  const cleanValue = String(value ?? "").trim();
+  if (!cleanValue) return;
+  const key = cleanValue.toLowerCase();
+  const current = map.get(key) ?? { value: cleanValue, type, count: 0 };
+  map.set(key, { ...current, count: current.count + 1 });
+}
+
+function buildSearchSuggestions(transactions, cards, categories) {
+  const suggestions = new Map();
+
+  transactions.forEach((transaction) => {
+    addSuggestion(suggestions, transaction.merchant, "Merchant");
+    addSuggestion(suggestions, transaction.notes, "Notes");
+    addSuggestion(suggestions, transaction.paymentMethod, "Payment method");
+    addSuggestion(suggestions, getTransactionTypeLabel(transaction.transactionType), "Type");
+    addSuggestion(suggestions, getCardName(transaction.cardId, cards), "Card");
+    getTransactionCategoryRows(transaction).forEach((row) => {
+      addSuggestion(suggestions, getCategoryName(row.categoryId, categories), "Category");
+    });
+  });
+
+  return Array.from(suggestions.values())
+    .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value))
+    .slice(0, 40);
+}
+
+function getVisibleSuggestions(suggestions, search) {
+  const searchTerm = search.trim().toLowerCase();
+  if (!searchTerm) return suggestions.slice(0, 8);
+  return suggestions
+    .filter((suggestion) => suggestion.value.toLowerCase().includes(searchTerm))
+    .slice(0, 8);
+}
+
 export default function TransactionTable({
   transactions,
   cards,
@@ -58,6 +93,7 @@ export default function TransactionTable({
 }) {
   const [sortMode, setSortMode] = useState("date-desc");
   const [transactionPendingDelete, setTransactionPendingDelete] = useState(null);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const categoryOptions = useMemo(
     () => [{ id: UNCATEGORIZED_ID, name: "Uncategorized" }, ...categories],
     [categories],
@@ -66,10 +102,23 @@ export default function TransactionTable({
     () => Array.from(new Set(transactions.map((transaction) => transaction.paymentMethod).filter(Boolean))).sort(),
     [transactions],
   );
+  const searchSuggestions = useMemo(
+    () => buildSearchSuggestions(transactions, cards, categories),
+    [cards, categories, transactions],
+  );
+  const visibleSearchSuggestions = useMemo(
+    () => getVisibleSuggestions(searchSuggestions, filters.search),
+    [filters.search, searchSuggestions],
+  );
 
   function resetFilters() {
     setSortMode("date-desc");
     onFiltersChange(emptyFilters);
+  }
+
+  function applySearchSuggestion(value) {
+    onFiltersChange({ ...filters, search: value });
+    setIsSearchFocused(false);
   }
 
   const filteredTransactions = useMemo(() => {
@@ -116,13 +165,36 @@ export default function TransactionTable({
       <Card className="min-w-0 overflow-hidden">
         <div className="grid gap-4 border-b border-app-border p-4">
           <div className="grid min-w-0 gap-3 lg:grid-cols-[minmax(260px,1fr)_180px_180px] lg:items-end">
-            <Input
-              label="Search transactions"
-              value={filters.search}
-              onChange={(event) => onFiltersChange({ ...filters, search: event.target.value })}
-              placeholder="Merchant, notes, card, category, payment method"
-              className="min-w-0"
-            />
+            <div className="relative min-w-0">
+              <Input
+                label="Search transactions"
+                value={filters.search}
+                onChange={(event) => {
+                  setIsSearchFocused(true);
+                  onFiltersChange({ ...filters, search: event.target.value });
+                }}
+                onFocus={() => setIsSearchFocused(true)}
+                onBlur={() => window.setTimeout(() => setIsSearchFocused(false), 150)}
+                placeholder="Merchant, notes, card, category, payment method"
+                className="min-w-0"
+              />
+              {isSearchFocused && visibleSearchSuggestions.length > 0 ? (
+                <div className="absolute z-20 mt-1 max-h-64 w-full overflow-y-auto rounded-xl border border-app-border bg-app-surface p-1 shadow-lg">
+                  {visibleSearchSuggestions.map((suggestion) => (
+                    <button
+                      key={`${suggestion.type}-${suggestion.value}`}
+                      type="button"
+                      className="flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-sm transition hover:bg-app-background"
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => applySearchSuggestion(suggestion.value)}
+                    >
+                      <span className="min-w-0 truncate font-medium text-text-main">{suggestion.value}</span>
+                      <span className="shrink-0 text-xs text-text-muted">{suggestion.type}</span>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
             <Select label="Sort" value={sortMode} onChange={(event) => setSortMode(event.target.value)}>
               <option value="date-desc">Date newest</option>
               <option value="date-asc">Date oldest</option>
