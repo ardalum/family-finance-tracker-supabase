@@ -41,7 +41,7 @@ export default function PasswordResetForm() {
     resetFeedback();
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     resetFeedback();
 
@@ -53,8 +53,12 @@ export default function PasswordResetForm() {
     }
 
     setIsSubmitting(true);
-    setStatus(AUTH_RECOVERY_FORM_STATUS_COPY.placeholderSuccess);
-    setIsSubmitting(false);
+
+    try {
+      setStatus(AUTH_RECOVERY_FORM_STATUS_COPY.placeholderSuccess);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
