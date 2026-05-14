@@ -14,3 +14,7 @@ export function getResetRecoveryFormState() {
 export function isRecoveryFormStateEmpty({ primaryValue = "", confirmValue = "" } = {}) {
   return !primaryValue && !confirmValue;
 }
+
+export function hasRecoveryFormValues({ primaryValue = "", confirmValue = "" } = {}) {
+  return Boolean(primaryValue && confirmValue);
+}
