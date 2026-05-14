@@ -25,3 +25,7 @@ export function getRecoveryFormValidationError({ password = "", confirmPassword 
 export function isRecoveryFormValid(values = {}) {
   return !getRecoveryFormValidationError(values);
 }
+
+export function isRecoveryFormInvalid(values = {}) {
+  return !isRecoveryFormValid(values);
+}
