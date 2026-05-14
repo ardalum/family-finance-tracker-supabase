@@ -1,4 +1,4 @@
-import { CheckCircle2, MailCheck, ShieldAlert, UserCircle } from "lucide-react";
+import { CheckCircle2, KeyRound, MailCheck, ShieldAlert, UserCircle } from "lucide-react";
 import Card from "../../../components/ui/Card.jsx";
 import { formatAuthEventLabel } from "../authAccountDisplayUtils.js";
 import { useAuth } from "../AuthProvider.jsx";
@@ -14,6 +14,11 @@ const statusConfig = {
     icon: CheckCircle2,
     title: "Account verified",
     description: "Your account is ready. You can continue using WalletFlow.",
+  },
+  [AUTH_STATUS_TYPES.resetPassword]: {
+    icon: KeyRound,
+    title: "Reset your password",
+    description: "Follow the password reset steps from your email to continue securing your WalletFlow account.",
   },
   [AUTH_STATUS_TYPES.signedOut]: {
     icon: UserCircle,
