@@ -1,11 +1,15 @@
 import { AUTH_RECOVERY_FORM_STATUS_COPY } from "./authRecoveryCopy.js";
 import { getNormalizedRecoveryFormValues } from "./authRecoveryFormState.js";
 
+export function createRecoverySubmitResult({ status = "" } = {}) {
+  return { status };
+}
+
 export async function submitRecoveryForm({ password } = {}) {
   const { primaryValue } = getNormalizedRecoveryFormValues({ primaryValue: password });
   void primaryValue;
 
-  return {
+  return createRecoverySubmitResult({
     status: AUTH_RECOVERY_FORM_STATUS_COPY.placeholderSuccess,
-  };
+  });
 }
