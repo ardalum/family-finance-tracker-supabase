@@ -2,7 +2,7 @@ export const AUTH_FORM_STATUS_COPY = {
   signUpConfirmation: "Account created. Check your email to confirm your address and finish setup.",
 };
 
-const AUTH_FORM_MODES = {
+export const AUTH_FORM_MODES = {
   signIn: "sign-in",
   signUp: "sign-up",
 };
