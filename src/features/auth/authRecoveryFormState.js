@@ -18,10 +18,12 @@ export function getNormalizedRecoveryFormValues({ primaryValue = "", confirmValu
   };
 }
 
-export function isRecoveryFormStateEmpty({ primaryValue = "", confirmValue = "" } = {}) {
+export function isRecoveryFormStateEmpty(values = {}) {
+  const { primaryValue, confirmValue } = getNormalizedRecoveryFormValues(values);
   return !primaryValue && !confirmValue;
 }
 
-export function hasRecoveryFormValues({ primaryValue = "", confirmValue = "" } = {}) {
+export function hasRecoveryFormValues(values = {}) {
+  const { primaryValue, confirmValue } = getNormalizedRecoveryFormValues(values);
   return Boolean(primaryValue && confirmValue);
 }
