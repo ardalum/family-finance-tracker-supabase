@@ -10,6 +10,8 @@ A Vite + React personal finance tracker backed by Supabase. The app supports Sup
 
 ## Install
 
+Use Node 24 for local development. The project includes `.nvmrc`, `.npmrc`, and `package.json` engine settings so local installs and project checks use the same major Node version.
+
 Install dependencies:
 
 ```powershell
@@ -22,9 +24,27 @@ On macOS/Linux or a shell where npm scripts are enabled:
 npm install
 ```
 
+For a clean install that matches the lockfile:
+
+```bash
+npm ci
+```
+
 ## Environment Variables
 
-Create a local `.env.local` file for development:
+Copy the example environment file and fill in the local values:
+
+```bash
+cp .env.example .env.local
+```
+
+On PowerShell:
+
+```powershell
+Copy-Item .env.example .env.local
+```
+
+Required frontend variables:
 
 ```text
 VITE_SUPABASE_URL=your-supabase-project-url
@@ -43,18 +63,36 @@ Start the Vite dev server:
 npm.cmd run dev
 ```
 
+On macOS/Linux or a shell where npm scripts are enabled:
+
+```bash
+npm run dev
+```
+
 If Vite dependency caching gets stale after moving folders or changing dependencies:
 
 ```powershell
 npm.cmd run dev -- --force
 ```
 
-## Build
+## Build and Checks
 
 Create a production build:
 
 ```powershell
 npm.cmd run build
+```
+
+Run tests:
+
+```powershell
+npm.cmd run test:run
+```
+
+Run build and tests together:
+
+```powershell
+npm.cmd run verify
 ```
 
 Preview the production build locally:
@@ -153,6 +191,8 @@ After deployment, update Supabase Auth URL settings:
 ## Production Checklist
 
 - [ ] `npm.cmd run build` passes locally.
+- [ ] `npm.cmd run test:run` passes locally.
+- [ ] `npm.cmd run verify` passes locally.
 - [ ] Supabase migrations have been applied to production.
 - [ ] RLS is enabled on all household finance tables.
 - [ ] `011_security_hardening.sql` has been applied and role permissions tested.
