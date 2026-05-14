@@ -34,6 +34,13 @@ export default function PasswordResetForm() {
     setStatus("");
   }
 
+  function clearValues() {
+    setPassword("");
+    setConfirmPassword("");
+    setShowPassword(false);
+    setShowConfirmPassword(false);
+  }
+
   function handlePasswordChange(event) {
     setPassword(event.target.value);
     resetFeedback();
@@ -59,6 +66,7 @@ export default function PasswordResetForm() {
 
     try {
       const result = await submitRecoveryForm({ password });
+      clearValues();
       setStatus(result.status);
     } catch (currentError) {
       setError(getFriendlyAuthError(currentError, AUTH_RECOVERY_FORM_ERROR_COPY.submitFailed));
