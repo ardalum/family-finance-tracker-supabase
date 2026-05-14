@@ -10,6 +10,7 @@ import {
   getRecoveryPasswordToggleLabel,
 } from "../authRecoveryCopy.js";
 import { AUTH_RECOVERY_FORM_FEEDBACK_IDS } from "../authRecoveryIds.js";
+import { submitRecoveryForm } from "../authRecoverySubmit.js";
 import { getRecoveryFormValidationError } from "../authRecoveryValidation.js";
 
 export default function PasswordResetForm() {
@@ -55,7 +56,8 @@ export default function PasswordResetForm() {
     setIsSubmitting(true);
 
     try {
-      setStatus(AUTH_RECOVERY_FORM_STATUS_COPY.placeholderSuccess);
+      const result = await submitRecoveryForm();
+      setStatus(result.status);
     } finally {
       setIsSubmitting(false);
     }
