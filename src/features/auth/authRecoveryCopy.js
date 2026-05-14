@@ -16,6 +16,11 @@ export const AUTH_RECOVERY_FORM_ERROR_COPY = {
   submitFailed: "Could not update password.",
 };
 
+export const AUTH_RECOVERY_FORM_VALIDATION_COPY = {
+  passwordTooShort: "Password must be at least 6 characters.",
+  passwordsDoNotMatch: "Passwords do not match.",
+};
+
 export function getRecoveryPasswordToggleLabel(isVisible) {
   return isVisible ? "Hide new password" : "Show new password";
 }
