@@ -11,6 +11,13 @@ export function getResetRecoveryFormState() {
   return getInitialRecoveryFormState();
 }
 
+export function getNormalizedRecoveryFormValues({ primaryValue = "", confirmValue = "" } = {}) {
+  return {
+    primaryValue: String(primaryValue).trim(),
+    confirmValue: String(confirmValue).trim(),
+  };
+}
+
 export function isRecoveryFormStateEmpty({ primaryValue = "", confirmValue = "" } = {}) {
   return !primaryValue && !confirmValue;
 }
