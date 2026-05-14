@@ -34,6 +34,16 @@ export default function AuthForm() {
     setStatus("");
   }
 
+  function handleEmailChange(event) {
+    setEmail(event.target.value);
+    resetAuthFormFeedback();
+  }
+
+  function handlePasswordChange(event) {
+    setPassword(event.target.value);
+    resetAuthFormFeedback();
+  }
+
   function prepareAuthFormSubmit() {
     const normalizedEmail = email.trim();
     const validationError = getAuthFormValidationError({ email: normalizedEmail, password, mode });
@@ -123,7 +133,7 @@ export default function AuthForm() {
               type="email"
               autoComplete="email"
               value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              onChange={handleEmailChange}
               onBlur={() => setEmail((currentEmail) => currentEmail.trim())}
               disabled={isSubmitting}
               required
@@ -134,7 +144,7 @@ export default function AuthForm() {
                 type={showPassword ? "text" : "password"}
                 autoComplete={passwordAutocomplete}
                 value={password}
-                onChange={(event) => setPassword(event.target.value)}
+                onChange={handlePasswordChange}
                 minLength={6}
                 disabled={isSubmitting}
                 required
