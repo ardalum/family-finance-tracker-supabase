@@ -14,8 +14,8 @@ import {
   isSignUpAuthFormMode,
 } from "../authFormCopy.js";
 import { AUTH_FORM_FEEDBACK_IDS } from "../authFormIds.js";
-import { getAuthFormValidationError } from "../authFormValidation.js";
-import { signInWithEmail, signUpWithEmail } from "../authService.js";
+import { getAuthFormEmailValidationError, getAuthFormValidationError } from "../authFormValidation.js";
+import { requestPasswordReset, signInWithEmail, signUpWithEmail } from "../authService.js";
 
 export default function AuthForm() {
   const [mode, setMode] = useState(AUTH_FORM_MODES.signIn);
@@ -25,6 +25,7 @@ export default function AuthForm() {
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSendingResetLink, setIsSendingResetLink] = useState(false);
 
   const isSignUp = isSignUpAuthFormMode(mode);
   const modeCopy = getAuthFormCopy(mode);
@@ -36,6 +37,7 @@ export default function AuthForm() {
       : undefined;
   const passwordToggleLabel = showPassword ? "Hide password" : "Show password";
   const hasAuthFormError = Boolean(error);
+  const isFormBusy = isSubmitting || isSendingResetLink;
 
   function resetAuthFormFeedback() {
     setError("");
@@ -75,6 +77,30 @@ export default function AuthForm() {
       normalizedEmail,
       validationError,
     };
+  }
+
+  async function handlePasswordResetRequest() {
+    resetAuthFormFeedback();
+
+    const normalizedEmail = email.trim();
+    const validationError = getAuthFormEmailValidationError(normalizedEmail);
+    setEmail(normalizedEmail);
+
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setIsSendingResetLink(true);
+
+    try {
+      await requestPasswordReset({ email: normalizedEmail });
+      setStatus(AUTH_FORM_STATUS_COPY.passwordResetRequested);
+    } catch (currentError) {
+      setError(getFriendlyAuthError(currentError, "Could not send password reset email."));
+    } finally {
+      setIsSendingResetLink(false);
+    }
   }
 
   async function handleSubmit(event) {
@@ -170,7 +196,7 @@ export default function AuthForm() {
               onBlur={handleEmailBlur}
               aria-describedby={feedbackDescriptionId}
               aria-invalid={hasAuthFormError}
-              disabled={isSubmitting}
+              disabled={isFormBusy}
               required
             />
             <div className="grid gap-1.5">
@@ -183,23 +209,35 @@ export default function AuthForm() {
                 minLength={6}
                 aria-describedby={feedbackDescriptionId}
                 aria-invalid={hasAuthFormError}
-                disabled={isSubmitting}
+                disabled={isFormBusy}
                 required
               />
-              <button
-                type="button"
-                className="inline-flex w-fit items-center gap-1.5 rounded-lg px-1 text-xs font-semibold text-[#6B7280] transition hover:text-[#111827] disabled:cursor-not-allowed disabled:opacity-50"
-                onClick={handlePasswordVisibilityToggle}
-                aria-label={passwordToggleLabel}
-                aria-pressed={showPassword}
-                disabled={isSubmitting}
-              >
-                {showPassword ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
-                {passwordToggleLabel}
-              </button>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <button
+                  type="button"
+                  className="inline-flex w-fit items-center gap-1.5 rounded-lg px-1 text-xs font-semibold text-[#6B7280] transition hover:text-[#111827] disabled:cursor-not-allowed disabled:opacity-50"
+                  onClick={handlePasswordVisibilityToggle}
+                  aria-label={passwordToggleLabel}
+                  aria-pressed={showPassword}
+                  disabled={isFormBusy}
+                >
+                  {showPassword ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
+                  {passwordToggleLabel}
+                </button>
+                {!isSignUp ? (
+                  <button
+                    type="button"
+                    className="inline-flex w-fit rounded-lg px-1 text-xs font-semibold text-[#6B7280] transition hover:text-[#111827] disabled:cursor-not-allowed disabled:opacity-50"
+                    onClick={handlePasswordResetRequest}
+                    disabled={isFormBusy || !isSupabaseConfigured}
+                  >
+                    {isSendingResetLink ? AUTH_FORM_STATUS_COPY.sendingResetLink : modeCopy.resetPasswordLabel}
+                  </button>
+                ) : null}
+              </div>
             </div>
 
-            <Button type="submit" disabled={isSubmitting || !isSupabaseConfigured}>
+            <Button type="submit" disabled={isFormBusy || !isSupabaseConfigured}>
               {isSubmitting ? AUTH_FORM_STATUS_COPY.submitting : modeCopy.submitLabel}
             </Button>
 
@@ -207,7 +245,7 @@ export default function AuthForm() {
               type="button"
               variant="ghost"
               onClick={handleModeSwitch}
-              disabled={isSubmitting}
+              disabled={isFormBusy}
             >
               {modeCopy.switchModeLabel}
             </Button>
