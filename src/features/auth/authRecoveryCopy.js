@@ -8,7 +8,7 @@ export const AUTH_RECOVERY_FORM_COPY = {
 };
 
 export const AUTH_RECOVERY_FORM_STATUS_COPY = {
-  placeholderSuccess: "Password update UI is ready. The secure update service will be connected in the next PR.",
+  placeholderSuccess: "Your password has been updated. You can continue using WalletFlow.",
   submitting: "Updating password...",
 };
 
