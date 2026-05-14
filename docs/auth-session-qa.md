@@ -2,6 +2,12 @@
 
 Use this checklist before marking authentication and session handling as complete.
 
+## Current status
+
+Authentication and session handling is functionally wired for sign up, sign in, password recovery request, recovery submit, URL cleanup, and sign out.
+
+Known follow-up: clear the recovery form field values after a successful recovery submit once the component edit can be applied safely.
+
 ## Build
 
 - [ ] `npm run build` passes.
