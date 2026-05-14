@@ -20,6 +20,7 @@ export default function PasswordResetForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const [status, setStatus] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const hasFeedback = Boolean(error || status);
   const passwordToggleLabel = getRecoveryPasswordToggleLabel(showPassword);
@@ -51,7 +52,9 @@ export default function PasswordResetForm() {
       return;
     }
 
+    setIsSubmitting(true);
     setStatus(AUTH_RECOVERY_FORM_STATUS_COPY.placeholderSuccess);
+    setIsSubmitting(false);
   }
 
   return (
@@ -114,14 +117,16 @@ export default function PasswordResetForm() {
                 minLength={6}
                 aria-describedby={hasFeedback ? PASSWORD_RESET_FORM_FEEDBACK_ID : undefined}
                 aria-invalid={Boolean(error)}
+                disabled={isSubmitting}
                 required
               />
               <button
                 type="button"
-                className="inline-flex w-fit items-center gap-1.5 rounded-lg px-1 text-xs font-semibold text-[#6B7280] transition hover:text-[#111827]"
+                className="inline-flex w-fit items-center gap-1.5 rounded-lg px-1 text-xs font-semibold text-[#6B7280] transition hover:text-[#111827] disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={() => setShowPassword((current) => !current)}
                 aria-label={passwordToggleLabel}
                 aria-pressed={showPassword}
+                disabled={isSubmitting}
               >
                 {showPassword ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
                 {passwordToggleLabel}
@@ -138,21 +143,25 @@ export default function PasswordResetForm() {
                 minLength={6}
                 aria-describedby={hasFeedback ? PASSWORD_RESET_FORM_FEEDBACK_ID : undefined}
                 aria-invalid={Boolean(error)}
+                disabled={isSubmitting}
                 required
               />
               <button
                 type="button"
-                className="inline-flex w-fit items-center gap-1.5 rounded-lg px-1 text-xs font-semibold text-[#6B7280] transition hover:text-[#111827]"
+                className="inline-flex w-fit items-center gap-1.5 rounded-lg px-1 text-xs font-semibold text-[#6B7280] transition hover:text-[#111827] disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={() => setShowConfirmPassword((current) => !current)}
                 aria-label={confirmPasswordToggleLabel}
                 aria-pressed={showConfirmPassword}
+                disabled={isSubmitting}
               >
                 {showConfirmPassword ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
                 {confirmPasswordToggleLabel}
               </button>
             </div>
 
-            <Button type="submit">{AUTH_RECOVERY_FORM_COPY.submitLabel}</Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? AUTH_RECOVERY_FORM_STATUS_COPY.submitting : AUTH_RECOVERY_FORM_COPY.submitLabel}
+            </Button>
           </form>
         </Card>
       </div>
