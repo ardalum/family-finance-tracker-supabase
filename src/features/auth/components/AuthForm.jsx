@@ -115,19 +115,29 @@ export default function AuthForm() {
             </div>
 
             {!isSupabaseConfigured ? (
-              <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B]">
+              <div
+                className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B]"
+                role="alert"
+              >
                 Supabase environment variables are missing.
               </div>
             ) : null}
 
             {error ? (
-              <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B]">
+              <div
+                className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B]"
+                role="alert"
+              >
                 {error}
               </div>
             ) : null}
 
             {status ? (
-              <div className="rounded-xl border border-green-200 bg-[#DCFCE7] px-3 py-2 text-sm text-[#166534]">
+              <div
+                className="rounded-xl border border-green-200 bg-[#DCFCE7] px-3 py-2 text-sm text-[#166534]"
+                role="status"
+                aria-live="polite"
+              >
                 {status}
               </div>
             ) : null}
