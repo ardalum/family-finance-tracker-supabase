@@ -131,7 +131,7 @@ export default function AuthForm() {
             </div>
 
             <Button type="submit" disabled={isSubmitting || !isSupabaseConfigured}>
-              {isSubmitting ? "Working..." : modeCopy.submitLabel}
+              {isSubmitting ? AUTH_FORM_STATUS_COPY.submitting : modeCopy.submitLabel}
             </Button>
 
             <Button

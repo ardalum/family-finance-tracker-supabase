@@ -1,5 +1,6 @@
 export const AUTH_FORM_STATUS_COPY = {
   signUpConfirmation: "Account created. Check your email to confirm your address and finish setup.",
+  submitting: "Working...",
 };
 
 export const AUTH_FORM_MODES = {
