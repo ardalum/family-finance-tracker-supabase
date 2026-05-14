@@ -1,4 +1,7 @@
-import { AUTH_RECOVERY_FORM_VALIDATION_COPY } from "./authRecoveryCopy.js";
+import {
+  AUTH_RECOVERY_FORM_VALIDATION_COPY,
+  getRecoveryPasswordTooShortMessage,
+} from "./authRecoveryCopy.js";
 
 export const AUTH_RECOVERY_VALIDATION_RULES = {
   minPasswordLength: 6,
@@ -9,7 +12,7 @@ export function getRecoveryFormValidationError({ password = "", confirmPassword 
   const normalizedConfirmPassword = String(confirmPassword).trim();
 
   if (normalizedPassword.length < AUTH_RECOVERY_VALIDATION_RULES.minPasswordLength) {
-    return AUTH_RECOVERY_FORM_VALIDATION_COPY.passwordTooShort;
+    return getRecoveryPasswordTooShortMessage(AUTH_RECOVERY_VALIDATION_RULES.minPasswordLength);
   }
 
   if (normalizedPassword !== normalizedConfirmPassword) {
