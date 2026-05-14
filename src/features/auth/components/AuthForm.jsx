@@ -13,11 +13,9 @@ import {
   getPasswordAutocomplete,
   isSignUpAuthFormMode,
 } from "../authFormCopy.js";
+import { AUTH_FORM_FEEDBACK_IDS } from "../authFormIds.js";
 import { getAuthFormValidationError } from "../authFormValidation.js";
 import { signInWithEmail, signUpWithEmail } from "../authService.js";
-
-const AUTH_FORM_ERROR_ID = "auth-form-error";
-const AUTH_FORM_STATUS_ID = "auth-form-status";
 
 export default function AuthForm() {
   const [mode, setMode] = useState(AUTH_FORM_MODES.signIn);
@@ -31,7 +29,11 @@ export default function AuthForm() {
   const isSignUp = isSignUpAuthFormMode(mode);
   const modeCopy = getAuthFormCopy(mode);
   const passwordAutocomplete = getPasswordAutocomplete(mode);
-  const feedbackDescriptionId = error ? AUTH_FORM_ERROR_ID : status ? AUTH_FORM_STATUS_ID : undefined;
+  const feedbackDescriptionId = error
+    ? AUTH_FORM_FEEDBACK_IDS.error
+    : status
+      ? AUTH_FORM_FEEDBACK_IDS.status
+      : undefined;
   const passwordToggleLabel = showPassword ? "Hide password" : "Show password";
   const hasAuthFormError = Boolean(error);
 
@@ -140,7 +142,7 @@ export default function AuthForm() {
 
             {error ? (
               <div
-                id={AUTH_FORM_ERROR_ID}
+                id={AUTH_FORM_FEEDBACK_IDS.error}
                 className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B]"
                 role="alert"
               >
@@ -150,7 +152,7 @@ export default function AuthForm() {
 
             {status ? (
               <div
-                id={AUTH_FORM_STATUS_ID}
+                id={AUTH_FORM_FEEDBACK_IDS.status}
                 className="rounded-xl border border-green-200 bg-[#DCFCE7] px-3 py-2 text-sm text-[#166534]"
                 role="status"
                 aria-live="polite"
