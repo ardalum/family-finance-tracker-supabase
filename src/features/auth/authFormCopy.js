@@ -27,5 +27,9 @@ export function getAuthFormCopy(mode) {
 }
 
 export function getNextAuthFormMode(mode) {
-  return mode === AUTH_FORM_MODES.signUp ? AUTH_FORM_MODES.signIn : AUTH_FORM_MODES.signUp;
+  return isSignUpAuthFormMode(mode) ? AUTH_FORM_MODES.signIn : AUTH_FORM_MODES.signUp;
+}
+
+export function isSignUpAuthFormMode(mode) {
+  return mode === AUTH_FORM_MODES.signUp;
 }
