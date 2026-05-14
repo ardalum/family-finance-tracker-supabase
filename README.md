@@ -2,6 +2,12 @@
 
 A Vite + React personal finance tracker backed by Supabase. The app supports Supabase Auth, household setup, household profiles, credit card tracking, monthly card balances, budgets, spending, recurring payments, dashboard views, Supabase JSON backup/import, Excel export, and account deletion through a Supabase Edge Function.
 
+## Project Docs
+
+- `docs/local-workflow.md` covers Node version, install commands, local checks, pull request routine, and project checks.
+- `docs/frontend-architecture-plan.md` tracks the frontend architecture cleanup plan.
+- `docs/auth-session-qa.md` contains the authentication and session QA checklist.
+
 ## Install
 
 Install dependencies:
