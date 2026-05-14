@@ -1,4 +1,4 @@
-import { updateAppData } from "../../lib/storage/appStorage";
+import { updateAppData } from "../../lib/storage/appStorage.js";
 
 function createId(prefix) {
   return `${prefix}_${crypto.randomUUID()}`;
