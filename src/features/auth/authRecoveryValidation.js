@@ -29,3 +29,12 @@ export function isRecoveryFormValid(values = {}) {
 export function isRecoveryFormInvalid(values = {}) {
   return !isRecoveryFormValid(values);
 }
+
+export function getRecoveryFormValidationResult(values = {}) {
+  const error = getRecoveryFormValidationError(values);
+
+  return {
+    error,
+    isValid: !error,
+  };
+}
