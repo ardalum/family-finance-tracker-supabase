@@ -10,6 +10,7 @@ import {
   AUTH_FORM_STATUS_COPY,
   getAuthFormCopy,
   getNextAuthFormMode,
+  isSignUpAuthFormMode,
 } from "../authFormCopy.js";
 import { signInWithEmail, signUpWithEmail } from "../authService.js";
 
@@ -22,7 +23,7 @@ export default function AuthForm() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const isSignUp = mode === AUTH_FORM_MODES.signUp;
+  const isSignUp = isSignUpAuthFormMode(mode);
   const modeCopy = getAuthFormCopy(mode);
 
   async function handleSubmit(event) {
