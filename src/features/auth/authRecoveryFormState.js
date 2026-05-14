@@ -6,3 +6,7 @@ export function getInitialRecoveryFormState() {
     showConfirmValue: false,
   };
 }
+
+export function getResetRecoveryFormState() {
+  return getInitialRecoveryFormState();
+}
