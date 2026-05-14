@@ -7,6 +7,11 @@ export const AUTH_FORM_MODES = {
   signUp: "sign-up",
 };
 
+const PASSWORD_AUTOCOMPLETE_VALUES = {
+  current: "current-password",
+  new: "new-password",
+};
+
 const authFormCopy = {
   [AUTH_FORM_MODES.signIn]: {
     title: "Sign in",
@@ -28,6 +33,10 @@ export function getAuthFormCopy(mode) {
 
 export function getNextAuthFormMode(mode) {
   return isSignUpAuthFormMode(mode) ? AUTH_FORM_MODES.signIn : AUTH_FORM_MODES.signUp;
+}
+
+export function getPasswordAutocomplete(mode) {
+  return isSignUpAuthFormMode(mode) ? PASSWORD_AUTOCOMPLETE_VALUES.new : PASSWORD_AUTOCOMPLETE_VALUES.current;
 }
 
 export function isSignUpAuthFormMode(mode) {
