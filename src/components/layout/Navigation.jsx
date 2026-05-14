@@ -1,52 +1,6 @@
-import {
-  CalendarSync,
-  ChartNoAxesCombined,
-  CreditCard,
-  LayoutDashboard,
-  ReceiptText,
-  WalletCards,
-} from "lucide-react";
 import { useEffect, useState } from "react";
 import { NAVIGATE_EVENT } from "../../lib/navigationTargets.js";
-
-const navItems = [
-  {
-    id: "dashboard",
-    label: "Dashboard",
-    shortLabel: "Home",
-    icon: LayoutDashboard,
-  },
-  {
-    id: "credit-cards",
-    label: "Credit Cards",
-    shortLabel: "Cards",
-    icon: CreditCard,
-  },
-  {
-    id: "budgets",
-    label: "Monthly Budget",
-    shortLabel: "Budget",
-    icon: WalletCards,
-  },
-  {
-    id: "spending",
-    label: "Transactions",
-    shortLabel: "Txns",
-    icon: ReceiptText,
-  },
-  {
-    id: "recurring",
-    label: "Recurring Payments",
-    shortLabel: "Bills",
-    icon: CalendarSync,
-  },
-  {
-    id: "insights",
-    label: "Insights",
-    shortLabel: "Insights",
-    icon: ChartNoAxesCombined,
-  },
-];
+import { navItems } from "./navigationItems.js";
 
 export default function Navigation({ activeView, onChange }) {
   const [hoveredId, setHoveredId] = useState("");
