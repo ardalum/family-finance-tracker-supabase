@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1",
     "test": "node --test",
-    "test:run": "node --test"
+    "test:run": "node --test",
+    "verify": "npm run build && npm run test:run"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.4",
