@@ -45,6 +45,10 @@ export default function AuthForm() {
     resetAuthFormFeedback();
   }
 
+  function handleEmailBlur() {
+    setEmail((currentEmail) => currentEmail.trim());
+  }
+
   function handlePasswordChange(event) {
     setPassword(event.target.value);
     resetAuthFormFeedback();
@@ -161,7 +165,7 @@ export default function AuthForm() {
               autoComplete="email"
               value={email}
               onChange={handleEmailChange}
-              onBlur={() => setEmail((currentEmail) => currentEmail.trim())}
+              onBlur={handleEmailBlur}
               aria-describedby={feedbackDescriptionId}
               aria-invalid={hasAuthFormError}
               disabled={isSubmitting}
