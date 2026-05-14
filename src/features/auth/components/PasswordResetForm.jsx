@@ -3,6 +3,7 @@ import { useState } from "react";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import Input from "../../../components/ui/Input.jsx";
+import { getRecoveryFormValidationError } from "../authRecoveryValidation.js";
 
 const PASSWORD_RESET_FORM_FEEDBACK_ID = "password-reset-form-feedback";
 
@@ -39,13 +40,10 @@ export default function PasswordResetForm() {
     event.preventDefault();
     resetFeedback();
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
-      return;
-    }
+    const validationError = getRecoveryFormValidationError({ password, confirmPassword });
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
