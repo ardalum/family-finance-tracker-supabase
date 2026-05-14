@@ -54,6 +54,11 @@ export default function AuthForm() {
     setShowPassword((current) => !current);
   }
 
+  function handleModeSwitch() {
+    setMode((currentMode) => getNextAuthFormMode(currentMode));
+    resetAuthFormFeedback();
+  }
+
   function prepareAuthFormSubmit() {
     const normalizedEmail = email.trim();
     const validationError = getAuthFormValidationError({ email: normalizedEmail, password, mode });
@@ -195,10 +200,7 @@ export default function AuthForm() {
             <Button
               type="button"
               variant="ghost"
-              onClick={() => {
-                setMode((currentMode) => getNextAuthFormMode(currentMode));
-                resetAuthFormFeedback();
-              }}
+              onClick={handleModeSwitch}
               disabled={isSubmitting}
             >
               {modeCopy.switchModeLabel}
