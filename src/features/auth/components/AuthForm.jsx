@@ -33,6 +33,7 @@ export default function AuthForm() {
   const passwordAutocomplete = getPasswordAutocomplete(mode);
   const feedbackDescriptionId = error ? AUTH_FORM_ERROR_ID : status ? AUTH_FORM_STATUS_ID : undefined;
   const passwordToggleLabel = showPassword ? "Hide password" : "Show password";
+  const hasAuthFormError = Boolean(error);
 
   function resetAuthFormFeedback() {
     setError("");
@@ -157,6 +158,7 @@ export default function AuthForm() {
               onChange={handleEmailChange}
               onBlur={() => setEmail((currentEmail) => currentEmail.trim())}
               aria-describedby={feedbackDescriptionId}
+              aria-invalid={hasAuthFormError}
               disabled={isSubmitting}
               required
             />
@@ -169,6 +171,7 @@ export default function AuthForm() {
                 onChange={handlePasswordChange}
                 minLength={6}
                 aria-describedby={feedbackDescriptionId}
+                aria-invalid={hasAuthFormError}
                 disabled={isSubmitting}
                 required
               />
