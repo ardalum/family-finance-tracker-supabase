@@ -5,6 +5,7 @@ import Card from "../../../components/ui/Card.jsx";
 import Input from "../../../components/ui/Input.jsx";
 import { isSupabaseConfigured } from "../../../lib/supabase/client.js";
 import { getFriendlyAuthError } from "../authErrors.js";
+import { getAuthFormCopy } from "../authFormCopy.js";
 import { signInWithEmail, signUpWithEmail } from "../authService.js";
 
 export default function AuthForm() {
@@ -17,9 +18,7 @@ export default function AuthForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isSignUp = mode === "sign-up";
-  const authModeDescription = isSignUp
-    ? "Create an account to start managing your household finance tracker."
-    : "Sign in to continue to your household finance tracker.";
+  const modeCopy = getAuthFormCopy(mode);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -64,9 +63,9 @@ export default function AuthForm() {
           <form className="grid gap-4 p-5" onSubmit={handleSubmit}>
             <div>
               <h2 className="text-lg font-semibold tracking-normal text-[#111827]">
-                {isSignUp ? "Create account" : "Sign in"}
+                {modeCopy.title}
               </h2>
-              <p className="mt-1 text-sm text-[#6B7280]">{authModeDescription}</p>
+              <p className="mt-1 text-sm text-[#6B7280]">{modeCopy.description}</p>
             </div>
 
             {!isSupabaseConfigured ? (
@@ -120,7 +119,7 @@ export default function AuthForm() {
             </div>
 
             <Button type="submit" disabled={isSubmitting || !isSupabaseConfigured}>
-              {isSubmitting ? "Working..." : isSignUp ? "Create account" : "Sign in"}
+              {isSubmitting ? "Working..." : modeCopy.submitLabel}
             </Button>
 
             <Button
@@ -133,7 +132,7 @@ export default function AuthForm() {
               }}
               disabled={isSubmitting}
             >
-              {isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up"}
+              {modeCopy.switchModeLabel}
             </Button>
           </form>
         </Card>
