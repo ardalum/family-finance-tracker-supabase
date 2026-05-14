@@ -44,6 +44,10 @@ export default function AuthForm() {
     resetAuthFormFeedback();
   }
 
+  function handlePasswordVisibilityToggle() {
+    setShowPassword((current) => !current);
+  }
+
   function prepareAuthFormSubmit() {
     const normalizedEmail = email.trim();
     const validationError = getAuthFormValidationError({ email: normalizedEmail, password, mode });
@@ -152,7 +156,7 @@ export default function AuthForm() {
               <button
                 type="button"
                 className="inline-flex w-fit items-center gap-1.5 rounded-lg px-1 text-xs font-semibold text-[#6B7280] transition hover:text-[#111827] disabled:cursor-not-allowed disabled:opacity-50"
-                onClick={() => setShowPassword((current) => !current)}
+                onClick={handlePasswordVisibilityToggle}
                 aria-pressed={showPassword}
                 disabled={isSubmitting}
               >
