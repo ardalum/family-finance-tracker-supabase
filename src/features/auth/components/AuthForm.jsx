@@ -16,6 +16,9 @@ import {
 import { getAuthFormValidationError } from "../authFormValidation.js";
 import { signInWithEmail, signUpWithEmail } from "../authService.js";
 
+const AUTH_FORM_ERROR_ID = "auth-form-error";
+const AUTH_FORM_STATUS_ID = "auth-form-status";
+
 export default function AuthForm() {
   const [mode, setMode] = useState(AUTH_FORM_MODES.signIn);
   const [email, setEmail] = useState("");
@@ -28,6 +31,7 @@ export default function AuthForm() {
   const isSignUp = isSignUpAuthFormMode(mode);
   const modeCopy = getAuthFormCopy(mode);
   const passwordAutocomplete = getPasswordAutocomplete(mode);
+  const feedbackDescriptionId = error ? AUTH_FORM_ERROR_ID : status ? AUTH_FORM_STATUS_ID : undefined;
 
   function resetAuthFormFeedback() {
     setError("");
@@ -125,6 +129,7 @@ export default function AuthForm() {
 
             {error ? (
               <div
+                id={AUTH_FORM_ERROR_ID}
                 className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B]"
                 role="alert"
               >
@@ -134,6 +139,7 @@ export default function AuthForm() {
 
             {status ? (
               <div
+                id={AUTH_FORM_STATUS_ID}
                 className="rounded-xl border border-green-200 bg-[#DCFCE7] px-3 py-2 text-sm text-[#166534]"
                 role="status"
                 aria-live="polite"
@@ -149,6 +155,7 @@ export default function AuthForm() {
               value={email}
               onChange={handleEmailChange}
               onBlur={() => setEmail((currentEmail) => currentEmail.trim())}
+              aria-describedby={feedbackDescriptionId}
               disabled={isSubmitting}
               required
             />
@@ -160,6 +167,7 @@ export default function AuthForm() {
                 value={password}
                 onChange={handlePasswordChange}
                 minLength={6}
+                aria-describedby={feedbackDescriptionId}
                 disabled={isSubmitting}
                 required
               />
