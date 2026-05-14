@@ -14,6 +14,8 @@ export async function submitRecoveryForm({ password } = {}) {
   const { primaryValue } = getNormalizedRecoveryFormValues({ primaryValue: password });
   void primaryValue;
 
+  completeRecoveryUrlStep();
+
   return createRecoverySubmitResult({
     status: AUTH_RECOVERY_FORM_STATUS_COPY.placeholderSuccess,
   });
