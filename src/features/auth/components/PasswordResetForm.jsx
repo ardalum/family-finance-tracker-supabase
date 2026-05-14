@@ -3,8 +3,10 @@ import { useState } from "react";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import Input from "../../../components/ui/Input.jsx";
+import { getFriendlyAuthError } from "../authErrors.js";
 import {
   AUTH_RECOVERY_FORM_COPY,
+  AUTH_RECOVERY_FORM_ERROR_COPY,
   AUTH_RECOVERY_FORM_STATUS_COPY,
   getRecoveryConfirmPasswordToggleLabel,
   getRecoveryPasswordToggleLabel,
@@ -58,6 +60,8 @@ export default function PasswordResetForm() {
     try {
       const result = await submitRecoveryForm({ password });
       setStatus(result.status);
+    } catch (currentError) {
+      setError(getFriendlyAuthError(currentError, AUTH_RECOVERY_FORM_ERROR_COPY.submitFailed));
     } finally {
       setIsSubmitting(false);
     }
