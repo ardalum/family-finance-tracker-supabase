@@ -1,5 +1,5 @@
 import { supabase } from "../../lib/supabase/client.js";
-import { getSignUpConfirmationRedirectUrl } from "./authEmailRedirects.js";
+import { getPasswordResetRedirectUrl, getSignUpConfirmationRedirectUrl } from "./authEmailRedirects.js";
 
 function requireSupabase() {
   if (!supabase) {
@@ -43,6 +43,16 @@ export async function signUpWithEmail({ email, password }) {
 export async function signInWithEmail({ email, password }) {
   const client = requireSupabase();
   const { data, error } = await client.auth.signInWithPassword({ email, password });
+
+  if (error) throw error;
+  return data;
+}
+
+export async function requestPasswordReset({ email }) {
+  const client = requireSupabase();
+  const { data, error } = await client.auth.resetPasswordForEmail(email, {
+    redirectTo: getPasswordResetRedirectUrl(email),
+  });
 
   if (error) throw error;
   return data;
