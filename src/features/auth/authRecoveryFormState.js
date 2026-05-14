@@ -10,3 +10,7 @@ export function getInitialRecoveryFormState() {
 export function getResetRecoveryFormState() {
   return getInitialRecoveryFormState();
 }
+
+export function isRecoveryFormStateEmpty({ primaryValue = "", confirmValue = "" } = {}) {
+  return !primaryValue && !confirmValue;
+}
