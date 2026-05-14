@@ -5,7 +5,7 @@ import Card from "../../../components/ui/Card.jsx";
 import Input from "../../../components/ui/Input.jsx";
 import { isSupabaseConfigured } from "../../../lib/supabase/client.js";
 import { getFriendlyAuthError } from "../authErrors.js";
-import { AUTH_FORM_STATUS_COPY, getAuthFormCopy } from "../authFormCopy.js";
+import { AUTH_FORM_STATUS_COPY, getAuthFormCopy, getNextAuthFormMode } from "../authFormCopy.js";
 import { signInWithEmail, signUpWithEmail } from "../authService.js";
 
 export default function AuthForm() {
@@ -126,7 +126,7 @@ export default function AuthForm() {
               type="button"
               variant="ghost"
               onClick={() => {
-                setMode(isSignUp ? "sign-in" : "sign-up");
+                setMode((currentMode) => getNextAuthFormMode(currentMode));
                 setError("");
                 setStatus("");
               }}
