@@ -5,7 +5,7 @@ import Card from "../../../components/ui/Card.jsx";
 import Input from "../../../components/ui/Input.jsx";
 import { isSupabaseConfigured } from "../../../lib/supabase/client.js";
 import { getFriendlyAuthError } from "../authErrors.js";
-import { getAuthFormCopy } from "../authFormCopy.js";
+import { AUTH_FORM_STATUS_COPY, getAuthFormCopy } from "../authFormCopy.js";
 import { signInWithEmail, signUpWithEmail } from "../authService.js";
 
 export default function AuthForm() {
@@ -30,7 +30,7 @@ export default function AuthForm() {
       if (isSignUp) {
         const result = await signUpWithEmail({ email, password });
         if (!result.session) {
-          setStatus("Account created. Check your email to confirm your address and finish setup.");
+          setStatus(AUTH_FORM_STATUS_COPY.signUpConfirmation);
         }
       } else {
         await signInWithEmail({ email, password });
