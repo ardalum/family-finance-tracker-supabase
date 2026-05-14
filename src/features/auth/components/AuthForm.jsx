@@ -26,10 +26,14 @@ export default function AuthForm() {
   const isSignUp = isSignUpAuthFormMode(mode);
   const modeCopy = getAuthFormCopy(mode);
 
-  async function handleSubmit(event) {
-    event.preventDefault();
+  function resetAuthFormFeedback() {
     setError("");
     setStatus("");
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    resetAuthFormFeedback();
     setIsSubmitting(true);
 
     try {
@@ -133,8 +137,7 @@ export default function AuthForm() {
               variant="ghost"
               onClick={() => {
                 setMode((currentMode) => getNextAuthFormMode(currentMode));
-                setError("");
-                setStatus("");
+                resetAuthFormFeedback();
               }}
               disabled={isSubmitting}
             >
