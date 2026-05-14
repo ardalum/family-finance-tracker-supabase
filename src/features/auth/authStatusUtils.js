@@ -59,6 +59,17 @@ export function getAuthStatusScreenProps(location = getWindowLocation()) {
   };
 }
 
+export function hasAuthStatusUrlState(location = getWindowLocation()) {
+  if (!location) return false;
+
+  const searchParams = new URLSearchParams(location.search || "");
+  const hashParams = getHashParams(location.hash || "");
+
+  return [AUTH_STATUS_PARAM, AUTH_MESSAGE_PARAM, AUTH_EMAIL_PARAM, AUTH_TYPE_PARAM].some(
+    (paramName) => searchParams.has(paramName) || hashParams.has(paramName),
+  );
+}
+
 export function hasPasswordResetCallback(location = getWindowLocation()) {
   if (!location) return false;
 
