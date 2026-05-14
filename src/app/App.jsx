@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AppShell from "../components/layout/AppShell.jsx";
+import AppProviders from "./AppProviders.jsx";
 import AboutWalletFlow from "../features/about/components/AboutWalletFlow.jsx";
-import { AuthProvider } from "../features/auth/AuthProvider.jsx";
 import AccountMenu from "../features/auth/components/AccountMenu.jsx";
-import AuthGate from "../features/auth/components/AuthGate.jsx";
 import BackupRestore from "../features/backup/components/BackupRestore.jsx";
 import BudgetTracker from "../features/budgets/components/BudgetTracker.jsx";
 import {
@@ -27,7 +26,6 @@ import {
 } from "../features/creditCards/monthlyBalancesSupabaseService.js";
 import Dashboard from "../features/dashboard/components/Dashboard.jsx";
 import { useHouseholds } from "../features/households/HouseholdProvider.jsx";
-import HouseholdGate from "../features/households/components/HouseholdGate.jsx";
 import HouseholdSettings from "../features/households/components/HouseholdSettings.jsx";
 import HouseholdSwitcher from "../features/households/components/HouseholdSwitcher.jsx";
 import Insights from "../features/insights/components/Insights.jsx";
@@ -113,13 +111,9 @@ const ACTIVE_VIEW_KEY = "personalFinanceApp:activeView:v1";
 
 export default function App() {
   return (
-    <AuthProvider>
-      <AuthGate>
-        <HouseholdGate>
-          <FinanceTrackerApp />
-        </HouseholdGate>
-      </AuthGate>
-    </AuthProvider>
+    <AppProviders>
+      <FinanceTrackerApp />
+    </AppProviders>
   );
 }
 
