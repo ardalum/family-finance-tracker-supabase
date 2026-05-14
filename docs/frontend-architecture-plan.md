@@ -29,6 +29,10 @@ The app passes shared finance objects across many files. Shared types would make
 - Added a frontend architecture plan.
 - Added Node test scripts.
 - Added a verify script.
+- Added GitHub Actions checks.
+- Added local workflow documentation.
+- Added repo config guardrails for Node, npm engines, editor settings, Git attributes, and ignored files.
+- Added `.env.example`.
 - Added tests for date, dashboard alert, spending, recurring, credit card, page content, active view, view group, setup status, and async state helpers.
 - Added `pageContent.js`.
 - Added `activeViewStorage.js`.
@@ -39,9 +43,25 @@ The app passes shared finance objects across many files. Shared types would make
 - Added `useLocalAppData.js`.
 - Added `asyncStateUtils.js`.
 
+## Pull request sizing guidance
+
+Prefer grouped, focused pull requests.
+
+Good pull request scope examples:
+
+- one feature hook extraction
+- one app shell wiring pass
+- one grouped tooling update
+- one grouped documentation update
+- one focused UI cleanup
+
+Very small pull requests are still acceptable when the risk is high, the file is difficult to edit safely, or the change needs to be isolated for review.
+
+Avoid mixing unrelated changes, such as UI redesign, data service changes, migrations, and documentation-only edits in one pull request.
+
 ## Next App.jsx wiring order
 
-Use very small PRs because `App.jsx` is large and easy to break.
+Use focused PRs because `App.jsx` is large and easy to break.
 
 1. Wire `AppProviders.jsx` into `App.jsx` and remove the direct provider/gate imports.
 2. Wire `pageContent.js` into `App.jsx` and remove the inline page content object.
@@ -53,7 +73,7 @@ Use very small PRs because `App.jsx` is large and easy to break.
 ## Recommended order
 
 1. Add lint and format tooling.
-2. Wire existing app helper modules into `App.jsx` in small PRs.
+2. Wire existing app helper modules into `App.jsx` in focused PRs.
 3. Extract feature-level data hooks from `App.jsx` one feature at a time.
 4. Improve refresh behavior after mutations.
 5. Add shared finance data types.
