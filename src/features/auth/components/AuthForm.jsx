@@ -13,6 +13,7 @@ import {
   getPasswordAutocomplete,
   isSignUpAuthFormMode,
 } from "../authFormCopy.js";
+import { getAuthFormValidationError } from "../authFormValidation.js";
 import { signInWithEmail, signUpWithEmail } from "../authService.js";
 
 export default function AuthForm() {
@@ -36,6 +37,13 @@ export default function AuthForm() {
   async function handleSubmit(event) {
     event.preventDefault();
     resetAuthFormFeedback();
+
+    const validationError = getAuthFormValidationError({ email, password, mode });
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
