@@ -57,7 +57,7 @@ Do not commit `.env.local`.
 
 ## Check commands
 
-Run these before merging code changes:
+For code, config, dependency, workflow, or behavior changes, run these before merging:
 
 ```bash
 npm run build
@@ -68,6 +68,8 @@ npm run dev
 
 `npm run verify` runs the build and test commands together.
 
+For documentation-only changes, local app testing is not usually needed. GitHub Actions checks are enough unless the documentation change includes commands that should be manually verified.
+
 ## Pull request routine
 
 Use the pull request template and include:
@@ -75,7 +77,7 @@ Use the pull request template and include:
 - summary
 - changes
 - testing checklist
-- local commands
+- local commands when local testing is needed
 
 Prefer focused pull requests, not one-line pull requests for every tiny repo setting.
 
