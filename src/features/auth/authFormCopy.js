@@ -1,6 +1,8 @@
 export const AUTH_FORM_STATUS_COPY = {
   signUpConfirmation: "Account created. Check your email to confirm your address and finish setup.",
+  passwordResetRequested: "Check your email for a password reset link.",
   submitting: "Working...",
+  sendingResetLink: "Sending reset link...",
 };
 
 export const AUTH_FORM_MODES = {
@@ -19,12 +21,14 @@ const authFormCopy = {
     description: "Sign in to continue to your household finance tracker.",
     submitLabel: "Sign in",
     switchModeLabel: "Need an account? Sign up",
+    resetPasswordLabel: "Forgot password?",
   },
   [AUTH_FORM_MODES.signUp]: {
     title: "Create account",
     description: "Create an account to start managing your household finance tracker.",
     submitLabel: "Create account",
     switchModeLabel: "Already have an account? Sign in",
+    resetPasswordLabel: "",
   },
 };
 
