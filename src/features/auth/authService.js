@@ -58,6 +58,14 @@ export async function requestPasswordReset({ email }) {
   return data;
 }
 
+export async function updateAuthUser(attributes) {
+  const client = requireSupabase();
+  const { data, error } = await client.auth.updateUser(attributes);
+
+  if (error) throw error;
+  return data;
+}
+
 export async function signOut() {
   const client = requireSupabase();
   const { error } = await client.auth.signOut();
