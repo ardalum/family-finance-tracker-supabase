@@ -10,3 +10,12 @@ export function getSignUpConfirmationRedirectUrl(email = "") {
     }),
   );
 }
+
+export function getPasswordResetRedirectUrl(email = "") {
+  return getAuthRedirectUrl(
+    buildAuthStatusPath({
+      status: AUTH_STATUS_TYPES.resetPassword,
+      email,
+    }),
+  );
+}
