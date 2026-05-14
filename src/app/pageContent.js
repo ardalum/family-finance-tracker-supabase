@@ -42,7 +42,7 @@ export const pageContent = {
 };
 
 export function getPageContent(view, fallbackView = "dashboard") {
-  return pageContent[view] ?? pageContent[fallbackView];
+  return pageContent[view] ?? pageContent[fallbackView] ?? pageContent.dashboard;
 }
 
 export function isKnownPageView(view) {
