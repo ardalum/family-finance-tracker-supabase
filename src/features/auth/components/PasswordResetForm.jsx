@@ -3,6 +3,12 @@ import { useState } from "react";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import Input from "../../../components/ui/Input.jsx";
+import {
+  AUTH_RECOVERY_FORM_COPY,
+  AUTH_RECOVERY_FORM_STATUS_COPY,
+  getRecoveryConfirmPasswordToggleLabel,
+  getRecoveryPasswordToggleLabel,
+} from "../authRecoveryCopy.js";
 import { getRecoveryFormValidationError } from "../authRecoveryValidation.js";
 
 const PASSWORD_RESET_FORM_FEEDBACK_ID = "password-reset-form-feedback";
@@ -16,10 +22,8 @@ export default function PasswordResetForm() {
   const [status, setStatus] = useState("");
 
   const hasFeedback = Boolean(error || status);
-  const passwordToggleLabel = showPassword ? "Hide new password" : "Show new password";
-  const confirmPasswordToggleLabel = showConfirmPassword
-    ? "Hide confirm password"
-    : "Show confirm password";
+  const passwordToggleLabel = getRecoveryPasswordToggleLabel(showPassword);
+  const confirmPasswordToggleLabel = getRecoveryConfirmPasswordToggleLabel(showConfirmPassword);
 
   function resetFeedback() {
     setError("");
@@ -47,7 +51,7 @@ export default function PasswordResetForm() {
       return;
     }
 
-    setStatus("Password update UI is ready. The secure update service will be connected in the next PR.");
+    setStatus(AUTH_RECOVERY_FORM_STATUS_COPY.placeholderSuccess);
   }
 
   return (
@@ -63,7 +67,7 @@ export default function PasswordResetForm() {
               <span className="text-[#1F2937]">Wallet</span>
               <span className="text-[#10B981]">Flow</span>
             </h1>
-            <p className="text-sm text-[#6B7280]">Create a new password for your account.</p>
+            <p className="text-sm text-[#6B7280]">{AUTH_RECOVERY_FORM_COPY.brandDescription}</p>
           </div>
         </div>
 
@@ -73,10 +77,10 @@ export default function PasswordResetForm() {
               <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#DCFCE7] text-[#166534]">
                 <KeyRound size={20} aria-hidden="true" />
               </div>
-              <h2 className="text-lg font-semibold tracking-normal text-[#111827]">Reset your password</h2>
-              <p className="mt-1 text-sm text-[#6B7280]">
-                Enter a new password below. You will use this password the next time you sign in.
-              </p>
+              <h2 className="text-lg font-semibold tracking-normal text-[#111827]">
+                {AUTH_RECOVERY_FORM_COPY.title}
+              </h2>
+              <p className="mt-1 text-sm text-[#6B7280]">{AUTH_RECOVERY_FORM_COPY.description}</p>
             </div>
 
             {error ? (
@@ -102,7 +106,7 @@ export default function PasswordResetForm() {
 
             <div className="grid gap-1.5">
               <Input
-                label="New password"
+                label={AUTH_RECOVERY_FORM_COPY.passwordLabel}
                 type={showPassword ? "text" : "password"}
                 autoComplete="new-password"
                 value={password}
@@ -126,7 +130,7 @@ export default function PasswordResetForm() {
 
             <div className="grid gap-1.5">
               <Input
-                label="Confirm new password"
+                label={AUTH_RECOVERY_FORM_COPY.confirmPasswordLabel}
                 type={showConfirmPassword ? "text" : "password"}
                 autoComplete="new-password"
                 value={confirmPassword}
@@ -148,7 +152,7 @@ export default function PasswordResetForm() {
               </button>
             </div>
 
-            <Button type="submit">Continue</Button>
+            <Button type="submit">{AUTH_RECOVERY_FORM_COPY.submitLabel}</Button>
           </form>
         </Card>
       </div>
