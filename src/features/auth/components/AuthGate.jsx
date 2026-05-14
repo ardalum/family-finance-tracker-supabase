@@ -1,8 +1,11 @@
 import { useAuth } from "../AuthProvider.jsx";
+import { hasPasswordResetCallback } from "../authStatusUtils.js";
 import AuthForm from "./AuthForm.jsx";
+import PasswordResetForm from "./PasswordResetForm.jsx";
 
 export default function AuthGate({ children }) {
   const { session, loading, error } = useAuth();
+  const shouldShowPasswordResetForm = Boolean(session) && hasPasswordResetCallback();
 
   if (loading) {
     return (
@@ -23,6 +26,10 @@ export default function AuthGate({ children }) {
         <AuthForm />
       </>
     );
+  }
+
+  if (shouldShowPasswordResetForm) {
+    return <PasswordResetForm />;
   }
 
   return children;
