@@ -10,6 +10,7 @@ import {
   AUTH_FORM_STATUS_COPY,
   getAuthFormCopy,
   getNextAuthFormMode,
+  getPasswordAutocomplete,
   isSignUpAuthFormMode,
 } from "../authFormCopy.js";
 import { signInWithEmail, signUpWithEmail } from "../authService.js";
@@ -25,6 +26,7 @@ export default function AuthForm() {
 
   const isSignUp = isSignUpAuthFormMode(mode);
   const modeCopy = getAuthFormCopy(mode);
+  const passwordAutocomplete = getPasswordAutocomplete(mode);
 
   function resetAuthFormFeedback() {
     setError("");
@@ -109,7 +111,7 @@ export default function AuthForm() {
               <Input
                 label="Password"
                 type={showPassword ? "text" : "password"}
-                autoComplete={isSignUp ? "new-password" : "current-password"}
+                autoComplete={passwordAutocomplete}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 minLength={6}
