@@ -3,6 +3,7 @@ import { AUTH_STATUS_TYPES } from "./authViewTargets.js";
 const AUTH_STATUS_PARAM = "authStatus";
 const AUTH_MESSAGE_PARAM = "message";
 const AUTH_EMAIL_PARAM = "email";
+const AUTH_TYPE_PARAM = "type";
 
 const statusAliases = {
   confirm: AUTH_STATUS_TYPES.inbox,
@@ -20,6 +21,8 @@ const statusAliases = {
   problem: AUTH_STATUS_TYPES.problem,
   error: AUTH_STATUS_TYPES.problem,
 };
+
+const resetCallbackTypes = new Set(["recovery", "reset", "reset-password", "resetpassword"]);
 
 export function getAuthStatusFromLocation(location = getWindowLocation()) {
   if (!location) return null;
@@ -54,6 +57,19 @@ export function getAuthStatusScreenProps(location = getWindowLocation()) {
     email: authStatus.email,
     message: authStatus.message,
   };
+}
+
+export function hasPasswordResetCallback(location = getWindowLocation()) {
+  if (!location) return false;
+
+  const searchParams = new URLSearchParams(location.search || "");
+  const hashParams = getHashParams(location.hash || "");
+  const status = normalizeAuthStatus(searchParams.get(AUTH_STATUS_PARAM) || hashParams.get(AUTH_STATUS_PARAM));
+  const type = String(searchParams.get(AUTH_TYPE_PARAM) || hashParams.get(AUTH_TYPE_PARAM) || "")
+    .trim()
+    .toLowerCase();
+
+  return status === AUTH_STATUS_TYPES.resetPassword || resetCallbackTypes.has(type);
 }
 
 export function normalizeAuthStatus(status) {
