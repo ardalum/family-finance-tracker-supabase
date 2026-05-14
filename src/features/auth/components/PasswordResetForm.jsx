@@ -9,9 +9,8 @@ import {
   getRecoveryConfirmPasswordToggleLabel,
   getRecoveryPasswordToggleLabel,
 } from "../authRecoveryCopy.js";
+import { AUTH_RECOVERY_FORM_FEEDBACK_IDS } from "../authRecoveryIds.js";
 import { getRecoveryFormValidationError } from "../authRecoveryValidation.js";
-
-const PASSWORD_RESET_FORM_FEEDBACK_ID = "password-reset-form-feedback";
 
 export default function PasswordResetForm() {
   const [password, setPassword] = useState("");
@@ -23,6 +22,7 @@ export default function PasswordResetForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const hasFeedback = Boolean(error || status);
+  const feedbackDescriptionId = hasFeedback ? AUTH_RECOVERY_FORM_FEEDBACK_IDS.feedback : undefined;
   const passwordToggleLabel = getRecoveryPasswordToggleLabel(showPassword);
   const confirmPasswordToggleLabel = getRecoveryConfirmPasswordToggleLabel(showConfirmPassword);
 
@@ -88,7 +88,7 @@ export default function PasswordResetForm() {
 
             {error ? (
               <div
-                id={PASSWORD_RESET_FORM_FEEDBACK_ID}
+                id={AUTH_RECOVERY_FORM_FEEDBACK_IDS.feedback}
                 className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B]"
                 role="alert"
               >
@@ -98,7 +98,7 @@ export default function PasswordResetForm() {
 
             {status ? (
               <div
-                id={PASSWORD_RESET_FORM_FEEDBACK_ID}
+                id={AUTH_RECOVERY_FORM_FEEDBACK_IDS.feedback}
                 className="rounded-xl border border-green-200 bg-[#DCFCE7] px-3 py-2 text-sm text-[#166534]"
                 role="status"
                 aria-live="polite"
@@ -115,7 +115,7 @@ export default function PasswordResetForm() {
                 value={password}
                 onChange={handlePasswordChange}
                 minLength={6}
-                aria-describedby={hasFeedback ? PASSWORD_RESET_FORM_FEEDBACK_ID : undefined}
+                aria-describedby={feedbackDescriptionId}
                 aria-invalid={Boolean(error)}
                 disabled={isSubmitting}
                 required
@@ -141,7 +141,7 @@ export default function PasswordResetForm() {
                 value={confirmPassword}
                 onChange={handleConfirmPasswordChange}
                 minLength={6}
-                aria-describedby={hasFeedback ? PASSWORD_RESET_FORM_FEEDBACK_ID : undefined}
+                aria-describedby={feedbackDescriptionId}
                 aria-invalid={Boolean(error)}
                 disabled={isSubmitting}
                 required
