@@ -21,6 +21,10 @@ export const AUTH_RECOVERY_FORM_VALIDATION_COPY = {
   passwordsDoNotMatch: "Passwords do not match.",
 };
 
+export function getRecoveryPasswordTooShortMessage(minPasswordLength) {
+  return `Password must be at least ${minPasswordLength} characters.`;
+}
+
 export function getRecoveryPasswordToggleLabel(isVisible) {
   return isVisible ? "Hide new password" : "Show new password";
 }
