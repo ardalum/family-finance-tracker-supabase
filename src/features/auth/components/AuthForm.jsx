@@ -38,22 +38,25 @@ export default function AuthForm() {
     event.preventDefault();
     resetAuthFormFeedback();
 
-    const validationError = getAuthFormValidationError({ email, password, mode });
+    const normalizedEmail = email.trim();
+    const validationError = getAuthFormValidationError({ email: normalizedEmail, password, mode });
     if (validationError) {
       setError(validationError);
+      setEmail(normalizedEmail);
       return;
     }
 
+    setEmail(normalizedEmail);
     setIsSubmitting(true);
 
     try {
       if (isSignUp) {
-        const result = await signUpWithEmail({ email, password });
+        const result = await signUpWithEmail({ email: normalizedEmail, password });
         if (!result.session) {
           setStatus(AUTH_FORM_STATUS_COPY.signUpConfirmation);
         }
       } else {
-        await signInWithEmail({ email, password });
+        await signInWithEmail({ email: normalizedEmail, password });
       }
     } catch (currentError) {
       setError(getFriendlyAuthError(currentError, "Authentication failed."));
@@ -112,6 +115,7 @@ export default function AuthForm() {
               autoComplete="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
+              onBlur={() => setEmail((currentEmail) => currentEmail.trim())}
               disabled={isSubmitting}
               required
             />
