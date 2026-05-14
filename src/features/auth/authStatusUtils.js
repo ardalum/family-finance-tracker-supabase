@@ -72,6 +72,17 @@ export function hasPasswordResetCallback(location = getWindowLocation()) {
   return status === AUTH_STATUS_TYPES.resetPassword || resetCallbackTypes.has(type);
 }
 
+export function getAuthStatusUrlCleanupPath(location = getWindowLocation()) {
+  if (!location) return "";
+
+  return `${location.pathname || ""}${location.hash && !location.hash.includes("access_token") ? location.hash : ""}`;
+}
+
+export function replaceAuthStatusUrl(nextPath = getAuthStatusUrlCleanupPath()) {
+  if (typeof window === "undefined" || !nextPath) return;
+  window.history.replaceState({}, document.title, nextPath);
+}
+
 export function normalizeAuthStatus(status) {
   if (!status) return "";
 
