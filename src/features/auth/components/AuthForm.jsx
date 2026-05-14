@@ -32,6 +32,7 @@ export default function AuthForm() {
   const modeCopy = getAuthFormCopy(mode);
   const passwordAutocomplete = getPasswordAutocomplete(mode);
   const feedbackDescriptionId = error ? AUTH_FORM_ERROR_ID : status ? AUTH_FORM_STATUS_ID : undefined;
+  const passwordToggleLabel = showPassword ? "Hide password" : "Show password";
 
   function resetAuthFormFeedback() {
     setError("");
@@ -175,11 +176,12 @@ export default function AuthForm() {
                 type="button"
                 className="inline-flex w-fit items-center gap-1.5 rounded-lg px-1 text-xs font-semibold text-[#6B7280] transition hover:text-[#111827] disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={handlePasswordVisibilityToggle}
+                aria-label={passwordToggleLabel}
                 aria-pressed={showPassword}
                 disabled={isSubmitting}
               >
                 {showPassword ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
-                {showPassword ? "Hide password" : "Show password"}
+                {passwordToggleLabel}
               </button>
             </div>
 
