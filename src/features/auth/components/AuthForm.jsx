@@ -5,11 +5,16 @@ import Card from "../../../components/ui/Card.jsx";
 import Input from "../../../components/ui/Input.jsx";
 import { isSupabaseConfigured } from "../../../lib/supabase/client.js";
 import { getFriendlyAuthError } from "../authErrors.js";
-import { AUTH_FORM_STATUS_COPY, getAuthFormCopy, getNextAuthFormMode } from "../authFormCopy.js";
+import {
+  AUTH_FORM_MODES,
+  AUTH_FORM_STATUS_COPY,
+  getAuthFormCopy,
+  getNextAuthFormMode,
+} from "../authFormCopy.js";
 import { signInWithEmail, signUpWithEmail } from "../authService.js";
 
 export default function AuthForm() {
-  const [mode, setMode] = useState("sign-in");
+  const [mode, setMode] = useState(AUTH_FORM_MODES.signIn);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -17,7 +22,7 @@ export default function AuthForm() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const isSignUp = mode === "sign-up";
+  const isSignUp = mode === AUTH_FORM_MODES.signUp;
   const modeCopy = getAuthFormCopy(mode);
 
   async function handleSubmit(event) {
