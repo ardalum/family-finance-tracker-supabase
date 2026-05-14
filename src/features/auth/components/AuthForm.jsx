@@ -34,19 +34,28 @@ export default function AuthForm() {
     setStatus("");
   }
 
+  function prepareAuthFormSubmit() {
+    const normalizedEmail = email.trim();
+    const validationError = getAuthFormValidationError({ email: normalizedEmail, password, mode });
+
+    setEmail(normalizedEmail);
+
+    return {
+      normalizedEmail,
+      validationError,
+    };
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
     resetAuthFormFeedback();
 
-    const normalizedEmail = email.trim();
-    const validationError = getAuthFormValidationError({ email: normalizedEmail, password, mode });
+    const { normalizedEmail, validationError } = prepareAuthFormSubmit();
     if (validationError) {
       setError(validationError);
-      setEmail(normalizedEmail);
       return;
     }
 
-    setEmail(normalizedEmail);
     setIsSubmitting(true);
 
     try {
