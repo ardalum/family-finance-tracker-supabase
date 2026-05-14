@@ -56,7 +56,7 @@ export default function PasswordResetForm() {
     setIsSubmitting(true);
 
     try {
-      const result = await submitRecoveryForm();
+      const result = await submitRecoveryForm({ password });
       setStatus(result.status);
     } finally {
       setIsSubmitting(false);
