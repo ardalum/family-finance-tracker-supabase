@@ -56,6 +56,10 @@ describe("page content config", () => {
     assert.deepEqual(getPageContent("missing-view", "about"), pageContent.about);
   });
 
+  it("falls back to dashboard content when the custom fallback view is unknown", () => {
+    assert.deepEqual(getPageContent("missing-view", "also-missing"), pageContent.dashboard);
+  });
+
   it("detects known page views", () => {
     assert.equal(isKnownPageView("dashboard"), true);
     assert.equal(isKnownPageView("household-settings"), true);
