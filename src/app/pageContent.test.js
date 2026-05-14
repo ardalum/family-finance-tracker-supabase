@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { appViewGroups, primaryFinanceViewIds, secondaryViewIds } from "./secondaryViews.js";
 import { getPageContent, isKnownPageView, pageContent } from "./pageContent.js";
 
 describe("page content config", () => {
@@ -10,6 +11,37 @@ describe("page content config", () => {
     assert.equal(pageContent.spending.title, "Transactions");
     assert.equal(pageContent.recurring.title, "Recurring Payments");
     assert.equal(pageContent.insights.title, "Insights");
+  });
+
+  it("contains page content for every main finance view", () => {
+    for (const viewId of primaryFinanceViewIds) {
+      const content = pageContent[viewId];
+
+      assert.ok(content, `${viewId} is missing page content`);
+      assert.equal(typeof content.title, "string");
+      assert.equal(typeof content.description, "string");
+      assert.notEqual(content.title.trim(), "");
+      assert.notEqual(content.description.trim(), "");
+    }
+  });
+
+  it("contains page content for every utility view", () => {
+    for (const viewId of secondaryViewIds) {
+      const content = pageContent[viewId];
+
+      assert.ok(content, `${viewId} is missing page content`);
+      assert.equal(typeof content.title, "string");
+      assert.equal(typeof content.description, "string");
+      assert.notEqual(content.title.trim(), "");
+      assert.notEqual(content.description.trim(), "");
+    }
+  });
+
+  it("keeps all grouped views represented in page content", () => {
+    const groupedViewIds = [...appViewGroups.primary, ...appViewGroups.secondary];
+    const pageContentViewIds = Object.keys(pageContent);
+
+    assert.deepEqual([...groupedViewIds].sort(), [...pageContentViewIds].sort());
   });
 
   it("gets page content for a known view", () => {
