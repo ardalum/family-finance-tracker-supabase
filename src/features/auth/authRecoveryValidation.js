@@ -1,9 +1,12 @@
 export function getRecoveryFormValidationError({ password = "", confirmPassword = "" } = {}) {
-  if (password.length < 6) {
+  const normalizedPassword = String(password).trim();
+  const normalizedConfirmPassword = String(confirmPassword).trim();
+
+  if (normalizedPassword.length < 6) {
     return "Password must be at least 6 characters.";
   }
 
-  if (password !== confirmPassword) {
+  if (normalizedPassword !== normalizedConfirmPassword) {
     return "Passwords do not match.";
   }
 
