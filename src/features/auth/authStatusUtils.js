@@ -89,8 +89,8 @@ export function getAuthStatusUrlCleanupPath(location = getWindowLocation()) {
   return `${location.pathname || ""}${location.hash && !location.hash.includes("access_token") ? location.hash : ""}`;
 }
 
-export function replaceAuthStatusUrl(nextPath = getAuthStatusUrlCleanupPath()) {
-  if (typeof window === "undefined" || !nextPath) return;
+export function replaceAuthStatusUrl(nextPath = getAuthStatusUrlCleanupPath(), location = getWindowLocation()) {
+  if (typeof window === "undefined" || !nextPath || !hasAuthStatusUrlState(location)) return;
   window.history.replaceState({}, document.title, nextPath);
 }
 
