@@ -12,6 +12,10 @@ export const AUTH_RECOVERY_FORM_STATUS_COPY = {
   submitting: "Updating password...",
 };
 
+export const AUTH_RECOVERY_FORM_ERROR_COPY = {
+  submitFailed: "Could not update password.",
+};
+
 export function getRecoveryPasswordToggleLabel(isVisible) {
   return isVisible ? "Hide new password" : "Show new password";
 }
