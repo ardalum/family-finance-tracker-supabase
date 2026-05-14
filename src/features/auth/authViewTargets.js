@@ -6,6 +6,7 @@ export const AUTH_VIEW_TARGETS = Object.freeze({
 export const AUTH_STATUS_TYPES = Object.freeze({
   inbox: "inbox",
   verified: "verified",
+  resetPassword: "resetPassword",
   signedOut: "signedOut",
   problem: "problem",
 });
