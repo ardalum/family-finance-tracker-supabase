@@ -13,6 +13,8 @@ export function createAppViewProps({
   monthlyBalancesError,
   householdProfiles,
   householdProfilesLoading,
+  householdProfilesSaving,
+  householdProfilesError,
   supabaseBudgets,
   selectedBudgetMonth,
   budgetsLoading,
