@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AppShell from "../components/layout/AppShell.jsx";
 import AppProviders from "./AppProviders.jsx";
+import AppHeaderAccountSlot from "./AppHeaderAccountSlot.jsx";
+import { AppSetupErrorMessage, AppSetupLoadingScreen } from "./AppStatusMessages.jsx";
 import {
   getInitialSetupStatusState,
   getSetupStatusErrorMessage,
@@ -18,7 +20,6 @@ import {
 import { useActiveView } from "./useActiveView.js";
 import { useLocalAppData } from "./useLocalAppData.js";
 import AboutWalletFlow from "../features/about/components/AboutWalletFlow.jsx";
-import AccountMenu from "../features/auth/components/AccountMenu.jsx";
 import BackupRestore from "../features/backup/components/BackupRestore.jsx";
 import BudgetTracker from "../features/budgets/components/BudgetTracker.jsx";
 import {
@@ -43,7 +44,6 @@ import {
 import Dashboard from "../features/dashboard/components/Dashboard.jsx";
 import { useHouseholds } from "../features/households/HouseholdProvider.jsx";
 import HouseholdSettings from "../features/households/components/HouseholdSettings.jsx";
-import HouseholdSwitcher from "../features/households/components/HouseholdSwitcher.jsx";
 import Insights from "../features/insights/components/Insights.jsx";
 import {
   addHouseholdProfile,
@@ -75,7 +75,6 @@ import {
   listTransactions,
   updateTransactionInSupabase,
 } from "../features/spending/spendingSupabaseService.js";
-import AlertsMenu from "../features/dashboard/components/AlertsMenu.jsx";
 import { getAlerts, getDashboardData } from "../features/dashboard/dashboardUtils.js";
 import { getCurrentMonthKey } from "../lib/dates.js";
 
@@ -1167,11 +1166,7 @@ function FinanceTrackerApp() {
   );
 
   if (setupCheckLoading) {
-    return (
-      <div className="grid min-h-screen place-items-center bg-[#F9FAFB] px-4 text-sm text-[#6B7280]">
-        Checking setup...
-      </div>
-    );
+    return <AppSetupLoadingScreen />;
   }
 
   if (!activeHousehold?.setupComplete) {
@@ -1198,19 +1193,9 @@ function FinanceTrackerApp() {
       onViewChange={setActiveView}
       pageTitle={currentPage.title}
       pageDescription={currentPage.description}
-      accountSlot={
-        <>
-          <HouseholdSwitcher />
-          <AlertsMenu alerts={headerAlerts} />
-          <AccountMenu onNavigate={setActiveView} />
-        </>
-      }
+      accountSlot={<AppHeaderAccountSlot alerts={headerAlerts} onNavigate={setActiveView} />}
     >
-      {setupCheckError ? (
-        <div className="mb-4 rounded-xl border border-amber-200 bg-[#FEF3C7] px-3 py-2 text-sm text-[#92400E]">
-          {setupCheckError}
-        </div>
-      ) : null}
+      <AppSetupErrorMessage error={setupCheckError} />
 
       {activeView === "dashboard" ? (
         <Dashboard
