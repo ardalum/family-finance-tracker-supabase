@@ -8,6 +8,7 @@ import {
   shouldSkipSetupStatusCheck,
 } from "./setupStatusUtils.js";
 import {
+  createAllSupabaseRefreshers,
   createDashboardInsightsRefreshers,
   createRecurringDashboardInsightsRefreshers,
   createRecurringSpendingDashboardInsightsRefreshers,
@@ -1080,16 +1081,30 @@ function FinanceTrackerApp() {
   }, [activeHouseholdId, appData.recurringPayments, loadDashboardData, loadInsightsData, loadRecurringData, recurringCategories, supabaseCreditCards]);
 
   const refreshSupabaseDataAfterImport = useCallback(async () => {
-    await loadSupabaseCreditCards();
-    await loadSupabaseMonthlyBalances();
-    await loadSupabaseBudgets();
-    await loadSpendingCategories();
-    await loadSpendingTransactions();
-    await loadDashboardData();
-    await loadInsightsData();
-    await loadRecurringCategories();
-    await loadRecurringData();
-  }, [loadDashboardData, loadInsightsData, loadRecurringCategories, loadRecurringData, loadSpendingCategories, loadSpendingTransactions, loadSupabaseBudgets, loadSupabaseCreditCards, loadSupabaseMonthlyBalances]);
+    await runRefreshSequence(
+      createAllSupabaseRefreshers({
+        loadSupabaseCreditCards,
+        loadSupabaseMonthlyBalances,
+        loadSupabaseBudgets,
+        loadSpendingCategories,
+        loadSpendingTransactions,
+        loadDashboardData,
+        loadInsightsData,
+        loadRecurringCategories,
+        loadRecurringData,
+      }),
+    );
+  }, [
+    loadDashboardData,
+    loadInsightsData,
+    loadRecurringCategories,
+    loadRecurringData,
+    loadSpendingCategories,
+    loadSpendingTransactions,
+    loadSupabaseBudgets,
+    loadSupabaseCreditCards,
+    loadSupabaseMonthlyBalances,
+  ]);
 
   const finishFirstTimeSetup = useCallback(async () => {
     await completeActiveHouseholdSetup();
