@@ -3,6 +3,7 @@ import AppProviders from "./AppProviders.jsx";
 import { AppSetupLoadingScreen } from "./AppStatusMessages.jsx";
 import AppFirstTimeSetupScreen from "./AppFirstTimeSetupScreen.jsx";
 import AppShellFrame from "./AppShellFrame.jsx";
+import AppViewRenderer from "./AppViewRenderer.jsx";
 import {
   getInitialSetupStatusState,
   getSetupStatusErrorMessage,
@@ -20,9 +21,6 @@ import {
 import { createDashboardAppData, createInsightsAppData } from "./appDataComposition.js";
 import { useActiveView } from "./useActiveView.js";
 import { useLocalAppData } from "./useLocalAppData.js";
-import AboutWalletFlow from "../features/about/components/AboutWalletFlow.jsx";
-import BackupRestore from "../features/backup/components/BackupRestore.jsx";
-import BudgetTracker from "../features/budgets/components/BudgetTracker.jsx";
 import {
   addBudgetCategoryToSupabase,
   deleteBudgetCategoryFromSupabase,
@@ -31,7 +29,6 @@ import {
   updateBudgetCategoryInSupabase,
 } from "../features/budgets/budgetsSupabaseService.js";
 import { defaultBudgetCategories } from "../features/budgets/budgetDefaults.js";
-import CreditCardTracker from "../features/creditCards/components/CreditCardTracker.jsx";
 import {
   addCreditCardToSupabase,
   deleteCreditCardFromSupabase,
@@ -42,10 +39,7 @@ import {
   listAllMonthlyBalances,
   upsertMonthlyBalance,
 } from "../features/creditCards/monthlyBalancesSupabaseService.js";
-import Dashboard from "../features/dashboard/components/Dashboard.jsx";
 import { useHouseholds } from "../features/households/HouseholdProvider.jsx";
-import HouseholdSettings from "../features/households/components/HouseholdSettings.jsx";
-import Insights from "../features/insights/components/Insights.jsx";
 import {
   addHouseholdProfile,
   createDefaultHouseholdProfiles,
@@ -53,7 +47,6 @@ import {
   listHouseholdProfiles,
   updateHouseholdProfile,
 } from "../features/households/householdProfilesService.js";
-import RecurringPayments from "../features/recurring/components/RecurringPayments.jsx";
 import {
   addRecurringPaymentToSupabase,
   deleteRecurringPaymentFromSupabase,
@@ -65,9 +58,7 @@ import {
   skipRecurringPaymentInSupabase,
   updateRecurringPaymentInSupabase,
 } from "../features/recurring/recurringSupabaseService.js";
-import AppSettings from "../features/settings/components/AppSettings.jsx";
 import { householdHasFinanceData } from "../features/setup/setupService.js";
-import SpendingTracker from "../features/spending/components/SpendingTracker.jsx";
 import {
   addTransactionToSupabase,
   deleteTransactionFromSupabase,
@@ -1166,22 +1157,22 @@ function FinanceTrackerApp() {
   }
 
   if (!activeHousehold?.setupComplete) {
-  return (
-    <AppFirstTimeSetupScreen
-      householdProfiles={householdProfiles}
-      householdProfilesLoading={householdProfilesLoading}
-      householdProfilesSaving={householdProfilesSaving}
-      onCreateProfile={createHouseholdProfile}
-      onUpdateProfile={saveHouseholdProfile}
-      onDeactivateProfile={deactivateProfile}
-      onCreateCard={createSupabaseCreditCard}
-      creditCardsSaving={creditCardsSaving}
-      onAddDefaultBudgets={addDefaultBudgetsToSupabase}
-      budgetsSaving={budgetsSaving}
-      onFinish={finishFirstTimeSetup}
-    />
-  );
-}
+    return (
+      <AppFirstTimeSetupScreen
+        householdProfiles={householdProfiles}
+        householdProfilesLoading={householdProfilesLoading}
+        householdProfilesSaving={householdProfilesSaving}
+        onCreateProfile={createHouseholdProfile}
+        onUpdateProfile={saveHouseholdProfile}
+        onDeactivateProfile={deactivateProfile}
+        onCreateCard={createSupabaseCreditCard}
+        creditCardsSaving={creditCardsSaving}
+        onAddDefaultBudgets={addDefaultBudgetsToSupabase}
+        budgetsSaving={budgetsSaving}
+        onFinish={finishFirstTimeSetup}
+      />
+    );
+  }
 
   return (
   <AppShellFrame
@@ -1192,133 +1183,109 @@ function FinanceTrackerApp() {
     onViewChange={setActiveView}
   >
 
-      {activeView === "dashboard" ? (
-        <Dashboard
-          appData={dashboardAppData}
-          selectedMonth={selectedDashboardMonth}
-          onMonthChange={setSelectedDashboardMonth}
-          loading={dashboardLoading}
-          error={dashboardError}
-        />
-      ) : null}
-
-      {activeView === "credit-cards" ? (
-        <CreditCardTracker
-          creditCards={supabaseCreditCards}
-          monthlyBalances={supabaseMonthlyBalances}
-          selectedBalanceMonth={selectedBalanceMonth}
-          loading={creditCardsLoading}
-          error={creditCardsError}
-          isSaving={creditCardsSaving}
-          monthlyBalancesLoading={monthlyBalancesLoading}
-          monthlyBalancesSaving={monthlyBalancesSaving}
-          monthlyBalancesError={monthlyBalancesError}
-          householdProfiles={householdProfiles}
-          householdProfilesLoading={householdProfilesLoading}
-          onCreateCard={createSupabaseCreditCard}
-          onUpdateCard={updateSupabaseCreditCard}
-          onDeleteCard={deleteSupabaseCreditCard}
-          onBalanceMonthChange={setSelectedBalanceMonth}
-          onMonthlyBalanceChange={saveSupabaseMonthlyBalance}
-          onDataChange={refreshData}
-        />
-      ) : null}
-
-      {activeView === "budgets" ? (
-        <BudgetTracker
-          budgets={supabaseBudgets}
-          localBudgetsByMonth={appData.budgetsByMonth}
-          selectedMonth={selectedBudgetMonth}
-          loading={budgetsLoading}
-          error={budgetsError}
-          isSaving={budgetsSaving}
-          onMonthChange={setSelectedBudgetMonth}
-          onCreateBudget={createSupabaseBudget}
-          onUpdateBudget={updateSupabaseBudget}
-          onDeleteBudget={deleteSupabaseBudget}
-          onAddDefaultBudgets={addDefaultBudgetsToSupabase}
-          onImportLocalBudgets={importLocalBudgetsToSupabase}
-        />
-      ) : null}
-
-      {activeView === "spending" ? (
-        <SpendingTracker
-          creditCards={supabaseCreditCards}
-          categories={spendingCategories}
-          transactions={spendingTransactions}
-          localTransactions={appData.transactions}
-          selectedMonth={selectedSpendingMonth}
-          loading={spendingLoading}
-          error={spendingError}
-          isSaving={spendingSaving}
-          categoriesLoading={spendingCategoriesLoading}
-          categoriesError={spendingCategoriesError}
-          onMonthChange={setSelectedSpendingMonth}
-          onCreateTransaction={createSupabaseTransaction}
-          onUpdateTransaction={updateSupabaseTransaction}
-          onDeleteTransaction={deleteSupabaseTransaction}
-          onImportLocalTransactions={importLocalSpendingToSupabase}
-        />
-      ) : null}
-
-      {activeView === "recurring" ? (
-        <RecurringPayments
-          creditCards={supabaseCreditCards}
-          categories={recurringCategories}
-          recurringPayments={recurringPayments}
-          recurringStatusByMonth={recurringStatusByMonth}
-          transactions={recurringTransactions}
-          localRecurringPayments={appData.recurringPayments}
-          selectedMonth={selectedRecurringMonth}
-          loading={recurringLoading}
-          error={recurringError}
-          isSaving={recurringSaving}
-          categoriesLoading={recurringCategoriesLoading}
-          categoriesError={recurringCategoriesError}
-          onMonthChange={setSelectedRecurringMonth}
-          onCreateRecurringPayment={createSupabaseRecurringPayment}
-          onUpdateRecurringPayment={updateSupabaseRecurringPayment}
-          onDeleteRecurringPayment={deleteSupabaseRecurringPayment}
-          onMarkRecurringPaid={markSupabaseRecurringPaid}
-          onMarkRecurringUnpaid={markSupabaseRecurringUnpaid}
-          onSkipRecurringPayment={skipSupabaseRecurringPayment}
-          onImportLocalRecurringPayments={importLocalRecurringToSupabase}
-        />
-      ) : null}
-
-      {activeView === "insights" ? (
-        <Insights
-          appData={insightsAppData}
-          selectedMonth={selectedInsightsMonth}
-          onMonthChange={setSelectedInsightsMonth}
-          loading={insightsLoading}
-          error={insightsError}
-        />
-      ) : null}
-
-      {activeView === "backup" ? (
-        <BackupRestore
-          onDataChange={refreshData}
-          onSupabaseImportComplete={refreshSupabaseDataAfterImport}
-        />
-      ) : null}
-
-      {activeView === "household-settings" ? (
-        <HouseholdSettings
-          householdProfiles={householdProfiles}
-          householdProfilesLoading={householdProfilesLoading}
-          householdProfilesSaving={householdProfilesSaving}
-          householdProfilesError={householdProfilesError}
-          onCreateProfile={createHouseholdProfile}
-          onUpdateProfile={saveHouseholdProfile}
-          onDeactivateProfile={deactivateProfile}
-          onCreateDefaultProfiles={addDefaultProfiles}
-        />
-      ) : null}
-
-      {activeView === "app-settings" ? <AppSettings /> : null}
-
-      {activeView === "about" ? <AboutWalletFlow /> : null}
+      <AppViewRenderer
+        activeView={activeView}
+        dashboardProps={{
+          appData: dashboardAppData,
+          selectedMonth: selectedDashboardMonth,
+          onMonthChange: setSelectedDashboardMonth,
+          loading: dashboardLoading,
+          error: dashboardError,
+        }}
+        creditCardProps={{
+          creditCards: supabaseCreditCards,
+          monthlyBalances: supabaseMonthlyBalances,
+          selectedBalanceMonth,
+          loading: creditCardsLoading,
+          error: creditCardsError,
+          isSaving: creditCardsSaving,
+          monthlyBalancesLoading,
+          monthlyBalancesSaving,
+          monthlyBalancesError,
+          householdProfiles,
+          householdProfilesLoading,
+          onCreateCard: createSupabaseCreditCard,
+          onUpdateCard: updateSupabaseCreditCard,
+          onDeleteCard: deleteSupabaseCreditCard,
+          onBalanceMonthChange: setSelectedBalanceMonth,
+          onMonthlyBalanceChange: saveSupabaseMonthlyBalance,
+          onDataChange: refreshData,
+        }}
+        budgetProps={{
+          budgets: supabaseBudgets,
+          localBudgetsByMonth: appData.budgetsByMonth,
+          selectedMonth: selectedBudgetMonth,
+          loading: budgetsLoading,
+          error: budgetsError,
+          isSaving: budgetsSaving,
+          onMonthChange: setSelectedBudgetMonth,
+          onCreateBudget: createSupabaseBudget,
+          onUpdateBudget: updateSupabaseBudget,
+          onDeleteBudget: deleteSupabaseBudget,
+          onAddDefaultBudgets: addDefaultBudgetsToSupabase,
+          onImportLocalBudgets: importLocalBudgetsToSupabase,
+        }}
+        spendingProps={{
+          creditCards: supabaseCreditCards,
+          categories: spendingCategories,
+          transactions: spendingTransactions,
+          localTransactions: appData.transactions,
+          selectedMonth: selectedSpendingMonth,
+          loading: spendingLoading,
+          error: spendingError,
+          isSaving: spendingSaving,
+          categoriesLoading: spendingCategoriesLoading,
+          categoriesError: spendingCategoriesError,
+          onMonthChange: setSelectedSpendingMonth,
+          onCreateTransaction: createSupabaseTransaction,
+          onUpdateTransaction: updateSupabaseTransaction,
+          onDeleteTransaction: deleteSupabaseTransaction,
+          onImportLocalTransactions: importLocalSpendingToSupabase,
+        }}
+        recurringProps={{
+          creditCards: supabaseCreditCards,
+          categories: recurringCategories,
+          recurringPayments,
+          recurringStatusByMonth,
+          transactions: recurringTransactions,
+          localRecurringPayments: appData.recurringPayments,
+          selectedMonth: selectedRecurringMonth,
+          loading: recurringLoading,
+          error: recurringError,
+          isSaving: recurringSaving,
+          categoriesLoading: recurringCategoriesLoading,
+          categoriesError: recurringCategoriesError,
+          onMonthChange: setSelectedRecurringMonth,
+          onCreateRecurringPayment: createSupabaseRecurringPayment,
+          onUpdateRecurringPayment: updateSupabaseRecurringPayment,
+          onDeleteRecurringPayment: deleteSupabaseRecurringPayment,
+          onMarkRecurringPaid: markSupabaseRecurringPaid,
+          onMarkRecurringUnpaid: markSupabaseRecurringUnpaid,
+          onSkipRecurringPayment: skipSupabaseRecurringPayment,
+          onImportLocalRecurringPayments: importLocalRecurringToSupabase,
+        }}
+        insightsProps={{
+          appData: insightsAppData,
+          selectedMonth: selectedInsightsMonth,
+          onMonthChange: setSelectedInsightsMonth,
+          loading: insightsLoading,
+          error: insightsError,
+        }}
+        backupProps={{
+          onDataChange: refreshData,
+          onSupabaseImportComplete: refreshSupabaseDataAfterImport,
+        }}
+        householdSettingsProps={{
+          householdProfiles,
+          householdProfilesLoading,
+          householdProfilesSaving,
+          householdProfilesError,
+          onCreateProfile: createHouseholdProfile,
+          onUpdateProfile: saveHouseholdProfile,
+          onDeactivateProfile: deactivateProfile,
+          onCreateDefaultProfiles: addDefaultProfiles,
+        }}
+      />
       </AppShellFrame>
 );
 }
