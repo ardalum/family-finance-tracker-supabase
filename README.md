@@ -89,11 +89,13 @@ Run tests:
 npm.cmd run test:run
 ```
 
-Run build and tests together:
+Run the full project verification suite:
 
 ```powershell
 npm.cmd run verify
 ```
+
+`verify` runs formatting checks, production build, tests, and lint.
 
 Preview the production build locally:
 
@@ -190,9 +192,8 @@ After deployment, update Supabase Auth URL settings:
 
 ## Production Checklist
 
-- [ ] `npm.cmd run build` passes locally.
-- [ ] `npm.cmd run test:run` passes locally.
 - [ ] `npm.cmd run verify` passes locally.
+- [ ] `npm.cmd run dev` starts locally when browser behavior should be checked.
 - [ ] Supabase migrations have been applied to production.
 - [ ] RLS is enabled on all household finance tables.
 - [ ] `011_security_hardening.sql` has been applied and role permissions tested.
