@@ -15,7 +15,8 @@ export default function SpendingMigrationPanel({
   const [isImporting, setIsImporting] = useState(false);
 
   const localMonthTransactions = useMemo(
-    () => localTransactions.filter((transaction) => transaction.date?.startsWith(`${selectedMonth}-`)),
+    () =>
+      localTransactions.filter((transaction) => transaction.date?.startsWith(`${selectedMonth}-`)),
     [localTransactions, selectedMonth],
   );
 

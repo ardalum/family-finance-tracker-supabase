@@ -30,12 +30,9 @@ export function createRecurringSpendingDashboardInsightsRefreshers({
   loadDashboardData,
   loadInsightsData,
 } = {}) {
-  return [
-    loadRecurringData,
-    loadSpendingTransactions,
-    loadDashboardData,
-    loadInsightsData,
-  ].filter(Boolean);
+  return [loadRecurringData, loadSpendingTransactions, loadDashboardData, loadInsightsData].filter(
+    Boolean,
+  );
 }
 
 export function createAllSupabaseRefreshers({

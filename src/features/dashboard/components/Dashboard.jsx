@@ -1,5 +1,14 @@
 import { useMemo, useState } from "react";
-import { AlertTriangle, BarChart3, CheckCircle2, Clock3, CreditCard, ReceiptText, Repeat, WalletCards } from "lucide-react";
+import {
+  AlertTriangle,
+  BarChart3,
+  CheckCircle2,
+  Clock3,
+  CreditCard,
+  ReceiptText,
+  Repeat,
+  WalletCards,
+} from "lucide-react";
 import Card from "../../../components/ui/Card.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { buildMonthOptions, getCurrentMonthKey } from "../../../lib/dates.js";
@@ -78,15 +87,16 @@ export default function Dashboard({
   const data = useMemo(() => getDashboardData(appData, selectedMonth), [appData, selectedMonth]);
   const alerts = useMemo(() => getAlerts(data), [data]);
   const priorityAlerts = alerts.slice(0, 5);
-  const currentSection = dashboardSections.find((section) => section.id === activeSection) ?? dashboardSections[0];
+  const currentSection =
+    dashboardSections.find((section) => section.id === activeSection) ?? dashboardSections[0];
   const cardAttentionRows = data.cardRows.filter(
     (row) => row.hasPaymentDue && row.daysUntilDue <= 7,
   );
   const budgetAttentionRows = data.budgetRows.filter(
     (row) => row.remaining < 0 || row.percentUsed >= 90,
   );
-  const recurringAttentionRows = data.recurringRows.filter(
-    (row) => ["Past due", "Due now", "Due soon"].includes(row.displayStatus),
+  const recurringAttentionRows = data.recurringRows.filter((row) =>
+    ["Past due", "Due now", "Due soon"].includes(row.displayStatus),
   );
 
   const showAttention = activeSection === "attention" || activeSection === "all-sections";
@@ -101,10 +111,10 @@ export default function Dashboard({
             <h2 className="mt-1 text-2xl font-semibold tracking-normal text-text-main">
               {formatMonthLabel(selectedMonth)}
             </h2>
-            <p className="mt-1 text-sm text-text-muted">
-              What needs your attention right now.
-            </p>
-            {loading ? <p className="mt-2 text-sm text-text-muted">Loading dashboard data...</p> : null}
+            <p className="mt-1 text-sm text-text-muted">What needs your attention right now.</p>
+            {loading ? (
+              <p className="mt-2 text-sm text-text-muted">Loading dashboard data...</p>
+            ) : null}
             {error ? <p className="mt-2 text-sm font-medium text-status-danger">{error}</p> : null}
           </div>
           <Select
@@ -259,7 +269,8 @@ function DashboardPriorityPanel({ alerts, totalAlertCount }) {
         <div>
           <h3 className="text-base font-semibold text-text-main">Top alerts</h3>
           <p className="mt-1 text-sm text-text-muted">
-            Showing {alerts.length} of {totalAlertCount} item{totalAlertCount === 1 ? "" : "s"} that need attention.
+            Showing {alerts.length} of {totalAlertCount} item{totalAlertCount === 1 ? "" : "s"} that
+            need attention.
           </p>
         </div>
         <span className="inline-flex w-fit items-center gap-2 rounded-full bg-status-warningBg px-3 py-1 text-sm font-semibold text-status-warningDark">
@@ -269,12 +280,19 @@ function DashboardPriorityPanel({ alerts, totalAlertCount }) {
       </div>
       <div className="grid gap-2 p-4">
         {alerts.map((alert, index) => (
-          <div key={`${alert.category}-${alert.text}-${index}`} className="rounded-xl border border-app-border bg-app-background px-3 py-2">
+          <div
+            key={`${alert.category}-${alert.text}-${index}`}
+            className="rounded-xl border border-app-border bg-app-background px-3 py-2"
+          >
             <div className="flex flex-wrap items-center gap-2">
-              <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${alert.type === "danger" ? "bg-status-dangerBg text-status-danger" : "bg-status-warningBg text-status-warningDark"}`}>
+              <span
+                className={`rounded-full px-2 py-0.5 text-xs font-semibold ${alert.type === "danger" ? "bg-status-dangerBg text-status-danger" : "bg-status-warningBg text-status-warningDark"}`}
+              >
                 {alert.type === "danger" ? "Urgent" : "Warning"}
               </span>
-              <span className="text-xs font-semibold uppercase tracking-normal text-text-muted">{alert.category}</span>
+              <span className="text-xs font-semibold uppercase tracking-normal text-text-muted">
+                {alert.category}
+              </span>
             </div>
             <p className="mt-1 text-sm font-medium text-text-main">{alert.text}</p>
           </div>
@@ -294,7 +312,8 @@ function DashboardActivitySummary({ data }) {
         <div>
           <h3 className="text-base font-semibold text-text-main">Month activity snapshot</h3>
           <p className="mt-1 text-sm text-text-muted">
-            Current month totals based on budget, spending, recurring bills, and unpaid card balances.
+            Current month totals based on budget, spending, recurring bills, and unpaid card
+            balances.
           </p>
         </div>
       </div>
@@ -313,7 +332,9 @@ function ActivityMetric({ label, value, isCount = false }) {
   return (
     <div className="rounded-xl border border-app-border bg-app-background px-3 py-2">
       <p className="text-xs font-semibold uppercase tracking-normal text-text-muted">{label}</p>
-      <p className={`mt-1 text-lg font-semibold ${isNegativeMoney ? "text-status-danger" : "text-text-main"}`}>
+      <p
+        className={`mt-1 text-lg font-semibold ${isNegativeMoney ? "text-status-danger" : "text-text-main"}`}
+      >
         {isCount ? value : formatCurrency(value)}
       </p>
     </div>

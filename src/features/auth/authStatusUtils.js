@@ -75,7 +75,9 @@ export function hasPasswordResetCallback(location = getWindowLocation()) {
 
   const searchParams = new URLSearchParams(location.search || "");
   const hashParams = getHashParams(location.hash || "");
-  const status = normalizeAuthStatus(searchParams.get(AUTH_STATUS_PARAM) || hashParams.get(AUTH_STATUS_PARAM));
+  const status = normalizeAuthStatus(
+    searchParams.get(AUTH_STATUS_PARAM) || hashParams.get(AUTH_STATUS_PARAM),
+  );
   const type = String(searchParams.get(AUTH_TYPE_PARAM) || hashParams.get(AUTH_TYPE_PARAM) || "")
     .trim()
     .toLowerCase();
@@ -89,7 +91,10 @@ export function getAuthStatusUrlCleanupPath(location = getWindowLocation()) {
   return `${location.pathname || ""}${location.hash && !location.hash.includes("access_token") ? location.hash : ""}`;
 }
 
-export function replaceAuthStatusUrl(nextPath = getAuthStatusUrlCleanupPath(), location = getWindowLocation()) {
+export function replaceAuthStatusUrl(
+  nextPath = getAuthStatusUrlCleanupPath(),
+  location = getWindowLocation(),
+) {
   if (typeof window === "undefined" || !nextPath || !hasAuthStatusUrlState(location)) return;
   window.history.replaceState({}, document.title, nextPath);
 }
@@ -100,10 +105,18 @@ export function normalizeAuthStatus(status) {
   const normalized = String(status).trim();
   if (!normalized) return "";
 
-  return statusAliases[normalized] || statusAliases[normalized.toLowerCase()] || AUTH_STATUS_TYPES.problem;
+  return (
+    statusAliases[normalized] ||
+    statusAliases[normalized.toLowerCase()] ||
+    AUTH_STATUS_TYPES.problem
+  );
 }
 
-export function buildAuthStatusPath({ status = AUTH_STATUS_TYPES.inbox, email = "", message = "" } = {}) {
+export function buildAuthStatusPath({
+  status = AUTH_STATUS_TYPES.inbox,
+  email = "",
+  message = "",
+} = {}) {
   const params = new URLSearchParams();
   params.set(AUTH_STATUS_PARAM, normalizeAuthStatus(status) || AUTH_STATUS_TYPES.problem);
 

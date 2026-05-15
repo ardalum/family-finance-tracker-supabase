@@ -42,7 +42,9 @@ export default function RecurringPaymentTable({
         {templates.length === 0 ? (
           <div className="grid gap-3 p-8 text-center text-sm text-text-muted">
             <p className="font-semibold text-text-main">No recurring payment templates yet</p>
-            <p>Add bills like rent, utilities, insurance, subscriptions, and recurring card charges.</p>
+            <p>
+              Add bills like rent, utilities, insurance, subscriptions, and recurring card charges.
+            </p>
           </div>
         ) : (
           <div className="grid gap-3 p-4">
@@ -59,18 +61,25 @@ export default function RecurringPaymentTable({
                         <h4 className="min-w-0 text-base font-semibold text-text-main">
                           {template.name}
                         </h4>
-                        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${template.active ? "bg-status-successBg text-status-successDark ring-status-successBg" : "bg-app-muted text-text-muted ring-app-muted"}`}>
+                        <span
+                          className={`rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${template.active ? "bg-status-successBg text-status-successDark ring-status-successBg" : "bg-app-muted text-text-muted ring-app-muted"}`}
+                        >
                           {template.active ? "Active" : "Inactive"}
                         </span>
                       </div>
                       <p className="text-sm text-text-muted">
-                        {getCategoryName(template.categoryId, categories)} · {template.billType === "fixed" ? "Fixed" : "Variable"}
+                        {getCategoryName(template.categoryId, categories)} ·{" "}
+                        {template.billType === "fixed" ? "Fixed" : "Variable"}
                       </p>
                     </div>
 
                     <div className="text-left sm:text-right">
-                      <p className="text-lg font-semibold text-text-main">{formatCurrency(template.estimatedAmount)}</p>
-                      <p className="text-xs font-medium text-text-muted">Estimated monthly amount</p>
+                      <p className="text-lg font-semibold text-text-main">
+                        {formatCurrency(template.estimatedAmount)}
+                      </p>
+                      <p className="text-xs font-medium text-text-muted">
+                        Estimated monthly amount
+                      </p>
                     </div>
                   </div>
 
@@ -82,7 +91,11 @@ export default function RecurringPaymentTable({
                       <span>{template.paymentMethod}</span>
                       {template.paymentMethod === "Credit Card" ? (
                         <span className="truncate text-xs text-text-muted">
-                          {card ? <LinkedCardName card={card} /> : getCardName(template.cardId, cards)}
+                          {card ? (
+                            <LinkedCardName card={card} />
+                          ) : (
+                            getCardName(template.cardId, cards)
+                          )}
                         </span>
                       ) : null}
                     </TemplateDetail>
@@ -138,11 +151,15 @@ export default function RecurringPaymentTable({
           <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white shadow-xl">
             <div className="flex items-start justify-between gap-4 border-b border-gray-200 p-5">
               <div>
-                <h2 id="delete-recurring-template-title" className="text-lg font-semibold text-gray-950">
+                <h2
+                  id="delete-recurring-template-title"
+                  className="text-lg font-semibold text-gray-950"
+                >
                   Delete recurring template?
                 </h2>
                 <p className="mt-1 text-sm text-gray-500">
-                  This removes the bill template going forward. Existing transactions are not deleted here.
+                  This removes the bill template going forward. Existing transactions are not
+                  deleted here.
                 </p>
               </div>
               <button
@@ -159,7 +176,8 @@ export default function RecurringPaymentTable({
               <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-800">
                 <p className="font-semibold">{templatePendingDelete.name}</p>
                 <p className="mt-1">
-                  {formatCurrency(templatePendingDelete.estimatedAmount)} · Day {templatePendingDelete.dueDay} · {templatePendingDelete.paymentMethod}
+                  {formatCurrency(templatePendingDelete.estimatedAmount)} · Day{" "}
+                  {templatePendingDelete.dueDay} · {templatePendingDelete.paymentMethod}
                 </p>
               </div>
               <div className="flex flex-wrap justify-end gap-3">
@@ -171,12 +189,7 @@ export default function RecurringPaymentTable({
                 >
                   Cancel
                 </Button>
-                <Button
-                  type="button"
-                  variant="danger"
-                  onClick={confirmDelete}
-                  disabled={isSaving}
-                >
+                <Button type="button" variant="danger" onClick={confirmDelete} disabled={isSaving}>
                   <Trash2 size={16} aria-hidden="true" />
                   {isSaving ? "Deleting..." : "Delete template"}
                 </Button>

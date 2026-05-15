@@ -59,7 +59,8 @@ export default function CreditCardTracker({
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("monthly-balances");
   const activeCards = useMemo(() => creditCards.filter((card) => card.isActive), [creditCards]);
-  const currentSection = creditCardSections.find((section) => section.id === activeSection) ?? creditCardSections[0];
+  const currentSection =
+    creditCardSections.find((section) => section.id === activeSection) ?? creditCardSections[0];
 
   useEffect(() => {
     const target = consumeNavigationTarget("credit-cards");
@@ -84,19 +85,25 @@ export default function CreditCardTracker({
     setEditingCard(null);
   }, []);
 
-  const handleSave = useCallback(async (form, card) => {
-    if (card) {
-      await onUpdateCard(card.supabaseId ?? card.id, form);
-    } else {
-      await onCreateCard(form);
-    }
-    closeCardModal();
-  }, [onUpdateCard, onCreateCard, closeCardModal]);
+  const handleSave = useCallback(
+    async (form, card) => {
+      if (card) {
+        await onUpdateCard(card.supabaseId ?? card.id, form);
+      } else {
+        await onCreateCard(form);
+      }
+      closeCardModal();
+    },
+    [onUpdateCard, onCreateCard, closeCardModal],
+  );
 
-  const handleDelete = useCallback(async (card) => {
-    await onDeleteCard(card.supabaseId ?? card.id);
-    setEditingCard((current) => (current?.id === card.id ? null : current));
-  }, [onDeleteCard]);
+  const handleDelete = useCallback(
+    async (card) => {
+      await onDeleteCard(card.supabaseId ?? card.id);
+      setEditingCard((current) => (current?.id === card.id ? null : current));
+    },
+    [onDeleteCard],
+  );
 
   return (
     <section className="grid gap-6">
@@ -116,11 +123,7 @@ export default function CreditCardTracker({
         </div>
         <div className="flex flex-wrap items-center justify-end gap-3">
           {loading ? <div className="text-sm text-[#6B7280]">Loading credit cards...</div> : null}
-          <Button
-            type="button"
-            onClick={openAddModal}
-            disabled={loading || isSaving}
-          >
+          <Button type="button" onClick={openAddModal} disabled={loading || isSaving}>
             <Plus size={16} aria-hidden="true" />
             Add Credit Card
           </Button>

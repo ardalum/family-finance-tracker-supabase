@@ -53,7 +53,9 @@ export default function AlertsMenu({ alerts = [] }) {
           count > 0 ? "border-app-border bg-app-surface" : "border-app-border bg-app-surface"
         }`}
         onClick={() => setOpen((current) => !current)}
-        aria-label={count > 0 ? `${count} active alert${count === 1 ? "" : "s"}` : "No active alerts"}
+        aria-label={
+          count > 0 ? `${count} active alert${count === 1 ? "" : "s"}` : "No active alerts"
+        }
         aria-expanded={open}
       >
         <Bell size={18} aria-hidden="true" />
@@ -113,7 +115,11 @@ export default function AlertsMenu({ alerts = [] }) {
                     <X size={14} aria-hidden="true" />
                   </button>
                   <p className="text-xs font-semibold uppercase tracking-normal">
-                    {alert.type === "danger" ? "Critical" : alert.type === "info" ? "Info" : "Warning"}
+                    {alert.type === "danger"
+                      ? "Critical"
+                      : alert.type === "info"
+                        ? "Info"
+                        : "Warning"}
                   </p>
                   {alert.category ? (
                     <p className="mt-0.5 text-xs font-medium opacity-80">{alert.category}</p>

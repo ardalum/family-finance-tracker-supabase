@@ -120,8 +120,12 @@ export default function MonthlyBalanceTable({
                 {formatCurrency(unpaidTotal, { cents: true })}
               </span>
             </p>
-            {loading ? <p className="mt-2 text-sm text-text-muted">Loading monthly balances...</p> : null}
-            {saving ? <p className="mt-2 text-sm text-text-muted">Saving monthly balance...</p> : null}
+            {loading ? (
+              <p className="mt-2 text-sm text-text-muted">Loading monthly balances...</p>
+            ) : null}
+            {saving ? (
+              <p className="mt-2 text-sm text-text-muted">Saving monthly balance...</p>
+            ) : null}
             {error ? <p className="mt-2 text-sm font-medium text-status-danger">{error}</p> : null}
           </div>
           <div className="grid gap-3 sm:grid-cols-[160px_180px_auto] sm:items-end">
@@ -158,23 +162,31 @@ export default function MonthlyBalanceTable({
           <Input
             label="Search cards"
             value={filters.search}
-            onChange={(event) => setFilters((current) => ({ ...current, search: event.target.value }))}
+            onChange={(event) =>
+              setFilters((current) => ({ ...current, search: event.target.value }))
+            }
             placeholder="Card name, network, owner, or last 4"
           />
           <Select
             label="Owner"
             value={filters.owner}
-            onChange={(event) => setFilters((current) => ({ ...current, owner: event.target.value }))}
+            onChange={(event) =>
+              setFilters((current) => ({ ...current, owner: event.target.value }))
+            }
           >
             <option value="">All owners</option>
             {ownerOptions.map((owner) => (
-              <option key={owner} value={owner}>{owner}</option>
+              <option key={owner} value={owner}>
+                {owner}
+              </option>
             ))}
           </Select>
           <Select
             label="Status"
             value={filters.status}
-            onChange={(event) => setFilters((current) => ({ ...current, status: event.target.value }))}
+            onChange={(event) =>
+              setFilters((current) => ({ ...current, status: event.target.value }))
+            }
           >
             <option value="">All statuses</option>
             <option value="paid">Paid</option>
@@ -184,7 +196,8 @@ export default function MonthlyBalanceTable({
             <option value="no-balance">No balance</option>
           </Select>
           <div className="text-sm font-medium text-text-muted lg:pb-2">
-            Showing <span className="font-semibold text-text-main">{visibleCards.length}</span> of {cards.length}
+            Showing <span className="font-semibold text-text-main">{visibleCards.length}</span> of{" "}
+            {cards.length}
           </div>
         </div>
       </div>

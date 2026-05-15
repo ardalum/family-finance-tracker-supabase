@@ -10,7 +10,10 @@ import {
 
 describe("setup status helpers", () => {
   it("skips setup status checks when there is no active household", () => {
-    assert.equal(shouldSkipSetupStatusCheck({ activeHouseholdId: "", activeHousehold: null }), true);
+    assert.equal(
+      shouldSkipSetupStatusCheck({ activeHouseholdId: "", activeHousehold: null }),
+      true,
+    );
   });
 
   it("skips setup status checks when setup is already complete", () => {

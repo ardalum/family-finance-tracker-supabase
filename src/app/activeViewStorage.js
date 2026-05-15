@@ -1,4 +1,9 @@
-import { ACTIVE_VIEW_KEY, DEFAULT_ACTIVE_VIEW, canUseActiveView, normalizeActiveView } from "./activeViewUtils.js";
+import {
+  ACTIVE_VIEW_KEY,
+  DEFAULT_ACTIVE_VIEW,
+  canUseActiveView,
+  normalizeActiveView,
+} from "./activeViewUtils.js";
 
 export { ACTIVE_VIEW_KEY, DEFAULT_ACTIVE_VIEW };
 

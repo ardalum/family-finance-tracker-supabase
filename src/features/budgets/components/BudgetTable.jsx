@@ -26,7 +26,14 @@ export default function BudgetTable({
 
   const filterCounts = useMemo(() => getFilterCounts(displayRows), [displayRows]);
   const filteredRows = useMemo(
-    () => displayRows.filter((row) => activeFilter === "all" || row.status === activeFilter || (activeFilter === "active" && Number(row.spent || 0) > 0) || (activeFilter === "unused" && Number(row.spent || 0) === 0)),
+    () =>
+      displayRows.filter(
+        (row) =>
+          activeFilter === "all" ||
+          row.status === activeFilter ||
+          (activeFilter === "active" && Number(row.spent || 0) > 0) ||
+          (activeFilter === "unused" && Number(row.spent || 0) === 0),
+      ),
     [activeFilter, displayRows],
   );
 
@@ -75,7 +82,9 @@ export default function BudgetTable({
                       onClick={() => setActiveFilter(filter.id)}
                     >
                       {filter.label}
-                      <span className={`rounded-full px-1.5 py-0.5 text-[10px] ${isActive ? "bg-white/15 text-white" : "bg-app-background text-text-muted"}`}>
+                      <span
+                        className={`rounded-full px-1.5 py-0.5 text-[10px] ${isActive ? "bg-white/15 text-white" : "bg-app-background text-text-muted"}`}
+                      >
                         {filterCounts[filter.id] ?? 0}
                       </span>
                     </button>
@@ -121,7 +130,8 @@ export default function BudgetTable({
                   Delete budget category?
                 </h2>
                 <p className="mt-1 text-sm text-gray-500">
-                  This removes the category from this month’s budget. Existing transactions are not deleted.
+                  This removes the category from this month’s budget. Existing transactions are not
+                  deleted.
                 </p>
               </div>
               <button
@@ -138,7 +148,8 @@ export default function BudgetTable({
               <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-800">
                 <p className="font-semibold">{budgetPendingDelete.name}</p>
                 <p className="mt-1">
-                  Budget {formatCurrency(budgetPendingDelete.monthlyAmount)} · Spent {formatCurrency(budgetPendingDelete.spent || 0)}
+                  Budget {formatCurrency(budgetPendingDelete.monthlyAmount)} · Spent{" "}
+                  {formatCurrency(budgetPendingDelete.spent || 0)}
                 </p>
               </div>
               <div className="flex flex-wrap justify-end gap-3">
@@ -150,12 +161,7 @@ export default function BudgetTable({
                 >
                   Cancel
                 </Button>
-                <Button
-                  type="button"
-                  variant="danger"
-                  onClick={confirmDelete}
-                  disabled={isSaving}
-                >
+                <Button type="button" variant="danger" onClick={confirmDelete} disabled={isSaving}>
                   <Trash2 size={16} aria-hidden="true" />
                   {isSaving ? "Deleting..." : "Delete category"}
                 </Button>
@@ -179,17 +185,31 @@ function BudgetCard({ budget, onEdit, onRequestDelete, isSaving }) {
       <div className="flex min-w-0 items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex min-w-0 flex-wrap items-center gap-2">
-            <h4 className="truncate text-base font-semibold text-text-main" title={budget.name}>{budget.name}</h4>
-            <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${over ? "bg-status-dangerBg text-status-dangerDark" : near ? "bg-status-warningBg text-status-warningDark" : Number(budget.spent || 0) > 0 ? "bg-status-infoBg text-status-infoDark" : "bg-app-muted text-text-soft"}`}>
-              {over ? "Over budget" : near ? "Near limit" : Number(budget.spent || 0) > 0 ? "Has spending" : "No spending"}
+            <h4 className="truncate text-base font-semibold text-text-main" title={budget.name}>
+              {budget.name}
+            </h4>
+            <span
+              className={`rounded-full px-2.5 py-1 text-xs font-semibold ${over ? "bg-status-dangerBg text-status-dangerDark" : near ? "bg-status-warningBg text-status-warningDark" : Number(budget.spent || 0) > 0 ? "bg-status-infoBg text-status-infoDark" : "bg-app-muted text-text-soft"}`}
+            >
+              {over
+                ? "Over budget"
+                : near
+                  ? "Near limit"
+                  : Number(budget.spent || 0) > 0
+                    ? "Has spending"
+                    : "No spending"}
             </span>
           </div>
           {budget.notes ? (
-            <p className="mt-1 line-clamp-2 text-xs text-text-muted" title={budget.notes}>{budget.notes}</p>
+            <p className="mt-1 line-clamp-2 text-xs text-text-muted" title={budget.notes}>
+              {budget.notes}
+            </p>
           ) : null}
         </div>
         <div className="text-right">
-          <p className="text-lg font-semibold text-text-main">{formatCurrency(budget.monthlyAmount)}</p>
+          <p className="text-lg font-semibold text-text-main">
+            {formatCurrency(budget.monthlyAmount)}
+          </p>
           <p className="text-xs text-text-muted">Budget</p>
         </div>
       </div>
@@ -209,7 +229,9 @@ function BudgetCard({ budget, onEdit, onRequestDelete, isSaving }) {
           />
         </div>
         <p className="text-xs text-text-muted">
-          {over ? `${formatCurrency(Math.abs(budget.remaining))} over budget` : `${formatCurrency(budget.remaining)} remaining`}
+          {over
+            ? `${formatCurrency(Math.abs(budget.remaining))} over budget`
+            : `${formatCurrency(budget.remaining)} remaining`}
         </p>
       </div>
 

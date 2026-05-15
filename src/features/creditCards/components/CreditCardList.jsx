@@ -65,23 +65,31 @@ export default function CreditCardList({ cards, onEdit, onDelete, isSaving = fal
             <Input
               label="Search cards"
               value={filters.search}
-              onChange={(event) => setFilters((current) => ({ ...current, search: event.target.value }))}
+              onChange={(event) =>
+                setFilters((current) => ({ ...current, search: event.target.value }))
+              }
               placeholder="Card name, network, owner, last 4, or limit"
             />
             <Select
               label="Owner"
               value={filters.owner}
-              onChange={(event) => setFilters((current) => ({ ...current, owner: event.target.value }))}
+              onChange={(event) =>
+                setFilters((current) => ({ ...current, owner: event.target.value }))
+              }
             >
               <option value="">All owners</option>
               {ownerOptions.map((owner) => (
-                <option key={owner} value={owner}>{owner}</option>
+                <option key={owner} value={owner}>
+                  {owner}
+                </option>
               ))}
             </Select>
             <Select
               label="Status"
               value={filters.status}
-              onChange={(event) => setFilters((current) => ({ ...current, status: event.target.value }))}
+              onChange={(event) =>
+                setFilters((current) => ({ ...current, status: event.target.value }))
+              }
             >
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
@@ -187,7 +195,8 @@ export default function CreditCardList({ cards, onEdit, onDelete, isSaving = fal
                 </p>
               </div>
               <p className="text-sm text-gray-600">
-                This action can affect related monthly balances and statement records. Export a backup first if you are not sure.
+                This action can affect related monthly balances and statement records. Export a
+                backup first if you are not sure.
               </p>
               <div className="flex flex-wrap justify-end gap-3">
                 <Button
@@ -198,12 +207,7 @@ export default function CreditCardList({ cards, onEdit, onDelete, isSaving = fal
                 >
                   Cancel
                 </Button>
-                <Button
-                  type="button"
-                  variant="danger"
-                  onClick={confirmDelete}
-                  disabled={isSaving}
-                >
+                <Button type="button" variant="danger" onClick={confirmDelete} disabled={isSaving}>
                   <Trash2 size={16} aria-hidden="true" />
                   {isSaving ? "Deleting..." : "Delete card"}
                 </Button>

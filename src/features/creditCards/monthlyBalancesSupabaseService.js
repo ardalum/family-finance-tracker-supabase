@@ -2,7 +2,9 @@ import { supabase } from "../../lib/supabase/client.js";
 
 function requireSupabase() {
   if (!supabase) {
-    throw new Error("Supabase is not configured. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
+    throw new Error(
+      "Supabase is not configured. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.",
+    );
   }
 
   return supabase;
@@ -103,26 +105,25 @@ async function upsertCardStatement(client, householdId, monthKey, card, patch) {
   const paid = Boolean(patch.paid) || paidAmount >= balance || balance === 0;
   const { statementCloseDate, paymentDueDate } = getStatementDates(monthKey, card);
 
-  const { error } = await client
-    .from("card_statements")
-    .upsert(
-      {
-        household_id: householdId,
-        credit_card_id: creditCardId,
-        month_key: monthKey,
-        statement_close_date: patch.statementCloseDate || statementCloseDate,
-        payment_due_date: patch.paymentDueDate || paymentDueDate,
-        statement_balance: balance,
-        minimum_payment: Number(patch.minimumPayment ?? 0) || 0,
-        paid_amount: paidAmount,
-        paid_date: patch.paidDate || (paid && paidAmount > 0 ? new Date().toISOString().slice(0, 10) : null),
-        autopay_enabled: Boolean(patch.autopayEnabled),
-        autopay_date: patch.autopayDate || null,
-        confirmation_number: patch.confirmationNumber?.trim?.() ?? "",
-        status: getStatementStatus({ ...patch, paid, paidAmount }),
-      },
-      { onConflict: "credit_card_id,month_key" },
-    );
+  const { error } = await client.from("card_statements").upsert(
+    {
+      household_id: householdId,
+      credit_card_id: creditCardId,
+      month_key: monthKey,
+      statement_close_date: patch.statementCloseDate || statementCloseDate,
+      payment_due_date: patch.paymentDueDate || paymentDueDate,
+      statement_balance: balance,
+      minimum_payment: Number(patch.minimumPayment ?? 0) || 0,
+      paid_amount: paidAmount,
+      paid_date:
+        patch.paidDate || (paid && paidAmount > 0 ? new Date().toISOString().slice(0, 10) : null),
+      autopay_enabled: Boolean(patch.autopayEnabled),
+      autopay_date: patch.autopayDate || null,
+      confirmation_number: patch.confirmationNumber?.trim?.() ?? "",
+      status: getStatementStatus({ ...patch, paid, paidAmount }),
+    },
+    { onConflict: "credit_card_id,month_key" },
+  );
 
   if (error) throw error;
 }

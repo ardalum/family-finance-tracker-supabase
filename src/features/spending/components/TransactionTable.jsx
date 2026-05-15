@@ -1,5 +1,16 @@
 import { useMemo, useState } from "react";
-import { CalendarDays, ChevronDown, CreditCard, Edit, RotateCcw, SlidersHorizontal, StickyNote, Tags, Trash2, X } from "lucide-react";
+import {
+  CalendarDays,
+  ChevronDown,
+  CreditCard,
+  Edit,
+  RotateCcw,
+  SlidersHorizontal,
+  StickyNote,
+  Tags,
+  Trash2,
+  X,
+} from "lucide-react";
 import LinkedCardName from "../../../components/shared/LinkedCardName.jsx";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
@@ -93,7 +104,10 @@ export default function TransactionTable({
     [categories],
   );
   const paymentMethodOptions = useMemo(
-    () => Array.from(new Set(transactions.map((transaction) => transaction.paymentMethod).filter(Boolean))).sort(),
+    () =>
+      Array.from(
+        new Set(transactions.map((transaction) => transaction.paymentMethod).filter(Boolean)),
+      ).sort(),
     [transactions],
   );
 
@@ -106,27 +120,51 @@ export default function TransactionTable({
     }
 
     if (filters.cardId) {
-      chips.push({ key: "cardId", label: `Card: ${getCardName(filters.cardId, cards)}`, type: "filter" });
+      chips.push({
+        key: "cardId",
+        label: `Card: ${getCardName(filters.cardId, cards)}`,
+        type: "filter",
+      });
     }
 
     if (filters.categoryId) {
-      chips.push({ key: "categoryId", label: `Category: ${getCategoryName(filters.categoryId, categories)}`, type: "filter" });
+      chips.push({
+        key: "categoryId",
+        label: `Category: ${getCategoryName(filters.categoryId, categories)}`,
+        type: "filter",
+      });
     }
 
     if (filters.transactionType) {
-      chips.push({ key: "transactionType", label: `Type: ${getTransactionTypeLabel(filters.transactionType)}`, type: "filter" });
+      chips.push({
+        key: "transactionType",
+        label: `Type: ${getTransactionTypeLabel(filters.transactionType)}`,
+        type: "filter",
+      });
     }
 
     if (filters.paymentMethod) {
-      chips.push({ key: "paymentMethod", label: `Payment: ${filters.paymentMethod}`, type: "filter" });
+      chips.push({
+        key: "paymentMethod",
+        label: `Payment: ${filters.paymentMethod}`,
+        type: "filter",
+      });
     }
 
     if (filters.source) {
-      chips.push({ key: "source", label: `Source: ${sourceLabels[filters.source] ?? filters.source}`, type: "filter" });
+      chips.push({
+        key: "source",
+        label: `Source: ${sourceLabels[filters.source] ?? filters.source}`,
+        type: "filter",
+      });
     }
 
     if (quickFilter === "large") {
-      chips.push({ key: "quick-large", label: `Quick: $${LARGE_AMOUNT_THRESHOLD}+`, type: "quick" });
+      chips.push({
+        key: "quick-large",
+        label: `Quick: $${LARGE_AMOUNT_THRESHOLD}+`,
+        type: "quick",
+      });
     }
 
     if (sortMode !== "date-desc") {
@@ -203,9 +241,18 @@ export default function TransactionTable({
     const searchTerm = filters.search.trim().toLowerCase();
     return transactions
       .filter((transaction) => !filters.cardId || transaction.cardId === filters.cardId)
-      .filter((transaction) => !filters.transactionType || (transaction.transactionType || "expense") === filters.transactionType)
-      .filter((transaction) => !filters.paymentMethod || transaction.paymentMethod === filters.paymentMethod)
-      .filter((transaction) => !filters.source || (transaction.source || "manual") === filters.source)
+      .filter(
+        (transaction) =>
+          !filters.transactionType ||
+          (transaction.transactionType || "expense") === filters.transactionType,
+      )
+      .filter(
+        (transaction) =>
+          !filters.paymentMethod || transaction.paymentMethod === filters.paymentMethod,
+      )
+      .filter(
+        (transaction) => !filters.source || (transaction.source || "manual") === filters.source,
+      )
       .filter((transaction) => {
         if (quickFilter !== "large") return true;
         return Number(transaction.amount || 0) >= LARGE_AMOUNT_THRESHOLD;
@@ -223,21 +270,27 @@ export default function TransactionTable({
       .sort((a, b) => sortTransactions(a, b, sortMode, cards, categories));
   }, [cards, categories, filters, quickFilter, sortMode, transactions]);
 
-  const quickFilterCounts = useMemo(
-    () => getQuickFilterCounts(transactions),
-    [transactions],
-  );
+  const quickFilterCounts = useMemo(() => getQuickFilterCounts(transactions), [transactions]);
 
   const filteredImpactTotal = useMemo(
-    () => filteredTransactions.reduce((total, transaction) => total + getTransactionImpactAmount(transaction), 0),
+    () =>
+      filteredTransactions.reduce(
+        (total, transaction) => total + getTransactionImpactAmount(transaction),
+        0,
+      ),
     [filteredTransactions],
   );
 
-  const groupedTransactions = useMemo(() => groupTransactionsByDate(filteredTransactions), [filteredTransactions]);
+  const groupedTransactions = useMemo(
+    () => groupTransactionsByDate(filteredTransactions),
+    [filteredTransactions],
+  );
 
   function requestDelete(transaction) {
     if (transaction.source === "recurring") {
-      window.alert("Recurring transactions are managed from Recurring Payments. Mark the bill unpaid there to remove the linked transaction.");
+      window.alert(
+        "Recurring transactions are managed from Recurring Payments. Mark the bill unpaid there to remove the linked transaction.",
+      );
       return;
     }
     setTransactionPendingDelete(transaction);
@@ -261,7 +314,11 @@ export default function TransactionTable({
               placeholder="Merchant, notes, card, category, payment method"
               className="min-w-0"
             />
-            <Select label="Sort" value={sortMode} onChange={(event) => setSortMode(event.target.value)}>
+            <Select
+              label="Sort"
+              value={sortMode}
+              onChange={(event) => setSortMode(event.target.value)}
+            >
               <option value="date-desc">Date newest</option>
               <option value="date-asc">Date oldest</option>
               <option value="store">Merchant</option>
@@ -300,7 +357,9 @@ export default function TransactionTable({
           </div>
 
           <div className="grid gap-2">
-            <p className="text-xs font-semibold uppercase tracking-normal text-text-muted">Quick filters</p>
+            <p className="text-xs font-semibold uppercase tracking-normal text-text-muted">
+              Quick filters
+            </p>
             <div className="flex gap-2 overflow-x-auto pb-1 md:flex-wrap md:overflow-visible md:pb-0">
               {quickFilters.map((option) => {
                 const isActive = quickFilter === option.id;
@@ -318,7 +377,9 @@ export default function TransactionTable({
                     title={option.description}
                   >
                     {option.label}
-                    <span className={`rounded-full px-1.5 py-0.5 text-[10px] ${isActive ? "bg-white/15 text-white" : "bg-app-background text-text-muted"}`}>
+                    <span
+                      className={`rounded-full px-1.5 py-0.5 text-[10px] ${isActive ? "bg-white/15 text-white" : "bg-app-background text-text-muted"}`}
+                    >
                       {count}
                     </span>
                   </button>
@@ -376,7 +437,9 @@ export default function TransactionTable({
             <Select
               label="Payment method"
               value={filters.paymentMethod}
-              onChange={(event) => onFiltersChange({ ...filters, paymentMethod: event.target.value })}
+              onChange={(event) =>
+                onFiltersChange({ ...filters, paymentMethod: event.target.value })
+              }
             >
               <option value="">All methods</option>
               {paymentMethodOptions.map((method) => (
@@ -418,13 +481,16 @@ export default function TransactionTable({
 
           <div className="grid gap-2 rounded-xl bg-app-background px-3 py-2 text-xs font-medium text-text-muted sm:grid-cols-2 sm:items-center">
             <div>
-              Showing <span className="font-semibold text-text-main">{filteredTransactions.length}</span>{" "}
-              of <span className="font-semibold text-text-main">{transactions.length}</span>{" "}
+              Showing{" "}
+              <span className="font-semibold text-text-main">{filteredTransactions.length}</span> of{" "}
+              <span className="font-semibold text-text-main">{transactions.length}</span>{" "}
               transaction{transactions.length === 1 ? "" : "s"}
             </div>
             <div className="sm:text-right">
               Filtered spending impact:{" "}
-              <span className="font-semibold text-text-main">{formatCurrency(filteredImpactTotal)}</span>
+              <span className="font-semibold text-text-main">
+                {formatCurrency(filteredImpactTotal)}
+              </span>
             </div>
           </div>
         </div>
@@ -433,11 +499,17 @@ export default function TransactionTable({
           <div className="grid gap-3 p-8 text-center text-sm text-text-muted">
             <p className="font-semibold text-text-main">No matching transactions</p>
             <p>
-              Try clearing a filter or searching by merchant, note, card, category, payment method, type, or source.
+              Try clearing a filter or searching by merchant, note, card, category, payment method,
+              type, or source.
             </p>
             {hasActiveControls ? (
               <div className="mt-1 flex justify-center">
-                <Button type="button" variant="secondary" className="min-h-9 px-3 py-1.5 text-sm" onClick={resetFilters}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="min-h-9 px-3 py-1.5 text-sm"
+                  onClick={resetFilters}
+                >
                   <RotateCcw size={16} aria-hidden="true" />
                   Reset filters
                 </Button>
@@ -454,7 +526,8 @@ export default function TransactionTable({
                     {group.date}
                   </h3>
                   <span className="text-xs font-semibold text-text-muted">
-                    {group.transactions.length} item{group.transactions.length === 1 ? "" : "s"} · {formatCurrency(group.impactTotal)} impact
+                    {group.transactions.length} item{group.transactions.length === 1 ? "" : "s"} ·{" "}
+                    {formatCurrency(group.impactTotal)} impact
                   </span>
                 </div>
                 <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
@@ -507,7 +580,9 @@ export default function TransactionTable({
               <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-800">
                 <p className="font-semibold">{transactionPendingDelete.merchant}</p>
                 <p className="mt-1">
-                  {transactionPendingDelete.date} · {formatCurrency(transactionPendingDelete.amount)} · {getTransactionTypeLabel(transactionPendingDelete.transactionType)}
+                  {transactionPendingDelete.date} ·{" "}
+                  {formatCurrency(transactionPendingDelete.amount)} ·{" "}
+                  {getTransactionTypeLabel(transactionPendingDelete.transactionType)}
                 </p>
               </div>
               <div className="flex flex-wrap justify-end gap-3">
@@ -519,12 +594,7 @@ export default function TransactionTable({
                 >
                   Cancel
                 </Button>
-                <Button
-                  type="button"
-                  variant="danger"
-                  onClick={confirmDelete}
-                  disabled={isSaving}
-                >
+                <Button type="button" variant="danger" onClick={confirmDelete} disabled={isSaving}>
                   <Trash2 size={16} aria-hidden="true" />
                   {isSaving ? "Deleting..." : "Delete transaction"}
                 </Button>
@@ -549,7 +619,10 @@ function TransactionCard({ transaction, cards, categories, onEdit, onDelete, isS
       <div className="flex min-w-0 items-start justify-between gap-4">
         <div className="grid min-w-0 gap-1">
           <div className="flex min-w-0 flex-wrap items-center gap-2">
-            <h4 className="min-w-0 truncate text-base font-semibold text-text-main" title={transaction.merchant}>
+            <h4
+              className="min-w-0 truncate text-base font-semibold text-text-main"
+              title={transaction.merchant}
+            >
               {transaction.merchant}
             </h4>
             <span className="shrink-0 rounded-full bg-app-background px-2.5 py-1 text-xs font-semibold text-text-muted ring-1 ring-inset ring-app-border">
@@ -577,7 +650,10 @@ function TransactionCard({ transaction, cards, categories, onEdit, onDelete, isS
 
       <div className="grid min-w-0 gap-2 text-sm text-text-soft">
         <DetailBlock icon={CreditCard} label="Payment">
-          <span className="truncate text-xs font-medium text-text-muted" title={transaction.paymentMethod || "No payment method"}>
+          <span
+            className="truncate text-xs font-medium text-text-muted"
+            title={transaction.paymentMethod || "No payment method"}
+          >
             {transaction.paymentMethod || "No payment method"}
           </span>
           {card ? (
@@ -617,7 +693,9 @@ function TransactionCard({ transaction, cards, categories, onEdit, onDelete, isS
 
         <DetailBlock icon={StickyNote} label="Notes">
           {transaction.notes ? (
-            <span className="line-clamp-2 text-text-soft" title={transaction.notes}>{transaction.notes}</span>
+            <span className="line-clamp-2 text-text-soft" title={transaction.notes}>
+              {transaction.notes}
+            </span>
           ) : (
             <span className="text-text-muted">None</span>
           )}
@@ -687,41 +765,51 @@ function groupTransactionsByDate(transactions) {
 
 function getQuickFilterAfterFieldClear(currentQuickFilter, clearedKey) {
   if (["manual", "recurring"].includes(currentQuickFilter) && clearedKey === "source") return "all";
-  if (["expense", "payment", "refund", "income"].includes(currentQuickFilter) && clearedKey === "transactionType") return "all";
+  if (
+    ["expense", "payment", "refund", "income"].includes(currentQuickFilter) &&
+    clearedKey === "transactionType"
+  )
+    return "all";
   return currentQuickFilter;
 }
 
 function getQuickFilterCounts(transactions) {
-  return transactions.reduce((counts, transaction) => {
-    const source = transaction.source || "manual";
-    const transactionType = transaction.transactionType || "expense";
+  return transactions.reduce(
+    (counts, transaction) => {
+      const source = transaction.source || "manual";
+      const transactionType = transaction.transactionType || "expense";
 
-    counts.all += 1;
-    if (source === "manual") counts.manual += 1;
-    if (source === "recurring") counts.recurring += 1;
-    if (transactionType in counts) counts[transactionType] += 1;
-    if (Number(transaction.amount || 0) >= LARGE_AMOUNT_THRESHOLD) counts.large += 1;
+      counts.all += 1;
+      if (source === "manual") counts.manual += 1;
+      if (source === "recurring") counts.recurring += 1;
+      if (transactionType in counts) counts[transactionType] += 1;
+      if (Number(transaction.amount || 0) >= LARGE_AMOUNT_THRESHOLD) counts.large += 1;
 
-    return counts;
-  }, {
-    all: 0,
-    manual: 0,
-    recurring: 0,
-    expense: 0,
-    payment: 0,
-    refund: 0,
-    income: 0,
-    large: 0,
-  });
+      return counts;
+    },
+    {
+      all: 0,
+      manual: 0,
+      recurring: 0,
+      expense: 0,
+      payment: 0,
+      refund: 0,
+      income: 0,
+      large: 0,
+    },
+  );
 }
 
 function sortTransactions(a, b, sortMode, cards, categories) {
   if (sortMode === "date-asc") return a.date.localeCompare(b.date);
   if (sortMode === "store") return a.merchant.localeCompare(b.merchant);
   if (sortMode === "category") {
-    return getPrimaryCategoryName(a, categories).localeCompare(getPrimaryCategoryName(b, categories));
+    return getPrimaryCategoryName(a, categories).localeCompare(
+      getPrimaryCategoryName(b, categories),
+    );
   }
-  if (sortMode === "card") return getCardName(a.cardId, cards).localeCompare(getCardName(b.cardId, cards));
+  if (sortMode === "card")
+    return getCardName(a.cardId, cards).localeCompare(getCardName(b.cardId, cards));
   if (sortMode === "amount-desc") return Number(b.amount) - Number(a.amount);
   if (sortMode === "amount-asc") return Number(a.amount) - Number(b.amount);
   return b.date.localeCompare(a.date);

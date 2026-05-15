@@ -14,7 +14,9 @@ export function normalizeRedirectPath(path = DEFAULT_AUTH_REDIRECT_PATH) {
   if (rawPath.startsWith("http://") || rawPath.startsWith("https://")) {
     try {
       const parsedUrl = new URL(rawPath);
-      return `${parsedUrl.pathname}${parsedUrl.search}${parsedUrl.hash}` || DEFAULT_AUTH_REDIRECT_PATH;
+      return (
+        `${parsedUrl.pathname}${parsedUrl.search}${parsedUrl.hash}` || DEFAULT_AUTH_REDIRECT_PATH
+      );
     } catch {
       return DEFAULT_AUTH_REDIRECT_PATH;
     }

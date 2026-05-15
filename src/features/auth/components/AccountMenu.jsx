@@ -131,15 +131,22 @@ export default function AccountMenu({ onNavigate }) {
       </button>
 
       {open ? (
-        <div className="absolute right-0 z-30 mt-2 w-[calc(100vw-2rem)] max-w-80 overflow-hidden rounded-2xl border border-app-border bg-app-surface shadow-lg" role="menu">
+        <div
+          className="absolute right-0 z-30 mt-2 w-[calc(100vw-2rem)] max-w-80 overflow-hidden rounded-2xl border border-app-border bg-app-surface shadow-lg"
+          role="menu"
+        >
           <div className="border-b border-app-border px-4 py-3">
-            <p className="text-xs font-medium uppercase tracking-normal text-text-muted">Signed in as</p>
+            <p className="text-xs font-medium uppercase tracking-normal text-text-muted">
+              Signed in as
+            </p>
             <div className="mt-2 flex items-start gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-app-background text-text-muted">
                 <UserCircle size={20} aria-hidden="true" />
               </div>
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-text-main">{identity.displayName}</p>
+                <p className="truncate text-sm font-semibold text-text-main">
+                  {identity.displayName}
+                </p>
                 <p className="mt-0.5 truncate text-xs text-text-muted">{identity.email}</p>
                 {identity.role ? (
                   <p className="mt-1 inline-flex rounded-full border border-app-border bg-app-background px-2 py-0.5 text-[0.68rem] font-semibold text-text-muted">
@@ -154,7 +161,9 @@ export default function AccountMenu({ onNavigate }) {
               <Clock3 size={16} className="mt-0.5 shrink-0 text-text-muted" aria-hidden="true" />
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-text-main">{sessionStatus.label}</p>
-                <p className="mt-0.5 text-xs leading-snug text-text-muted">{sessionStatus.description}</p>
+                <p className="mt-0.5 text-xs leading-snug text-text-muted">
+                  {sessionStatus.description}
+                </p>
               </div>
             </div>
           </div>
@@ -197,7 +206,9 @@ export default function AccountMenu({ onNavigate }) {
               role="menuitem"
             >
               <LogOut size={16} aria-hidden="true" />
-              {signingOutMode === "everywhere" ? "Signing out everywhere..." : "Sign out from all devices"}
+              {signingOutMode === "everywhere"
+                ? "Signing out everywhere..."
+                : "Sign out from all devices"}
             </button>
           </div>
         </div>

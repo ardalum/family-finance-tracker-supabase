@@ -27,9 +27,9 @@ export default function AboutWalletFlow() {
               Track your cards, budget, and spending in one clear place.
             </p>
             <p className="mt-4 text-sm leading-6 text-text-muted">
-              WalletFlow is a practical household finance tracker designed to help users
-              organize credit cards, monthly budgets, transactions, and recurring payments
-              in one clean dashboard.
+              WalletFlow is a practical household finance tracker designed to help users organize
+              credit cards, monthly budgets, transactions, and recurring payments in one clean
+              dashboard.
             </p>
           </div>
         </div>
@@ -41,7 +41,11 @@ export default function AboutWalletFlow() {
           <ul className="mt-4 grid gap-3">
             {trackingItems.map((item) => (
               <li key={item} className="flex gap-3 text-sm leading-6 text-text-soft">
-                <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-brand-accent" aria-hidden="true" />
+                <CheckCircle2
+                  size={18}
+                  className="mt-0.5 shrink-0 text-brand-accent"
+                  aria-hidden="true"
+                />
                 <span>{item}</span>
               </li>
             ))}
@@ -65,7 +69,11 @@ export default function AboutWalletFlow() {
 
       <Card className="p-5">
         <div className="flex gap-3">
-          <ShieldAlert size={20} className="mt-0.5 shrink-0 text-status-warning" aria-hidden="true" />
+          <ShieldAlert
+            size={20}
+            className="mt-0.5 shrink-0 text-status-warning"
+            aria-hidden="true"
+          />
           <div>
             <h3 className="text-lg font-semibold text-text-main">Disclaimer</h3>
             <p className="mt-3 text-sm leading-6 text-text-muted">
@@ -75,8 +83,8 @@ export default function AboutWalletFlow() {
               providers, or qualified professionals.
             </p>
             <p className="mt-3 text-sm leading-6 text-text-muted">
-              WalletFlow only tracks information that users enter into the app. It is not a
-              bank, lender, payment processor, or financial institution.
+              WalletFlow only tracks information that users enter into the app. It is not a bank,
+              lender, payment processor, or financial institution.
             </p>
           </div>
         </div>

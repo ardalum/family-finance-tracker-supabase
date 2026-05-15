@@ -4,7 +4,9 @@ import { UNCATEGORIZED_ID } from "../spending/spendingService.js";
 
 function requireSupabase() {
   if (!supabase) {
-    throw new Error("Supabase is not configured. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
+    throw new Error(
+      "Supabase is not configured. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.",
+    );
   }
 
   return supabase;
@@ -28,7 +30,7 @@ function toAppTemplate(row, cardsBySupabaseId, categoriesBySupabaseId) {
     id: row.imported_local_id ?? row.id,
     supabaseId: row.id,
     name: row.name,
-    categoryId: row.category_id ? category?.id ?? row.category_id : UNCATEGORIZED_ID,
+    categoryId: row.category_id ? (category?.id ?? row.category_id) : UNCATEGORIZED_ID,
     billType: row.bill_type,
     estimatedAmount: Number(row.estimated_amount || 0),
     dueDay: row.due_day,
@@ -144,7 +146,8 @@ export async function listRecurringInstances(householdId, templates) {
         [templateId]: {
           status: instance.status === "generated" ? "paid" : instance.status,
           transactionId: instance.transaction_id,
-          actualAmount: instance.actual_amount === null ? null : Number(instance.actual_amount || 0),
+          actualAmount:
+            instance.actual_amount === null ? null : Number(instance.actual_amount || 0),
           paidDate: instance.paid_date,
         },
       },
@@ -152,11 +155,21 @@ export async function listRecurringInstances(householdId, templates) {
   }, {});
 }
 
-function buildRecurringTransactionPayload({ householdId, monthKey, template, templateId, amount, paidDate, cardsByAppId, categoriesByAppId }) {
+function buildRecurringTransactionPayload({
+  householdId,
+  monthKey,
+  template,
+  templateId,
+  amount,
+  paidDate,
+  cardsByAppId,
+  categoriesByAppId,
+}) {
   const card = cardsByAppId.get(template.cardId);
   return {
     household_id: householdId,
-    transaction_date: paidDate || getDueDateForMonth(monthKey, template.dueDay).toISOString().slice(0, 10),
+    transaction_date:
+      paidDate || getDueDateForMonth(monthKey, template.dueDay).toISOString().slice(0, 10),
     merchant: template.name,
     payment_method: template.paymentMethod,
     credit_card_id: template.paymentMethod === "Credit Card" ? getSupabaseCardId(card) : null,
@@ -213,8 +226,20 @@ async function upsertRecurringTransaction(client, payload, existingTransactionId
   return data;
 }
 
-async function deleteRecurringTransaction(client, householdId, templateId, monthKey, transactionId) {
-  const transaction = await findRecurringTransaction(client, householdId, templateId, monthKey, transactionId);
+async function deleteRecurringTransaction(
+  client,
+  householdId,
+  templateId,
+  monthKey,
+  transactionId,
+) {
+  const transaction = await findRecurringTransaction(
+    client,
+    householdId,
+    templateId,
+    monthKey,
+    transactionId,
+  );
   if (!transaction) return;
   const { error } = await client.from("transactions").delete().eq("id", transaction.id);
   if (error) throw error;
@@ -231,7 +256,8 @@ export async function markRecurringPaymentPaidInSupabase({
   const template = row.template;
   const templateId = template.supabaseId ?? template.id;
   const amount = Number(row.actualAmount ?? template.estimatedAmount ?? 0) || 0;
-  const paidDate = row.paidDate || getDueDateForMonth(monthKey, template.dueDay).toISOString().slice(0, 10);
+  const paidDate =
+    row.paidDate || getDueDateForMonth(monthKey, template.dueDay).toISOString().slice(0, 10);
 
   if (amount <= 0) {
     throw new Error("Actual amount must be greater than zero before marking paid.");

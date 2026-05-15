@@ -47,14 +47,7 @@ describe("spending service", () => {
   });
 
   it("calculates split totals", () => {
-    assert.equal(
-      getSplitTotal([
-        { amount: 12.5 },
-        { amount: "7.50" },
-        { amount: "" },
-      ]),
-      20,
-    );
+    assert.equal(getSplitTotal([{ amount: 12.5 }, { amount: "7.50" }, { amount: "" }]), 20);
   });
 
   it("uses split rows when a transaction is split", () => {

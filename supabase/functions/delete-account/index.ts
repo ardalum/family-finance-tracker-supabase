@@ -106,7 +106,10 @@ Deno.serve(async (request) => {
     if (activeMemberCount !== 1) {
       return jsonResponse(
         request,
-        { error: "Account deletion is blocked because the active household has other active members." },
+        {
+          error:
+            "Account deletion is blocked because the active household has other active members.",
+        },
         409,
       );
     }
@@ -146,10 +149,7 @@ Deno.serve(async (request) => {
     return jsonResponse(
       request,
       {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Could not delete account.",
+        error: error instanceof Error ? error.message : "Could not delete account.",
       },
       500,
     );
@@ -193,7 +193,8 @@ function getSupabaseSecretKey() {
 }
 
 function getAllowedOrigins() {
-  const configuredOrigins = Deno.env.get("ALLOWED_ORIGINS")
+  const configuredOrigins = Deno.env
+    .get("ALLOWED_ORIGINS")
     ?.split(",")
     .map((origin) => origin.trim())
     .filter(Boolean);
@@ -210,7 +211,7 @@ function getCorsHeaders(request: Request) {
     "Access-Control-Allow-Origin": allowedOrigin,
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Vary": "Origin",
+    Vary: "Origin",
   };
 }
 

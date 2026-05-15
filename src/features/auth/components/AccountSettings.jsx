@@ -22,7 +22,9 @@ export default function AccountSettings() {
           </div>
           <div className="min-w-0">
             <p className="text-sm font-medium text-text-muted">Account</p>
-            <h3 className="mt-1 truncate text-xl font-semibold text-text-main">{identity.displayName}</h3>
+            <h3 className="mt-1 truncate text-xl font-semibold text-text-main">
+              {identity.displayName}
+            </h3>
             <p className="mt-1 truncate text-sm text-text-muted">{identity.email}</p>
             {identity.role ? (
               <p className="mt-3 inline-flex rounded-full border border-app-border bg-app-background px-3 py-1 text-xs font-semibold text-text-muted">
@@ -50,7 +52,8 @@ export default function AccountSettings() {
             <p className="text-sm font-medium text-text-muted">Security controls</p>
             <h3 className="mt-1 text-lg font-semibold text-text-main">Planned account actions</h3>
             <p className="mt-2 text-sm text-text-muted">
-              This page is the safe home for future account security actions. The controls below are placeholders until the underlying auth flows are added.
+              This page is the safe home for future account security actions. The controls below are
+              placeholders until the underlying auth flows are added.
             </p>
           </div>
           <div className="divide-y divide-app-border">

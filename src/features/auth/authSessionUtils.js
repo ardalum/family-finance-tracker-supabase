@@ -1,7 +1,4 @@
-export {
-  SESSION_CHECK_INTERVAL_MS,
-  SESSION_WARNING_THRESHOLD_MS,
-} from "./authSessionConfig.js";
+export { SESSION_CHECK_INTERVAL_MS, SESSION_WARNING_THRESHOLD_MS } from "./authSessionConfig.js";
 
 export {
   formatRemainingTime,

@@ -2,7 +2,9 @@ import { supabase } from "../../lib/supabase/client.js";
 
 function requireSupabase() {
   if (!supabase) {
-    throw new Error("Supabase is not configured. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
+    throw new Error(
+      "Supabase is not configured. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.",
+    );
   }
 
   return supabase;
@@ -83,14 +85,16 @@ export async function deactivateHouseholdProfile(profileId) {
   return toAppProfile(data);
 }
 
-export async function createDefaultHouseholdProfiles(householdId, existingProfiles = [], defaultNames = []) {
+export async function createDefaultHouseholdProfiles(
+  householdId,
+  existingProfiles = [],
+  defaultNames = [],
+) {
   const client = requireSupabase();
   const existingNames = new Set(
     existingProfiles.map((profile) => profile.displayName.trim().toLowerCase()),
   );
-  const uniqueDefaultNames = [
-    ...new Set(defaultNames.map((name) => name.trim()).filter(Boolean)),
-  ];
+  const uniqueDefaultNames = [...new Set(defaultNames.map((name) => name.trim()).filter(Boolean))];
   const rows = uniqueDefaultNames
     .filter((displayName) => !existingNames.has(displayName.toLowerCase()))
     .map((displayName) => ({
@@ -102,10 +106,7 @@ export async function createDefaultHouseholdProfiles(householdId, existingProfil
 
   if (rows.length === 0) return [];
 
-  const { data, error } = await client
-    .from("household_profiles")
-    .insert(rows)
-    .select("*");
+  const { data, error } = await client.from("household_profiles").insert(rows).select("*");
 
   if (error) throw error;
   return (data ?? []).map(toAppProfile);

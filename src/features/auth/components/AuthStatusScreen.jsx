@@ -8,7 +8,8 @@ const statusConfig = {
   [AUTH_STATUS_TYPES.inbox]: {
     icon: MailCheck,
     title: "Check your inbox",
-    description: "Open the email from WalletFlow and follow the link to finish setting up your account.",
+    description:
+      "Open the email from WalletFlow and follow the link to finish setting up your account.",
   },
   [AUTH_STATUS_TYPES.verified]: {
     icon: CheckCircle2,
@@ -18,7 +19,8 @@ const statusConfig = {
   [AUTH_STATUS_TYPES.resetPassword]: {
     icon: KeyRound,
     title: "Reset your password",
-    description: "Follow the password reset steps from your email to continue securing your WalletFlow account.",
+    description:
+      "Follow the password reset steps from your email to continue securing your WalletFlow account.",
   },
   [AUTH_STATUS_TYPES.signedOut]: {
     icon: UserCircle,
@@ -28,7 +30,8 @@ const statusConfig = {
   [AUTH_STATUS_TYPES.problem]: {
     icon: ShieldAlert,
     title: "Auth status needs attention",
-    description: "Something about the sign-in state needs attention. Try refreshing or signing in again.",
+    description:
+      "Something about the sign-in state needs attention. Try refreshing or signing in again.",
   },
 };
 

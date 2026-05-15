@@ -1,11 +1,6 @@
 import { isKnownPageView } from "./pageContent.js";
 
-export const secondaryViewIds = [
-  "backup",
-  "household-settings",
-  "app-settings",
-  "about",
-];
+export const secondaryViewIds = ["backup", "household-settings", "app-settings", "about"];
 
 export const primaryFinanceViewIds = [
   "dashboard",

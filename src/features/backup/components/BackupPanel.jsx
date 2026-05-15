@@ -220,9 +220,7 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
             <p className="text-xs font-semibold uppercase tracking-wide text-sky-700">
               Primary backup
             </p>
-            <h2 className="mt-1 text-lg font-semibold text-gray-950">
-              Supabase Cloud Backup
-            </h2>
+            <h2 className="mt-1 text-lg font-semibold text-gray-950">Supabase Cloud Backup</h2>
             <p className="mt-1 max-w-3xl text-sm text-gray-600">
               Export the finance data for your active household from Supabase. This includes cards,
               monthly balances, card statements, budgets, transactions, splits, recurring payments,
@@ -260,12 +258,10 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
           <div className="rounded-md border border-sky-100 bg-white p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <h3 className="text-sm font-semibold text-gray-950">
-                  Import Supabase Backup
-                </h3>
+                <h3 className="text-sm font-semibold text-gray-950">Import Supabase Backup</h3>
                 <p className="mt-1 max-w-2xl text-sm text-gray-500">
-                  Merge mode adds missing records and skips records that are already present.
-                  It will not delete existing data.
+                  Merge mode adds missing records and skips records that are already present. It
+                  will not delete existing data.
                 </p>
                 <p className="mt-2 text-xs text-amber-700">
                   Recommended: Export a fresh Supabase backup before importing.
@@ -297,7 +293,8 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
             {cloudImport ? (
               <div className="mt-4 grid gap-4">
                 <div className="rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-600">
-                  Preview for <span className="font-medium text-gray-900">{cloudImport.fileName}</span>
+                  Preview for{" "}
+                  <span className="font-medium text-gray-900">{cloudImport.fileName}</span>
                 </div>
                 <ImportSummary counts={cloudImport.preview} mode="preview" />
                 {cloudImport.result ? (
@@ -305,7 +302,8 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
                     <div>
                       <p className="text-sm font-semibold text-emerald-900">Import completed</p>
                       <p className="mt-1 text-sm text-emerald-700">
-                        Records shown as skipped were already present or safely matched during merge.
+                        Records shown as skipped were already present or safely matched during
+                        merge.
                       </p>
                     </div>
                     <ImportSummary counts={cloudImport.result} mode="result" />
@@ -320,7 +318,8 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
                         onChange={(event) => setImportAcknowledged(event.target.checked)}
                       />
                       <span>
-                        I reviewed the preview and understand this will merge the backup into the current household without deleting existing data.
+                        I reviewed the preview and understand this will merge the backup into the
+                        current household without deleting existing data.
                       </span>
                     </label>
                     <div className="flex flex-wrap gap-2">
@@ -366,9 +365,7 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
             <p className="text-xs font-semibold uppercase tracking-wide text-red-700">
               Danger Zone
             </p>
-            <h2 className="mt-1 text-lg font-semibold text-gray-950">
-              Delete Account
-            </h2>
+            <h2 className="mt-1 text-lg font-semibold text-gray-950">Delete Account</h2>
             <p className="mt-1 max-w-3xl text-sm text-gray-600">
               This permanently deletes your Supabase Auth login and the active household only when
               you are its only active member and owner. Shared households or extra households you
@@ -516,9 +513,7 @@ function ImportSummary({ counts, mode = "preview" }) {
           <span className="min-w-12 text-right font-medium text-gray-950">
             {counts?.[key]?.imported ?? 0}
           </span>
-          <span className="min-w-12 text-right text-gray-500">
-            {counts?.[key]?.skipped ?? 0}
-          </span>
+          <span className="min-w-12 text-right text-gray-500">{counts?.[key]?.skipped ?? 0}</span>
         </div>
       ))}
       <div className="grid grid-cols-[1fr_auto_auto] gap-4 border-t border-gray-200 bg-gray-50 px-3 py-2 text-sm font-semibold">

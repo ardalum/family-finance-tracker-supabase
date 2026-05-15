@@ -5,4 +5,5 @@ coverage
 .tmp
 .env
 .env.*
+supabase/.temp
 package-lock.json

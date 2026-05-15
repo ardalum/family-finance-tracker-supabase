@@ -17,10 +17,7 @@ export default function Navigation({ activeView, onChange }) {
   }, [onChange]);
 
   return (
-    <nav
-      className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap"
-      aria-label="Primary navigation"
-    >
+    <nav className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap" aria-label="Primary navigation">
       {navItems.map((item) => {
         const Icon = item.icon;
         const isActive = activeView === item.id;

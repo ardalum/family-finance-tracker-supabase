@@ -105,7 +105,10 @@ describe("recurring service", () => {
     const today = new Date(2026, 4, 14);
 
     assert.equal(getRecurringDisplayStatus(template, "2026-05", { status: "paid" }, today), "Paid");
-    assert.equal(getRecurringDisplayStatus(template, "2026-05", { status: "skipped" }, today), "Skipped");
+    assert.equal(
+      getRecurringDisplayStatus(template, "2026-05", { status: "skipped" }, today),
+      "Skipped",
+    );
     assert.equal(getRecurringDisplayStatus({ dueDay: 10 }, "2026-05", null, today), "Past due");
     assert.equal(getRecurringDisplayStatus({ dueDay: 14 }, "2026-05", null, today), "Due now");
     assert.equal(getRecurringDisplayStatus(template, "2026-05", null, today), "Due soon");
@@ -120,7 +123,10 @@ describe("recurring service", () => {
   it("marks recurring status as paid when an instance or generated transaction exists", () => {
     const template = { id: "rent" };
 
-    assert.equal(getRecurringStatus(template, "2026-05", [], { "2026-05": { rent: { status: "paid" } } }), "Paid");
+    assert.equal(
+      getRecurringStatus(template, "2026-05", [], { "2026-05": { rent: { status: "paid" } } }),
+      "Paid",
+    );
     assert.equal(
       getRecurringStatus(
         template,
@@ -136,7 +142,10 @@ describe("recurring service", () => {
       ),
       "Paid",
     );
-    assert.equal(getRecurringStatus(template, "2026-05", [], { "2026-05": { rent: { status: "skipped" } } }), "Skipped");
+    assert.equal(
+      getRecurringStatus(template, "2026-05", [], { "2026-05": { rent: { status: "skipped" } } }),
+      "Skipped",
+    );
     assert.equal(getRecurringStatus(template, "2026-05", [], {}), "Unpaid");
   });
 

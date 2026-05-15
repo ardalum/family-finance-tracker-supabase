@@ -2,7 +2,9 @@ import { supabase } from "../../lib/supabase/client.js";
 
 function requireSupabase() {
   if (!supabase) {
-    throw new Error("Supabase is not configured. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
+    throw new Error(
+      "Supabase is not configured. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.",
+    );
   }
 
   return supabase;
@@ -92,7 +94,14 @@ async function ensureCategory(client, householdId, input) {
   return data;
 }
 
-async function upsertMonthlyBudget(client, householdId, monthKey, categoryId, input, importedLocalId = null) {
+async function upsertMonthlyBudget(
+  client,
+  householdId,
+  monthKey,
+  categoryId,
+  input,
+  importedLocalId = null,
+) {
   const normalized = normalizeBudgetInput(input);
   const { data, error } = await client
     .from("monthly_category_budgets")
@@ -164,7 +173,13 @@ export async function addBudgetCategoryToSupabase(householdId, monthKey, input) 
   const client = requireSupabase();
   const normalized = normalizeBudgetInput(input);
   const category = await ensureCategory(client, householdId, normalized);
-  const monthlyBudget = await upsertMonthlyBudget(client, householdId, monthKey, category.id, normalized);
+  const monthlyBudget = await upsertMonthlyBudget(
+    client,
+    householdId,
+    monthKey,
+    category.id,
+    normalized,
+  );
 
   const { data, error } = await client
     .from("budget_categories")
@@ -233,7 +248,11 @@ export async function deleteBudgetCategoryFromSupabase(budgetId) {
 
   if (existingError) throw existingError;
 
-  const category = await findCategoryByName(client, existingBudget.household_id, existingBudget.name);
+  const category = await findCategoryByName(
+    client,
+    existingBudget.household_id,
+    existingBudget.name,
+  );
   if (category) {
     const { error: monthlyDeleteError } = await client
       .from("monthly_category_budgets")

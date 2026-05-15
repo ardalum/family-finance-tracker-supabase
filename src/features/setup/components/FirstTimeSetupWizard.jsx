@@ -208,11 +208,15 @@ export default function FirstTimeSetupWizard({
                 <div>
                   <h2 className="text-lg font-semibold text-[#111827]">Household profiles</h2>
                   <p className="mt-1 text-sm text-[#6B7280]">
-                    Profiles are people or owner labels inside this household. They are not login accounts.
+                    Profiles are people or owner labels inside this household. They are not login
+                    accounts.
                   </p>
                 </div>
 
-                <form className="flex flex-col gap-3 sm:flex-row sm:items-end" onSubmit={addProfile}>
+                <form
+                  className="flex flex-col gap-3 sm:flex-row sm:items-end"
+                  onSubmit={addProfile}
+                >
                   <div className="flex-1">
                     <Input
                       label="Profile name"
@@ -232,7 +236,9 @@ export default function FirstTimeSetupWizard({
                   {householdProfilesLoading ? (
                     <p className="text-sm text-gray-500">Loading profiles...</p>
                   ) : activeProfiles.length === 0 ? (
-                    <Alert tone="warning">Create at least one household profile before continuing.</Alert>
+                    <Alert tone="warning">
+                      Create at least one household profile before continuing.
+                    </Alert>
                   ) : (
                     activeProfiles.map((profile) => (
                       <div
@@ -267,7 +273,9 @@ export default function FirstTimeSetupWizard({
                           </div>
                         ) : (
                           <>
-                            <span className="text-sm font-medium text-gray-800">{profile.displayName}</span>
+                            <span className="text-sm font-medium text-gray-800">
+                              {profile.displayName}
+                            </span>
                             <div className="flex gap-2">
                               <Button
                                 type="button"
@@ -309,9 +317,13 @@ export default function FirstTimeSetupWizard({
                   </p>
                 </div>
                 {activeProfiles.length === 0 ? (
-                  <Alert tone="warning">Create at least one household profile before adding a credit card.</Alert>
+                  <Alert tone="warning">
+                    Create at least one household profile before adding a credit card.
+                  </Alert>
                 ) : firstCardAdded ? (
-                  <Alert tone="success">Your first card is ready. Continue when you are ready.</Alert>
+                  <Alert tone="success">
+                    Your first card is ready. Continue when you are ready.
+                  </Alert>
                 ) : (
                   <CreditCardForm
                     showHeader={false}
@@ -353,7 +365,10 @@ export default function FirstTimeSetupWizard({
                   </p>
                 </div>
                 <dl className="grid gap-3 rounded-md border border-gray-200 bg-gray-50 p-4 text-sm">
-                  <SummaryRow label="Household name" value={householdName.trim() || "My Household"} />
+                  <SummaryRow
+                    label="Household name"
+                    value={householdName.trim() || "My Household"}
+                  />
                   <SummaryRow label="Profiles" value={String(activeProfiles.length)} />
                   <SummaryRow label="First card" value={firstCardAdded ? "Added" : "Skipped"} />
                   <SummaryRow
