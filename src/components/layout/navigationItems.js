@@ -6,42 +6,45 @@ import {
   ReceiptText,
   WalletCards,
 } from "lucide-react";
-
-export const navItems = [
-  {
-    id: "dashboard",
+import { primaryFinanceViewIds } from "../../app/secondaryViews.js";
+const navigationItemByView = {
+  dashboard: {
     label: "Dashboard",
     shortLabel: "Home",
     icon: LayoutDashboard,
   },
-  {
-    id: "credit-cards",
+  "credit-cards": {
     label: "Credit Cards",
     shortLabel: "Cards",
     icon: CreditCard,
   },
-  {
-    id: "budgets",
+  budgets: {
     label: "Monthly Budget",
     shortLabel: "Budget",
     icon: WalletCards,
   },
-  {
-    id: "spending",
+  spending: {
     label: "Transactions",
     shortLabel: "Txns",
     icon: ReceiptText,
   },
-  {
-    id: "recurring",
+  recurring: {
     label: "Recurring Payments",
     shortLabel: "Bills",
     icon: CalendarSync,
   },
-  {
-    id: "insights",
+  insights: {
     label: "Insights",
     shortLabel: "Insights",
     icon: ChartNoAxesCombined,
   },
-];
+};
+
+export const navItems = primaryFinanceViewIds.map((id) => ({
+  id,
+  ...navigationItemByView[id],
+}));
+
+export function getNavigationItemIds(items = navItems) {
+  return items.map((item) => item.id);
+}
