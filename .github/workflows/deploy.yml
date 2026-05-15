@@ -29,9 +29,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
+      - name: Verify
+        run: npm run verify
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      - name: Check built output
         run: |
-          npm run build
           echo "----- BUILT DIST INDEX -----"
           cat dist/index.html
           echo "----- CHECK FOR BAD SOURCE SCRIPT -----"
@@ -39,9 +44,6 @@ jobs:
             echo "ERROR: dist/index.html still points to /src/main.jsx"
             exit 1
           fi
-        env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
       - name: Deploy dist to gh-pages branch
         uses: peaceiris/actions-gh-pages@v3
