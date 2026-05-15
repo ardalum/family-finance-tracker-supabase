@@ -1112,28 +1112,28 @@ function FinanceTrackerApp() {
   }, [completeActiveHouseholdSetup, setActiveView]);
 
   const dashboardAppData = useMemo(
-    () =>
-      createDashboardAppData({
-        appData,
-        creditCards: supabaseCreditCards,
-        monthlyBalances: supabaseMonthlyBalances,
-        selectedMonth: selectedDashboardMonth,
-        budgets: dashboardBudgets,
-        transactions: dashboardTransactions,
-        recurringPayments,
-        recurringStatusByMonth,
-      }),
-    [
+  () =>
+    createDashboardAppData({
       appData,
-      dashboardBudgets,
-      dashboardTransactions,
+      creditCards: supabaseCreditCards,
+      monthlyBalances: supabaseMonthlyBalances,
+      selectedMonth: selectedDashboardMonth,
+      budgets: dashboardBudgets,
+      transactions: dashboardTransactions,
       recurringPayments,
       recurringStatusByMonth,
-      selectedDashboardMonth,
-      supabaseCreditCards,
-      supabaseMonthlyBalances,
-    ],
-  );
+    }),
+  [
+    appData,
+    dashboardBudgets,
+    dashboardTransactions,
+    recurringPayments,
+    recurringStatusByMonth,
+    selectedDashboardMonth,
+    supabaseCreditCards,
+    supabaseMonthlyBalances,
+  ],
+);
   const insightsAppData = useMemo(
   () =>
     createInsightsAppData({
