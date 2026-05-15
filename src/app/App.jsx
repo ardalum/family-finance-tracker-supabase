@@ -19,6 +19,7 @@ import {
   runRefreshSequence,
 } from "./refreshDataUtils.js";
 import { createDashboardAppData, createInsightsAppData } from "./appDataComposition.js";
+import { createAppViewProps } from "./appViewProps.js";
 import { useActiveView } from "./useActiveView.js";
 import { useLocalAppData } from "./useLocalAppData.js";
 import {
@@ -1125,33 +1126,111 @@ function FinanceTrackerApp() {
     ],
   );
   const insightsAppData = useMemo(
-  () =>
-    createInsightsAppData({
+    () =>
+      createInsightsAppData({
+        appData,
+        creditCards: supabaseCreditCards,
+        monthlyBalances: supabaseMonthlyBalances,
+        selectedMonth: selectedInsightsMonth,
+        budgets: insightsBudgets,
+        transactions: insightsTransactions,
+        recurringPayments,
+        recurringStatusByMonth,
+      }),
+    [
       appData,
-      creditCards: supabaseCreditCards,
-      monthlyBalances: supabaseMonthlyBalances,
-      selectedMonth: selectedInsightsMonth,
-      budgets: insightsBudgets,
-      transactions: insightsTransactions,
+      insightsBudgets,
+      insightsTransactions,
       recurringPayments,
       recurringStatusByMonth,
-    }),
-  [
-    appData,
-    insightsBudgets,
-    insightsTransactions,
-    recurringPayments,
-    recurringStatusByMonth,
-    selectedInsightsMonth,
-    supabaseCreditCards,
-    supabaseMonthlyBalances,
-  ],
-);
+      selectedInsightsMonth,
+      supabaseCreditCards,
+      supabaseMonthlyBalances,
+    ],
+  );
   const headerAlerts = useMemo(
     () => getAlerts(getDashboardData(dashboardAppData, selectedDashboardMonth)),
     [dashboardAppData, selectedDashboardMonth],
   );
-
+  const appViewProps = createAppViewProps({
+    appData,
+    dashboardAppData,
+    insightsAppData,
+    supabaseCreditCards,
+    supabaseMonthlyBalances,
+    selectedBalanceMonth,
+    creditCardsLoading,
+    creditCardsError,
+    creditCardsSaving,
+    monthlyBalancesLoading,
+    monthlyBalancesSaving,
+    monthlyBalancesError,
+    householdProfiles,
+    householdProfilesLoading,
+    householdProfilesSaving,
+    householdProfilesError,
+    supabaseBudgets,
+    selectedBudgetMonth,
+    budgetsLoading,
+    budgetsError,
+    budgetsSaving,
+    spendingCategories,
+    spendingTransactions,
+    selectedSpendingMonth,
+    spendingLoading,
+    spendingError,
+    spendingSaving,
+    spendingCategoriesLoading,
+    spendingCategoriesError,
+    recurringCategories,
+    recurringPayments,
+    recurringStatusByMonth,
+    recurringTransactions,
+    selectedRecurringMonth,
+    recurringLoading,
+    recurringError,
+    recurringSaving,
+    recurringCategoriesLoading,
+    recurringCategoriesError,
+    selectedDashboardMonth,
+    dashboardLoading,
+    dashboardError,
+    selectedInsightsMonth,
+    insightsLoading,
+    insightsError,
+    setSelectedDashboardMonth,
+    setSelectedBalanceMonth,
+    setSelectedBudgetMonth,
+    setSelectedSpendingMonth,
+    setSelectedRecurringMonth,
+    setSelectedInsightsMonth,
+    createSupabaseCreditCard,
+    updateSupabaseCreditCard,
+    deleteSupabaseCreditCard,
+    saveSupabaseMonthlyBalance,
+    refreshData,
+    createSupabaseBudget,
+    updateSupabaseBudget,
+    deleteSupabaseBudget,
+    addDefaultBudgetsToSupabase,
+    importLocalBudgetsToSupabase,
+    createSupabaseTransaction,
+    updateSupabaseTransaction,
+    deleteSupabaseTransaction,
+    importLocalSpendingToSupabase,
+    createSupabaseRecurringPayment,
+    updateSupabaseRecurringPayment,
+    deleteSupabaseRecurringPayment,
+    markSupabaseRecurringPaid,
+    markSupabaseRecurringUnpaid,
+    skipSupabaseRecurringPayment,
+    importLocalRecurringToSupabase,
+    refreshSupabaseDataAfterImport,
+    createHouseholdProfile,
+    saveHouseholdProfile,
+    deactivateProfile,
+    addDefaultProfiles,
+  });
   if (setupCheckLoading) {
     return <AppSetupLoadingScreen />;
   }
@@ -1182,110 +1261,7 @@ function FinanceTrackerApp() {
     setupCheckError={setupCheckError}
     onViewChange={setActiveView}
   >
-
-      <AppViewRenderer
-        activeView={activeView}
-        dashboardProps={{
-          appData: dashboardAppData,
-          selectedMonth: selectedDashboardMonth,
-          onMonthChange: setSelectedDashboardMonth,
-          loading: dashboardLoading,
-          error: dashboardError,
-        }}
-        creditCardProps={{
-          creditCards: supabaseCreditCards,
-          monthlyBalances: supabaseMonthlyBalances,
-          selectedBalanceMonth,
-          loading: creditCardsLoading,
-          error: creditCardsError,
-          isSaving: creditCardsSaving,
-          monthlyBalancesLoading,
-          monthlyBalancesSaving,
-          monthlyBalancesError,
-          householdProfiles,
-          householdProfilesLoading,
-          onCreateCard: createSupabaseCreditCard,
-          onUpdateCard: updateSupabaseCreditCard,
-          onDeleteCard: deleteSupabaseCreditCard,
-          onBalanceMonthChange: setSelectedBalanceMonth,
-          onMonthlyBalanceChange: saveSupabaseMonthlyBalance,
-          onDataChange: refreshData,
-        }}
-        budgetProps={{
-          budgets: supabaseBudgets,
-          localBudgetsByMonth: appData.budgetsByMonth,
-          selectedMonth: selectedBudgetMonth,
-          loading: budgetsLoading,
-          error: budgetsError,
-          isSaving: budgetsSaving,
-          onMonthChange: setSelectedBudgetMonth,
-          onCreateBudget: createSupabaseBudget,
-          onUpdateBudget: updateSupabaseBudget,
-          onDeleteBudget: deleteSupabaseBudget,
-          onAddDefaultBudgets: addDefaultBudgetsToSupabase,
-          onImportLocalBudgets: importLocalBudgetsToSupabase,
-        }}
-        spendingProps={{
-          creditCards: supabaseCreditCards,
-          categories: spendingCategories,
-          transactions: spendingTransactions,
-          localTransactions: appData.transactions,
-          selectedMonth: selectedSpendingMonth,
-          loading: spendingLoading,
-          error: spendingError,
-          isSaving: spendingSaving,
-          categoriesLoading: spendingCategoriesLoading,
-          categoriesError: spendingCategoriesError,
-          onMonthChange: setSelectedSpendingMonth,
-          onCreateTransaction: createSupabaseTransaction,
-          onUpdateTransaction: updateSupabaseTransaction,
-          onDeleteTransaction: deleteSupabaseTransaction,
-          onImportLocalTransactions: importLocalSpendingToSupabase,
-        }}
-        recurringProps={{
-          creditCards: supabaseCreditCards,
-          categories: recurringCategories,
-          recurringPayments,
-          recurringStatusByMonth,
-          transactions: recurringTransactions,
-          localRecurringPayments: appData.recurringPayments,
-          selectedMonth: selectedRecurringMonth,
-          loading: recurringLoading,
-          error: recurringError,
-          isSaving: recurringSaving,
-          categoriesLoading: recurringCategoriesLoading,
-          categoriesError: recurringCategoriesError,
-          onMonthChange: setSelectedRecurringMonth,
-          onCreateRecurringPayment: createSupabaseRecurringPayment,
-          onUpdateRecurringPayment: updateSupabaseRecurringPayment,
-          onDeleteRecurringPayment: deleteSupabaseRecurringPayment,
-          onMarkRecurringPaid: markSupabaseRecurringPaid,
-          onMarkRecurringUnpaid: markSupabaseRecurringUnpaid,
-          onSkipRecurringPayment: skipSupabaseRecurringPayment,
-          onImportLocalRecurringPayments: importLocalRecurringToSupabase,
-        }}
-        insightsProps={{
-          appData: insightsAppData,
-          selectedMonth: selectedInsightsMonth,
-          onMonthChange: setSelectedInsightsMonth,
-          loading: insightsLoading,
-          error: insightsError,
-        }}
-        backupProps={{
-          onDataChange: refreshData,
-          onSupabaseImportComplete: refreshSupabaseDataAfterImport,
-        }}
-        householdSettingsProps={{
-          householdProfiles,
-          householdProfilesLoading,
-          householdProfilesSaving,
-          householdProfilesError,
-          onCreateProfile: createHouseholdProfile,
-          onUpdateProfile: saveHouseholdProfile,
-          onDeactivateProfile: deactivateProfile,
-          onCreateDefaultProfiles: addDefaultProfiles,
-        }}
-      />
+        <AppViewRenderer activeView={activeView} {...appViewProps} />
       </AppShellFrame>
 );
 }
