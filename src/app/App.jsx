@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import AppShell from "../components/layout/AppShell.jsx";
 import AppProviders from "./AppProviders.jsx";
 import { useActiveView } from "./useActiveView.js";
+import { useLocalAppData } from "./useLocalAppData.js";
 import AboutWalletFlow from "../features/about/components/AboutWalletFlow.jsx";
 import AccountMenu from "../features/auth/components/AccountMenu.jsx";
 import BackupRestore from "../features/backup/components/BackupRestore.jsx";
@@ -63,10 +64,6 @@ import {
 import AlertsMenu from "../features/dashboard/components/AlertsMenu.jsx";
 import { getAlerts, getDashboardData } from "../features/dashboard/dashboardUtils.js";
 import { getCurrentMonthKey } from "../lib/dates.js";
-import { readAppData } from "../lib/storage/appStorage.js";
-
-
-
 
 export default function App() {
   return (
@@ -78,7 +75,7 @@ export default function App() {
 
 function FinanceTrackerApp() {
   const { activeHouseholdId, activeHousehold, completeActiveHouseholdSetup } = useHouseholds();
-  const [appData, setAppData] = useState(() => readAppData());
+  const { appData, refreshData } = useLocalAppData();
   const [setupCheckLoading, setSetupCheckLoading] = useState(true);
   const [setupCheckError, setSetupCheckError] = useState("");
   const [supabaseCreditCards, setSupabaseCreditCards] = useState([]);
@@ -166,9 +163,7 @@ function FinanceTrackerApp() {
 
 
 
-  function refreshData(nextData) {
-    setAppData(nextData ?? readAppData());
-  }
+  
 
   const loadHouseholdProfiles = useCallback(async () => {
     if (!activeHouseholdId) {
