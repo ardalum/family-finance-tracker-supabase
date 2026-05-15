@@ -8,10 +8,9 @@
 
 For code, config, dependency, workflow, or behavior changes:
 
-- [ ] `npm run build` passes.
-- [ ] `npm run test:run` passes.
 - [ ] `npm run verify` passes.
-- [ ] `npm run dev` starts successfully.
+- [ ] `npm run dev` starts successfully when browser behavior should be checked.
+- [ ] Relevant browser checks were completed.
 
 For documentation-only changes:
 
@@ -24,8 +23,7 @@ For documentation-only changes:
 git fetch origin
 git checkout <branch-name>
 git pull origin <branch-name>
-npm run build
-npm run test:run
+npm ci
 npm run verify
 npm run dev
 ```
