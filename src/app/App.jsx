@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AppShell from "../components/layout/AppShell.jsx";
 import AppProviders from "./AppProviders.jsx";
+import {
+  getInitialSetupStatusState,
+  getSetupStatusErrorMessage,
+  getSkippedSetupStatusState,
+  shouldSkipSetupStatusCheck,
+} from "./setupStatusUtils.js";
 import { useActiveView } from "./useActiveView.js";
 import { useLocalAppData } from "./useLocalAppData.js";
 import AboutWalletFlow from "../features/about/components/AboutWalletFlow.jsx";
@@ -76,8 +82,9 @@ export default function App() {
 function FinanceTrackerApp() {
   const { activeHouseholdId, activeHousehold, completeActiveHouseholdSetup } = useHouseholds();
   const { appData, refreshData } = useLocalAppData();
-  const [setupCheckLoading, setSetupCheckLoading] = useState(true);
-  const [setupCheckError, setSetupCheckError] = useState("");
+  const initialSetupStatusState = getInitialSetupStatusState();
+  const [setupCheckLoading, setSetupCheckLoading] = useState(initialSetupStatusState.isLoading);
+  const [setupCheckError, setSetupCheckError] = useState(initialSetupStatusState.error);
   const [supabaseCreditCards, setSupabaseCreditCards] = useState([]);
   const [creditCardsLoading, setCreditCardsLoading] = useState(true);
   const [creditCardsSaving, setCreditCardsSaving] = useState(false);
@@ -129,9 +136,10 @@ function FinanceTrackerApp() {
     let isCurrent = true;
 
     async function checkSetupStatus() {
-      if (!activeHouseholdId || activeHousehold?.setupComplete) {
-        setSetupCheckLoading(false);
-        setSetupCheckError("");
+      if (shouldSkipSetupStatusCheck({ activeHouseholdId, activeHousehold })) {
+        const skippedState = getSkippedSetupStatusState();
+        setSetupCheckLoading(skippedState.isLoading);
+        setSetupCheckError(skippedState.error);
         return;
       }
 
@@ -145,7 +153,7 @@ function FinanceTrackerApp() {
         }
       } catch (error) {
         if (isCurrent) {
-          setSetupCheckError(error.message || "Could not check setup status.");
+          setSetupCheckError(getSetupStatusErrorMessage(error));
         }
       } finally {
         if (isCurrent) {
@@ -160,10 +168,6 @@ function FinanceTrackerApp() {
       isCurrent = false;
     };
   }, [activeHousehold?.setupComplete, activeHouseholdId, completeActiveHouseholdSetup]);
-
-
-
-  
 
   const loadHouseholdProfiles = useCallback(async () => {
     if (!activeHouseholdId) {
