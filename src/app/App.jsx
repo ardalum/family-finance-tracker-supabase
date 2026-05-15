@@ -9,6 +9,8 @@ import {
 } from "./setupStatusUtils.js";
 import {
   createDashboardInsightsRefreshers,
+  createRecurringDashboardInsightsRefreshers,
+  createRecurringSpendingDashboardInsightsRefreshers,
   createSpendingDashboardInsightsRefreshers,
   runRefreshSequence,
 } from "./refreshDataUtils.js";
@@ -905,9 +907,13 @@ function FinanceTrackerApp() {
         supabaseCreditCards,
         recurringCategories,
       );
-      await loadRecurringData();
-      await loadDashboardData();
-      await loadInsightsData();
+      await runRefreshSequence(
+        createRecurringDashboardInsightsRefreshers({
+          loadRecurringData,
+          loadDashboardData,
+          loadInsightsData,
+        }),
+      );
     } catch (error) {
       setRecurringError(error.message || "Could not add recurring payment.");
       throw error;
@@ -927,9 +933,13 @@ function FinanceTrackerApp() {
         supabaseCreditCards,
         recurringCategories,
       );
-      await loadRecurringData();
-      await loadDashboardData();
-      await loadInsightsData();
+      await runRefreshSequence(
+        createRecurringDashboardInsightsRefreshers({
+          loadRecurringData,
+          loadDashboardData,
+          loadInsightsData,
+        }),
+      );
     } catch (error) {
       setRecurringError(error.message || "Could not update recurring payment.");
       throw error;
@@ -944,9 +954,13 @@ function FinanceTrackerApp() {
 
     try {
       await deleteRecurringPaymentFromSupabase(templateId);
-      await loadRecurringData();
-      await loadDashboardData();
-      await loadInsightsData();
+      await runRefreshSequence(
+        createRecurringDashboardInsightsRefreshers({
+          loadRecurringData,
+          loadDashboardData,
+          loadInsightsData,
+        }),
+      );
     } catch (error) {
       setRecurringError(error.message || "Could not delete recurring payment.");
       throw error;
@@ -967,10 +981,14 @@ function FinanceTrackerApp() {
         cards: supabaseCreditCards,
         categories: recurringCategories,
       });
-      await loadRecurringData();
-      await loadSpendingTransactions();
-      await loadDashboardData();
-      await loadInsightsData();
+      await runRefreshSequence(
+        createRecurringSpendingDashboardInsightsRefreshers({
+          loadRecurringData,
+          loadSpendingTransactions,
+          loadDashboardData,
+          loadInsightsData,
+        }),
+      );
       return instance;
     } catch (error) {
       setRecurringError(error.message || "Could not mark recurring payment paid.");
@@ -990,10 +1008,14 @@ function FinanceTrackerApp() {
         monthKey: selectedRecurringMonth,
         template,
       });
-      await loadRecurringData();
-      await loadSpendingTransactions();
-      await loadDashboardData();
-      await loadInsightsData();
+      await runRefreshSequence(
+        createRecurringSpendingDashboardInsightsRefreshers({
+          loadRecurringData,
+          loadSpendingTransactions,
+          loadDashboardData,
+          loadInsightsData,
+        }),
+      );
       return instance;
     } catch (error) {
       setRecurringError(error.message || "Could not mark recurring payment unpaid.");
@@ -1013,10 +1035,14 @@ function FinanceTrackerApp() {
         monthKey: selectedRecurringMonth,
         template,
       });
-      await loadRecurringData();
-      await loadSpendingTransactions();
-      await loadDashboardData();
-      await loadInsightsData();
+      await runRefreshSequence(
+        createRecurringSpendingDashboardInsightsRefreshers({
+          loadRecurringData,
+          loadSpendingTransactions,
+          loadDashboardData,
+          loadInsightsData,
+        }),
+      );
       return instance;
     } catch (error) {
       setRecurringError(error.message || "Could not skip recurring payment.");
@@ -1037,9 +1063,13 @@ function FinanceTrackerApp() {
         supabaseCreditCards,
         recurringCategories,
       );
-      await loadRecurringData();
-      await loadDashboardData();
-      await loadInsightsData();
+      await runRefreshSequence(
+        createRecurringDashboardInsightsRefreshers({
+          loadRecurringData,
+          loadDashboardData,
+          loadInsightsData,
+        }),
+      );
       return imported;
     } catch (error) {
       setRecurringError(error.message || "Could not import local recurring payments.");
