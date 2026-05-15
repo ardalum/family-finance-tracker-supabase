@@ -1,39 +1,57 @@
 # Frontend architecture plan
 
-This document tracks the next frontend architecture work after authentication and session handling.
+This document tracks frontend architecture and tooling cleanup work for WalletFlow.
 
 ## Current areas to improve
 
 ### App orchestration
 
-`App.jsx` currently coordinates many feature areas. It imports many feature modules, owns many state values, loads data for several pages, and passes many callbacks into child components.
+`App.jsx` still coordinates many feature areas. It now delegates app providers, active view
+state, local app data, setup status helpers, render wrappers, view rendering, and view prop
+construction to focused helpers, but it still owns many feature data states, loaders, and mutation
+callbacks.
 
 A better long-term structure is to move feature data logic into feature-level hooks.
 
 ### Data refresh flow
 
-Several user actions reload data for more than one feature area. This is useful, but it is currently handled manually.
+Shared refresh helper utilities now centralize the existing multi-feature refresh sequences for
+budget, spending, recurring, and full-import flows.
 
-A better long-term structure is to centralize refresh behavior or adopt a data-fetching library.
+A better long-term structure would still be to extract feature hooks or adopt a data-fetching
+library so mutations can invalidate or refresh data closer to the affected feature.
 
-### Project scripts
+### Project scripts and CI
 
-The project now has build, test, and verify scripts. Lint and format scripts should still be added once ESLint and Prettier are configured.
+The project now has pinned ESLint and Prettier tooling, formatting checks, a shared `verify` script,
+PR verification, and deploy verification.
+
+`npm run verify` is the standard local and CI check. It runs formatting checks, production build,
+tests, and lint.
 
 ### Shared data shapes
 
-The app passes shared finance objects across many files. Shared types would make those objects easier to maintain over time.
+The app passes shared finance objects across many files. Shared types would make those objects
+easier to maintain over time.
+
+TypeScript is still intentionally deferred until the app has more practical usage mileage and the
+remaining feature hook boundaries are clearer.
 
 ## Completed groundwork
 
 - Added a frontend architecture plan.
 - Added Node test scripts.
-- Added a verify script.
-- Added GitHub Actions checks.
+- Added a shared verify script.
+- Added GitHub Actions checks for pull requests, pushes, and deploys.
 - Added local workflow documentation.
-- Added repo config guardrails for Node, npm engines, editor settings, Git attributes, and ignored files.
+- Added repo config guardrails for Node, npm engines, editor settings, Git attributes, and ignored
+  files.
 - Added `.env.example`.
-- Added tests for date, dashboard alert, spending, recurring, credit card, page content, active view, view group, setup status, and async state helpers.
+- Added pinned ESLint and Prettier tooling.
+- Added Prettier config and formatting baseline.
+- Added tests for date, dashboard alert, spending, recurring, credit card, page content, active
+  view, view group, setup status, async state, refresh helper, app-data composition, and app-view
+  prop helpers.
 - Added `pageContent.js`.
 - Added `activeViewStorage.js`.
 - Added `useActiveView.js`.
@@ -42,6 +60,14 @@ The app passes shared finance objects across many files. Shared types would make
 - Added `setupStatusUtils.js`.
 - Added `useLocalAppData.js`.
 - Added `asyncStateUtils.js`.
+- Added `refreshDataUtils.js`.
+- Added `appDataComposition.js`.
+- Added `appViewProps.js`.
+- Added `AppHeaderAccountSlot.jsx`.
+- Added `AppStatusMessages.jsx`.
+- Added `AppFirstTimeSetupScreen.jsx`.
+- Added `AppShellFrame.jsx`.
+- Added `AppViewRenderer.jsx`.
 
 ## Pull request sizing guidance
 
@@ -55,29 +81,37 @@ Good pull request scope examples:
 - one grouped documentation update
 - one focused UI cleanup
 
-Very small pull requests are still acceptable when the risk is high, the file is difficult to edit safely, or the change needs to be isolated for review.
+Very small pull requests are still acceptable when the risk is high, the file is difficult to edit
+safely, or the change needs to be isolated for review.
 
-Avoid mixing unrelated changes, such as UI redesign, data service changes, migrations, and documentation-only edits in one pull request.
+Avoid mixing unrelated changes, such as UI redesign, data service changes, migrations, and
+documentation-only edits in one pull request.
 
-## Next App.jsx wiring order
+## Completed App.jsx wiring
 
-Use focused PRs because `App.jsx` is large and easy to break.
+These App.jsx wiring passes are complete:
 
-1. Wire `AppProviders.jsx` into `App.jsx` and remove the direct provider/gate imports.
-2. Wire `pageContent.js` into `App.jsx` and remove the inline page content object.
-3. Wire `useActiveView.js` into `App.jsx` and remove inline active-view storage logic.
-4. Wire `useLocalAppData.js` into `App.jsx` and remove inline local app data state.
-5. Use `setupStatusUtils.js` inside the setup-check effect.
-6. Continue extracting feature-level hooks one feature at a time.
+1. Wired `AppProviders.jsx` into `App.jsx`.
+2. Wired page content helpers into active view utilities.
+3. Wired `useActiveView.js` into `App.jsx`.
+4. Wired `useLocalAppData.js` into `App.jsx`.
+5. Wired `setupStatusUtils.js` into the setup-check effect.
+6. Wired refresh helpers into budget, spending, recurring, and full-import flows.
+7. Extracted app shell account/status rendering.
+8. Extracted first-time setup and app shell frame wrappers.
+9. Extracted app view rendering.
+10. Extracted app view prop construction.
 
-## Recommended order
+## Recommended next order
 
-1. Add lint and format tooling.
-2. Wire existing app helper modules into `App.jsx` in focused PRs.
+1. Use the app with real household data and keep manual backups.
+2. Fix practical usage bugs before deep refactoring.
 3. Extract feature-level data hooks from `App.jsx` one feature at a time.
-4. Improve refresh behavior after mutations.
-5. Add shared finance data types.
-6. Consider a gradual TypeScript migration for service files.
+4. Keep refresh behavior unchanged during hook extraction.
+5. Add tests for feature hook helper logic before wiring.
+6. Add shared finance data types after hook boundaries stabilize.
+7. Consider a gradual TypeScript migration for service files after practical use confirms the current
+   data model.
 
 ## Proposed hooks
 
@@ -89,18 +123,19 @@ Use focused PRs because `App.jsx` is large and easy to break.
 - `useDashboardData(householdId, month)`
 - `useInsightsData(householdId, month)`
 
-## Suggested first test targets
+## Suggested next test targets
 
-- date calculations
-- due date alerts
-- budget totals
-- transaction totals
-- recurring payment generation
-- monthly balance calculations
+- feature hook helper logic before wiring
+- mutation refresh sequencing for each feature hook
+- dashboard and insights data composition around edge cases
+- backup/import validation edge cases
+- account and household deletion safety flows
 - sorting and filtering helpers
 
 ## Data-fetching note
 
-TanStack Query is a good candidate for this app because it can help manage loading state, errors, cached data, refetching, and mutation updates.
+TanStack Query is a good candidate for this app because it can help manage loading state, errors,
+cached data, refetching, and mutation updates.
 
-It should be introduced after the basic tooling is in place.
+It should be introduced only after the app has enough real usage mileage to confirm the current
+feature boundaries and refresh behavior.
