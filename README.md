@@ -101,6 +101,12 @@ Run the full project verification suite:
 npm.cmd run verify
 ```
 
+Run a clean verification pass when generated folders or Vite cache may be stale:
+
+```powershell
+npm.cmd run verify:clean
+```
+
 `verify` runs formatting checks, production build, tests, and lint.
 
 Preview the production build locally:
