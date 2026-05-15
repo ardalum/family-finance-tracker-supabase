@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import AppShell from "../components/layout/AppShell.jsx";
 import AppProviders from "./AppProviders.jsx";
-import AppHeaderAccountSlot from "./AppHeaderAccountSlot.jsx";
-import { AppSetupErrorMessage, AppSetupLoadingScreen } from "./AppStatusMessages.jsx";
+import { AppSetupLoadingScreen } from "./AppStatusMessages.jsx";
+import AppFirstTimeSetupScreen from "./AppFirstTimeSetupScreen.jsx";
+import AppShellFrame from "./AppShellFrame.jsx";
 import {
   getInitialSetupStatusState,
   getSetupStatusErrorMessage,
@@ -65,7 +65,6 @@ import {
   skipRecurringPaymentInSupabase,
   updateRecurringPaymentInSupabase,
 } from "../features/recurring/recurringSupabaseService.js";
-import FirstTimeSetupWizard from "../features/setup/components/FirstTimeSetupWizard.jsx";
 import AppSettings from "../features/settings/components/AppSettings.jsx";
 import { householdHasFinanceData } from "../features/setup/setupService.js";
 import SpendingTracker from "../features/spending/components/SpendingTracker.jsx";
@@ -1167,32 +1166,31 @@ function FinanceTrackerApp() {
   }
 
   if (!activeHousehold?.setupComplete) {
-    return (
-      <FirstTimeSetupWizard
-        householdProfiles={householdProfiles}
-        householdProfilesLoading={householdProfilesLoading}
-        householdProfilesSaving={householdProfilesSaving}
-        onCreateProfile={createHouseholdProfile}
-        onUpdateProfile={saveHouseholdProfile}
-        onDeactivateProfile={deactivateProfile}
-        onCreateCard={createSupabaseCreditCard}
-        creditCardsSaving={creditCardsSaving}
-        onAddDefaultBudgets={addDefaultBudgetsToSupabase}
-        budgetsSaving={budgetsSaving}
-        onFinish={finishFirstTimeSetup}
-      />
-    );
-  }
+  return (
+    <AppFirstTimeSetupScreen
+      householdProfiles={householdProfiles}
+      householdProfilesLoading={householdProfilesLoading}
+      householdProfilesSaving={householdProfilesSaving}
+      onCreateProfile={createHouseholdProfile}
+      onUpdateProfile={saveHouseholdProfile}
+      onDeactivateProfile={deactivateProfile}
+      onCreateCard={createSupabaseCreditCard}
+      creditCardsSaving={creditCardsSaving}
+      onAddDefaultBudgets={addDefaultBudgetsToSupabase}
+      budgetsSaving={budgetsSaving}
+      onFinish={finishFirstTimeSetup}
+    />
+  );
+}
 
   return (
-    <AppShell
-      activeView={activeView}
-      onViewChange={setActiveView}
-      pageTitle={currentPage.title}
-      pageDescription={currentPage.description}
-      accountSlot={<AppHeaderAccountSlot alerts={headerAlerts} onNavigate={setActiveView} />}
-    >
-      <AppSetupErrorMessage error={setupCheckError} />
+  <AppShellFrame
+    activeView={activeView}
+    currentPage={currentPage}
+    headerAlerts={headerAlerts}
+    setupCheckError={setupCheckError}
+    onViewChange={setActiveView}
+  >
 
       {activeView === "dashboard" ? (
         <Dashboard
@@ -1321,6 +1319,6 @@ function FinanceTrackerApp() {
       {activeView === "app-settings" ? <AppSettings /> : null}
 
       {activeView === "about" ? <AboutWalletFlow /> : null}
-    </AppShell>
-  );
+      </AppShellFrame>
+);
 }
