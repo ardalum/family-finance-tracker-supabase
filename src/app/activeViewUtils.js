@@ -1,5 +1,7 @@
-import { DEFAULT_ACTIVE_VIEW } from "./activeViewStorage.js";
+import { ACTIVE_VIEW_KEY, DEFAULT_ACTIVE_VIEW } from "./activeViewConstants.js";
 import { getPageContent, isKnownPageView } from "./pageContent.js";
+
+export { ACTIVE_VIEW_KEY, DEFAULT_ACTIVE_VIEW };
 
 export function normalizeActiveView(view, fallbackView = DEFAULT_ACTIVE_VIEW) {
   if (isKnownPageView(view)) return view;
