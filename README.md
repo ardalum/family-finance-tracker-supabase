@@ -75,6 +75,12 @@ If Vite dependency caching gets stale after moving folders or changing dependenc
 npm.cmd run dev -- --force
 ```
 
+Remove generated local folders before a clean rebuild:
+
+```powershell
+npm.cmd run clean
+```
+
 ## Build and Checks
 
 Create a production build:
