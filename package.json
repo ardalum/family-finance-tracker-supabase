@@ -15,6 +15,7 @@
     "lint": "eslint .",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
+    "clean": "node scripts/clean.mjs",
     "verify": "npm run format:check && npm run build && npm run test:run && npm run lint"
   },
   "dependencies": {
