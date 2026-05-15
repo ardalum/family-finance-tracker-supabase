@@ -71,6 +71,14 @@ Run the app locally when browser behavior should be checked:
 npm run dev
 ```
 
+Remove generated local folders before a clean rebuild:
+
+```bash
+npm run clean
+```
+
+The clean command removes `dist`, `coverage`, and the Vite dependency cache.
+
 For documentation-only changes, local app testing is not usually needed. GitHub Actions checks are enough unless the documentation change includes commands that should be manually verified.
 
 ## Pull request routine
