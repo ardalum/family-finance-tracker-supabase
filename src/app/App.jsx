@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AppShell from "../components/layout/AppShell.jsx";
 import AppProviders from "./AppProviders.jsx";
+import { getPageContent, isKnownPageView } from "./pageContent.js";
 import AboutWalletFlow from "../features/about/components/AboutWalletFlow.jsx";
 import AccountMenu from "../features/auth/components/AccountMenu.jsx";
 import BackupRestore from "../features/backup/components/BackupRestore.jsx";
@@ -64,48 +65,6 @@ import { getAlerts, getDashboardData } from "../features/dashboard/dashboardUtil
 import { getCurrentMonthKey } from "../lib/dates.js";
 import { readAppData } from "../lib/storage/appStorage.js";
 
-const pageContent = {
-  dashboard: {
-    title: "Dashboard",
-    description: "A clear view of cards, budget, spending, and bills.",
-  },
-  "credit-cards": {
-    title: "Credit Cards",
-    description: "Manage cards, monthly balances, due dates, and payment status.",
-  },
-  budgets: {
-    title: "Monthly Budget",
-    description: "Plan category budgets for each month.",
-  },
-  spending: {
-    title: "Transactions",
-    description: "Track spending, payment methods, categories, and notes.",
-  },
-  recurring: {
-    title: "Recurring Payments",
-    description: "Manage monthly bills, subscriptions, and mandatory payments.",
-  },
-  insights: {
-    title: "Insights",
-    description: "Review spending trends, budget performance, and payment patterns.",
-  },
-  backup: {
-    title: "Backup & Restore",
-    description: "Export Supabase household data and access legacy localStorage backup tools.",
-  },
-  "household-settings": {
-    title: "Household Settings",
-    description: "Create households, review membership, and choose the active household.",
-  },
-  "app-settings": {
-    title: "App Settings",
-    description: "Customize display and app preferences.",
-  },
-  about: {
-    title: "About WalletFlow",
-    description: "Learn more about WalletFlow.",
-  },
-};
 
 const ACTIVE_VIEW_KEY = "personalFinanceApp:activeView:v1";
 
@@ -171,12 +130,12 @@ function FinanceTrackerApp() {
   const [activeView, setActiveViewState] = useState(() => {
     try {
       const storedView = window.localStorage.getItem(ACTIVE_VIEW_KEY);
-      return pageContent[storedView] ? storedView : "dashboard";
+      return isKnownPageView(storedView) ? storedView : "dashboard";
     } catch {
       return "dashboard";
     }
   });
-  const currentPage = pageContent[activeView];
+  const currentPage = getPageContent(activeView);
 
   useEffect(() => {
     let isCurrent = true;
