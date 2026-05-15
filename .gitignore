@@ -28,3 +28,4 @@ Thumbs.db
 # Local cache
 .cache/
 .tmp/
+supabase/.temp/
