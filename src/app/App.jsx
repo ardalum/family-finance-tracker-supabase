@@ -7,6 +7,10 @@ import {
   getSkippedSetupStatusState,
   shouldSkipSetupStatusCheck,
 } from "./setupStatusUtils.js";
+import {
+  createDashboardInsightsRefreshers,
+  runRefreshSequence,
+} from "./refreshDataUtils.js";
 import { useActiveView } from "./useActiveView.js";
 import { useLocalAppData } from "./useLocalAppData.js";
 import AboutWalletFlow from "../features/about/components/AboutWalletFlow.jsx";
@@ -661,8 +665,12 @@ function FinanceTrackerApp() {
         input,
       );
       setSupabaseBudgets((budgets) => [...budgets, budget]);
-      await loadDashboardData();
-      await loadInsightsData();
+      await runRefreshSequence(
+        createDashboardInsightsRefreshers({
+          loadDashboardData,
+          loadInsightsData,
+        }),
+      );
       return budget;
     } catch (error) {
       setBudgetsError(error.message || "Could not add budget category.");
@@ -681,8 +689,12 @@ function FinanceTrackerApp() {
       setSupabaseBudgets((budgets) =>
         budgets.map((currentBudget) => (currentBudget.id === budget.id ? budget : currentBudget)),
       );
-      await loadDashboardData();
-      await loadInsightsData();
+      await runRefreshSequence(
+        createDashboardInsightsRefreshers({
+          loadDashboardData,
+          loadInsightsData,
+        }),
+      );
       return budget;
     } catch (error) {
       setBudgetsError(error.message || "Could not update budget category.");
@@ -701,8 +713,12 @@ function FinanceTrackerApp() {
       setSupabaseBudgets((budgets) =>
         budgets.filter((budget) => (budget.supabaseId ?? budget.id) !== budgetId),
       );
-      await loadDashboardData();
-      await loadInsightsData();
+      await runRefreshSequence(
+        createDashboardInsightsRefreshers({
+          loadDashboardData,
+          loadInsightsData,
+        }),
+      );
     } catch (error) {
       setBudgetsError(error.message || "Could not delete budget category.");
       throw error;
@@ -722,9 +738,13 @@ function FinanceTrackerApp() {
           [selectedBudgetMonth]: appData.budgetsByMonth?.[selectedBudgetMonth] ?? [],
         },
       );
-      await loadSupabaseBudgets();
-      await loadDashboardData();
-      await loadInsightsData();
+      await runRefreshSequence([
+        loadSupabaseBudgets,
+        ...createDashboardInsightsRefreshers({
+          loadDashboardData,
+          loadInsightsData,
+        }),
+      ]);
       return importedBudgets;
     } catch (error) {
       setBudgetsError(error.message || "Could not import local budget categories.");
@@ -759,8 +779,12 @@ function FinanceTrackerApp() {
       }
 
       setSupabaseBudgets((budgets) => [...budgets, ...createdBudgets]);
-      await loadDashboardData();
-      await loadInsightsData();
+      await runRefreshSequence(
+        createDashboardInsightsRefreshers({
+          loadDashboardData,
+          loadInsightsData,
+        }),
+      );
       return createdBudgets;
     } catch (error) {
       setBudgetsError(error.message || "Could not add default budget categories.");
