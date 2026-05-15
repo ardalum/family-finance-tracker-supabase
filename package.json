@@ -16,7 +16,8 @@
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "clean": "node scripts/clean.mjs",
-    "verify": "npm run format:check && npm run build && npm run test:run && npm run lint"
+    "verify": "npm run format:check && npm run build && npm run test:run && npm run lint",
+    "verify:clean": "npm run clean && npm run verify"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.4",
