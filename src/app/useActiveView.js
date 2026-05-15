@@ -1,20 +1,21 @@
 import { useState } from "react";
-import { getPageContent, isKnownPageView } from "./pageContent.js";
+import { canUseActiveView, getActiveViewSnapshot } from "./activeViewUtils.js";
 import { DEFAULT_ACTIVE_VIEW, getStoredActiveView, setStoredActiveView } from "./activeViewStorage.js";
 
 export function useActiveView() {
   const [activeView, setActiveViewState] = useState(() => getStoredActiveView());
+  const activeViewSnapshot = getActiveViewSnapshot(activeView);
 
   function setActiveView(nextView) {
-    if (!isKnownPageView(nextView)) return;
+    if (!canUseActiveView(nextView)) return;
 
     setActiveViewState(nextView);
     setStoredActiveView(nextView);
   }
 
   return {
-    activeView,
-    currentPage: getPageContent(activeView),
+    activeView: activeViewSnapshot.activeView,
+    currentPage: activeViewSnapshot.currentPage,
     defaultActiveView: DEFAULT_ACTIVE_VIEW,
     setActiveView,
   };
