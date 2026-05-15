@@ -57,16 +57,19 @@ Do not commit `.env.local`.
 
 ## Check commands
 
-For code, config, dependency, workflow, or behavior changes, run these before merging:
+For code, config, dependency, workflow, or behavior changes, run this before merging:
 
 ```bash
-npm run build
-npm run test:run
 npm run verify
-npm run dev
 ```
 
-`npm run verify` runs the build and test commands together.
+`npm run verify` runs formatting checks, production build, tests, and lint.
+
+Run the app locally when browser behavior should be checked:
+
+```bash
+npm run dev
+```
 
 For documentation-only changes, local app testing is not usually needed. GitHub Actions checks are enough unless the documentation change includes commands that should be manually verified.
 
@@ -95,7 +98,9 @@ Avoid mixing unrelated changes, such as UI redesign, data service changes, migra
 
 The project workflow runs on pull requests and main branch updates.
 
-It installs dependencies, builds the app, and runs tests.
+It installs dependencies and runs `npm run verify`.
+
+The deploy workflow also runs `npm run verify` before publishing the GitHub Pages build.
 
 Older in-progress checks for the same branch are cancelled when newer commits are pushed.
 
