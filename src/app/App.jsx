@@ -9,6 +9,7 @@ import {
 } from "./setupStatusUtils.js";
 import {
   createDashboardInsightsRefreshers,
+  createSpendingDashboardInsightsRefreshers,
   runRefreshSequence,
 } from "./refreshDataUtils.js";
 import { useActiveView } from "./useActiveView.js";
@@ -805,9 +806,13 @@ function FinanceTrackerApp() {
         supabaseCreditCards,
         spendingCategories,
       );
-      await loadSpendingTransactions();
-      await loadDashboardData();
-      await loadInsightsData();
+      await runRefreshSequence(
+        createSpendingDashboardInsightsRefreshers({
+          loadSpendingTransactions,
+          loadDashboardData,
+          loadInsightsData,
+        }),
+      );
     } catch (error) {
       setSpendingError(error.message || "Could not add transaction.");
       throw error;
@@ -827,9 +832,13 @@ function FinanceTrackerApp() {
         supabaseCreditCards,
         spendingCategories,
       );
-      await loadSpendingTransactions();
-      await loadDashboardData();
-      await loadInsightsData();
+      await runRefreshSequence(
+        createSpendingDashboardInsightsRefreshers({
+          loadSpendingTransactions,
+          loadDashboardData,
+          loadInsightsData,
+        }),
+      );
     } catch (error) {
       setSpendingError(error.message || "Could not update transaction.");
       throw error;
@@ -847,8 +856,12 @@ function FinanceTrackerApp() {
       setSpendingTransactions((transactions) =>
         transactions.filter((transaction) => (transaction.supabaseId ?? transaction.id) !== transactionId),
       );
-      await loadDashboardData();
-      await loadInsightsData();
+      await runRefreshSequence(
+        createDashboardInsightsRefreshers({
+          loadDashboardData,
+          loadInsightsData,
+        }),
+      );
     } catch (error) {
       setSpendingError(error.message || "Could not delete transaction.");
       throw error;
@@ -868,8 +881,10 @@ function FinanceTrackerApp() {
         supabaseCreditCards,
         spendingCategories,
       );
-      await loadSpendingTransactions();
-      await loadDashboardData();
+      await runRefreshSequence([
+        loadSpendingTransactions,
+        loadDashboardData,
+      ]);
       return importedIds;
     } catch (error) {
       setSpendingError(error.message || "Could not import local spending transactions.");
