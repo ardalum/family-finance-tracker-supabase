@@ -36,9 +36,7 @@ function normalizeData(value) {
         ? value.monthlyBalances
         : {},
     budgetsByMonth:
-      value?.budgetsByMonth && typeof value.budgetsByMonth === "object"
-        ? value.budgetsByMonth
-        : {},
+      value?.budgetsByMonth && typeof value.budgetsByMonth === "object" ? value.budgetsByMonth : {},
     transactions: Array.isArray(value?.transactions) ? value.transactions : [],
     recurringPayments: Array.isArray(value?.recurringPayments) ? value.recurringPayments : [],
     recurringStatusByMonth:

@@ -58,9 +58,7 @@ export default function BudgetForm({
           <h3 className="text-base font-semibold text-[#111827]">
             {editingBudget ? "Edit budget category" : "Add budget category"}
           </h3>
-          <p className="mt-1 text-sm text-[#6B7280]">
-            Set the monthly amount and optional notes.
-          </p>
+          <p className="mt-1 text-sm text-[#6B7280]">Set the monthly amount and optional notes.</p>
         </div>
       ) : null}
 

@@ -118,13 +118,22 @@ export default function SpendingTracker({
               {formatMonthLabel(selectedMonth)}
             </h2>
             <p className="mt-1 text-sm text-[#6B7280]">
-              Search, filter, and manage card spending, refunds, payments, transfers, and recurring-linked transactions.
+              Search, filter, and manage card spending, refunds, payments, transfers, and
+              recurring-linked transactions.
             </p>
-            {loading ? <p className="mt-2 text-sm text-[#6B7280]">Loading transactions...</p> : null}
-            {categoriesLoading ? <p className="mt-2 text-sm text-[#6B7280]">Loading categories...</p> : null}
+            {loading ? (
+              <p className="mt-2 text-sm text-[#6B7280]">Loading transactions...</p>
+            ) : null}
+            {categoriesLoading ? (
+              <p className="mt-2 text-sm text-[#6B7280]">Loading categories...</p>
+            ) : null}
             {isSaving ? <p className="mt-2 text-sm text-[#6B7280]">Saving transaction...</p> : null}
           </div>
-          <Button type="button" onClick={openAddModal} disabled={loading || isSaving || categoriesLoading}>
+          <Button
+            type="button"
+            onClick={openAddModal}
+            disabled={loading || isSaving || categoriesLoading}
+          >
             <Plus size={16} aria-hidden="true" />
             Add Transaction
           </Button>
@@ -147,11 +156,7 @@ export default function SpendingTracker({
         </div>
       </Card>
 
-      <SpendingSummary
-        transactions={transactions}
-        cards={activeCards}
-        categories={categories}
-      />
+      <SpendingSummary transactions={transactions} cards={activeCards} categories={categories} />
 
       <TransactionTable
         transactions={transactions}

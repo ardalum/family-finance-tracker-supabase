@@ -17,20 +17,33 @@ export default function RecurringOverview({
       <div className="border-b border-app-border p-5">
         <h3 className="text-lg font-semibold text-text-main">{title}</h3>
         <p className="mt-1 text-sm text-text-muted">
-          Total {formatCurrency(summary.estimatedTotal)} / Paid {formatCurrency(summary.paidTotal)} / Remaining {formatCurrency(summary.remainingTotal)}
+          Total {formatCurrency(summary.estimatedTotal)} / Paid {formatCurrency(summary.paidTotal)}{" "}
+          / Remaining {formatCurrency(summary.remainingTotal)}
         </p>
       </div>
-      {rows.length === 0 ? <Empty message={emptyMessage} /> : (
+      {rows.length === 0 ? (
+        <Empty message={emptyMessage} />
+      ) : (
         <div className="grid gap-3 p-4">
           {previewRows.map((row) => {
-            const variableNeedsActual = row.template.billType === "variable" && row.displayStatus !== "Paid" && !row.instance?.actualAmount;
+            const variableNeedsActual =
+              row.template.billType === "variable" &&
+              row.displayStatus !== "Paid" &&
+              !row.instance?.actualAmount;
             return (
-              <article key={row.template.id} className="rounded-2xl border border-app-border bg-app-surface px-4 py-3">
+              <article
+                key={row.template.id}
+                className="rounded-2xl border border-app-border bg-app-surface px-4 py-3"
+              >
                 <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex min-w-0 flex-wrap items-center gap-2">
-                      <h4 className="truncate text-sm font-semibold text-text-main">{row.template.name}</h4>
-                      <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${getStatusBadgeClass(row.displayStatus, variableNeedsActual)}`}>
+                      <h4 className="truncate text-sm font-semibold text-text-main">
+                        {row.template.name}
+                      </h4>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs font-semibold ${getStatusBadgeClass(row.displayStatus, variableNeedsActual)}`}
+                      >
                         {row.displayStatus}
                       </span>
                     </div>
@@ -39,7 +52,9 @@ export default function RecurringOverview({
                     </p>
                   </div>
                   <div className="text-left sm:text-right">
-                    <p className="text-sm font-semibold text-text-main">{formatCurrency(row.amount)}</p>
+                    <p className="text-sm font-semibold text-text-main">
+                      {formatCurrency(row.amount)}
+                    </p>
                     <p className="text-xs text-text-muted">Actual / expected</p>
                   </div>
                 </div>
@@ -53,7 +68,8 @@ export default function RecurringOverview({
           })}
           {hiddenCount > 0 ? (
             <p className="px-1 text-xs font-medium text-text-muted">
-              Showing {previewRows.length} of {rows.length}. Open Recurring Payments to review the rest.
+              Showing {previewRows.length} of {rows.length}. Open Recurring Payments to review the
+              rest.
             </p>
           ) : null}
         </div>

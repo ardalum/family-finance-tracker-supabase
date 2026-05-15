@@ -37,7 +37,9 @@ export default function SessionTimeoutWarning() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="font-semibold">
-            {sessionState.isExpired ? "Your session may have expired" : "Your session may expire soon"}
+            {sessionState.isExpired
+              ? "Your session may have expired"
+              : "Your session may expire soon"}
           </p>
           <p className="mt-1 text-text-muted">
             {sessionState.isExpired

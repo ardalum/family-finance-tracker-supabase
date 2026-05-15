@@ -6,7 +6,11 @@ import Select from "../../../components/ui/Select.jsx";
 import { useHouseholds } from "../../households/HouseholdProvider.jsx";
 import { buildMonthOptions, getCurrentMonthKey } from "../../../lib/dates.js";
 import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
-import { getTransactionCategoryRows, getTransactionImpactAmount, UNCATEGORIZED_ID } from "../../spending/spendingService.js";
+import {
+  getTransactionCategoryRows,
+  getTransactionImpactAmount,
+  UNCATEGORIZED_ID,
+} from "../../spending/spendingService.js";
 import { listTransactions } from "../../spending/spendingSupabaseService.js";
 import BudgetMigrationPanel from "./BudgetMigrationPanel.jsx";
 import BudgetModal from "./BudgetModal.jsx";
@@ -37,7 +41,10 @@ export default function BudgetTracker({
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const totalBudget = getTotalMonthlyBudget(budgets);
   const transactionsForBudget = transactions ?? budgetTransactions;
-  const budgetRows = useMemo(() => buildBudgetRows(budgets, transactionsForBudget), [budgets, transactionsForBudget]);
+  const budgetRows = useMemo(
+    () => buildBudgetRows(budgets, transactionsForBudget),
+    [budgets, transactionsForBudget],
+  );
   const summary = useMemo(() => getBudgetSummary(budgetRows), [budgetRows]);
 
   useEffect(() => {
@@ -136,9 +143,15 @@ export default function BudgetTracker({
             <p className="mt-1 text-sm text-[#6B7280]">
               Total monthly budget for {formatMonthLabel(selectedMonth)}
             </p>
-            {loading ? <p className="mt-2 text-sm text-[#6B7280]">Loading budget categories...</p> : null}
-            {transactionsLoading ? <p className="mt-2 text-sm text-[#6B7280]">Loading budget spending...</p> : null}
-            {isSaving ? <p className="mt-2 text-sm text-[#6B7280]">Saving budget category...</p> : null}
+            {loading ? (
+              <p className="mt-2 text-sm text-[#6B7280]">Loading budget categories...</p>
+            ) : null}
+            {transactionsLoading ? (
+              <p className="mt-2 text-sm text-[#6B7280]">Loading budget spending...</p>
+            ) : null}
+            {isSaving ? (
+              <p className="mt-2 text-sm text-[#6B7280]">Saving budget category...</p>
+            ) : null}
           </div>
           <Select
             label="Budget month"
@@ -224,7 +237,9 @@ function BudgetSummaryCards({ summary, totalBudget }) {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-sm font-medium text-text-muted">{card.label}</p>
-                <p className={`mt-1 text-2xl font-semibold ${card.danger ? "text-status-danger" : "text-text-main"}`}>
+                <p
+                  className={`mt-1 text-2xl font-semibold ${card.danger ? "text-status-danger" : "text-text-main"}`}
+                >
                   {card.isCount ? card.value : formatCurrency(card.value)}
                 </p>
                 <p className="mt-1 text-xs text-text-muted">{card.helper}</p>

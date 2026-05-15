@@ -1,7 +1,8 @@
 export default function Button({ children, variant = "primary", className = "", ...props }) {
   const variants = {
     primary: "bg-brand-primary text-white shadow-sm hover:bg-brand-dark",
-    secondary: "bg-app-surface text-text-main ring-1 ring-inset ring-app-border hover:bg-app-background",
+    secondary:
+      "bg-app-surface text-text-main ring-1 ring-inset ring-app-border hover:bg-app-background",
     success: "bg-brand-accent text-white shadow-sm hover:bg-status-success",
     danger: "bg-status-danger text-white shadow-sm hover:bg-status-dangerDark",
     ghost: "text-text-soft hover:bg-app-muted",

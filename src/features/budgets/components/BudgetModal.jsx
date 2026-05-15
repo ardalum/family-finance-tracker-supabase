@@ -2,13 +2,7 @@ import { useEffect } from "react";
 import { X } from "lucide-react";
 import BudgetForm from "./BudgetForm.jsx";
 
-export default function BudgetModal({
-  open,
-  editingBudget,
-  onClose,
-  onSaved,
-  isSaving = false,
-}) {
+export default function BudgetModal({ open, editingBudget, onClose, onSaved, isSaving = false }) {
   useEffect(() => {
     if (!open) return undefined;
 

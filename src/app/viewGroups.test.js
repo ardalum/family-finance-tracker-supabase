@@ -23,12 +23,7 @@ describe("view groups", () => {
   });
 
   it("keeps the expected utility views", () => {
-    assert.deepEqual(secondaryViewIds, [
-      "backup",
-      "household-settings",
-      "app-settings",
-      "about",
-    ]);
+    assert.deepEqual(secondaryViewIds, ["backup", "household-settings", "app-settings", "about"]);
   });
 
   it("groups main and utility views", () => {

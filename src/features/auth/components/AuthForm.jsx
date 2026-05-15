@@ -14,7 +14,10 @@ import {
   isSignUpAuthFormMode,
 } from "../authFormCopy.js";
 import { AUTH_FORM_FEEDBACK_IDS } from "../authFormIds.js";
-import { getAuthFormEmailValidationError, getAuthFormValidationError } from "../authFormValidation.js";
+import {
+  getAuthFormEmailValidationError,
+  getAuthFormValidationError,
+} from "../authFormValidation.js";
 import { requestPasswordReset, signInWithEmail, signUpWithEmail } from "../authService.js";
 
 export default function AuthForm() {
@@ -144,7 +147,9 @@ export default function AuthForm() {
               <span className="text-[#1F2937]">Wallet</span>
               <span className="text-[#10B981]">Flow</span>
             </h1>
-            <p className="text-sm text-[#6B7280]">Track your cards, budget, and spending in one clear place.</p>
+            <p className="text-sm text-[#6B7280]">
+              Track your cards, budget, and spending in one clear place.
+            </p>
           </div>
         </div>
 
@@ -221,7 +226,11 @@ export default function AuthForm() {
                   aria-pressed={showPassword}
                   disabled={isFormBusy}
                 >
-                  {showPassword ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
+                  {showPassword ? (
+                    <EyeOff size={14} aria-hidden="true" />
+                  ) : (
+                    <Eye size={14} aria-hidden="true" />
+                  )}
                   {passwordToggleLabel}
                 </button>
                 {!isSignUp ? (
@@ -231,7 +240,9 @@ export default function AuthForm() {
                     onClick={handlePasswordResetRequest}
                     disabled={isFormBusy || !isSupabaseConfigured}
                   >
-                    {isSendingResetLink ? AUTH_FORM_STATUS_COPY.sendingResetLink : modeCopy.resetPasswordLabel}
+                    {isSendingResetLink
+                      ? AUTH_FORM_STATUS_COPY.sendingResetLink
+                      : modeCopy.resetPasswordLabel}
                   </button>
                 ) : null}
               </div>
@@ -241,12 +252,7 @@ export default function AuthForm() {
               {isSubmitting ? AUTH_FORM_STATUS_COPY.submitting : modeCopy.submitLabel}
             </Button>
 
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={handleModeSwitch}
-              disabled={isFormBusy}
-            >
+            <Button type="button" variant="ghost" onClick={handleModeSwitch} disabled={isFormBusy}>
               {modeCopy.switchModeLabel}
             </Button>
           </form>

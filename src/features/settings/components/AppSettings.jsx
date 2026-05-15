@@ -48,10 +48,12 @@ export default function AppSettings() {
               Display Settings
             </h2>
             <p className="mt-1 max-w-2xl text-sm text-text-muted">
-              These settings stay in this browser. They do not change household data,
-              backups, cards, budgets, transactions, or recurring payments.
+              These settings stay in this browser. They do not change household data, backups,
+              cards, budgets, transactions, or recurring payments.
             </p>
-            {saved ? <p className="mt-2 text-sm font-semibold text-status-successDark">Saved</p> : null}
+            {saved ? (
+              <p className="mt-2 text-sm font-semibold text-status-successDark">Saved</p>
+            ) : null}
           </div>
           <Button type="button" variant="secondary" onClick={resetSettings}>
             Reset Defaults
@@ -64,10 +66,7 @@ export default function AppSettings() {
           title="Currency Settings"
           description="Control how money values are displayed."
         >
-          <CurrencyPicker
-            selectedCurrency={settings.currency}
-            onChange={updateCurrency}
-          />
+          <CurrencyPicker selectedCurrency={settings.currency} onChange={updateCurrency} />
           <ToggleRow
             label="Show cents"
             description="Display currency values with two decimal places."
@@ -118,10 +117,7 @@ export default function AppSettings() {
           />
         </SettingsSection>
 
-        <SettingsSection
-          title="Theme"
-          description="WalletFlow currently uses a clean light theme."
-        >
+        <SettingsSection title="Theme" description="WalletFlow currently uses a clean light theme.">
           <div className="rounded-2xl border border-app-border bg-app-background p-4">
             <p className="text-sm font-semibold text-text-main">Light mode</p>
             <p className="mt-1 text-sm text-text-muted">Current mode</p>
@@ -136,10 +132,7 @@ export default function AppSettings() {
   );
 }
 
-function CurrencyPicker({
-  selectedCurrency,
-  onChange,
-}) {
+function CurrencyPicker({ selectedCurrency, onChange }) {
   const selected = selectedCurrency ?? defaultAppSettings.currency;
 
   return (
@@ -158,9 +151,7 @@ function CurrencyPicker({
           ))}
         </select>
       </label>
-      <p className="text-sm text-text-muted">
-        Selected: {getCurrencyLabel(selected)}
-      </p>
+      <p className="text-sm text-text-muted">Selected: {getCurrencyLabel(selected)}</p>
     </div>
   );
 }

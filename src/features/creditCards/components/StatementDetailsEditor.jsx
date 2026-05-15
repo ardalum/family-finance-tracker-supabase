@@ -39,13 +39,15 @@ export default function StatementDetailsEditor({
     () => cards.find((card) => card.id === selectedCardId) ?? cards[0],
     [cards, selectedCardId],
   );
-  const selectedEntry = selectedCard ? monthBalances[selectedCard.id] ?? { balance: 0, paid: false } : {};
+  const selectedEntry = selectedCard
+    ? (monthBalances[selectedCard.id] ?? { balance: 0, paid: false })
+    : {};
   const [form, setForm] = useState(() => emptyStatement(selectedEntry));
   const [message, setMessage] = useState("");
 
   function handleCardChange(cardId) {
     const card = cards.find((item) => item.id === cardId);
-    const entry = card ? monthBalances[card.id] ?? { balance: 0, paid: false } : {};
+    const entry = card ? (monthBalances[card.id] ?? { balance: 0, paid: false }) : {};
     setSelectedCardId(cardId);
     setForm(emptyStatement(entry));
     setMessage("");
@@ -67,7 +69,9 @@ export default function StatementDetailsEditor({
       autopayEnabled: Boolean(form.autopayEnabled),
       autopayDate: form.autopayDate || null,
       confirmationNumber: form.confirmationNumber,
-      paid: Number(form.paidAmount || 0) >= Number(selectedEntry.balance || 0) && Number(selectedEntry.balance || 0) > 0,
+      paid:
+        Number(form.paidAmount || 0) >= Number(selectedEntry.balance || 0) &&
+        Number(selectedEntry.balance || 0) > 0,
     });
 
     setMessage("Statement details saved.");
@@ -80,7 +84,8 @@ export default function StatementDetailsEditor({
       <div className="grid gap-1">
         <h2 className="text-lg font-semibold text-text-main">Statement details</h2>
         <p className="text-sm text-text-muted">
-          Track minimum payment, paid amount, paid date, autopay, and confirmation details for the selected month.
+          Track minimum payment, paid amount, paid date, autopay, and confirmation details for the
+          selected month.
         </p>
       </div>
 
@@ -105,7 +110,9 @@ export default function StatementDetailsEditor({
           </div>
           <div className="grid gap-1 text-sm">
             <span className="font-medium text-text-muted">Status</span>
-            <span className="text-lg font-semibold text-text-main">{getStatusLabel(selectedEntry)}</span>
+            <span className="text-lg font-semibold text-text-main">
+              {getStatusLabel(selectedEntry)}
+            </span>
           </div>
         </div>
 
@@ -159,7 +166,9 @@ export default function StatementDetailsEditor({
           <Button type="submit" disabled={saving}>
             {saving ? "Saving..." : "Save statement details"}
           </Button>
-          {message ? <p className="text-sm font-medium text-status-successDark">{message}</p> : null}
+          {message ? (
+            <p className="text-sm font-medium text-status-successDark">{message}</p>
+          ) : null}
         </div>
       </form>
     </Card>

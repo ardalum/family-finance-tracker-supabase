@@ -48,14 +48,21 @@ export default function AppShell({
       <footer className="border-t border-app-border bg-app-background">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-5 text-xs text-text-muted sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
           <p>
-            <span className="font-semibold text-brand-primary">WalletFlow</span> © 2026 Arvin Dalumpines. Made by Arvin Dalumpines.
+            <span className="font-semibold text-brand-primary">WalletFlow</span> © 2026 Arvin
+            Dalumpines. Made by Arvin Dalumpines.
           </p>
           <nav className="flex flex-wrap gap-x-3 gap-y-2" aria-label="Footer links">
             <FooterLink targetView="privacy-policy">Privacy Policy</FooterLink>
-            <span className="text-app-border" aria-hidden="true">·</span>
+            <span className="text-app-border" aria-hidden="true">
+              ·
+            </span>
             <FooterLink targetView="terms-of-use">Terms of Use</FooterLink>
-            <span className="text-app-border" aria-hidden="true">·</span>
-            <FooterLink targetView="about" onNavigate={onViewChange}>About</FooterLink>
+            <span className="text-app-border" aria-hidden="true">
+              ·
+            </span>
+            <FooterLink targetView="about" onNavigate={onViewChange}>
+              About
+            </FooterLink>
           </nav>
         </div>
       </footer>

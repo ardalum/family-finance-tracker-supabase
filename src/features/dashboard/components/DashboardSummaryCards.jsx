@@ -22,7 +22,9 @@ export default function DashboardSummaryCards({ summary }) {
         return (
           <Card key={key} className="p-5">
             <p className="text-sm font-medium text-text-muted">{label}</p>
-            <p className={`mt-2 text-2xl font-semibold tracking-normal ${isWarning ? "text-status-danger" : "text-text-main"}`}>
+            <p
+              className={`mt-2 text-2xl font-semibold tracking-normal ${isWarning ? "text-status-danger" : "text-text-main"}`}
+            >
               {isCount ? Number(value || 0) : formatCurrency(value)}
             </p>
           </Card>

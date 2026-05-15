@@ -31,7 +31,11 @@ export function getDashboardData(appData, monthKey) {
     const balance = Number(entry.balance || 0);
     return entry.paid || balance <= 0 ? sum : sum + balance;
   }, 0);
-  const recurringSummary = getRecurringSummary(appData.recurringPayments, monthKey, appData.recurringStatusByMonth);
+  const recurringSummary = getRecurringSummary(
+    appData.recurringPayments,
+    monthKey,
+    appData.recurringStatusByMonth,
+  );
 
   return {
     cards,
@@ -106,7 +110,12 @@ export function getAlerts(data) {
       }
     }
 
-    if (row.balance > 0 && !row.paid && row.minimumPayment > 0 && row.paidAmount < row.minimumPayment) {
+    if (
+      row.balance > 0 &&
+      !row.paid &&
+      row.minimumPayment > 0 &&
+      row.paidAmount < row.minimumPayment
+    ) {
       alerts.push({
         type: row.daysUntilDue <= 7 ? "danger" : "warning",
         category: "Credit Card Statements",
@@ -141,17 +150,37 @@ export function getAlerts(data) {
 
   data.recurringRows.forEach((row) => {
     if (row.displayStatus === "Past due") {
-      alerts.push({ type: "danger", category: "Recurring Payments", text: `${row.template.name} is past due and unpaid.` });
+      alerts.push({
+        type: "danger",
+        category: "Recurring Payments",
+        text: `${row.template.name} is past due and unpaid.`,
+      });
     } else if (["Due now", "Due soon"].includes(row.displayStatus)) {
-      alerts.push({ type: "warning", category: "Recurring Payments", text: `${row.template.name} is due within 7 days and unpaid.` });
+      alerts.push({
+        type: "warning",
+        category: "Recurring Payments",
+        text: `${row.template.name} is due within 7 days and unpaid.`,
+      });
     }
-    if (row.template.billType === "variable" && row.displayStatus !== "Paid" && !row.instance?.actualAmount) {
-      alerts.push({ type: "warning", category: "Data Cleanup", text: `${row.template.name} needs an actual variable amount.` });
+    if (
+      row.template.billType === "variable" &&
+      row.displayStatus !== "Paid" &&
+      !row.instance?.actualAmount
+    ) {
+      alerts.push({
+        type: "warning",
+        category: "Data Cleanup",
+        text: `${row.template.name} needs an actual variable amount.`,
+      });
     }
   });
 
   if (data.summary.spendingTotal > data.summary.budgetTotal && data.summary.budgetTotal > 0) {
-    alerts.push({ type: "danger", category: "Budgets", text: "Total spending is higher than total budget." });
+    alerts.push({
+      type: "danger",
+      category: "Budgets",
+      text: "Total spending is higher than total budget.",
+    });
   }
 
   return alerts;
@@ -180,28 +209,27 @@ function getBudgetRows(budgets, transactions) {
 }
 
 function getCardRows(cards, monthlyBalances, monthKey) {
-  const rows = cards
-    .map((card) => {
-      const dueDate = getDueDateForMonth(monthKey, card.dueDay);
-      const entry = monthlyBalances[card.id] ?? { balance: 0, paid: false };
-      const balance = Number(entry.balance || 0);
-      const paidAmount = Number(entry.paidAmount || 0);
-      const paid = Boolean(entry.paid) || (balance > 0 && paidAmount >= balance);
-      const minimumPayment = Number(entry.minimumPayment || 0);
-      return {
-        card,
-        balance,
-        paid,
-        minimumPayment,
-        paidAmount,
-        paidDate: entry.paidDate ?? null,
-        autopayEnabled: Boolean(entry.autopayEnabled),
-        autopayDate: entry.autopayDate ?? null,
-        statementStatus: entry.statementStatus ?? (paid ? "paid" : "unpaid"),
-        hasPaymentDue: balance > 0 && !paid,
-        daysUntilDue: daysBetween(new Date(), dueDate),
-      };
-    });
+  const rows = cards.map((card) => {
+    const dueDate = getDueDateForMonth(monthKey, card.dueDay);
+    const entry = monthlyBalances[card.id] ?? { balance: 0, paid: false };
+    const balance = Number(entry.balance || 0);
+    const paidAmount = Number(entry.paidAmount || 0);
+    const paid = Boolean(entry.paid) || (balance > 0 && paidAmount >= balance);
+    const minimumPayment = Number(entry.minimumPayment || 0);
+    return {
+      card,
+      balance,
+      paid,
+      minimumPayment,
+      paidAmount,
+      paidDate: entry.paidDate ?? null,
+      autopayEnabled: Boolean(entry.autopayEnabled),
+      autopayDate: entry.autopayDate ?? null,
+      statementStatus: entry.statementStatus ?? (paid ? "paid" : "unpaid"),
+      hasPaymentDue: balance > 0 && !paid,
+      daysUntilDue: daysBetween(new Date(), dueDate),
+    };
+  });
   const hasUnpaidBalanceCards = rows.some((row) => row.hasPaymentDue);
 
   return rows.sort((a, b) => {
@@ -229,9 +257,10 @@ function getSpendingByCategory(transactions, budgets) {
 
   transactions.forEach((transaction) => {
     getTransactionCategoryRows(transaction).forEach((row) => {
-      const name = row.categoryId === UNCATEGORIZED_ID
-        ? UNCATEGORIZED_NAME
-        : getCategoryName(row.categoryId, budgets);
+      const name =
+        row.categoryId === UNCATEGORIZED_ID
+          ? UNCATEGORIZED_NAME
+          : getCategoryName(row.categoryId, budgets);
       totals.set(name, (totals.get(name) ?? 0) + Number(row.amount || 0));
     });
   });

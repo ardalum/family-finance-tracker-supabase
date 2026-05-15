@@ -53,7 +53,8 @@ export default function RecurringPayments({
   const [activeSection, setActiveSection] = useState("this-month");
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const activeCards = creditCards.filter((card) => card.isActive);
-  const currentSection = recurringSections.find((section) => section.id === activeSection) ?? recurringSections[0];
+  const currentSection =
+    recurringSections.find((section) => section.id === activeSection) ?? recurringSections[0];
 
   useEffect(() => {
     const target = consumeNavigationTarget("recurring");
@@ -138,9 +139,15 @@ export default function RecurringPayments({
             <p className="mt-1 text-sm text-gray-500">
               Manage bill templates and track what is paid each month.
             </p>
-            {loading ? <p className="mt-2 text-sm text-gray-500">Loading recurring payments...</p> : null}
-            {categoriesLoading ? <p className="mt-2 text-sm text-gray-500">Loading categories...</p> : null}
-            {isSaving ? <p className="mt-2 text-sm text-gray-500">Saving recurring payments...</p> : null}
+            {loading ? (
+              <p className="mt-2 text-sm text-gray-500">Loading recurring payments...</p>
+            ) : null}
+            {categoriesLoading ? (
+              <p className="mt-2 text-sm text-gray-500">Loading categories...</p>
+            ) : null}
+            {isSaving ? (
+              <p className="mt-2 text-sm text-gray-500">Saving recurring payments...</p>
+            ) : null}
           </div>
           <Select
             label="Generation month"
@@ -229,7 +236,10 @@ export default function RecurringPayments({
           <div className="flex max-h-[calc(100dvh-1.5rem)] min-h-0 w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl sm:max-h-[calc(100dvh-3rem)]">
             <div className="flex shrink-0 items-start justify-between gap-4 border-b border-gray-200 px-5 py-4">
               <div>
-                <h2 id="recurring-template-modal-title" className="text-lg font-semibold text-gray-950">
+                <h2
+                  id="recurring-template-modal-title"
+                  className="text-lg font-semibold text-gray-950"
+                >
                   {editingTemplate ? "Edit recurring payment" : "Add recurring payment"}
                 </h2>
                 <p className="mt-1 text-sm text-gray-500">

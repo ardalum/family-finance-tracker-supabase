@@ -46,10 +46,10 @@ test("createDashboardInsightsRefreshers returns dashboard and insights refresher
   const loadDashboardData = () => {};
   const loadInsightsData = () => {};
 
-  assert.deepEqual(
-    createDashboardInsightsRefreshers({ loadDashboardData, loadInsightsData }),
-    [loadDashboardData, loadInsightsData],
-  );
+  assert.deepEqual(createDashboardInsightsRefreshers({ loadDashboardData, loadInsightsData }), [
+    loadDashboardData,
+    loadInsightsData,
+  ]);
 });
 
 test("createSpendingDashboardInsightsRefreshers returns spending, dashboard, and insights refreshers", () => {

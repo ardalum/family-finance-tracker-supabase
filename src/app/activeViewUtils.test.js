@@ -1,11 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import {
-  canUseActiveView,
-  getActiveViewSnapshot,
-  normalizeActiveView,
-} from "./activeViewUtils.js";
+import { canUseActiveView, getActiveViewSnapshot, normalizeActiveView } from "./activeViewUtils.js";
 import { DEFAULT_ACTIVE_VIEW } from "./activeViewStorage.js";
 import { getPageContent } from "./pageContent.js";
 

@@ -97,7 +97,9 @@ export default function HouseholdSettings({
         <Card>
           <div className="border-b border-gray-200 p-5">
             <h2 className="text-lg font-semibold text-gray-950">Your households</h2>
-            <p className="text-sm text-gray-500">Only households where you are a member are shown.</p>
+            <p className="text-sm text-gray-500">
+              Only households where you are a member are shown.
+            </p>
           </div>
 
           {loading ? (

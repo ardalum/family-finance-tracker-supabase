@@ -15,7 +15,7 @@
     "lint": "eslint .",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
-    "verify": "npm run build && npm run test:run && npm run lint"
+    "verify": "npm run format:check && npm run build && npm run test:run && npm run lint"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.4",

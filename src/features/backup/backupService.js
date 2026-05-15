@@ -19,7 +19,9 @@ const EXPECTED_SUPABASE_SECTIONS = [
 
 function requireSupabase() {
   if (!supabase) {
-    throw new Error("Supabase is not configured. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
+    throw new Error(
+      "Supabase is not configured. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.",
+    );
   }
 
   return supabase;
@@ -57,7 +59,11 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
         .select("*")
         .eq("household_id", householdId)
         .order("display_name", { ascending: true }),
-      client.from("credit_cards").select("*").eq("household_id", householdId).order("created_at", { ascending: true }),
+      client
+        .from("credit_cards")
+        .select("*")
+        .eq("household_id", householdId)
+        .order("created_at", { ascending: true }),
       client
         .from("monthly_card_balances")
         .select("*")
@@ -875,7 +881,10 @@ export async function importSupabaseBackupMerge(householdId, backup) {
           amount: Number(transaction.amount || 0),
           notes: transaction.notes ?? "",
           source: transaction.source ?? "manual",
-          recurring_payment_id: getMappedId(maps.recurringPayments, transaction.recurring_payment_id),
+          recurring_payment_id: getMappedId(
+            maps.recurringPayments,
+            transaction.recurring_payment_id,
+          ),
           recurring_month: transaction.recurring_month || null,
           imported_local_id: importedLocalId,
         })
@@ -1020,7 +1029,10 @@ export async function importSupabaseBackupMerge(householdId, backup) {
 
     const instanceRows = [...(context.recurringPaymentInstances ?? [])];
     for (const instance of normalizedBackup.recurringPaymentInstances ?? []) {
-      const mappedRecurringPaymentId = getMappedId(maps.recurringPayments, instance.recurring_payment_id);
+      const mappedRecurringPaymentId = getMappedId(
+        maps.recurringPayments,
+        instance.recurring_payment_id,
+      );
       if (!mappedRecurringPaymentId) {
         counts.recurringPaymentInstances.skipped += 1;
         continue;
@@ -1156,14 +1168,16 @@ function validateSupabaseBackup(backup) {
     cardStatements: Array.isArray(backup.cardStatements) ? backup.cardStatements : [],
   };
 
-  const missingSection = EXPECTED_SUPABASE_SECTIONS.find((section) => !(section in normalizedBackup));
+  const missingSection = EXPECTED_SUPABASE_SECTIONS.find(
+    (section) => !(section in normalizedBackup),
+  );
   if (missingSection) {
     return invalid(`Supabase backup is missing ${missingSection}.`);
   }
 
-  const invalidArraySection = EXPECTED_SUPABASE_SECTIONS
-    .filter((section) => section !== "household")
-    .find((section) => !Array.isArray(normalizedBackup[section]));
+  const invalidArraySection = EXPECTED_SUPABASE_SECTIONS.filter(
+    (section) => section !== "household",
+  ).find((section) => !Array.isArray(normalizedBackup[section]));
   if (invalidArraySection) {
     return invalid(`Supabase backup ${invalidArraySection} must be an array.`);
   }
@@ -1177,7 +1191,9 @@ function validateSupabaseBackup(backup) {
   }
 
   if (containsForbiddenBackupKeys(normalizedBackup)) {
-    return invalid("Supabase backup contains fields that look like secrets or unsupported sensitive data.");
+    return invalid(
+      "Supabase backup contains fields that look like secrets or unsupported sensitive data.",
+    );
   }
 
   if (!normalizedBackup.householdProfiles.every(isValidSupabaseHouseholdProfile)) {
@@ -1215,14 +1231,20 @@ function validateSupabaseBackup(backup) {
   const profileIds = new Set(normalizedBackup.householdProfiles.map((profile) => profile.id));
   const cardIds = new Set(normalizedBackup.creditCards.map((card) => card.id));
   const categoryIds = new Set(normalizedBackup.budgetCategories.map((category) => category.id));
-  const transactionIds = new Set(normalizedBackup.transactions.map((transaction) => transaction.id));
+  const transactionIds = new Set(
+    normalizedBackup.transactions.map((transaction) => transaction.id),
+  );
   const recurringIds = new Set(normalizedBackup.recurringPayments.map((payment) => payment.id));
 
-  if (!normalizedBackup.creditCards.every((card) => nullableSetHas(profileIds, card.owner_profile_id))) {
+  if (
+    !normalizedBackup.creditCards.every((card) => nullableSetHas(profileIds, card.owner_profile_id))
+  ) {
     return invalid("Supabase backup has credit cards that reference missing household profiles.");
   }
 
-  if (!normalizedBackup.monthlyCardBalances.every((balance) => cardIds.has(balance.credit_card_id))) {
+  if (
+    !normalizedBackup.monthlyCardBalances.every((balance) => cardIds.has(balance.credit_card_id))
+  ) {
     return invalid("Supabase backup has monthly balances that reference missing credit cards.");
   }
 
@@ -1240,8 +1262,7 @@ function validateSupabaseBackup(backup) {
   if (
     !normalizedBackup.transactionSplits.every(
       (split) =>
-        transactionIds.has(split.transaction_id) &&
-        nullableSetHas(categoryIds, split.category_id),
+        transactionIds.has(split.transaction_id) && nullableSetHas(categoryIds, split.category_id),
     )
   ) {
     return invalid("Supabase backup has transaction splits with invalid related records.");
@@ -1440,7 +1461,10 @@ function buildSupabaseImportPreview(backup, context) {
 
   const instanceRows = [...context.recurringPaymentInstances];
   backup.recurringPaymentInstances.forEach((instance) => {
-    const mappedRecurringPaymentId = getMappedId(maps.recurringPayments, instance.recurring_payment_id);
+    const mappedRecurringPaymentId = getMappedId(
+      maps.recurringPayments,
+      instance.recurring_payment_id,
+    );
     const existing = instanceRows.find(
       (row) =>
         row.recurring_payment_id === mappedRecurringPaymentId &&
@@ -1498,11 +1522,9 @@ function findCreditCardMatch(card, rows) {
 
   return rows.find(
     (row) =>
-      [
-        normalizeText(row.name),
-        normalizeText(row.last_four),
-        normalizeText(row.owner_name),
-      ].join("|") === target,
+      [normalizeText(row.name), normalizeText(row.last_four), normalizeText(row.owner_name)].join(
+        "|",
+      ) === target,
   );
 }
 
@@ -1538,19 +1560,13 @@ function findTransactionMatch(transaction, rows) {
 }
 
 function findTransactionSplitMatch(split, rows) {
-  const target = [
-    split.transaction_id ?? "",
-    split.category_id ?? "",
-    moneyKey(split.amount),
-  ].join("|");
+  const target = [split.transaction_id ?? "", split.category_id ?? "", moneyKey(split.amount)].join(
+    "|",
+  );
 
   return rows.find(
     (row) =>
-      [
-        row.transaction_id ?? "",
-        row.category_id ?? "",
-        moneyKey(row.amount),
-      ].join("|") === target,
+      [row.transaction_id ?? "", row.category_id ?? "", moneyKey(row.amount)].join("|") === target,
   );
 }
 
@@ -1579,7 +1595,9 @@ function transactionKey(transaction) {
 }
 
 function normalizeText(value) {
-  return String(value ?? "").trim().toLowerCase();
+  return String(value ?? "")
+    .trim()
+    .toLowerCase();
 }
 
 function moneyKey(value) {
@@ -1608,7 +1626,8 @@ function containsForbiddenBackupKeys(value) {
 
   return Object.entries(value).some(([key, childValue]) => {
     if (forbiddenPatterns.some((pattern) => pattern.test(key))) return true;
-    if (Array.isArray(childValue)) return childValue.some((item) => containsForbiddenBackupKeys(item));
+    if (Array.isArray(childValue))
+      return childValue.some((item) => containsForbiddenBackupKeys(item));
     return containsForbiddenBackupKeys(childValue);
   });
 }
@@ -1735,7 +1754,9 @@ function isValidSupabaseRecurringPayment(payment) {
     isNullableUuidLike(payment.credit_card_id) &&
     isNullableUuidLike(payment.category_id) &&
     isValidMonthKey(payment.start_month) &&
-    (payment.end_month === null || payment.end_month === undefined || isValidMonthKey(payment.end_month))
+    (payment.end_month === null ||
+      payment.end_month === undefined ||
+      isValidMonthKey(payment.end_month))
   );
 }
 
@@ -1832,7 +1853,11 @@ function validateBackup(backup) {
     return invalid("Backup credit cards must be an array.");
   }
 
-  if (!data.monthlyBalances || typeof data.monthlyBalances !== "object" || Array.isArray(data.monthlyBalances)) {
+  if (
+    !data.monthlyBalances ||
+    typeof data.monthlyBalances !== "object" ||
+    Array.isArray(data.monthlyBalances)
+  ) {
     return invalid("Backup monthly balances must be an object.");
   }
 
@@ -1864,7 +1889,10 @@ function validateBackup(backup) {
     data.recurringStatusByMonth = {};
   }
 
-  if (typeof data.recurringStatusByMonth !== "object" || Array.isArray(data.recurringStatusByMonth)) {
+  if (
+    typeof data.recurringStatusByMonth !== "object" ||
+    Array.isArray(data.recurringStatusByMonth)
+  ) {
     return invalid("Backup recurring payment statuses must be an object.");
   }
 
@@ -1918,14 +1946,22 @@ function areRecurringPaymentsValid(recurringPayments, creditCards) {
       typeof template.paymentMethod !== "string" ||
       typeof template.startMonth !== "string" ||
       !/^\d{4}-\d{2}$/.test(template.startMonth) ||
-      !(template.endMonth === null || template.endMonth === "" || /^\d{4}-\d{2}$/.test(template.endMonth)) ||
+      !(
+        template.endMonth === null ||
+        template.endMonth === "" ||
+        /^\d{4}-\d{2}$/.test(template.endMonth)
+      ) ||
       typeof template.active !== "boolean" ||
       typeof template.notes !== "string"
     ) {
       return false;
     }
 
-    if (template.paymentMethod === "Credit Card" && template.cardId && !cardIds.has(template.cardId)) {
+    if (
+      template.paymentMethod === "Credit Card" &&
+      template.cardId &&
+      !cardIds.has(template.cardId)
+    ) {
       return false;
     }
 
@@ -1942,7 +1978,8 @@ function areRecurringStatusesValid(recurringStatusByMonth, recurringPayments) {
 
     return Object.entries(statuses).every(([templateId, status]) => {
       if (!templateIds.has(templateId)) return false;
-      if (typeof status === "string") return ["paid", "unpaid", "skipped", "generated"].includes(status);
+      if (typeof status === "string")
+        return ["paid", "unpaid", "skipped", "generated"].includes(status);
       return (
         status &&
         typeof status === "object" &&
@@ -1950,7 +1987,9 @@ function areRecurringStatusesValid(recurringStatusByMonth, recurringPayments) {
         (status.actualAmount === null ||
           status.actualAmount === undefined ||
           isNonNegativeNumber(status.actualAmount)) &&
-        (status.paidDate === null || status.paidDate === undefined || typeof status.paidDate === "string")
+        (status.paidDate === null ||
+          status.paidDate === undefined ||
+          typeof status.paidDate === "string")
       );
     });
   });

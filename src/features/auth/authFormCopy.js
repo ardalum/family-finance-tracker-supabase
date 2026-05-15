@@ -41,7 +41,9 @@ export function getNextAuthFormMode(mode) {
 }
 
 export function getPasswordAutocomplete(mode) {
-  return isSignUpAuthFormMode(mode) ? PASSWORD_AUTOCOMPLETE_VALUES.new : PASSWORD_AUTOCOMPLETE_VALUES.current;
+  return isSignUpAuthFormMode(mode)
+    ? PASSWORD_AUTOCOMPLETE_VALUES.new
+    : PASSWORD_AUTOCOMPLETE_VALUES.current;
 }
 
 export function isSignUpAuthFormMode(mode) {

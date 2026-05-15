@@ -15,7 +15,9 @@ export default function BudgetMigrationPanel({
   const [isImporting, setIsImporting] = useState(false);
 
   const importableCount = useMemo(() => {
-    const importedIds = new Set(supabaseBudgets.map((budget) => budget.importedLocalId).filter(Boolean));
+    const importedIds = new Set(
+      supabaseBudgets.map((budget) => budget.importedLocalId).filter(Boolean),
+    );
     return (localBudgetsByMonth?.[selectedMonth] ?? []).filter(
       (budget) => !importedIds.has(budget.id),
     ).length;

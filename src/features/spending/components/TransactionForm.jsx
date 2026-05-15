@@ -28,7 +28,9 @@ function getEditingSplits(transaction) {
     }));
   }
 
-  return [getInitialSplit(transaction.categoryId || UNCATEGORIZED_ID, String(transaction.amount ?? ""))];
+  return [
+    getInitialSplit(transaction.categoryId || UNCATEGORIZED_ID, String(transaction.amount ?? "")),
+  ];
 }
 
 function roundMoney(value) {
@@ -82,7 +84,10 @@ export default function TransactionForm({
     [cards],
   );
   const splitTotal = useMemo(() => getSplitTotal(form.splits), [form.splits]);
-  const splitDifference = useMemo(() => roundMoney(Number(form.amount || 0) - splitTotal), [form.amount, splitTotal]);
+  const splitDifference = useMemo(
+    () => roundMoney(Number(form.amount || 0) - splitTotal),
+    [form.amount, splitTotal],
+  );
   const isEditingRecurring = editingTransaction?.source === "recurring";
 
   useEffect(() => {
@@ -131,10 +136,7 @@ export default function TransactionForm({
     setError("");
     setForm((current) => ({
       ...current,
-      splits: [
-        ...current.splits,
-        getInitialSplit(UNCATEGORIZED_ID, ""),
-      ],
+      splits: [...current.splits, getInitialSplit(UNCATEGORIZED_ID, "")],
     }));
   }
 
@@ -205,7 +207,8 @@ export default function TransactionForm({
 
       {!editingTransaction ? (
         <div className="rounded-xl border border-app-border bg-app-background px-3 py-2 text-xs text-text-muted">
-          Smart defaults remember the last payment method, card, type, and category during this session. Merchant, amount, and notes stay blank.
+          Smart defaults remember the last payment method, card, type, and category during this
+          session. Merchant, amount, and notes stay blank.
         </div>
       ) : null}
 
@@ -334,13 +337,21 @@ export default function TransactionForm({
                 Split amounts must match the transaction total.
               </p>
             </div>
-            <Button type="button" variant="secondary" className="min-h-9 px-3 py-1" onClick={addSplit}>
+            <Button
+              type="button"
+              variant="secondary"
+              className="min-h-9 px-3 py-1"
+              onClick={addSplit}
+            >
               <Plus size={15} aria-hidden="true" />
               Add split
             </Button>
           </div>
           {form.splits.map((split) => (
-            <div key={split.id} className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_120px_40px] sm:items-end">
+            <div
+              key={split.id}
+              className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_120px_40px] sm:items-end"
+            >
               <Select
                 label="Category"
                 value={split.categoryId}
@@ -375,12 +386,22 @@ export default function TransactionForm({
           ))}
           <div className="grid gap-1 rounded-xl bg-app-surface px-3 py-2 text-xs text-text-muted sm:grid-cols-3">
             <p>
-              Transaction: <span className="font-semibold text-text-main">${Number(form.amount || 0).toFixed(2)}</span>
+              Transaction:{" "}
+              <span className="font-semibold text-text-main">
+                ${Number(form.amount || 0).toFixed(2)}
+              </span>
             </p>
             <p>
-              Split total: <span className="font-semibold text-text-main">${splitTotal.toFixed(2)}</span>
+              Split total:{" "}
+              <span className="font-semibold text-text-main">${splitTotal.toFixed(2)}</span>
             </p>
-            <p className={splitDifference === 0 ? "font-semibold text-status-successDark" : "font-semibold text-status-dangerDark"}>
+            <p
+              className={
+                splitDifference === 0
+                  ? "font-semibold text-status-successDark"
+                  : "font-semibold text-status-dangerDark"
+              }
+            >
               Difference: ${splitDifference.toFixed(2)}
             </p>
           </div>
@@ -402,7 +423,12 @@ export default function TransactionForm({
           {isSaving ? "Saving..." : editingTransaction ? "Save transaction" : "Add transaction"}
         </Button>
         {!editingTransaction ? (
-          <Button type="button" variant="secondary" onClick={handleSaveAndAddAnother} disabled={isSaving || isEditingRecurring}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleSaveAndAddAnother}
+            disabled={isSaving || isEditingRecurring}
+          >
             {isSaving ? "Saving..." : "Save and add another"}
           </Button>
         ) : null}
@@ -432,9 +458,10 @@ function getPreparedForm(form) {
 }
 
 function getNewTransactionForm(monthKey, smartDefaults = defaultSmartDefaults) {
-  const splitDefaults = smartDefaults.splitMode && smartDefaults.splits?.length
-    ? smartDefaults.splits.map((split) => getInitialSplit(split.categoryId, ""))
-    : [getInitialSplit(smartDefaults.categoryId || UNCATEGORIZED_ID, "")];
+  const splitDefaults =
+    smartDefaults.splitMode && smartDefaults.splits?.length
+      ? smartDefaults.splits.map((split) => getInitialSplit(split.categoryId, ""))
+      : [getInitialSplit(smartDefaults.categoryId || UNCATEGORIZED_ID, "")];
 
   return {
     ...emptyForm,
@@ -468,19 +495,24 @@ function getCardOptionLabel(card, showOwner) {
 }
 
 function validateForm(form, cards, isEditingRecurring = false) {
-  if (isEditingRecurring) return "Recurring-linked transactions must be edited from Recurring Payments.";
+  if (isEditingRecurring)
+    return "Recurring-linked transactions must be edited from Recurring Payments.";
   if (!form.date) return "Date is required.";
   if (!form.merchant.trim()) return "Store or merchant is required.";
   if (!form.transactionType) return "Transaction type is required.";
   if (!form.paymentMethod) return "Payment method is required.";
   if (form.paymentMethod === "Credit Card" && !form.cardId) return "Card used is required.";
-  if (form.paymentMethod === "Credit Card" && !cards.some((card) => card.id === form.cardId)) return "Select a valid card.";
-  if (!Number.isFinite(Number(form.amount)) || Number(form.amount) <= 0) return "Amount must be greater than zero.";
+  if (form.paymentMethod === "Credit Card" && !cards.some((card) => card.id === form.cardId))
+    return "Select a valid card.";
+  if (!Number.isFinite(Number(form.amount)) || Number(form.amount) <= 0)
+    return "Amount must be greater than zero.";
   if (!form.splitMode && !form.categoryId) return "Category is required.";
   if (!form.splitMode) return "";
   if (form.splits.length === 0) return "At least one category split is required.";
   if (form.splits.some((split) => !split.categoryId)) return "Every split needs a category.";
-  if (form.splits.some((split) => !Number.isFinite(Number(split.amount)) || Number(split.amount) <= 0)) {
+  if (
+    form.splits.some((split) => !Number.isFinite(Number(split.amount)) || Number(split.amount) <= 0)
+  ) {
     return "Every split amount must be greater than zero.";
   }
 

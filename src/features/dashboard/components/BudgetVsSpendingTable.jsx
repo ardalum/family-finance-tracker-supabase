@@ -14,18 +14,27 @@ export default function BudgetVsSpendingTable({
   return (
     <Card className="overflow-hidden">
       <SectionHeader title={title} />
-      {rows.length === 0 ? <Empty message={emptyMessage} /> : (
+      {rows.length === 0 ? (
+        <Empty message={emptyMessage} />
+      ) : (
         <div className="grid gap-3 p-4">
           {previewRows.map((row) => {
             const over = row.remaining < 0;
             const near = row.percentUsed >= 90;
             return (
-              <article key={row.category} className="rounded-2xl border border-app-border bg-app-surface px-4 py-3">
+              <article
+                key={row.category}
+                className="rounded-2xl border border-app-border bg-app-surface px-4 py-3"
+              >
                 <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex min-w-0 flex-wrap items-center gap-2">
-                      <h4 className="truncate text-sm font-semibold text-text-main">{row.category}</h4>
-                      <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${over ? "bg-status-dangerBg text-status-dangerDark" : near ? "bg-status-warningBg text-status-warningDark" : "bg-status-successBg text-status-successDark"}`}>
+                      <h4 className="truncate text-sm font-semibold text-text-main">
+                        {row.category}
+                      </h4>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs font-semibold ${over ? "bg-status-dangerBg text-status-dangerDark" : near ? "bg-status-warningBg text-status-warningDark" : "bg-status-successBg text-status-successDark"}`}
+                      >
                         {row.percentUsed.toFixed(0)}% used
                       </span>
                     </div>
@@ -34,7 +43,9 @@ export default function BudgetVsSpendingTable({
                     </p>
                   </div>
                   <div className="text-left sm:text-right">
-                    <p className={`text-sm font-semibold ${over ? "text-status-danger" : "text-text-main"}`}>
+                    <p
+                      className={`text-sm font-semibold ${over ? "text-status-danger" : "text-text-main"}`}
+                    >
                       {formatCurrency(row.remaining)}
                     </p>
                     <p className="text-xs text-text-muted">Remaining</p>
@@ -52,7 +63,8 @@ export default function BudgetVsSpendingTable({
           })}
           {hiddenCount > 0 ? (
             <p className="px-1 text-xs font-medium text-text-muted">
-              Showing {previewRows.length} of {rows.length}. Open Monthly Budget to review all categories.
+              Showing {previewRows.length} of {rows.length}. Open Monthly Budget to review all
+              categories.
             </p>
           ) : (
             <p className="px-1 text-xs font-medium text-text-muted">

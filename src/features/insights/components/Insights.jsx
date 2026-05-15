@@ -40,8 +40,14 @@ export default function Insights({
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const data = useMemo(() => getDashboardData(appData, selectedMonth), [appData, selectedMonth]);
   const budgetInsights = useMemo(() => getBudgetInsights(data.budgetRows), [data.budgetRows]);
-  const topCategories = useMemo(() => getTopCategories(data.chartData.spendingByCategory), [data.chartData.spendingByCategory]);
-  const transactionTypeRows = useMemo(() => getTransactionTypeRows(data.transactions), [data.transactions]);
+  const topCategories = useMemo(
+    () => getTopCategories(data.chartData.spendingByCategory),
+    [data.chartData.spendingByCategory],
+  );
+  const transactionTypeRows = useMemo(
+    () => getTransactionTypeRows(data.transactions),
+    [data.transactions],
+  );
   const topMerchants = useMemo(() => getTopMerchants(data.transactions), [data.transactions]);
   const hasInsightData = data.transactions.length > 0 || data.budgets.length > 0;
 
@@ -55,8 +61,8 @@ export default function Insights({
               {formatMonthLabel(selectedMonth)}
             </h2>
             <p className="mt-1 max-w-2xl text-sm text-text-muted">
-              A read-only summary of where the money went, which budgets need attention,
-              and which transaction types are affecting the month.
+              A read-only summary of where the money went, which budgets need attention, and which
+              transaction types are affecting the month.
             </p>
             {loading ? <p className="mt-2 text-sm text-text-muted">Loading insights...</p> : null}
             {error ? <p className="mt-2 text-sm font-medium text-status-danger">{error}</p> : null}
@@ -77,10 +83,7 @@ export default function Insights({
 
       {!hasInsightData ? <InsightsEmptyState selectedMonth={selectedMonth} /> : null}
 
-      <InsightsSummaryCards
-        summary={data.summary}
-        overBudgetCount={budgetInsights.over.length}
-      />
+      <InsightsSummaryCards summary={data.summary} overBudgetCount={budgetInsights.over.length} />
 
       <section className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
         <TopSpendingCategories categories={topCategories} totalSpent={data.summary.spendingTotal} />
@@ -102,8 +105,8 @@ function InsightsEmptyState({ selectedMonth }) {
         No insight data for {formatMonthLabel(selectedMonth)} yet.
       </p>
       <p className="mx-auto mt-2 max-w-xl text-sm text-text-muted">
-        Add budgets and transactions for this month to unlock spending categories,
-        budget health, transaction type totals, and merchant trends.
+        Add budgets and transactions for this month to unlock spending categories, budget health,
+        transaction type totals, and merchant trends.
       </p>
     </Card>
   );
@@ -129,7 +132,10 @@ function TopSpendingCategories({ categories, totalSpent }) {
                     <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
                       #{index + 1}
                     </p>
-                    <p className="truncate text-sm font-semibold text-text-main" title={category.name}>
+                    <p
+                      className="truncate text-sm font-semibold text-text-main"
+                      title={category.name}
+                    >
                       {category.name}
                     </p>
                   </div>
@@ -230,7 +236,10 @@ function TransactionTypeBreakdown({ rows }) {
       ) : (
         <div className="divide-y divide-app-border">
           {rows.map((row) => (
-            <div key={row.type} className="grid gap-2 px-5 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+            <div
+              key={row.type}
+              className="grid gap-2 px-5 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+            >
               <div>
                 <p className="text-sm font-semibold text-text-main">{row.label}</p>
                 <p className="text-xs text-text-muted">
@@ -258,7 +267,10 @@ function TopMerchants({ merchants }) {
       ) : (
         <div className="divide-y divide-app-border">
           {merchants.map((merchant, index) => (
-            <div key={merchant.name} className="grid gap-2 px-5 py-4 sm:grid-cols-[2rem_minmax(0,1fr)_auto] sm:items-center">
+            <div
+              key={merchant.name}
+              className="grid gap-2 px-5 py-4 sm:grid-cols-[2rem_minmax(0,1fr)_auto] sm:items-center"
+            >
               <span className="text-sm font-semibold text-text-muted">#{index + 1}</span>
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-text-main" title={merchant.name}>
@@ -321,9 +333,7 @@ function getBudgetInsights(rows) {
 }
 
 function getTopCategories(categories) {
-  return categories
-    .filter((category) => Number(category.value || 0) > 0)
-    .slice(0, 8);
+  return categories.filter((category) => Number(category.value || 0) > 0).slice(0, 8);
 }
 
 function getTransactionTypeRows(transactions) {
@@ -348,11 +358,13 @@ function getTopMerchants(transactions) {
   const totals = new Map();
 
   transactions.forEach((transaction) => {
-    if (transaction.transactionType === "payment" || transaction.transactionType === "transfer") return;
+    if (transaction.transactionType === "payment" || transaction.transactionType === "transfer")
+      return;
     const name = transaction.merchant || "Unknown merchant";
-    const amount = transaction.transactionType === "refund"
-      ? -Number(transaction.amount || 0)
-      : Number(transaction.amount || 0);
+    const amount =
+      transaction.transactionType === "refund"
+        ? -Number(transaction.amount || 0)
+        : Number(transaction.amount || 0);
     const current = totals.get(name) ?? { name, total: 0, count: 0 };
     totals.set(name, {
       ...current,

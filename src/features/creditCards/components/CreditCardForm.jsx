@@ -91,7 +91,9 @@ export default function CreditCardForm({
     }
 
     try {
-      const selectedProfile = householdProfiles.find((profile) => profile.id === effectiveOwnerProfileId);
+      const selectedProfile = householdProfiles.find(
+        (profile) => profile.id === effectiveOwnerProfileId,
+      );
       await onSaved(
         {
           ...form,
@@ -113,7 +115,9 @@ export default function CreditCardForm({
           <h2 className="text-lg font-semibold text-gray-950">
             {editingCard ? "Edit credit card" : "Add credit card"}
           </h2>
-          <p className="mt-1 text-sm text-gray-500">Card URLs are required and open in a new tab.</p>
+          <p className="mt-1 text-sm text-gray-500">
+            Card URLs are required and open in a new tab.
+          </p>
         </div>
       ) : null}
 
@@ -189,7 +193,9 @@ export default function CreditCardForm({
         <Input
           label="Last 4"
           value={form.lastFour}
-          onChange={(event) => updateField("lastFour", event.target.value.replace(/\D/g, "").slice(0, 4))}
+          onChange={(event) =>
+            updateField("lastFour", event.target.value.replace(/\D/g, "").slice(0, 4))
+          }
           inputMode="numeric"
           maxLength="4"
           required
@@ -255,7 +261,8 @@ function validateForm(form) {
   if (!form.url.trim()) return "Card URL is required.";
   try {
     const url = new URL(form.url);
-    if (!["http:", "https:"].includes(url.protocol)) return "Card URL must start with http or https.";
+    if (!["http:", "https:"].includes(url.protocol))
+      return "Card URL must start with http or https.";
   } catch {
     return "Enter a valid card URL.";
   }
@@ -265,7 +272,8 @@ function validateForm(form) {
   if (Number(form.statementClosingDay) < 1 || Number(form.statementClosingDay) > 31) {
     return "Statement closing day must be between 1 and 31.";
   }
-  if (Number(form.dueDay) < 1 || Number(form.dueDay) > 31) return "Due day must be between 1 and 31.";
+  if (Number(form.dueDay) < 1 || Number(form.dueDay) > 31)
+    return "Due day must be between 1 and 31.";
   return "";
 }
 

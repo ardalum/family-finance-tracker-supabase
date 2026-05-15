@@ -14,7 +14,9 @@ export default function RecurringMigrationPanel({
   const [isImporting, setIsImporting] = useState(false);
 
   const importableCount = useMemo(() => {
-    const importedIds = new Set(supabaseTemplates.map((template) => template.importedLocalId).filter(Boolean));
+    const importedIds = new Set(
+      supabaseTemplates.map((template) => template.importedLocalId).filter(Boolean),
+    );
     return localTemplates.filter((template) => !importedIds.has(template.id)).length;
   }, [localTemplates, supabaseTemplates]);
 

@@ -36,7 +36,10 @@ function SummaryList({ title, items }) {
           {items.slice(0, 5).map((item) => (
             <div key={item.name} className="grid grid-cols-[1fr_auto] gap-3 text-sm">
               <span className="min-w-0 truncate text-gray-600">{item.name}</span>
-              <span className="text-right font-semibold text-gray-950" style={{ fontVariantNumeric: 'tabular-nums' }}>
+              <span
+                className="text-right font-semibold text-gray-950"
+                style={{ fontVariantNumeric: "tabular-nums" }}
+              >
                 {formatCurrency(item.amount)}
               </span>
             </div>

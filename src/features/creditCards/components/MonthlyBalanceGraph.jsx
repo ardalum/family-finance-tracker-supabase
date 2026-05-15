@@ -19,7 +19,9 @@ export default function MonthlyBalanceGraph({ monthlyBalances }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold text-gray-950">Monthly balance graph</h2>
-          <p className="text-sm text-gray-500">Total statement balance across all cards by month.</p>
+          <p className="text-sm text-gray-500">
+            Total statement balance across all cards by month.
+          </p>
         </div>
       </div>
 
@@ -32,7 +34,10 @@ export default function MonthlyBalanceGraph({ monthlyBalances }) {
           {points.map((point) => {
             const height = Math.max((point.total / maxTotal) * 100, 5);
             return (
-              <div key={point.month} className="flex h-full min-w-16 flex-col items-center justify-end gap-2">
+              <div
+                key={point.month}
+                className="flex h-full min-w-16 flex-col items-center justify-end gap-2"
+              >
                 <span className="text-xs font-semibold text-gray-700">
                   {formatCurrency(point.total, { cents: true })}
                 </span>

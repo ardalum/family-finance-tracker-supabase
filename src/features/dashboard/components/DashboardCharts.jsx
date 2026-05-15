@@ -16,7 +16,16 @@ import {
 import Card from "../../../components/ui/Card.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
 
-const colors = ["#10B981", "#4F46E5", "#06B6D4", "#22C55E", "#F97316", "#DC2626", "#1F2937", "#6B7280"];
+const colors = [
+  "#10B981",
+  "#4F46E5",
+  "#06B6D4",
+  "#22C55E",
+  "#F97316",
+  "#DC2626",
+  "#1F2937",
+  "#6B7280",
+];
 
 export default function DashboardCharts({ chartData }) {
   const spendingByCategory = withPercentages(chartData.spendingByCategory);
@@ -24,7 +33,9 @@ export default function DashboardCharts({ chartData }) {
   return (
     <section className="grid gap-6 xl:grid-cols-3">
       <ChartCard title="Spending by Category">
-        {spendingByCategory.length === 0 ? <EmptyChart /> : (
+        {spendingByCategory.length === 0 ? (
+          <EmptyChart />
+        ) : (
           <ResponsiveContainer width="100%" height={260}>
             <PieChart>
               <Pie
@@ -46,7 +57,9 @@ export default function DashboardCharts({ chartData }) {
       </ChartCard>
 
       <ChartCard title="Budget vs Actual">
-        {chartData.budgetVsSpending.length === 0 ? <EmptyChart /> : (
+        {chartData.budgetVsSpending.length === 0 ? (
+          <EmptyChart />
+        ) : (
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={chartData.budgetVsSpending}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -62,7 +75,9 @@ export default function DashboardCharts({ chartData }) {
       </ChartCard>
 
       <ChartCard title="Monthly Spending Trend">
-        {chartData.monthlyTrend.length === 0 ? <EmptyChart /> : (
+        {chartData.monthlyTrend.length === 0 ? (
+          <EmptyChart />
+        ) : (
           <ResponsiveContainer width="100%" height={260}>
             <LineChart data={chartData.monthlyTrend}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -84,10 +99,9 @@ function withPercentages(items) {
 
   return items.map((item) => ({
     ...item,
-    label: `${item.name} ${(Number(item.value || 0) / total * 100).toFixed(0)}%`,
+    label: `${item.name} ${((Number(item.value || 0) / total) * 100).toFixed(0)}%`,
   }));
 }
-
 
 function ChartCard({ title, children }) {
   return (

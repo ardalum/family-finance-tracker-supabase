@@ -21,7 +21,9 @@ export default function LinkedCardName({ card, className = "" }) {
 
   if (!safeUrl) {
     return (
-      <span className={`inline-flex min-w-0 items-center gap-2 font-semibold text-gray-950 ${className}`}>
+      <span
+        className={`inline-flex min-w-0 items-center gap-2 font-semibold text-gray-950 ${className}`}
+      >
         {content}
       </span>
     );

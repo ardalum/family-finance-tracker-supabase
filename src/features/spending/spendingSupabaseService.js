@@ -3,7 +3,9 @@ import { normalizeTransactionType, UNCATEGORIZED_ID } from "./spendingService.js
 
 function requireSupabase() {
   if (!supabase) {
-    throw new Error("Supabase is not configured. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
+    throw new Error(
+      "Supabase is not configured. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.",
+    );
   }
 
   return supabase;
@@ -21,7 +23,9 @@ function getSupabaseCategoryId(categoryId, categoriesByAppId) {
 
 function getRecurringPaymentId(input) {
   const value = input.recurringPaymentId;
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value ?? "")
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value ?? "",
+  )
     ? value
     : null;
 }
@@ -34,7 +38,9 @@ function normalizeTransactionInput(input, cardsByAppId, categoriesByAppId) {
     merchant: input.merchant.trim(),
     payment_method: input.paymentMethod || "Credit Card",
     credit_card_id: input.paymentMethod === "Credit Card" ? getSupabaseCardId(card) : null,
-    category_id: input.splitMode ? null : getSupabaseCategoryId(input.categoryId, categoriesByAppId),
+    category_id: input.splitMode
+      ? null
+      : getSupabaseCategoryId(input.categoryId, categoriesByAppId),
     transaction_type: normalizeTransactionType(input.transactionType),
     amount: Number(input.amount) || 0,
     notes: input.notes?.trim() ?? "",
@@ -52,7 +58,7 @@ function toAppTransaction(row, cardsBySupabaseId, categoriesBySupabaseId) {
       const splitCategory = categoriesBySupabaseId.get(split.category_id);
       return {
         id: split.id,
-        categoryId: split.category_id ? splitCategory?.id ?? split.category_id : UNCATEGORIZED_ID,
+        categoryId: split.category_id ? (splitCategory?.id ?? split.category_id) : UNCATEGORIZED_ID,
         amount: Number(split.amount || 0),
       };
     })
@@ -65,7 +71,7 @@ function toAppTransaction(row, cardsBySupabaseId, categoriesBySupabaseId) {
     merchant: row.merchant,
     paymentMethod: row.payment_method,
     cardId: card?.id ?? "",
-    categoryId: row.category_id ? category?.id ?? row.category_id : UNCATEGORIZED_ID,
+    categoryId: row.category_id ? (category?.id ?? row.category_id) : UNCATEGORIZED_ID,
     transactionType: normalizeTransactionType(row.transaction_type),
     amount: Number(row.amount || 0),
     notes: row.notes ?? "",
@@ -91,8 +97,7 @@ export async function listTransactions(householdId, monthKey, cards, categories)
   const [year, month] = monthKey.split("-").map(Number);
   const startDate = `${monthKey}-01`;
   const endDate = `${year}-${String(month + 1).padStart(2, "0")}-01`;
-  const nextMonthDate =
-    month === 12 ? `${year + 1}-01-01` : endDate;
+  const nextMonthDate = month === 12 ? `${year + 1}-01-01` : endDate;
 
   const { data, error } = await client
     .from("transactions")
@@ -107,7 +112,9 @@ export async function listTransactions(householdId, monthKey, cards, categories)
 
   const cardsBySupabaseId = buildLookup(cards);
   const categoriesBySupabaseId = buildLookup(categories);
-  return (data ?? []).map((row) => toAppTransaction(row, cardsBySupabaseId, categoriesBySupabaseId));
+  return (data ?? []).map((row) =>
+    toAppTransaction(row, cardsBySupabaseId, categoriesBySupabaseId),
+  );
 }
 
 export async function addTransactionToSupabase(householdId, input, cards, categories) {
@@ -127,7 +134,13 @@ export async function addTransactionToSupabase(householdId, input, cards, catego
   if (error) throw error;
 
   if (input.splitMode) {
-    await replaceTransactionSplits(client, householdId, transaction.id, input.splits, categoriesByAppId);
+    await replaceTransactionSplits(
+      client,
+      householdId,
+      transaction.id,
+      input.splits,
+      categoriesByAppId,
+    );
   }
   return transaction.id;
 }
@@ -148,7 +161,13 @@ export async function updateTransactionInSupabase(transactionId, input, cards, c
 
   await client.from("transaction_splits").delete().eq("transaction_id", transaction.id);
   if (input.splitMode) {
-    await replaceTransactionSplits(client, transaction.household_id, transaction.id, input.splits, categoriesByAppId);
+    await replaceTransactionSplits(
+      client,
+      transaction.household_id,
+      transaction.id,
+      input.splits,
+      categoriesByAppId,
+    );
   }
   return transaction.id;
 }
@@ -160,7 +179,13 @@ export async function deleteTransactionFromSupabase(transactionId) {
   if (error) throw error;
 }
 
-async function replaceTransactionSplits(client, householdId, transactionId, splits, categoriesByAppId) {
+async function replaceTransactionSplits(
+  client,
+  householdId,
+  transactionId,
+  splits,
+  categoriesByAppId,
+) {
   const rows = splits.map((split) => ({
     household_id: householdId,
     transaction_id: transactionId,

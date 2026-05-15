@@ -37,8 +37,7 @@ export default function InsightsSummaryCards({ summary, overBudgetCount = 0 }) {
     <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {cards.map((card) => {
         const value = Number(values[card.key] || 0);
-        const isWarning =
-          (card.warnIfNegative && value < 0) || (card.warnIfPositive && value > 0);
+        const isWarning = (card.warnIfNegative && value < 0) || (card.warnIfPositive && value > 0);
 
         return (
           <Card key={card.key} className="p-5">

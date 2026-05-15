@@ -35,7 +35,9 @@ export function normalizeTransactionType(type) {
 
 export function getTransactionTypeLabel(type) {
   const normalizedType = normalizeTransactionType(type);
-  return TRANSACTION_TYPE_OPTIONS.find((option) => option.value === normalizedType)?.label ?? "Expense";
+  return (
+    TRANSACTION_TYPE_OPTIONS.find((option) => option.value === normalizedType)?.label ?? "Expense"
+  );
 }
 
 export function getTransactionImpactAmount(transaction) {
@@ -61,11 +63,13 @@ function normalizeTransaction(input) {
     source: input.source || "manual",
     recurringPaymentId: input.recurringPaymentId || null,
     recurringMonth: input.recurringMonth || null,
-    splits: input.splitMode ? input.splits.map((split) => ({
-      id: split.id || createId("split"),
-      categoryId: split.categoryId || UNCATEGORIZED_ID,
-      amount: Number(split.amount) || 0,
-    })) : [],
+    splits: input.splitMode
+      ? input.splits.map((split) => ({
+          id: split.id || createId("split"),
+          categoryId: split.categoryId || UNCATEGORIZED_ID,
+          amount: Number(split.amount) || 0,
+        }))
+      : [],
   };
 }
 
@@ -130,7 +134,10 @@ export function getMonthTransactions(transactions, monthKey) {
 }
 
 export function getTotalSpending(transactions) {
-  return transactions.reduce((total, transaction) => total + getTransactionImpactAmount(transaction), 0);
+  return transactions.reduce(
+    (total, transaction) => total + getTransactionImpactAmount(transaction),
+    0,
+  );
 }
 
 export function summarizeByCategory(transactions, categories) {
@@ -168,10 +175,7 @@ export function summarizeByMerchant(transactions) {
   transactions.forEach((transaction) => {
     const impactAmount = getTransactionImpactAmount(transaction);
     if (impactAmount === 0) return;
-    totals.set(
-      transaction.merchant,
-      (totals.get(transaction.merchant) ?? 0) + impactAmount,
-    );
+    totals.set(transaction.merchant, (totals.get(transaction.merchant) ?? 0) + impactAmount);
   });
 
   return sortSummary(totals);

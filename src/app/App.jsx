@@ -475,79 +475,93 @@ function FinanceTrackerApp() {
     loadRecurringData();
   }, [loadRecurringData]);
 
-  const createSupabaseCreditCard = useCallback(async (input) => {
-    setCreditCardsSaving(true);
-    setCreditCardsError("");
+  const createSupabaseCreditCard = useCallback(
+    async (input) => {
+      setCreditCardsSaving(true);
+      setCreditCardsError("");
 
-    try {
-      const card = await addCreditCardToSupabase(activeHouseholdId, input);
-      setSupabaseCreditCards((cards) => [...cards, card]);
-      return card;
-    } catch (error) {
-      setCreditCardsError(error.message || "Could not add credit card.");
-      throw error;
-    } finally {
-      setCreditCardsSaving(false);
-    }
-  }, [activeHouseholdId]);
+      try {
+        const card = await addCreditCardToSupabase(activeHouseholdId, input);
+        setSupabaseCreditCards((cards) => [...cards, card]);
+        return card;
+      } catch (error) {
+        setCreditCardsError(error.message || "Could not add credit card.");
+        throw error;
+      } finally {
+        setCreditCardsSaving(false);
+      }
+    },
+    [activeHouseholdId],
+  );
 
-  const createHouseholdProfile = useCallback(async (input) => {
-    setHouseholdProfilesSaving(true);
-    setHouseholdProfilesError("");
+  const createHouseholdProfile = useCallback(
+    async (input) => {
+      setHouseholdProfilesSaving(true);
+      setHouseholdProfilesError("");
 
-    try {
-      const profile = await addHouseholdProfile(activeHouseholdId, input);
-      setHouseholdProfiles((profiles) =>
-        [...profiles, profile].sort((a, b) => a.displayName.localeCompare(b.displayName)),
-      );
-      return profile;
-    } catch (error) {
-      setHouseholdProfilesError(error.message || "Could not add household profile.");
-      throw error;
-    } finally {
-      setHouseholdProfilesSaving(false);
-    }
-  }, [activeHouseholdId]);
+      try {
+        const profile = await addHouseholdProfile(activeHouseholdId, input);
+        setHouseholdProfiles((profiles) =>
+          [...profiles, profile].sort((a, b) => a.displayName.localeCompare(b.displayName)),
+        );
+        return profile;
+      } catch (error) {
+        setHouseholdProfilesError(error.message || "Could not add household profile.");
+        throw error;
+      } finally {
+        setHouseholdProfilesSaving(false);
+      }
+    },
+    [activeHouseholdId],
+  );
 
-  const saveHouseholdProfile = useCallback(async (profileId, input) => {
-    setHouseholdProfilesSaving(true);
-    setHouseholdProfilesError("");
+  const saveHouseholdProfile = useCallback(
+    async (profileId, input) => {
+      setHouseholdProfilesSaving(true);
+      setHouseholdProfilesError("");
 
-    try {
-      const profile = await updateHouseholdProfile(profileId, input);
-      setHouseholdProfiles((profiles) =>
-        profiles
-          .map((currentProfile) => (currentProfile.id === profile.id ? profile : currentProfile))
-          .sort((a, b) => a.displayName.localeCompare(b.displayName)),
-      );
-      await loadSupabaseCreditCards();
-      return profile;
-    } catch (error) {
-      setHouseholdProfilesError(error.message || "Could not update household profile.");
-      throw error;
-    } finally {
-      setHouseholdProfilesSaving(false);
-    }
-  }, [loadSupabaseCreditCards]);
+      try {
+        const profile = await updateHouseholdProfile(profileId, input);
+        setHouseholdProfiles((profiles) =>
+          profiles
+            .map((currentProfile) => (currentProfile.id === profile.id ? profile : currentProfile))
+            .sort((a, b) => a.displayName.localeCompare(b.displayName)),
+        );
+        await loadSupabaseCreditCards();
+        return profile;
+      } catch (error) {
+        setHouseholdProfilesError(error.message || "Could not update household profile.");
+        throw error;
+      } finally {
+        setHouseholdProfilesSaving(false);
+      }
+    },
+    [loadSupabaseCreditCards],
+  );
 
-  const deactivateProfile = useCallback(async (profileId) => {
-    setHouseholdProfilesSaving(true);
-    setHouseholdProfilesError("");
+  const deactivateProfile = useCallback(
+    async (profileId) => {
+      setHouseholdProfilesSaving(true);
+      setHouseholdProfilesError("");
 
-    try {
-      const profile = await deactivateHouseholdProfile(profileId);
-      setHouseholdProfiles((profiles) =>
-        profiles.map((currentProfile) => (currentProfile.id === profile.id ? profile : currentProfile)),
-      );
-      await loadSupabaseCreditCards();
-      return profile;
-    } catch (error) {
-      setHouseholdProfilesError(error.message || "Could not deactivate household profile.");
-      throw error;
-    } finally {
-      setHouseholdProfilesSaving(false);
-    }
-  }, [loadSupabaseCreditCards]);
+      try {
+        const profile = await deactivateHouseholdProfile(profileId);
+        setHouseholdProfiles((profiles) =>
+          profiles.map((currentProfile) =>
+            currentProfile.id === profile.id ? profile : currentProfile,
+          ),
+        );
+        await loadSupabaseCreditCards();
+        return profile;
+      } catch (error) {
+        setHouseholdProfilesError(error.message || "Could not deactivate household profile.");
+        throw error;
+      } finally {
+        setHouseholdProfilesSaving(false);
+      }
+    },
+    [loadSupabaseCreditCards],
+  );
 
   const addDefaultProfiles = useCallback(async () => {
     setHouseholdProfilesSaving(true);
@@ -555,14 +569,12 @@ function FinanceTrackerApp() {
 
     try {
       const existingOwnerNames = [
-        ...new Set(
-          supabaseCreditCards
-            .map((card) => card.owner?.trim())
-            .filter(Boolean),
-        ),
+        ...new Set(supabaseCreditCards.map((card) => card.owner?.trim()).filter(Boolean)),
       ];
       if (existingOwnerNames.length === 0) {
-        setHouseholdProfilesError("No existing card owner names were found. Add profiles manually.");
+        setHouseholdProfilesError(
+          "No existing card owner names were found. Add profiles manually.",
+        );
         return [];
       }
       const profiles = await createDefaultHouseholdProfiles(
@@ -619,120 +631,129 @@ function FinanceTrackerApp() {
     }
   }, []);
 
-  const saveSupabaseMonthlyBalance = useCallback(async (monthKey, cardId, entry) => {
-    const card = supabaseCreditCards.find((currentCard) => currentCard.id === cardId);
-    if (!card) return;
+  const saveSupabaseMonthlyBalance = useCallback(
+    async (monthKey, cardId, entry) => {
+      const card = supabaseCreditCards.find((currentCard) => currentCard.id === cardId);
+      if (!card) return;
 
-    setMonthlyBalancesError("");
-    setSupabaseMonthlyBalances((balances) => ({
-      ...balances,
-      [monthKey]: {
-        ...(balances[monthKey] ?? {}),
-        [cardId]: {
-          balance: Number(entry.balance ?? 0) || 0,
-          paid: Boolean(entry.paid),
-          updatedAt: new Date().toISOString(),
+      setMonthlyBalancesError("");
+      setSupabaseMonthlyBalances((balances) => ({
+        ...balances,
+        [monthKey]: {
+          ...(balances[monthKey] ?? {}),
+          [cardId]: {
+            balance: Number(entry.balance ?? 0) || 0,
+            paid: Boolean(entry.paid),
+            updatedAt: new Date().toISOString(),
+          },
         },
-      },
-    }));
+      }));
 
-    setMonthlyBalancesSaving(true);
+      setMonthlyBalancesSaving(true);
 
-    try {
-      await upsertMonthlyBalance(activeHouseholdId, monthKey, card, entry);
-    } catch (error) {
-      setMonthlyBalancesError(error.message || "Could not save monthly balance.");
-      await loadSupabaseMonthlyBalances();
-      throw error;
-    } finally {
-      setMonthlyBalancesSaving(false);
-    }
-  }, [activeHouseholdId, loadSupabaseMonthlyBalances, supabaseCreditCards]);
+      try {
+        await upsertMonthlyBalance(activeHouseholdId, monthKey, card, entry);
+      } catch (error) {
+        setMonthlyBalancesError(error.message || "Could not save monthly balance.");
+        await loadSupabaseMonthlyBalances();
+        throw error;
+      } finally {
+        setMonthlyBalancesSaving(false);
+      }
+    },
+    [activeHouseholdId, loadSupabaseMonthlyBalances, supabaseCreditCards],
+  );
 
-  const createSupabaseBudget = useCallback(async (input) => {
-    setBudgetsSaving(true);
-    setBudgetsError("");
+  const createSupabaseBudget = useCallback(
+    async (input) => {
+      setBudgetsSaving(true);
+      setBudgetsError("");
 
-    try {
-      const budget = await addBudgetCategoryToSupabase(
-        activeHouseholdId,
-        selectedBudgetMonth,
-        input,
-      );
-      setSupabaseBudgets((budgets) => [...budgets, budget]);
-      await runRefreshSequence(
-        createDashboardInsightsRefreshers({
-          loadDashboardData,
-          loadInsightsData,
-        }),
-      );
-      return budget;
-    } catch (error) {
-      setBudgetsError(error.message || "Could not add budget category.");
-      throw error;
-    } finally {
-      setBudgetsSaving(false);
-    }
-  }, [activeHouseholdId, loadDashboardData, loadInsightsData, selectedBudgetMonth]);
+      try {
+        const budget = await addBudgetCategoryToSupabase(
+          activeHouseholdId,
+          selectedBudgetMonth,
+          input,
+        );
+        setSupabaseBudgets((budgets) => [...budgets, budget]);
+        await runRefreshSequence(
+          createDashboardInsightsRefreshers({
+            loadDashboardData,
+            loadInsightsData,
+          }),
+        );
+        return budget;
+      } catch (error) {
+        setBudgetsError(error.message || "Could not add budget category.");
+        throw error;
+      } finally {
+        setBudgetsSaving(false);
+      }
+    },
+    [activeHouseholdId, loadDashboardData, loadInsightsData, selectedBudgetMonth],
+  );
 
-  const updateSupabaseBudget = useCallback(async (budgetId, input) => {
-    setBudgetsSaving(true);
-    setBudgetsError("");
+  const updateSupabaseBudget = useCallback(
+    async (budgetId, input) => {
+      setBudgetsSaving(true);
+      setBudgetsError("");
 
-    try {
-      const budget = await updateBudgetCategoryInSupabase(budgetId, input);
-      setSupabaseBudgets((budgets) =>
-        budgets.map((currentBudget) => (currentBudget.id === budget.id ? budget : currentBudget)),
-      );
-      await runRefreshSequence(
-        createDashboardInsightsRefreshers({
-          loadDashboardData,
-          loadInsightsData,
-        }),
-      );
-      return budget;
-    } catch (error) {
-      setBudgetsError(error.message || "Could not update budget category.");
-      throw error;
-    } finally {
-      setBudgetsSaving(false);
-    }
-  }, [loadDashboardData, loadInsightsData]);
+      try {
+        const budget = await updateBudgetCategoryInSupabase(budgetId, input);
+        setSupabaseBudgets((budgets) =>
+          budgets.map((currentBudget) => (currentBudget.id === budget.id ? budget : currentBudget)),
+        );
+        await runRefreshSequence(
+          createDashboardInsightsRefreshers({
+            loadDashboardData,
+            loadInsightsData,
+          }),
+        );
+        return budget;
+      } catch (error) {
+        setBudgetsError(error.message || "Could not update budget category.");
+        throw error;
+      } finally {
+        setBudgetsSaving(false);
+      }
+    },
+    [loadDashboardData, loadInsightsData],
+  );
 
-  const deleteSupabaseBudget = useCallback(async (budgetId) => {
-    setBudgetsSaving(true);
-    setBudgetsError("");
+  const deleteSupabaseBudget = useCallback(
+    async (budgetId) => {
+      setBudgetsSaving(true);
+      setBudgetsError("");
 
-    try {
-      await deleteBudgetCategoryFromSupabase(budgetId);
-      setSupabaseBudgets((budgets) =>
-        budgets.filter((budget) => (budget.supabaseId ?? budget.id) !== budgetId),
-      );
-      await runRefreshSequence(
-        createDashboardInsightsRefreshers({
-          loadDashboardData,
-          loadInsightsData,
-        }),
-      );
-    } catch (error) {
-      setBudgetsError(error.message || "Could not delete budget category.");
-      throw error;
-    } finally {
-      setBudgetsSaving(false);
-    }
-  }, [loadDashboardData, loadInsightsData]);
+      try {
+        await deleteBudgetCategoryFromSupabase(budgetId);
+        setSupabaseBudgets((budgets) =>
+          budgets.filter((budget) => (budget.supabaseId ?? budget.id) !== budgetId),
+        );
+        await runRefreshSequence(
+          createDashboardInsightsRefreshers({
+            loadDashboardData,
+            loadInsightsData,
+          }),
+        );
+      } catch (error) {
+        setBudgetsError(error.message || "Could not delete budget category.");
+        throw error;
+      } finally {
+        setBudgetsSaving(false);
+      }
+    },
+    [loadDashboardData, loadInsightsData],
+  );
 
   const importLocalBudgetsToSupabase = useCallback(async () => {
     setBudgetsSaving(true);
     setBudgetsError("");
 
     try {
-      const importedBudgets = await importLocalBudgetCategories(
-        activeHouseholdId,
-        {
-          [selectedBudgetMonth]: appData.budgetsByMonth?.[selectedBudgetMonth] ?? [],
-        },
-      );
+      const importedBudgets = await importLocalBudgetCategories(activeHouseholdId, {
+        [selectedBudgetMonth]: appData.budgetsByMonth?.[selectedBudgetMonth] ?? [],
+      });
       await runRefreshSequence([
         loadSupabaseBudgets,
         ...createDashboardInsightsRefreshers({
@@ -747,7 +768,14 @@ function FinanceTrackerApp() {
     } finally {
       setBudgetsSaving(false);
     }
-  }, [activeHouseholdId, appData.budgetsByMonth, loadDashboardData, loadInsightsData, loadSupabaseBudgets, selectedBudgetMonth]);
+  }, [
+    activeHouseholdId,
+    appData.budgetsByMonth,
+    loadDashboardData,
+    loadInsightsData,
+    loadSupabaseBudgets,
+    selectedBudgetMonth,
+  ]);
 
   const addDefaultBudgetsToSupabase = useCallback(async () => {
     setBudgetsSaving(true);
@@ -787,262 +815,352 @@ function FinanceTrackerApp() {
     } finally {
       setBudgetsSaving(false);
     }
-  }, [activeHouseholdId, loadDashboardData, loadInsightsData, selectedBudgetMonth, supabaseBudgets]);
+  }, [
+    activeHouseholdId,
+    loadDashboardData,
+    loadInsightsData,
+    selectedBudgetMonth,
+    supabaseBudgets,
+  ]);
 
-  const createSupabaseTransaction = useCallback(async (input) => {
-    setSpendingSaving(true);
-    setSpendingError("");
+  const createSupabaseTransaction = useCallback(
+    async (input) => {
+      setSpendingSaving(true);
+      setSpendingError("");
 
-    try {
-      await addTransactionToSupabase(
-        activeHouseholdId,
-        input,
-        supabaseCreditCards,
-        spendingCategories,
-      );
-      await runRefreshSequence(
-        createSpendingDashboardInsightsRefreshers({
-          loadSpendingTransactions,
-          loadDashboardData,
-          loadInsightsData,
-        }),
-      );
-    } catch (error) {
-      setSpendingError(error.message || "Could not add transaction.");
-      throw error;
-    } finally {
-      setSpendingSaving(false);
-    }
-  }, [activeHouseholdId, loadDashboardData, loadInsightsData, loadSpendingTransactions, spendingCategories, supabaseCreditCards]);
+      try {
+        await addTransactionToSupabase(
+          activeHouseholdId,
+          input,
+          supabaseCreditCards,
+          spendingCategories,
+        );
+        await runRefreshSequence(
+          createSpendingDashboardInsightsRefreshers({
+            loadSpendingTransactions,
+            loadDashboardData,
+            loadInsightsData,
+          }),
+        );
+      } catch (error) {
+        setSpendingError(error.message || "Could not add transaction.");
+        throw error;
+      } finally {
+        setSpendingSaving(false);
+      }
+    },
+    [
+      activeHouseholdId,
+      loadDashboardData,
+      loadInsightsData,
+      loadSpendingTransactions,
+      spendingCategories,
+      supabaseCreditCards,
+    ],
+  );
 
-  const updateSupabaseTransaction = useCallback(async (transactionId, input) => {
-    setSpendingSaving(true);
-    setSpendingError("");
+  const updateSupabaseTransaction = useCallback(
+    async (transactionId, input) => {
+      setSpendingSaving(true);
+      setSpendingError("");
 
-    try {
-      await updateTransactionInSupabase(
-        transactionId,
-        input,
-        supabaseCreditCards,
-        spendingCategories,
-      );
-      await runRefreshSequence(
-        createSpendingDashboardInsightsRefreshers({
-          loadSpendingTransactions,
-          loadDashboardData,
-          loadInsightsData,
-        }),
-      );
-    } catch (error) {
-      setSpendingError(error.message || "Could not update transaction.");
-      throw error;
-    } finally {
-      setSpendingSaving(false);
-    }
-  }, [loadDashboardData, loadInsightsData, loadSpendingTransactions, spendingCategories, supabaseCreditCards]);
+      try {
+        await updateTransactionInSupabase(
+          transactionId,
+          input,
+          supabaseCreditCards,
+          spendingCategories,
+        );
+        await runRefreshSequence(
+          createSpendingDashboardInsightsRefreshers({
+            loadSpendingTransactions,
+            loadDashboardData,
+            loadInsightsData,
+          }),
+        );
+      } catch (error) {
+        setSpendingError(error.message || "Could not update transaction.");
+        throw error;
+      } finally {
+        setSpendingSaving(false);
+      }
+    },
+    [
+      loadDashboardData,
+      loadInsightsData,
+      loadSpendingTransactions,
+      spendingCategories,
+      supabaseCreditCards,
+    ],
+  );
 
-  const deleteSupabaseTransaction = useCallback(async (transactionId) => {
-    setSpendingSaving(true);
-    setSpendingError("");
+  const deleteSupabaseTransaction = useCallback(
+    async (transactionId) => {
+      setSpendingSaving(true);
+      setSpendingError("");
 
-    try {
-      await deleteTransactionFromSupabase(transactionId);
-      setSpendingTransactions((transactions) =>
-        transactions.filter((transaction) => (transaction.supabaseId ?? transaction.id) !== transactionId),
-      );
-      await runRefreshSequence(
-        createDashboardInsightsRefreshers({
-          loadDashboardData,
-          loadInsightsData,
-        }),
-      );
-    } catch (error) {
-      setSpendingError(error.message || "Could not delete transaction.");
-      throw error;
-    } finally {
-      setSpendingSaving(false);
-    }
-  }, [loadDashboardData, loadInsightsData]);
+      try {
+        await deleteTransactionFromSupabase(transactionId);
+        setSpendingTransactions((transactions) =>
+          transactions.filter(
+            (transaction) => (transaction.supabaseId ?? transaction.id) !== transactionId,
+          ),
+        );
+        await runRefreshSequence(
+          createDashboardInsightsRefreshers({
+            loadDashboardData,
+            loadInsightsData,
+          }),
+        );
+      } catch (error) {
+        setSpendingError(error.message || "Could not delete transaction.");
+        throw error;
+      } finally {
+        setSpendingSaving(false);
+      }
+    },
+    [loadDashboardData, loadInsightsData],
+  );
 
-  const importLocalSpendingToSupabase = useCallback(async (localMonthTransactions) => {
-    setSpendingSaving(true);
-    setSpendingError("");
+  const importLocalSpendingToSupabase = useCallback(
+    async (localMonthTransactions) => {
+      setSpendingSaving(true);
+      setSpendingError("");
 
-    try {
-      const importedIds = await importLocalTransactions(
-        activeHouseholdId,
-        localMonthTransactions,
-        supabaseCreditCards,
-        spendingCategories,
-      );
-      await runRefreshSequence([
-        loadSpendingTransactions,
-        loadDashboardData,
-      ]);
-      return importedIds;
-    } catch (error) {
-      setSpendingError(error.message || "Could not import local spending transactions.");
-      throw error;
-    } finally {
-      setSpendingSaving(false);
-    }
-  }, [activeHouseholdId, loadDashboardData, loadSpendingTransactions, spendingCategories, supabaseCreditCards]);
+      try {
+        const importedIds = await importLocalTransactions(
+          activeHouseholdId,
+          localMonthTransactions,
+          supabaseCreditCards,
+          spendingCategories,
+        );
+        await runRefreshSequence([loadSpendingTransactions, loadDashboardData]);
+        return importedIds;
+      } catch (error) {
+        setSpendingError(error.message || "Could not import local spending transactions.");
+        throw error;
+      } finally {
+        setSpendingSaving(false);
+      }
+    },
+    [
+      activeHouseholdId,
+      loadDashboardData,
+      loadSpendingTransactions,
+      spendingCategories,
+      supabaseCreditCards,
+    ],
+  );
 
-  const createSupabaseRecurringPayment = useCallback(async (input) => {
-    setRecurringSaving(true);
-    setRecurringError("");
+  const createSupabaseRecurringPayment = useCallback(
+    async (input) => {
+      setRecurringSaving(true);
+      setRecurringError("");
 
-    try {
-      await addRecurringPaymentToSupabase(
-        activeHouseholdId,
-        input,
-        supabaseCreditCards,
-        recurringCategories,
-      );
-      await runRefreshSequence(
-        createRecurringDashboardInsightsRefreshers({
-          loadRecurringData,
-          loadDashboardData,
-          loadInsightsData,
-        }),
-      );
-    } catch (error) {
-      setRecurringError(error.message || "Could not add recurring payment.");
-      throw error;
-    } finally {
-      setRecurringSaving(false);
-    }
-  }, [activeHouseholdId, loadDashboardData, loadInsightsData, loadRecurringData, recurringCategories, supabaseCreditCards]);
+      try {
+        await addRecurringPaymentToSupabase(
+          activeHouseholdId,
+          input,
+          supabaseCreditCards,
+          recurringCategories,
+        );
+        await runRefreshSequence(
+          createRecurringDashboardInsightsRefreshers({
+            loadRecurringData,
+            loadDashboardData,
+            loadInsightsData,
+          }),
+        );
+      } catch (error) {
+        setRecurringError(error.message || "Could not add recurring payment.");
+        throw error;
+      } finally {
+        setRecurringSaving(false);
+      }
+    },
+    [
+      activeHouseholdId,
+      loadDashboardData,
+      loadInsightsData,
+      loadRecurringData,
+      recurringCategories,
+      supabaseCreditCards,
+    ],
+  );
 
-  const updateSupabaseRecurringPayment = useCallback(async (templateId, input) => {
-    setRecurringSaving(true);
-    setRecurringError("");
+  const updateSupabaseRecurringPayment = useCallback(
+    async (templateId, input) => {
+      setRecurringSaving(true);
+      setRecurringError("");
 
-    try {
-      await updateRecurringPaymentInSupabase(
-        templateId,
-        input,
-        supabaseCreditCards,
-        recurringCategories,
-      );
-      await runRefreshSequence(
-        createRecurringDashboardInsightsRefreshers({
-          loadRecurringData,
-          loadDashboardData,
-          loadInsightsData,
-        }),
-      );
-    } catch (error) {
-      setRecurringError(error.message || "Could not update recurring payment.");
-      throw error;
-    } finally {
-      setRecurringSaving(false);
-    }
-  }, [loadDashboardData, loadInsightsData, loadRecurringData, recurringCategories, supabaseCreditCards]);
+      try {
+        await updateRecurringPaymentInSupabase(
+          templateId,
+          input,
+          supabaseCreditCards,
+          recurringCategories,
+        );
+        await runRefreshSequence(
+          createRecurringDashboardInsightsRefreshers({
+            loadRecurringData,
+            loadDashboardData,
+            loadInsightsData,
+          }),
+        );
+      } catch (error) {
+        setRecurringError(error.message || "Could not update recurring payment.");
+        throw error;
+      } finally {
+        setRecurringSaving(false);
+      }
+    },
+    [
+      loadDashboardData,
+      loadInsightsData,
+      loadRecurringData,
+      recurringCategories,
+      supabaseCreditCards,
+    ],
+  );
 
-  const deleteSupabaseRecurringPayment = useCallback(async (templateId) => {
-    setRecurringSaving(true);
-    setRecurringError("");
+  const deleteSupabaseRecurringPayment = useCallback(
+    async (templateId) => {
+      setRecurringSaving(true);
+      setRecurringError("");
 
-    try {
-      await deleteRecurringPaymentFromSupabase(templateId);
-      await runRefreshSequence(
-        createRecurringDashboardInsightsRefreshers({
-          loadRecurringData,
-          loadDashboardData,
-          loadInsightsData,
-        }),
-      );
-    } catch (error) {
-      setRecurringError(error.message || "Could not delete recurring payment.");
-      throw error;
-    } finally {
-      setRecurringSaving(false);
-    }
-  }, [loadDashboardData, loadInsightsData, loadRecurringData]);
+      try {
+        await deleteRecurringPaymentFromSupabase(templateId);
+        await runRefreshSequence(
+          createRecurringDashboardInsightsRefreshers({
+            loadRecurringData,
+            loadDashboardData,
+            loadInsightsData,
+          }),
+        );
+      } catch (error) {
+        setRecurringError(error.message || "Could not delete recurring payment.");
+        throw error;
+      } finally {
+        setRecurringSaving(false);
+      }
+    },
+    [loadDashboardData, loadInsightsData, loadRecurringData],
+  );
 
-  const markSupabaseRecurringPaid = useCallback(async (row) => {
-    setRecurringSaving(true);
-    setRecurringError("");
+  const markSupabaseRecurringPaid = useCallback(
+    async (row) => {
+      setRecurringSaving(true);
+      setRecurringError("");
 
-    try {
-      const instance = await markRecurringPaymentPaidInSupabase({
-        householdId: activeHouseholdId,
-        monthKey: selectedRecurringMonth,
-        row,
-        cards: supabaseCreditCards,
-        categories: recurringCategories,
-      });
-      await runRefreshSequence(
-        createRecurringSpendingDashboardInsightsRefreshers({
-          loadRecurringData,
-          loadSpendingTransactions,
-          loadDashboardData,
-          loadInsightsData,
-        }),
-      );
-      return instance;
-    } catch (error) {
-      setRecurringError(error.message || "Could not mark recurring payment paid.");
-      throw error;
-    } finally {
-      setRecurringSaving(false);
-    }
-  }, [activeHouseholdId, loadDashboardData, loadInsightsData, loadRecurringData, loadSpendingTransactions, recurringCategories, selectedRecurringMonth, supabaseCreditCards]);
+      try {
+        const instance = await markRecurringPaymentPaidInSupabase({
+          householdId: activeHouseholdId,
+          monthKey: selectedRecurringMonth,
+          row,
+          cards: supabaseCreditCards,
+          categories: recurringCategories,
+        });
+        await runRefreshSequence(
+          createRecurringSpendingDashboardInsightsRefreshers({
+            loadRecurringData,
+            loadSpendingTransactions,
+            loadDashboardData,
+            loadInsightsData,
+          }),
+        );
+        return instance;
+      } catch (error) {
+        setRecurringError(error.message || "Could not mark recurring payment paid.");
+        throw error;
+      } finally {
+        setRecurringSaving(false);
+      }
+    },
+    [
+      activeHouseholdId,
+      loadDashboardData,
+      loadInsightsData,
+      loadRecurringData,
+      loadSpendingTransactions,
+      recurringCategories,
+      selectedRecurringMonth,
+      supabaseCreditCards,
+    ],
+  );
 
-  const markSupabaseRecurringUnpaid = useCallback(async (template) => {
-    setRecurringSaving(true);
-    setRecurringError("");
+  const markSupabaseRecurringUnpaid = useCallback(
+    async (template) => {
+      setRecurringSaving(true);
+      setRecurringError("");
 
-    try {
-      const instance = await markRecurringPaymentUnpaidInSupabase({
-        householdId: activeHouseholdId,
-        monthKey: selectedRecurringMonth,
-        template,
-      });
-      await runRefreshSequence(
-        createRecurringSpendingDashboardInsightsRefreshers({
-          loadRecurringData,
-          loadSpendingTransactions,
-          loadDashboardData,
-          loadInsightsData,
-        }),
-      );
-      return instance;
-    } catch (error) {
-      setRecurringError(error.message || "Could not mark recurring payment unpaid.");
-      throw error;
-    } finally {
-      setRecurringSaving(false);
-    }
-  }, [activeHouseholdId, loadDashboardData, loadInsightsData, loadRecurringData, loadSpendingTransactions, selectedRecurringMonth]);
+      try {
+        const instance = await markRecurringPaymentUnpaidInSupabase({
+          householdId: activeHouseholdId,
+          monthKey: selectedRecurringMonth,
+          template,
+        });
+        await runRefreshSequence(
+          createRecurringSpendingDashboardInsightsRefreshers({
+            loadRecurringData,
+            loadSpendingTransactions,
+            loadDashboardData,
+            loadInsightsData,
+          }),
+        );
+        return instance;
+      } catch (error) {
+        setRecurringError(error.message || "Could not mark recurring payment unpaid.");
+        throw error;
+      } finally {
+        setRecurringSaving(false);
+      }
+    },
+    [
+      activeHouseholdId,
+      loadDashboardData,
+      loadInsightsData,
+      loadRecurringData,
+      loadSpendingTransactions,
+      selectedRecurringMonth,
+    ],
+  );
 
-  const skipSupabaseRecurringPayment = useCallback(async (template) => {
-    setRecurringSaving(true);
-    setRecurringError("");
+  const skipSupabaseRecurringPayment = useCallback(
+    async (template) => {
+      setRecurringSaving(true);
+      setRecurringError("");
 
-    try {
-      const instance = await skipRecurringPaymentInSupabase({
-        householdId: activeHouseholdId,
-        monthKey: selectedRecurringMonth,
-        template,
-      });
-      await runRefreshSequence(
-        createRecurringSpendingDashboardInsightsRefreshers({
-          loadRecurringData,
-          loadSpendingTransactions,
-          loadDashboardData,
-          loadInsightsData,
-        }),
-      );
-      return instance;
-    } catch (error) {
-      setRecurringError(error.message || "Could not skip recurring payment.");
-      throw error;
-    } finally {
-      setRecurringSaving(false);
-    }
-  }, [activeHouseholdId, loadDashboardData, loadInsightsData, loadRecurringData, loadSpendingTransactions, selectedRecurringMonth]);
+      try {
+        const instance = await skipRecurringPaymentInSupabase({
+          householdId: activeHouseholdId,
+          monthKey: selectedRecurringMonth,
+          template,
+        });
+        await runRefreshSequence(
+          createRecurringSpendingDashboardInsightsRefreshers({
+            loadRecurringData,
+            loadSpendingTransactions,
+            loadDashboardData,
+            loadInsightsData,
+          }),
+        );
+        return instance;
+      } catch (error) {
+        setRecurringError(error.message || "Could not skip recurring payment.");
+        throw error;
+      } finally {
+        setRecurringSaving(false);
+      }
+    },
+    [
+      activeHouseholdId,
+      loadDashboardData,
+      loadInsightsData,
+      loadRecurringData,
+      loadSpendingTransactions,
+      selectedRecurringMonth,
+    ],
+  );
 
   const importLocalRecurringToSupabase = useCallback(async () => {
     setRecurringSaving(true);
@@ -1069,7 +1187,15 @@ function FinanceTrackerApp() {
     } finally {
       setRecurringSaving(false);
     }
-  }, [activeHouseholdId, appData.recurringPayments, loadDashboardData, loadInsightsData, loadRecurringData, recurringCategories, supabaseCreditCards]);
+  }, [
+    activeHouseholdId,
+    appData.recurringPayments,
+    loadDashboardData,
+    loadInsightsData,
+    loadRecurringData,
+    recurringCategories,
+    supabaseCreditCards,
+  ]);
 
   const refreshSupabaseDataAfterImport = useCallback(async () => {
     await runRefreshSequence(
@@ -1254,14 +1380,14 @@ function FinanceTrackerApp() {
   }
 
   return (
-  <AppShellFrame
-    activeView={activeView}
-    currentPage={currentPage}
-    headerAlerts={headerAlerts}
-    setupCheckError={setupCheckError}
-    onViewChange={setActiveView}
-  >
-        <AppViewRenderer activeView={activeView} {...appViewProps} />
-      </AppShellFrame>
-);
+    <AppShellFrame
+      activeView={activeView}
+      currentPage={currentPage}
+      headerAlerts={headerAlerts}
+      setupCheckError={setupCheckError}
+      onViewChange={setActiveView}
+    >
+      <AppViewRenderer activeView={activeView} {...appViewProps} />
+    </AppShellFrame>
+  );
 }

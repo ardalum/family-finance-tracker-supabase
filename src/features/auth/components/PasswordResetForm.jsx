@@ -146,7 +146,11 @@ export default function PasswordResetForm() {
                 aria-pressed={showPassword}
                 disabled={isSubmitting}
               >
-                {showPassword ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
+                {showPassword ? (
+                  <EyeOff size={14} aria-hidden="true" />
+                ) : (
+                  <Eye size={14} aria-hidden="true" />
+                )}
                 {passwordToggleLabel}
               </button>
             </div>
@@ -172,13 +176,19 @@ export default function PasswordResetForm() {
                 aria-pressed={showConfirmPassword}
                 disabled={isSubmitting}
               >
-                {showConfirmPassword ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
+                {showConfirmPassword ? (
+                  <EyeOff size={14} aria-hidden="true" />
+                ) : (
+                  <Eye size={14} aria-hidden="true" />
+                )}
                 {confirmPasswordToggleLabel}
               </button>
             </div>
 
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? AUTH_RECOVERY_FORM_STATUS_COPY.submitting : AUTH_RECOVERY_FORM_COPY.submitLabel}
+              {isSubmitting
+                ? AUTH_RECOVERY_FORM_STATUS_COPY.submitting
+                : AUTH_RECOVERY_FORM_COPY.submitLabel}
             </Button>
           </form>
         </Card>

@@ -156,7 +156,10 @@ export default function HouseholdProfilesManager({
           )}
         </div>
 
-        <form className="grid h-fit gap-4 rounded-md border border-gray-200 p-4" onSubmit={handleSubmit}>
+        <form
+          className="grid h-fit gap-4 rounded-md border border-gray-200 p-4"
+          onSubmit={handleSubmit}
+        >
           <div>
             <h3 className="font-semibold text-gray-950">
               {editingProfile ? "Edit Profile" : "Add Profile"}

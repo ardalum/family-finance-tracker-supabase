@@ -18,11 +18,27 @@ function getStatementStatus(entry, closingDate, dueDate) {
   const balance = Number(entry?.balance || 0);
   const paid = Boolean(entry?.paid);
 
-  if (balance === 0) return { label: "No balance", className: "bg-app-muted text-text-muted ring-app-muted" };
-  if (paid) return { label: "Paid", className: "bg-status-successBg text-status-successDark ring-status-successBg" };
-  if (isDateOnOrBeforeToday(dueDate)) return { label: "Past due", className: "bg-status-dangerBg text-status-dangerDark ring-status-dangerBg" };
-  if (isDateOnOrBeforeToday(closingDate)) return { label: "Statement ready", className: "bg-status-warningBg text-status-warningDark ring-status-warningBg" };
-  return { label: "Upcoming", className: "bg-status-infoBg text-status-infoDark ring-status-infoBg" };
+  if (balance === 0)
+    return { label: "No balance", className: "bg-app-muted text-text-muted ring-app-muted" };
+  if (paid)
+    return {
+      label: "Paid",
+      className: "bg-status-successBg text-status-successDark ring-status-successBg",
+    };
+  if (isDateOnOrBeforeToday(dueDate))
+    return {
+      label: "Past due",
+      className: "bg-status-dangerBg text-status-dangerDark ring-status-dangerBg",
+    };
+  if (isDateOnOrBeforeToday(closingDate))
+    return {
+      label: "Statement ready",
+      className: "bg-status-warningBg text-status-warningDark ring-status-warningBg",
+    };
+  return {
+    label: "Upcoming",
+    className: "bg-status-infoBg text-status-infoDark ring-status-infoBg",
+  };
 }
 
 export default function StatementCycleSummary({ cards, monthlyBalances, selectedMonth }) {
@@ -52,7 +68,8 @@ export default function StatementCycleSummary({ cards, monthlyBalances, selected
       <div className="border-b border-app-border p-5">
         <h2 className="text-lg font-semibold text-text-main">Statement cycle summary</h2>
         <p className="mt-1 text-sm text-text-muted">
-          Review statement close dates, payment due dates, balances, and payment status for the selected month.
+          Review statement close dates, payment due dates, balances, and payment status for the
+          selected month.
         </p>
       </div>
 
@@ -79,21 +96,22 @@ export default function StatementCycleSummary({ cards, monthlyBalances, selected
                     <div className="grid gap-1">
                       <span className="font-semibold text-text-main">{card.name}</span>
                       <span className="text-xs text-text-muted">
-                        {card.network} **** {card.lastFour}{card.owner ? ` · ${card.owner}` : ""}
+                        {card.network} **** {card.lastFour}
+                        {card.owner ? ` · ${card.owner}` : ""}
                       </span>
                     </div>
                   </td>
                   <td className="px-5 py-4 align-middle text-text-soft">
                     {formatDate(closingDate)}
                   </td>
-                  <td className="px-5 py-4 align-middle text-text-soft">
-                    {formatDate(dueDate)}
-                  </td>
+                  <td className="px-5 py-4 align-middle text-text-soft">{formatDate(dueDate)}</td>
                   <td className="px-5 py-4 align-middle font-semibold text-text-main">
                     {formatCurrency(Number(entry.balance || 0), { cents: true })}
                   </td>
                   <td className="px-5 py-4 align-middle">
-                    <span className={`inline-flex rounded-lg px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${status.className}`}>
+                    <span
+                      className={`inline-flex rounded-lg px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${status.className}`}
+                    >
                       {status.label}
                     </span>
                   </td>

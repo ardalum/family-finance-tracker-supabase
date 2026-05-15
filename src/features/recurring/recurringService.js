@@ -1,7 +1,13 @@
 import { updateAppData } from "../../lib/storage/appStorage.js";
 import { UNCATEGORIZED_ID } from "../spending/spendingService.js";
 
-export const paymentMethods = ["Credit Card", "Checking Account", "Savings Account", "Cash", "Other"];
+export const paymentMethods = [
+  "Credit Card",
+  "Checking Account",
+  "Savings Account",
+  "Cash",
+  "Other",
+];
 
 function createId(prefix) {
   return `${prefix}_${crypto.randomUUID()}`;
@@ -123,7 +129,10 @@ export function getRecurringGeneratedTransaction(transactions, templateOrId, mon
 
 export function getRecurringStatus(template, monthKey, transactions, statusByMonth) {
   const instance = getRecurringInstance(statusByMonth, monthKey, template);
-  if (instance?.status === "paid" || getRecurringGeneratedTransaction(transactions, template, monthKey)) {
+  if (
+    instance?.status === "paid" ||
+    getRecurringGeneratedTransaction(transactions, template, monthKey)
+  ) {
     return "Paid";
   }
   if (instance?.status === "skipped") return "Skipped";
@@ -171,13 +180,19 @@ export function getMonthlyRecurringRows(templates, monthKey, statusByMonth, toda
         dueDate,
         amount,
         paidAmount: instance?.status === "paid" ? amount : 0,
-        unpaidAmount: !instance || instance.status === "unpaid" || !["paid", "skipped"].includes(instance.status)
-          ? amount
-          : 0,
+        unpaidAmount:
+          !instance ||
+          instance.status === "unpaid" ||
+          !["paid", "skipped"].includes(instance.status)
+            ? amount
+            : 0,
         displayStatus,
       };
     })
-    .sort((a, b) => a.dueDate.localeCompare(b.dueDate) || a.template.name.localeCompare(b.template.name));
+    .sort(
+      (a, b) =>
+        a.dueDate.localeCompare(b.dueDate) || a.template.name.localeCompare(b.template.name),
+    );
 }
 
 export function getRecurringSummary(templates, monthKey, statusByMonth) {
@@ -188,7 +203,10 @@ export function getRecurringSummary(templates, monthKey, statusByMonth) {
   const variableTotal = rows
     .filter((row) => row.template.billType === "variable")
     .reduce((total, row) => total + Number(row.template.estimatedAmount || 0), 0);
-  const estimatedTotal = rows.reduce((total, row) => total + Number(row.template.estimatedAmount || 0), 0);
+  const estimatedTotal = rows.reduce(
+    (total, row) => total + Number(row.template.estimatedAmount || 0),
+    0,
+  );
   const actualTotal = rows.reduce((total, row) => total + row.amount, 0);
   const paidTotal = rows.reduce((total, row) => total + row.paidAmount, 0);
   const unpaidTotal = rows.reduce((total, row) => total + row.unpaidAmount, 0);
@@ -203,7 +221,8 @@ export function getRecurringSummary(templates, monthKey, statusByMonth) {
     remainingTotal: unpaidTotal,
     paidCount: rows.filter((row) => row.instance?.status === "paid").length,
     unpaidCount: rows.filter((row) => row.unpaidAmount > 0).length,
-    upcomingUnpaidCount: rows.filter((row) => ["Due soon", "Upcoming"].includes(row.displayStatus)).length,
+    upcomingUnpaidCount: rows.filter((row) => ["Due soon", "Upcoming"].includes(row.displayStatus))
+      .length,
     pastDueUnpaidCount: rows.filter((row) => row.displayStatus === "Past due").length,
     difference: actualTotal - estimatedTotal,
   };
