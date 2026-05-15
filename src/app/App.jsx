@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AppShell from "../components/layout/AppShell.jsx";
 import AppProviders from "./AppProviders.jsx";
-import { getPageContent, isKnownPageView } from "./pageContent.js";
+import { useActiveView } from "./useActiveView.js";
 import AboutWalletFlow from "../features/about/components/AboutWalletFlow.jsx";
 import AccountMenu from "../features/auth/components/AccountMenu.jsx";
 import BackupRestore from "../features/backup/components/BackupRestore.jsx";
@@ -66,7 +66,7 @@ import { getCurrentMonthKey } from "../lib/dates.js";
 import { readAppData } from "../lib/storage/appStorage.js";
 
 
-const ACTIVE_VIEW_KEY = "personalFinanceApp:activeView:v1";
+
 
 export default function App() {
   return (
@@ -127,16 +127,7 @@ function FinanceTrackerApp() {
   const [recurringError, setRecurringError] = useState("");
   const [recurringCategoriesLoading, setRecurringCategoriesLoading] = useState(true);
   const [recurringCategoriesError, setRecurringCategoriesError] = useState("");
-  const [activeView, setActiveViewState] = useState(() => {
-    try {
-      const storedView = window.localStorage.getItem(ACTIVE_VIEW_KEY);
-      return isKnownPageView(storedView) ? storedView : "dashboard";
-    } catch {
-      return "dashboard";
-    }
-  });
-  const currentPage = getPageContent(activeView);
-
+  const { activeView, currentPage, setActiveView } = useActiveView();
   useEffect(() => {
     let isCurrent = true;
 
@@ -173,14 +164,7 @@ function FinanceTrackerApp() {
     };
   }, [activeHousehold?.setupComplete, activeHouseholdId, completeActiveHouseholdSetup]);
 
-  function setActiveView(nextView) {
-    setActiveViewState(nextView);
-    try {
-      window.localStorage.setItem(ACTIVE_VIEW_KEY, nextView);
-    } catch {
-      // Keeping navigation usable matters more than persisting this preference.
-    }
-  }
+
 
   function refreshData(nextData) {
     setAppData(nextData ?? readAppData());
