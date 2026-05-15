@@ -17,6 +17,7 @@ import {
   createSpendingDashboardInsightsRefreshers,
   runRefreshSequence,
 } from "./refreshDataUtils.js";
+import { createDashboardAppData, createInsightsAppData } from "./appDataComposition.js";
 import { useActiveView } from "./useActiveView.js";
 import { useLocalAppData } from "./useLocalAppData.js";
 import AboutWalletFlow from "../features/about/components/AboutWalletFlow.jsx";
@@ -1111,19 +1112,17 @@ function FinanceTrackerApp() {
   }, [completeActiveHouseholdSetup, setActiveView]);
 
   const dashboardAppData = useMemo(
-    () => ({
-      ...appData,
-      creditCards: supabaseCreditCards,
-      monthlyBalances: supabaseMonthlyBalances,
-      budgetsByMonth: {
-        ...appData.budgetsByMonth,
-        [selectedDashboardMonth]: dashboardBudgets,
-      },
-      transactions: dashboardTransactions,
-      recurringPayments,
-      recurringStatusByMonth,
-      recurringTransactions: dashboardTransactions,
-    }),
+    () =>
+      createDashboardAppData({
+        appData,
+        creditCards: supabaseCreditCards,
+        monthlyBalances: supabaseMonthlyBalances,
+        selectedMonth: selectedDashboardMonth,
+        budgets: dashboardBudgets,
+        transactions: dashboardTransactions,
+        recurringPayments,
+        recurringStatusByMonth,
+      }),
     [
       appData,
       dashboardBudgets,
@@ -1136,30 +1135,28 @@ function FinanceTrackerApp() {
     ],
   );
   const insightsAppData = useMemo(
-    () => ({
-      ...appData,
+  () =>
+    createInsightsAppData({
+      appData,
       creditCards: supabaseCreditCards,
       monthlyBalances: supabaseMonthlyBalances,
-      budgetsByMonth: {
-        ...appData.budgetsByMonth,
-        [selectedInsightsMonth]: insightsBudgets,
-      },
+      selectedMonth: selectedInsightsMonth,
+      budgets: insightsBudgets,
       transactions: insightsTransactions,
       recurringPayments,
       recurringStatusByMonth,
-      recurringTransactions: insightsTransactions,
     }),
-    [
-      appData,
-      insightsBudgets,
-      insightsTransactions,
-      recurringPayments,
-      recurringStatusByMonth,
-      selectedInsightsMonth,
-      supabaseCreditCards,
-      supabaseMonthlyBalances,
-    ],
-  );
+  [
+    appData,
+    insightsBudgets,
+    insightsTransactions,
+    recurringPayments,
+    recurringStatusByMonth,
+    selectedInsightsMonth,
+    supabaseCreditCards,
+    supabaseMonthlyBalances,
+  ],
+);
   const headerAlerts = useMemo(
     () => getAlerts(getDashboardData(dashboardAppData, selectedDashboardMonth)),
     [dashboardAppData, selectedDashboardMonth],
