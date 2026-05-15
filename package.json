@@ -12,7 +12,10 @@
     "preview": "vite preview --host 127.0.0.1",
     "test": "node --test",
     "test:run": "node --test",
-    "verify": "npm run build && npm run test:run"
+    "lint": "npx --yes eslint@9 .",
+    "format": "npx --yes prettier@3 . --write",
+    "format:check": "npx --yes prettier@3 . --check",
+    "verify": "npm run build && npm run test:run && npm run lint"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.4",
