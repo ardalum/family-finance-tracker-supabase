@@ -100,8 +100,7 @@ export function getMonthlyBalanceSummary(cards, monthBalances, selectedMonth) {
       return {
         statementBalance: summary.statementBalance + balance,
         unpaidBalance: summary.unpaidBalance + (entry?.paid ? 0 : balance),
-        checkedNoBalanceCount:
-          summary.checkedNoBalanceCount + (status.isCheckedNoBalance ? 1 : 0),
+        checkedNoBalanceCount: summary.checkedNoBalanceCount + (status.isCheckedNoBalance ? 1 : 0),
         notCheckedCount: summary.notCheckedCount + (status.isNotChecked ? 1 : 0),
       };
     },
