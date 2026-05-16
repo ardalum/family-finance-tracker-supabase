@@ -61,7 +61,7 @@ remaining feature hook boundaries are clearer.
 - Added `useLocalAppData.js`.
 - Added `asyncStateUtils.js`.
 - Added `refreshDataUtils.js`.
-- Added `appDataComposition.js`.
+- Added `appDataComposition.js` with shared feature app-data composition.
 - Added `appViewProps.js`.
 - Added `selectedMonthUtils.js`.
 - Added `AppHeaderAccountSlot.jsx`.
