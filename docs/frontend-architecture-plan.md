@@ -7,9 +7,9 @@ This document tracks frontend architecture and tooling cleanup work for WalletFl
 ### App orchestration
 
 `App.jsx` still coordinates many feature areas. It now delegates app providers, active view
-state, local app data, setup status helpers, render wrappers, view rendering, and view prop
-construction to focused helpers, but it still owns many feature data states, loaders, and mutation
-callbacks.
+state, selected month defaults, local app data, setup status helpers, render wrappers, view
+rendering, and view prop construction to focused helpers, but it still owns many feature data
+states, loaders, and mutation callbacks.
 
 A better long-term structure is to move feature data logic into feature-level hooks.
 
@@ -50,8 +50,8 @@ remaining feature hook boundaries are clearer.
 - Added pinned ESLint and Prettier tooling.
 - Added Prettier config and formatting baseline.
 - Added tests for date, dashboard alert, spending, recurring, credit card, page content, active
-  view, view group, setup status, async state, refresh helper, app-data composition, and app-view
-  prop helpers.
+  view, view group, setup status, async state, refresh helper, app-data composition, app-view prop,
+  and selected-month helpers.
 - Added `pageContent.js`.
 - Added `activeViewStorage.js`.
 - Added `useActiveView.js`.
@@ -63,6 +63,7 @@ remaining feature hook boundaries are clearer.
 - Added `refreshDataUtils.js`.
 - Added `appDataComposition.js`.
 - Added `appViewProps.js`.
+- Added `selectedMonthUtils.js`.
 - Added `AppHeaderAccountSlot.jsx`.
 - Added `AppStatusMessages.jsx`.
 - Added `AppFirstTimeSetupScreen.jsx`.
@@ -101,6 +102,7 @@ These App.jsx wiring passes are complete:
 8. Extracted first-time setup and app shell frame wrappers.
 9. Extracted app view rendering.
 10. Extracted app view prop construction.
+11. Wired selected month defaults through `selectedMonthUtils.js`.
 
 ## Recommended next order
 
