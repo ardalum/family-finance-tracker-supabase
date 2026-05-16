@@ -21,7 +21,6 @@ import { createAppViewProps } from "./appViewProps.js";
 import { createInitialSelectedMonths } from "./selectedMonthUtils.js";
 import { useActiveView } from "./useActiveView.js";
 import { useLocalAppData } from "./useLocalAppData.js";
-import { listBudgetCategories } from "../features/budgets/budgetsSupabaseService.js";
 import { useBudgets } from "../features/budgets/useBudgets.js";
 import { useCreditCards } from "../features/creditCards/useCreditCards.js";
 import { useDashboardData } from "../features/dashboard/useDashboardData.js";
@@ -29,6 +28,7 @@ import { useMonthlyBalances } from "../features/creditCards/useMonthlyBalances.j
 import { useHouseholds } from "../features/households/HouseholdProvider.jsx";
 import { useHouseholdProfiles } from "../features/households/useHouseholdProfiles.js";
 import { useInsightsData } from "../features/insights/useInsightsData.js";
+import { useRecurringCategories } from "../features/recurring/useRecurringCategories.js";
 import { useRecurringPayments } from "../features/recurring/useRecurringPayments.js";
 import { householdHasFinanceData } from "../features/setup/setupService.js";
 import { useSpendingCategories } from "../features/spending/useSpendingCategories.js";
@@ -52,9 +52,6 @@ function FinanceTrackerApp() {
   const [setupCheckError, setSetupCheckError] = useState(initialSetupStatusState.error);
   const [spendingCategoriesForTransactions, setSpendingCategoriesForTransactions] = useState([]);
   const [recurringCategoriesForPayments, setRecurringCategoriesForPayments] = useState([]);
-  const [recurringCategories, setRecurringCategories] = useState([]);
-  const [recurringCategoriesLoading, setRecurringCategoriesLoading] = useState(true);
-  const [recurringCategoriesError, setRecurringCategoriesError] = useState("");
   const { activeView, currentPage, setActiveView } = useActiveView();
   useEffect(() => {
     let isCurrent = true;
@@ -209,32 +206,15 @@ function FinanceTrackerApp() {
     localRecurringPayments: appData.recurringPayments,
   });
 
-  const loadRecurringCategories = useCallback(async () => {
-    if (!activeHouseholdId) {
-      setRecurringCategories([]);
-      setRecurringCategoriesLoading(false);
-      return [];
-    }
-
-    setRecurringCategoriesLoading(true);
-    setRecurringCategoriesError("");
-
-    try {
-      const categories = await listBudgetCategories(activeHouseholdId, selectedRecurringMonth);
-      setRecurringCategories(categories);
-      return categories;
-    } catch (error) {
-      setRecurringCategoriesError(error.message || "Could not load recurring categories.");
-      setRecurringCategories([]);
-      return [];
-    } finally {
-      setRecurringCategoriesLoading(false);
-    }
-  }, [activeHouseholdId, selectedRecurringMonth]);
-
-  useEffect(() => {
-    loadRecurringCategories();
-  }, [loadRecurringCategories]);
+  const {
+    recurringCategories,
+    recurringCategoriesLoading,
+    recurringCategoriesError,
+    loadRecurringCategories,
+  } = useRecurringCategories({
+    activeHouseholdId,
+    selectedRecurringMonth,
+  });
 
   useEffect(() => {
     setRecurringCategoriesForPayments(recurringCategories);
