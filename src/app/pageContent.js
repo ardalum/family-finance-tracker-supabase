@@ -39,6 +39,14 @@ export const pageContent = {
     title: "About WalletFlow",
     description: "Learn more about WalletFlow.",
   },
+  "privacy-policy": {
+    title: "Privacy Policy",
+    description: "Review how WalletFlow handles account, household, and finance tracking data.",
+  },
+  "terms-of-use": {
+    title: "Terms of Use",
+    description: "Review the rules, responsibilities, and disclaimers for using WalletFlow.",
+  },
 };
 
 export function getPageContent(view, fallbackView = "dashboard") {
