@@ -49,8 +49,7 @@ function getMonthlyBalanceSummary(cards, monthBalances, selectedMonth) {
       return {
         statementBalance: summary.statementBalance + balance,
         unpaidBalance: summary.unpaidBalance + (entry?.paid ? 0 : balance),
-        checkedNoBalanceCount:
-          summary.checkedNoBalanceCount + (status.isCheckedNoBalance ? 1 : 0),
+        checkedNoBalanceCount: summary.checkedNoBalanceCount + (status.isCheckedNoBalance ? 1 : 0),
         notCheckedCount: summary.notCheckedCount + (status.isNotChecked ? 1 : 0),
       };
     },
@@ -411,7 +410,9 @@ function MonthlyBalanceSummaryCard({ label, value, helper, danger = false }) {
   return (
     <div className="rounded-2xl border border-app-border bg-app-surface p-4 shadow-sm">
       <p className="text-sm font-medium text-text-muted">{label}</p>
-      <p className={`mt-1 text-2xl font-semibold ${danger ? "text-status-danger" : "text-text-main"}`}>
+      <p
+        className={`mt-1 text-2xl font-semibold ${danger ? "text-status-danger" : "text-text-main"}`}
+      >
         {value}
       </p>
       <p className="mt-1 text-xs text-text-muted">{helper}</p>
