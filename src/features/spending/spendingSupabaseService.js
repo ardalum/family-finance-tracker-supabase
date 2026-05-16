@@ -1,3 +1,4 @@
+import { getMonthDateRange } from "../../lib/dates.js";
 import { supabase } from "../../lib/supabase/client.js";
 import { normalizeTransactionType, UNCATEGORIZED_ID } from "./spendingService.js";
 
@@ -94,10 +95,7 @@ export async function listTransactions(householdId, monthKey, cards, categories)
   if (!householdId || !monthKey) return [];
 
   const client = requireSupabase();
-  const [year, month] = monthKey.split("-").map(Number);
-  const startDate = `${monthKey}-01`;
-  const endDate = `${year}-${String(month + 1).padStart(2, "0")}-01`;
-  const nextMonthDate = month === 12 ? `${year + 1}-01-01` : endDate;
+  const { startDate, nextMonthDate } = getMonthDateRange(monthKey);
 
   const { data, error } = await client
     .from("transactions")
