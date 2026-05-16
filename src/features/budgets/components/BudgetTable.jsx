@@ -18,6 +18,7 @@ export default function BudgetTable({
   onEdit,
   onDelete,
   onAddDefaults,
+  onCopyPreviousMonthBudgets,
   isSaving = false,
 }) {
   const [activeFilter, setActiveFilter] = useState("all");
@@ -51,12 +52,22 @@ export default function BudgetTable({
             <div>
               <h2 className="text-lg font-semibold text-text-main">No budget categories yet</h2>
               <p className="mt-1 text-sm text-text-muted">
-                Add your own category or start with the default set for this month.
+                Copy last month’s budget categories and amounts, add your own category, or start
+                with the default set for this month.
               </p>
             </div>
-            <Button type="button" onClick={onAddDefaults} disabled={isSaving}>
-              {isSaving ? "Adding..." : "Add Default Categories"}
-            </Button>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Button
+                type="button"
+                onClick={onCopyPreviousMonthBudgets}
+                disabled={isSaving || !onCopyPreviousMonthBudgets}
+              >
+                {isSaving ? "Copying..." : "Copy Previous Month’s Budget"}
+              </Button>
+              <Button type="button" variant="secondary" onClick={onAddDefaults} disabled={isSaving}>
+                {isSaving ? "Adding..." : "Add Default Categories"}
+              </Button>
+            </div>
           </div>
         ) : (
           <>
