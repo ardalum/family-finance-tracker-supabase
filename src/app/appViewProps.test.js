@@ -161,7 +161,10 @@ describe("app view props", () => {
       props.householdSettingsProps.householdProfilesLoading,
       input.householdProfilesLoading,
     );
-    assert.equal(props.householdSettingsProps.householdProfilesSaving, input.householdProfilesSaving);
+    assert.equal(
+      props.householdSettingsProps.householdProfilesSaving,
+      input.householdProfilesSaving,
+    );
     assert.equal(props.householdSettingsProps.householdProfilesError, input.householdProfilesError);
     assert.equal(props.householdSettingsProps.onCreateDefaultProfiles, input.addDefaultProfiles);
   });
