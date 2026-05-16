@@ -1,4 +1,5 @@
 import { CheckCircle2, Mail, ShieldAlert, WalletCards } from "lucide-react";
+import { appMetadata } from "../../../app/appMetadata.js";
 import Card from "../../../components/ui/Card.jsx";
 
 const trackingItems = [
@@ -61,7 +62,11 @@ export default function AboutWalletFlow() {
             </div>
             <div>
               <dt className="font-medium text-text-muted">Version</dt>
-              <dd className="mt-1 font-semibold text-text-main">1.0.0</dd>
+              <dd className="mt-1 font-semibold text-text-main">{appMetadata.version}</dd>
+            </div>
+            <div>
+              <dt className="font-medium text-text-muted">Release</dt>
+              <dd className="mt-1 font-semibold text-text-main">{appMetadata.releaseLabel}</dd>
             </div>
           </dl>
         </Card>

@@ -1,10 +1,11 @@
 import { CheckCircle2, ClipboardList, Sparkles } from "lucide-react";
+import { appMetadata } from "../../../app/appMetadata.js";
 import Card from "../../../components/ui/Card.jsx";
 
 const releaseNotes = [
   {
-    version: "Current UI polish pass",
-    date: "May 2026",
+    version: appMetadata.releaseLabel,
+    date: appMetadata.releaseDate,
     items: [
       "Renamed primary navigation labels to Dashboard, Cards, Budget, Spending, Bills, and Insights.",
       "Added Privacy Policy and Terms of Use pages.",
@@ -32,7 +33,12 @@ export default function ReleaseNotes() {
             <Sparkles size={26} strokeWidth={2.2} aria-hidden="true" />
           </div>
           <div className="max-w-3xl">
-            <h2 className="text-3xl font-semibold tracking-normal text-text-main">Release Notes</h2>
+            <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+              WalletFlow v{appMetadata.version}
+            </p>
+            <h2 className="mt-2 text-3xl font-semibold tracking-normal text-text-main">
+              Release Notes
+            </h2>
             <p className="mt-4 text-sm leading-6 text-text-muted">
               Review recent WalletFlow changes, cleanup passes, and user-facing improvements.
             </p>
