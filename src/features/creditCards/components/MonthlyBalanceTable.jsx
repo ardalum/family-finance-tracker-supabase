@@ -39,6 +39,29 @@ function getStatusFilterValue(status) {
   return "unpaid";
 }
 
+function getMonthlyBalanceSummary(cards, monthBalances, selectedMonth) {
+  return cards.reduce(
+    (summary, card) => {
+      const entry = monthBalances[card.id];
+      const status = getRowStatus(card, selectedMonth, entry);
+      const balance = Number(entry?.balance || 0);
+
+      return {
+        statementBalance: summary.statementBalance + balance,
+        unpaidBalance: summary.unpaidBalance + (entry?.paid ? 0 : balance),
+        checkedNoBalanceCount: summary.checkedNoBalanceCount + (status.isCheckedNoBalance ? 1 : 0),
+        notCheckedCount: summary.notCheckedCount + (status.isNotChecked ? 1 : 0),
+      };
+    },
+    {
+      statementBalance: 0,
+      unpaidBalance: 0,
+      checkedNoBalanceCount: 0,
+      notCheckedCount: 0,
+    },
+  );
+}
+
 export default function MonthlyBalanceTable({
   cards,
   monthlyBalances,
@@ -56,10 +79,11 @@ export default function MonthlyBalanceTable({
   const monthBalances = monthlyBalances[selectedMonth] ?? {};
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const monthTotal = getMonthTotal(monthBalances);
-  const unpaidTotal = Object.values(monthBalances ?? {}).reduce(
-    (total, entry) => total + (entry?.paid ? 0 : Number(entry?.balance || 0)),
-    0,
+  const summary = useMemo(
+    () => getMonthlyBalanceSummary(cards, monthBalances, selectedMonth),
+    [cards, monthBalances, selectedMonth],
   );
+  const unpaidTotal = summary.unpaidBalance;
   const ownerOptions = useMemo(
     () => Array.from(new Set(cards.map((card) => card.owner).filter(Boolean))).sort(),
     [cards],
@@ -119,16 +143,8 @@ export default function MonthlyBalanceTable({
           <div>
             <h2 className="text-lg font-semibold text-text-main">Monthly balance table</h2>
             <p className="mt-1 text-sm text-text-muted">
-              {formatMonthLabel(selectedMonth)} total statement balance:{" "}
-              <span className="font-semibold text-text-main">
-                {formatCurrency(monthTotal, { cents: true })}
-              </span>
-            </p>
-            <p className="mt-1 text-sm text-text-muted">
-              Total unpaid balance:{" "}
-              <span className="font-semibold text-status-danger">
-                {formatCurrency(unpaidTotal, { cents: true })}
-              </span>
+              Track statement balances, payment status, and which cards still need review for{" "}
+              {formatMonthLabel(selectedMonth)}.
             </p>
             {loading ? (
               <p className="mt-2 text-sm text-text-muted">Loading monthly balances...</p>
@@ -166,6 +182,31 @@ export default function MonthlyBalanceTable({
               Reset
             </Button>
           </div>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <MonthlyBalanceSummaryCard
+            label="Statement balance"
+            value={formatCurrency(summary.statementBalance, { cents: true })}
+            helper="Total entered for this month"
+          />
+          <MonthlyBalanceSummaryCard
+            label="Unpaid balance"
+            value={formatCurrency(summary.unpaidBalance, { cents: true })}
+            helper="Still needs payment"
+            danger={summary.unpaidBalance > 0}
+          />
+          <MonthlyBalanceSummaryCard
+            label="Checked no balance"
+            value={summary.checkedNoBalanceCount}
+            helper="Confirmed $0 statement"
+          />
+          <MonthlyBalanceSummaryCard
+            label="Not checked"
+            value={summary.notCheckedCount}
+            helper="Still needs website review"
+            danger={summary.notCheckedCount > 0}
+          />
         </div>
 
         <div className="grid gap-3 lg:grid-cols-[minmax(240px,1fr)_180px_200px_auto] lg:items-end">
@@ -362,5 +403,19 @@ export default function MonthlyBalanceTable({
         </div>
       )}
     </Card>
+  );
+}
+
+function MonthlyBalanceSummaryCard({ label, value, helper, danger = false }) {
+  return (
+    <div className="rounded-2xl border border-app-border bg-app-surface p-4 shadow-sm">
+      <p className="text-sm font-medium text-text-muted">{label}</p>
+      <p
+        className={`mt-1 text-2xl font-semibold ${danger ? "text-status-danger" : "text-text-main"}`}
+      >
+        {value}
+      </p>
+      <p className="mt-1 text-xs text-text-muted">{helper}</p>
+    </div>
   );
 }
