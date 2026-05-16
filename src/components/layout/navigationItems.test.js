@@ -9,6 +9,13 @@ describe("navigation items", () => {
     assert.deepEqual(getNavigationItemIds(), primaryFinanceViewIds);
   });
 
+  it("keeps primary navigation labels concise", () => {
+    assert.deepEqual(
+      navItems.map((item) => item.label),
+      ["Dashboard", "Cards", "Budget", "Spending", "Bills", "Insights"],
+    );
+  });
+
   it("keeps every navigation item renderable", () => {
     for (const item of navItems) {
       assert.equal(typeof item.id, "string");

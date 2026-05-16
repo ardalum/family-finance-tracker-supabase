@@ -10,26 +10,26 @@ import { primaryFinanceViewIds } from "../../app/secondaryViews.js";
 const navigationItemByView = {
   dashboard: {
     label: "Dashboard",
-    shortLabel: "Home",
+    shortLabel: "Dashboard",
     icon: LayoutDashboard,
   },
   "credit-cards": {
-    label: "Credit Cards",
+    label: "Cards",
     shortLabel: "Cards",
     icon: CreditCard,
   },
   budgets: {
-    label: "Monthly Budget",
+    label: "Budget",
     shortLabel: "Budget",
     icon: WalletCards,
   },
   spending: {
-    label: "Transactions",
-    shortLabel: "Txns",
+    label: "Spending",
+    shortLabel: "Spending",
     icon: ReceiptText,
   },
   recurring: {
-    label: "Recurring Payments",
+    label: "Bills",
     shortLabel: "Bills",
     icon: CalendarSync,
   },
