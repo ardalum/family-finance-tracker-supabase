@@ -4,6 +4,7 @@ import {
   buildMonthOptions,
   daysBetween,
   getDueDateForMonth,
+  getMonthDateRange,
   getNextDueDate,
   getStatementClosingDateForMonth,
 } from "./dates.js";
@@ -25,6 +26,20 @@ describe("date utilities", () => {
       "2026-10",
       "2026-11",
     ]);
+  });
+
+  it("gets the selected month date range", () => {
+    assert.deepEqual(getMonthDateRange("2026-05"), {
+      startDate: "2026-05-01",
+      nextMonthDate: "2026-06-01",
+    });
+  });
+
+  it("gets the selected month date range across year boundaries", () => {
+    assert.deepEqual(getMonthDateRange("2026-12"), {
+      startDate: "2026-12-01",
+      nextMonthDate: "2027-01-01",
+    });
   });
 
   it("caps a due date to the last day of the selected month", () => {
