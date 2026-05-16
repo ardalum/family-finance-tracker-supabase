@@ -100,10 +100,7 @@ describe("app view props", () => {
     assert.equal(props.creditCardProps.monthlyBalancesSaving, input.monthlyBalancesSaving);
     assert.equal(props.creditCardProps.monthlyBalancesError, input.monthlyBalancesError);
     assert.equal(props.creditCardProps.householdProfiles, input.householdProfiles);
-    assert.equal(
-      props.creditCardProps.householdProfilesLoading,
-      input.householdProfilesLoading,
-    );
+    assert.equal(props.creditCardProps.householdProfilesLoading, input.householdProfilesLoading);
     assert.equal(props.creditCardProps.onBalanceMonthChange, input.setSelectedBalanceMonth);
   });
 
