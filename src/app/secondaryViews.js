@@ -7,6 +7,8 @@ export const secondaryViewIds = [
   "about",
   "privacy-policy",
   "terms-of-use",
+  "help-support",
+  "release-notes",
 ];
 
 export const primaryFinanceViewIds = [
