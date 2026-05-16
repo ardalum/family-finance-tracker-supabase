@@ -6,6 +6,7 @@ import {
   getDueDateForMonth,
   getMonthDateRange,
   getNextDueDate,
+  getPreviousMonthKey,
   getStatementClosingDateForMonth,
 } from "./dates.js";
 
@@ -26,6 +27,14 @@ describe("date utilities", () => {
       "2026-10",
       "2026-11",
     ]);
+  });
+
+  it("gets the previous month key", () => {
+    assert.equal(getPreviousMonthKey("2026-05"), "2026-04");
+  });
+
+  it("gets the previous month key across year boundaries", () => {
+    assert.equal(getPreviousMonthKey("2026-01"), "2025-12");
   });
 
   it("gets the selected month date range", () => {

@@ -3,6 +3,12 @@ export function getCurrentMonthKey() {
   return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
 }
 
+export function getPreviousMonthKey(monthKey) {
+  const [year, month] = monthKey.split("-").map(Number);
+  const previousMonth = new Date(year, month - 2, 1);
+  return `${previousMonth.getFullYear()}-${String(previousMonth.getMonth() + 1).padStart(2, "0")}`;
+}
+
 export function getMonthDateRange(monthKey) {
   const [year, month] = monthKey.split("-").map(Number);
   const startDate = `${monthKey}-01`;
