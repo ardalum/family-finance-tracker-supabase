@@ -48,6 +48,7 @@ import {
   listTransactions,
   updateTransactionInSupabase,
 } from "../features/spending/spendingSupabaseService.js";
+import { useSpendingCategories } from "../features/spending/useSpendingCategories.js";
 import { getAlerts, getDashboardData } from "../features/dashboard/dashboardUtils.js";
 
 export default function App() {
@@ -66,15 +67,12 @@ function FinanceTrackerApp() {
   const [setupCheckLoading, setSetupCheckLoading] = useState(initialSetupStatusState.isLoading);
   const [setupCheckError, setSetupCheckError] = useState(initialSetupStatusState.error);
   const [spendingTransactions, setSpendingTransactions] = useState([]);
-  const [spendingCategories, setSpendingCategories] = useState([]);
   const [selectedSpendingMonth, setSelectedSpendingMonth] = useState(
     initialSelectedMonths.spending,
   );
   const [spendingLoading, setSpendingLoading] = useState(true);
   const [spendingSaving, setSpendingSaving] = useState(false);
   const [spendingError, setSpendingError] = useState("");
-  const [spendingCategoriesLoading, setSpendingCategoriesLoading] = useState(true);
-  const [spendingCategoriesError, setSpendingCategoriesError] = useState("");
   const [selectedDashboardMonth, setSelectedDashboardMonth] = useState(
     initialSelectedMonths.dashboard,
   );
@@ -164,32 +162,15 @@ function FinanceTrackerApp() {
     initialSelectedMonth: initialSelectedMonths.balance,
   });
 
-  const loadSpendingCategories = useCallback(async () => {
-    if (!activeHouseholdId) {
-      setSpendingCategories([]);
-      setSpendingCategoriesLoading(false);
-      return [];
-    }
-
-    setSpendingCategoriesLoading(true);
-    setSpendingCategoriesError("");
-
-    try {
-      const categories = await listBudgetCategories(activeHouseholdId, selectedSpendingMonth);
-      setSpendingCategories(categories);
-      return categories;
-    } catch (error) {
-      setSpendingCategoriesError(error.message || "Could not load spending categories.");
-      setSpendingCategories([]);
-      return [];
-    } finally {
-      setSpendingCategoriesLoading(false);
-    }
-  }, [activeHouseholdId, selectedSpendingMonth]);
-
-  useEffect(() => {
-    loadSpendingCategories();
-  }, [loadSpendingCategories]);
+  const {
+    spendingCategories,
+    spendingCategoriesLoading,
+    spendingCategoriesError,
+    loadSpendingCategories,
+  } = useSpendingCategories({
+    activeHouseholdId,
+    selectedSpendingMonth,
+  });
 
   const loadSpendingTransactions = useCallback(async () => {
     if (!activeHouseholdId) {
