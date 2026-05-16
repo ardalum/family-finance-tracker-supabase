@@ -20,6 +20,7 @@ import {
 } from "./refreshDataUtils.js";
 import { createDashboardAppData, createInsightsAppData } from "./appDataComposition.js";
 import { createAppViewProps } from "./appViewProps.js";
+import { createInitialSelectedMonths } from "./selectedMonthUtils.js";
 import { useActiveView } from "./useActiveView.js";
 import { useLocalAppData } from "./useLocalAppData.js";
 import {
@@ -68,7 +69,6 @@ import {
   updateTransactionInSupabase,
 } from "../features/spending/spendingSupabaseService.js";
 import { getAlerts, getDashboardData } from "../features/dashboard/dashboardUtils.js";
-import { getCurrentMonthKey } from "../lib/dates.js";
 
 export default function App() {
   return (
@@ -82,6 +82,7 @@ function FinanceTrackerApp() {
   const { activeHouseholdId, activeHousehold, completeActiveHouseholdSetup } = useHouseholds();
   const { appData, refreshData } = useLocalAppData();
   const initialSetupStatusState = getInitialSetupStatusState();
+  const initialSelectedMonths = createInitialSelectedMonths();
   const [setupCheckLoading, setSetupCheckLoading] = useState(initialSetupStatusState.isLoading);
   const [setupCheckError, setSetupCheckError] = useState(initialSetupStatusState.error);
   const [supabaseCreditCards, setSupabaseCreditCards] = useState([]);
@@ -93,29 +94,35 @@ function FinanceTrackerApp() {
   const [householdProfilesSaving, setHouseholdProfilesSaving] = useState(false);
   const [householdProfilesError, setHouseholdProfilesError] = useState("");
   const [supabaseMonthlyBalances, setSupabaseMonthlyBalances] = useState({});
-  const [selectedBalanceMonth, setSelectedBalanceMonth] = useState(getCurrentMonthKey());
+  const [selectedBalanceMonth, setSelectedBalanceMonth] = useState(initialSelectedMonths.balance);
   const [monthlyBalancesLoading, setMonthlyBalancesLoading] = useState(true);
   const [monthlyBalancesSaving, setMonthlyBalancesSaving] = useState(false);
   const [monthlyBalancesError, setMonthlyBalancesError] = useState("");
   const [supabaseBudgets, setSupabaseBudgets] = useState([]);
-  const [selectedBudgetMonth, setSelectedBudgetMonth] = useState(getCurrentMonthKey());
+  const [selectedBudgetMonth, setSelectedBudgetMonth] = useState(initialSelectedMonths.budget);
   const [budgetsLoading, setBudgetsLoading] = useState(true);
   const [budgetsSaving, setBudgetsSaving] = useState(false);
   const [budgetsError, setBudgetsError] = useState("");
   const [spendingTransactions, setSpendingTransactions] = useState([]);
   const [spendingCategories, setSpendingCategories] = useState([]);
-  const [selectedSpendingMonth, setSelectedSpendingMonth] = useState(getCurrentMonthKey());
+  const [selectedSpendingMonth, setSelectedSpendingMonth] = useState(
+    initialSelectedMonths.spending,
+  );
   const [spendingLoading, setSpendingLoading] = useState(true);
   const [spendingSaving, setSpendingSaving] = useState(false);
   const [spendingError, setSpendingError] = useState("");
   const [spendingCategoriesLoading, setSpendingCategoriesLoading] = useState(true);
   const [spendingCategoriesError, setSpendingCategoriesError] = useState("");
-  const [selectedDashboardMonth, setSelectedDashboardMonth] = useState(getCurrentMonthKey());
+  const [selectedDashboardMonth, setSelectedDashboardMonth] = useState(
+    initialSelectedMonths.dashboard,
+  );
   const [dashboardBudgets, setDashboardBudgets] = useState([]);
   const [dashboardTransactions, setDashboardTransactions] = useState([]);
   const [dashboardLoading, setDashboardLoading] = useState(true);
   const [dashboardError, setDashboardError] = useState("");
-  const [selectedInsightsMonth, setSelectedInsightsMonth] = useState(getCurrentMonthKey());
+  const [selectedInsightsMonth, setSelectedInsightsMonth] = useState(
+    initialSelectedMonths.insights,
+  );
   const [insightsBudgets, setInsightsBudgets] = useState([]);
   const [insightsTransactions, setInsightsTransactions] = useState([]);
   const [insightsLoading, setInsightsLoading] = useState(true);
@@ -124,7 +131,9 @@ function FinanceTrackerApp() {
   const [recurringStatusByMonth, setRecurringStatusByMonth] = useState({});
   const [recurringTransactions, setRecurringTransactions] = useState([]);
   const [recurringCategories, setRecurringCategories] = useState([]);
-  const [selectedRecurringMonth, setSelectedRecurringMonth] = useState(getCurrentMonthKey());
+  const [selectedRecurringMonth, setSelectedRecurringMonth] = useState(
+    initialSelectedMonths.recurring,
+  );
   const [recurringLoading, setRecurringLoading] = useState(true);
   const [recurringSaving, setRecurringSaving] = useState(false);
   const [recurringError, setRecurringError] = useState("");
