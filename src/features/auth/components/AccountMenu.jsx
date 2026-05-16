@@ -69,12 +69,6 @@ const menuSections = [
     title: "Info",
     items: [
       {
-        icon: Info,
-        label: "About WalletFlow",
-        description: "App purpose, version notes, and credits.",
-        view: "about",
-      },
-      {
         icon: LifeBuoy,
         label: "Help / Support",
         description: "Troubleshooting notes, safe testing reminders, and contact info.",
@@ -85,6 +79,12 @@ const menuSections = [
         label: "Release Notes",
         description: "Recent app changes, cleanup passes, and improvements.",
         view: "release-notes",
+      },
+      {
+        icon: Info,
+        label: "About WalletFlow",
+        description: "App purpose, version notes, and credits.",
+        view: "about",
       },
     ],
   },
