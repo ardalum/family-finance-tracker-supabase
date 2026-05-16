@@ -1,4 +1,4 @@
-import { daysBetween, getDueDateForMonth } from "../../lib/dates";
+import { daysBetween, getDueDateForMonth } from "../../lib/dates.js";
 
 export function getRowStatus(card, monthKey, entry) {
   const hasEntry = Boolean(entry);
