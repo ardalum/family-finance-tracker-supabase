@@ -1,15 +1,4 @@
-import {
-  ClipboardList,
-  Clock3,
-  DatabaseBackup,
-  Home,
-  Info,
-  LifeBuoy,
-  LogOut,
-  Settings,
-  ShieldCheck,
-  UserCircle,
-} from "lucide-react";
+import { Clock3, LogOut, UserCircle } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useHouseholds } from "../../households/HouseholdProvider.jsx";
 import { getAccountIdentity } from "../authAccountDisplayUtils.js";
@@ -17,78 +6,7 @@ import { getFriendlyAuthError } from "../authErrors.js";
 import { useAuth } from "../AuthProvider.jsx";
 import { signOut, signOutEverywhere } from "../authService.js";
 import { getSessionSummary } from "../authSessionUtils.js";
-import { AUTH_VIEW_TARGETS } from "../authViewTargets.js";
-
-const menuSections = [
-  {
-    title: "Account",
-    items: [
-      {
-        icon: UserCircle,
-        label: "Account Settings",
-        description: "Profile identity, session details, and planned security controls.",
-        view: AUTH_VIEW_TARGETS.accountSettings,
-      },
-      {
-        icon: ShieldCheck,
-        label: "Data & Privacy",
-        description: "Privacy policy, data handling, exports, and deletion notes.",
-        view: "privacy-policy",
-      },
-    ],
-  },
-  {
-    title: "Household",
-    items: [
-      {
-        icon: Home,
-        label: "Household Settings",
-        description: "Members, household access, and active household.",
-        view: "household-settings",
-      },
-    ],
-  },
-  {
-    title: "Tools",
-    items: [
-      {
-        icon: DatabaseBackup,
-        label: "Backup & Restore",
-        description: "Export data or restore legacy local backups.",
-        view: "backup",
-      },
-      {
-        icon: Settings,
-        label: "App Settings",
-        description: "Display preferences and app behavior.",
-        view: "app-settings",
-      },
-    ],
-  },
-  {
-    title: "Info",
-    items: [
-      {
-        icon: LifeBuoy,
-        label: "Help / Support",
-        description: "Troubleshooting notes, safe testing reminders, and contact info.",
-        view: "help-support",
-      },
-      {
-        icon: ClipboardList,
-        label: "Release Notes",
-        description: "Recent app changes, cleanup passes, and improvements.",
-        view: "release-notes",
-      },
-      {
-        icon: Info,
-        label: "About WalletFlow",
-        description: "App purpose, version notes, and credits.",
-        view: "about",
-      },
-    ],
-  },
-];
+import { accountMenuSections } from "./accountMenuSections.js";
 
 export default function AccountMenu({ onNavigate }) {
   const { session, user, setError } = useAuth();
@@ -197,7 +115,7 @@ export default function AccountMenu({ onNavigate }) {
             </div>
           </div>
           <div className="grid gap-2 p-2">
-            {menuSections.map((section) => (
+            {accountMenuSections.map((section) => (
               <div key={section.title}>
                 <p className="px-3 pt-2 text-[0.68rem] font-semibold uppercase tracking-wide text-text-muted">
                   {section.title}
