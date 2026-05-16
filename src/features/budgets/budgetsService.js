@@ -21,12 +21,6 @@ function normalizeBudgetName(name) {
   return name.trim().toLowerCase();
 }
 
-export function getPreviousMonthKey(monthKey) {
-  const [year, month] = monthKey.split("-").map(Number);
-  const previousMonth = new Date(year, month - 2, 1);
-  return `${previousMonth.getFullYear()}-${String(previousMonth.getMonth() + 1).padStart(2, "0")}`;
-}
-
 export function createBudgetCopyPlan(sourceBudgets = [], targetBudgets = []) {
   const targetNames = new Set(targetBudgets.map((budget) => normalizeBudgetName(budget.name)));
 
