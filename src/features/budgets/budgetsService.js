@@ -17,6 +17,28 @@ function normalizeBudget(input) {
   };
 }
 
+function normalizeBudgetName(name) {
+  return name.trim().toLowerCase();
+}
+
+export function getPreviousMonthKey(monthKey) {
+  const [year, month] = monthKey.split("-").map(Number);
+  const previousMonth = new Date(year, month - 2, 1);
+  return `${previousMonth.getFullYear()}-${String(previousMonth.getMonth() + 1).padStart(2, "0")}`;
+}
+
+export function createBudgetCopyPlan(sourceBudgets = [], targetBudgets = []) {
+  const targetNames = new Set(targetBudgets.map((budget) => normalizeBudgetName(budget.name)));
+
+  return sourceBudgets
+    .filter((budget) => !targetNames.has(normalizeBudgetName(budget.name)))
+    .map((budget) => ({
+      name: budget.name,
+      monthlyAmount: Number(budget.monthlyAmount) || 0,
+      notes: budget.notes ?? "",
+    }));
+}
+
 export function ensureMonthBudgets(monthKey) {
   return updateAppData((data) => {
     if (Array.isArray(data.budgetsByMonth?.[monthKey])) {
