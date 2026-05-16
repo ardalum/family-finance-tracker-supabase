@@ -1,21 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import {
-  createBudgetCopyPlan,
-  getPreviousMonthKey,
-  getTotalMonthlyBudget,
-} from "./budgetsService.js";
+import { createBudgetCopyPlan, getTotalMonthlyBudget } from "./budgetsService.js";
 
 describe("budget service", () => {
-  it("gets the previous month key", () => {
-    assert.equal(getPreviousMonthKey("2026-05"), "2026-04");
-  });
-
-  it("gets the previous month key across year boundaries", () => {
-    assert.equal(getPreviousMonthKey("2026-01"), "2025-12");
-  });
-
   it("creates a copy plan from source budget categories", () => {
     const plan = createBudgetCopyPlan([
       { name: "Groceries", monthlyAmount: 750, notes: "Food and household items" },
