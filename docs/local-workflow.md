@@ -65,6 +65,12 @@ npm run verify
 
 `npm run verify` runs formatting checks, production build, tests, and lint.
 
+Run a clean verification pass when generated folders or Vite cache may be stale:
+
+```bash
+npm run verify:clean
+```
+
 Run the app locally when browser behavior should be checked:
 
 ```bash
