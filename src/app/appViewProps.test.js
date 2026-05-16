@@ -63,6 +63,8 @@ const input = {
   setSelectedInsightsMonth: callback,
   refreshData: callback,
   refreshSupabaseDataAfterImport: callback,
+  addDefaultBudgetsToSupabase: callback,
+  copyPreviousMonthBudgetsToSupabase: callback,
   addDefaultProfiles: callback,
 };
 
@@ -114,6 +116,11 @@ describe("app view props", () => {
     assert.equal(props.budgetProps.error, input.budgetsError);
     assert.equal(props.budgetProps.isSaving, input.budgetsSaving);
     assert.equal(props.budgetProps.onMonthChange, input.setSelectedBudgetMonth);
+    assert.equal(props.budgetProps.onAddDefaultBudgets, input.addDefaultBudgetsToSupabase);
+    assert.equal(
+      props.budgetProps.onCopyPreviousMonthBudgets,
+      input.copyPreviousMonthBudgetsToSupabase,
+    );
   });
 
   it("maps spending props", () => {
