@@ -31,7 +31,8 @@ function getCardSearchText(card) {
 }
 
 function getStatusFilterValue(status) {
-  if (status.isNoBalance) return "no-balance";
+  if (status.isNotChecked) return "not-checked";
+  if (status.isCheckedNoBalance) return "checked-no-balance";
   if (status.label === "Paid") return "paid";
   if (status.label === "Past due") return "past-due";
   if (status.label === "Due soon") return "due-soon";
@@ -70,7 +71,7 @@ export default function MonthlyBalanceTable({
   const visibleCards = useMemo(() => {
     const searchTerm = filters.search.trim().toLowerCase();
     return sortedCards.filter((card) => {
-      const entry = monthBalances[card.id] ?? { balance: 0, paid: false };
+      const entry = monthBalances[card.id];
       const status = getRowStatus(card, selectedMonth, entry);
       const statusValue = getStatusFilterValue(status);
       const matchesSearch = !searchTerm || getCardSearchText(card).includes(searchTerm);
@@ -94,6 +95,15 @@ export default function MonthlyBalanceTable({
     onBalanceChange(selectedMonth, cardId, {
       ...currentEntry,
       paid,
+    });
+  }
+
+  function handleCheckedNoBalance(cardId) {
+    const currentEntry = monthBalances[cardId] ?? { balance: 0, paid: false };
+    onBalanceChange(selectedMonth, cardId, {
+      ...currentEntry,
+      balance: 0,
+      paid: true,
     });
   }
 
@@ -158,7 +168,7 @@ export default function MonthlyBalanceTable({
           </div>
         </div>
 
-        <div className="grid gap-3 lg:grid-cols-[minmax(240px,1fr)_180px_180px_auto] lg:items-end">
+        <div className="grid gap-3 lg:grid-cols-[minmax(240px,1fr)_180px_200px_auto] lg:items-end">
           <Input
             label="Search cards"
             value={filters.search}
@@ -189,11 +199,12 @@ export default function MonthlyBalanceTable({
             }
           >
             <option value="">All statuses</option>
+            <option value="not-checked">Not checked</option>
+            <option value="checked-no-balance">Checked no balance</option>
             <option value="paid">Paid</option>
             <option value="unpaid">Unpaid</option>
             <option value="due-soon">Due soon</option>
             <option value="past-due">Past due</option>
-            <option value="no-balance">No balance</option>
           </Select>
           <div className="text-sm font-medium text-text-muted lg:pb-2">
             Showing <span className="font-semibold text-text-main">{visibleCards.length}</span> of{" "}
@@ -225,7 +236,8 @@ export default function MonthlyBalanceTable({
             </thead>
             <tbody className="divide-y divide-app-border">
               {visibleCards.map((card) => {
-                const entry = monthBalances[card.id] ?? { balance: 0, paid: false };
+                const entry = monthBalances[card.id];
+                const displayEntry = entry ?? { balance: 0, paid: false };
                 const status = getRowStatus(card, selectedMonth, entry);
                 const statementClosingDay = card.statementClosingDay ?? card.dueDay;
                 const closingDate = getStatementClosingDateForMonth(
@@ -293,17 +305,30 @@ export default function MonthlyBalanceTable({
                       <label className="sr-only" htmlFor={`balance-${card.id}`}>
                         Statement balance for {card.name}
                       </label>
-                      <div className="flex items-center gap-2">
-                        <span className={`font-semibold ${status.balanceClass}`}>$</span>
-                        <input
-                          id={`balance-${card.id}`}
-                          className={`h-10 w-32 rounded-xl border border-app-border bg-app-surface px-3 text-sm font-semibold outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/10 ${status.balanceClass}`}
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          value={entry.balance}
-                          onChange={(event) => handleBalanceChange(card.id, event.target.value)}
-                        />
+                      <div className="grid gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className={`font-semibold ${status.balanceClass}`}>$</span>
+                          <input
+                            id={`balance-${card.id}`}
+                            className={`h-10 w-32 rounded-xl border border-app-border bg-app-surface px-3 text-sm font-semibold outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/10 ${status.balanceClass}`}
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={displayEntry.balance}
+                            onChange={(event) => handleBalanceChange(card.id, event.target.value)}
+                          />
+                        </div>
+                        {status.isNotChecked ? (
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            className="w-fit min-h-8 px-3 py-1 text-xs"
+                            onClick={() => handleCheckedNoBalance(card.id)}
+                            disabled={saving}
+                          >
+                            Mark checked, no balance
+                          </Button>
+                        ) : null}
                       </div>
                     </td>
                     <td className="px-5 py-4 align-middle">
@@ -317,11 +342,15 @@ export default function MonthlyBalanceTable({
                           <input
                             className="h-4 w-4 rounded border-app-border text-brand-primary focus:ring-brand-primary"
                             type="checkbox"
-                            checked={status.isNoBalance ? false : Boolean(entry.paid)}
-                            disabled={status.isNoBalance}
+                            checked={status.isNoBalance ? false : Boolean(displayEntry.paid)}
+                            disabled={status.isNoBalance || status.isNotChecked}
                             onChange={(event) => handlePaidChange(card.id, event.target.checked)}
                           />
-                          {status.isNoBalance ? "No payment needed" : "Paid"}
+                          {status.isNoBalance
+                            ? "No payment needed"
+                            : status.isNotChecked
+                              ? "Check first"
+                              : "Paid"}
                         </label>
                       </div>
                     </td>
