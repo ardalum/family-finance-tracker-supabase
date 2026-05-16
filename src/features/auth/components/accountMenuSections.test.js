@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { isKnownPageView } from "../../../app/pageContent.js";
+import { isAuthViewTarget } from "../authViewTargets.js";
 import { accountMenuSections } from "./accountMenuSections.js";
 
 describe("account menu sections", () => {
@@ -32,6 +34,20 @@ describe("account menu sections", () => {
         ["help-support", "release-notes", "about"],
       ],
     );
+  });
+
+  it("keeps account menu item targets aligned with known app or auth views", () => {
+    const targets = accountMenuSections.flatMap((section) =>
+      section.items.map((item) => item.view),
+    );
+
+    for (const target of targets) {
+      assert.equal(
+        isKnownPageView(target) || isAuthViewTarget(target),
+        true,
+        `${target} is not a known page or auth view`,
+      );
+    }
   });
 
   it("does not include duplicate account menu item targets", () => {
