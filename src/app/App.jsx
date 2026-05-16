@@ -24,12 +24,13 @@ import { useLocalAppData } from "./useLocalAppData.js";
 import { listBudgetCategories } from "../features/budgets/budgetsSupabaseService.js";
 import { useBudgets } from "../features/budgets/useBudgets.js";
 import { useCreditCards } from "../features/creditCards/useCreditCards.js";
+import { useDashboardData } from "../features/dashboard/useDashboardData.js";
 import { useMonthlyBalances } from "../features/creditCards/useMonthlyBalances.js";
 import { useHouseholds } from "../features/households/HouseholdProvider.jsx";
 import { useHouseholdProfiles } from "../features/households/useHouseholdProfiles.js";
+import { useInsightsData } from "../features/insights/useInsightsData.js";
 import { useRecurringPayments } from "../features/recurring/useRecurringPayments.js";
 import { householdHasFinanceData } from "../features/setup/setupService.js";
-import { listTransactions } from "../features/spending/spendingSupabaseService.js";
 import { useSpendingCategories } from "../features/spending/useSpendingCategories.js";
 import { useSpendingTransactions } from "../features/spending/useSpendingTransactions.js";
 import { getAlerts, getDashboardData } from "../features/dashboard/dashboardUtils.js";
@@ -51,20 +52,6 @@ function FinanceTrackerApp() {
   const [setupCheckError, setSetupCheckError] = useState(initialSetupStatusState.error);
   const [spendingCategoriesForTransactions, setSpendingCategoriesForTransactions] = useState([]);
   const [recurringCategoriesForPayments, setRecurringCategoriesForPayments] = useState([]);
-  const [selectedDashboardMonth, setSelectedDashboardMonth] = useState(
-    initialSelectedMonths.dashboard,
-  );
-  const [dashboardBudgets, setDashboardBudgets] = useState([]);
-  const [dashboardTransactions, setDashboardTransactions] = useState([]);
-  const [dashboardLoading, setDashboardLoading] = useState(true);
-  const [dashboardError, setDashboardError] = useState("");
-  const [selectedInsightsMonth, setSelectedInsightsMonth] = useState(
-    initialSelectedMonths.insights,
-  );
-  const [insightsBudgets, setInsightsBudgets] = useState([]);
-  const [insightsTransactions, setInsightsTransactions] = useState([]);
-  const [insightsLoading, setInsightsLoading] = useState(true);
-  const [insightsError, setInsightsError] = useState("");
   const [recurringCategories, setRecurringCategories] = useState([]);
   const [recurringCategoriesLoading, setRecurringCategoriesLoading] = useState(true);
   const [recurringCategoriesError, setRecurringCategoriesError] = useState("");
@@ -131,75 +118,33 @@ function FinanceTrackerApp() {
     initialSelectedMonth: initialSelectedMonths.balance,
   });
 
-  const loadDashboardData = useCallback(async () => {
-    if (!activeHouseholdId) {
-      setDashboardBudgets([]);
-      setDashboardTransactions([]);
-      setDashboardLoading(false);
-      return;
-    }
+  const {
+    selectedDashboardMonth,
+    setSelectedDashboardMonth,
+    dashboardBudgets,
+    dashboardTransactions,
+    dashboardLoading,
+    dashboardError,
+    loadDashboardData,
+  } = useDashboardData({
+    activeHouseholdId,
+    initialSelectedMonth: initialSelectedMonths.dashboard,
+    supabaseCreditCards,
+  });
 
-    setDashboardLoading(true);
-    setDashboardError("");
-
-    try {
-      const budgets = await listBudgetCategories(activeHouseholdId, selectedDashboardMonth);
-      const transactions = await listTransactions(
-        activeHouseholdId,
-        selectedDashboardMonth,
-        supabaseCreditCards,
-        budgets,
-      );
-
-      setDashboardBudgets(budgets);
-      setDashboardTransactions(transactions);
-    } catch (error) {
-      setDashboardError(error.message || "Could not load dashboard data.");
-      setDashboardBudgets([]);
-      setDashboardTransactions([]);
-    } finally {
-      setDashboardLoading(false);
-    }
-  }, [activeHouseholdId, selectedDashboardMonth, supabaseCreditCards]);
-
-  useEffect(() => {
-    loadDashboardData();
-  }, [loadDashboardData]);
-
-  const loadInsightsData = useCallback(async () => {
-    if (!activeHouseholdId) {
-      setInsightsBudgets([]);
-      setInsightsTransactions([]);
-      setInsightsLoading(false);
-      return;
-    }
-
-    setInsightsLoading(true);
-    setInsightsError("");
-
-    try {
-      const budgets = await listBudgetCategories(activeHouseholdId, selectedInsightsMonth);
-      const transactions = await listTransactions(
-        activeHouseholdId,
-        selectedInsightsMonth,
-        supabaseCreditCards,
-        budgets,
-      );
-
-      setInsightsBudgets(budgets);
-      setInsightsTransactions(transactions);
-    } catch (error) {
-      setInsightsError(error.message || "Could not load insights data.");
-      setInsightsBudgets([]);
-      setInsightsTransactions([]);
-    } finally {
-      setInsightsLoading(false);
-    }
-  }, [activeHouseholdId, selectedInsightsMonth, supabaseCreditCards]);
-
-  useEffect(() => {
-    loadInsightsData();
-  }, [loadInsightsData]);
+  const {
+    selectedInsightsMonth,
+    setSelectedInsightsMonth,
+    insightsBudgets,
+    insightsTransactions,
+    insightsLoading,
+    insightsError,
+    loadInsightsData,
+  } = useInsightsData({
+    activeHouseholdId,
+    initialSelectedMonth: initialSelectedMonths.insights,
+    supabaseCreditCards,
+  });
 
   const {
     spendingTransactions,
