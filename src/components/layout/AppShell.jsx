@@ -52,11 +52,15 @@ export default function AppShell({
             Dalumpines. Made by Arvin Dalumpines.
           </p>
           <nav className="flex flex-wrap gap-x-3 gap-y-2" aria-label="Footer links">
-            <FooterLink targetView="privacy-policy">Privacy Policy</FooterLink>
+            <FooterLink targetView="privacy-policy" onNavigate={onViewChange}>
+              Privacy Policy
+            </FooterLink>
             <span className="text-app-border" aria-hidden="true">
               ·
             </span>
-            <FooterLink targetView="terms-of-use">Terms of Use</FooterLink>
+            <FooterLink targetView="terms-of-use" onNavigate={onViewChange}>
+              Terms of Use
+            </FooterLink>
             <span className="text-app-border" aria-hidden="true">
               ·
             </span>

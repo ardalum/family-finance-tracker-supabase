@@ -5,6 +5,8 @@ import CreditCardTracker from "../features/creditCards/components/CreditCardTrac
 import Dashboard from "../features/dashboard/components/Dashboard.jsx";
 import HouseholdSettings from "../features/households/components/HouseholdSettings.jsx";
 import Insights from "../features/insights/components/Insights.jsx";
+import PrivacyPolicy from "../features/legal/components/PrivacyPolicy.jsx";
+import TermsOfUse from "../features/legal/components/TermsOfUse.jsx";
 import RecurringPayments from "../features/recurring/components/RecurringPayments.jsx";
 import AppSettings from "../features/settings/components/AppSettings.jsx";
 import SpendingTracker from "../features/spending/components/SpendingTracker.jsx";
@@ -34,6 +36,8 @@ export default function AppViewRenderer({
       ) : null}
       {activeView === "app-settings" ? <AppSettings /> : null}
       {activeView === "about" ? <AboutWalletFlow /> : null}
+      {activeView === "privacy-policy" ? <PrivacyPolicy /> : null}
+      {activeView === "terms-of-use" ? <TermsOfUse /> : null}
     </>
   );
 }

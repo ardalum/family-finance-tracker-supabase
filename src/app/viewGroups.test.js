@@ -23,7 +23,14 @@ describe("view groups", () => {
   });
 
   it("keeps the expected utility views", () => {
-    assert.deepEqual(secondaryViewIds, ["backup", "household-settings", "app-settings", "about"]);
+    assert.deepEqual(secondaryViewIds, [
+      "backup",
+      "household-settings",
+      "app-settings",
+      "about",
+      "privacy-policy",
+      "terms-of-use",
+    ]);
   });
 
   it("groups main and utility views", () => {
@@ -36,6 +43,8 @@ describe("view groups", () => {
   it("checks utility views", () => {
     assert.equal(isSecondaryView("backup"), true);
     assert.equal(isSecondaryView("household-settings"), true);
+    assert.equal(isSecondaryView("privacy-policy"), true);
+    assert.equal(isSecondaryView("terms-of-use"), true);
     assert.equal(isSecondaryView("dashboard"), false);
     assert.equal(isSecondaryView("missing-view"), false);
   });
@@ -50,12 +59,16 @@ describe("view groups", () => {
   it("checks known grouped views", () => {
     assert.equal(isKnownGroupedView("dashboard"), true);
     assert.equal(isKnownGroupedView("about"), true);
+    assert.equal(isKnownGroupedView("privacy-policy"), true);
+    assert.equal(isKnownGroupedView("terms-of-use"), true);
     assert.equal(isKnownGroupedView("missing-view"), false);
   });
 
   it("checks known views that are not in a group", () => {
     assert.equal(isKnownUngroupedView("dashboard"), false);
     assert.equal(isKnownUngroupedView("about"), false);
+    assert.equal(isKnownUngroupedView("privacy-policy"), false);
+    assert.equal(isKnownUngroupedView("terms-of-use"), false);
     assert.equal(isKnownUngroupedView("missing-view"), false);
   });
 });

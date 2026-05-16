@@ -13,6 +13,11 @@ describe("page content config", () => {
     assert.equal(pageContent.insights.title, "Insights");
   });
 
+  it("contains titles and descriptions for legal views", () => {
+    assert.equal(pageContent["privacy-policy"].title, "Privacy Policy");
+    assert.equal(pageContent["terms-of-use"].title, "Terms of Use");
+  });
+
   it("contains page content for every main finance view", () => {
     for (const viewId of primaryFinanceViewIds) {
       const content = pageContent[viewId];
@@ -63,6 +68,8 @@ describe("page content config", () => {
   it("detects known page views", () => {
     assert.equal(isKnownPageView("dashboard"), true);
     assert.equal(isKnownPageView("household-settings"), true);
+    assert.equal(isKnownPageView("privacy-policy"), true);
+    assert.equal(isKnownPageView("terms-of-use"), true);
     assert.equal(isKnownPageView("missing-view"), false);
   });
 });
