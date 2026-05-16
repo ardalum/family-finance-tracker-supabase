@@ -32,12 +32,7 @@ import {
   updateBudgetCategoryInSupabase,
 } from "../features/budgets/budgetsSupabaseService.js";
 import { defaultBudgetCategories } from "../features/budgets/budgetDefaults.js";
-import {
-  addCreditCardToSupabase,
-  deleteCreditCardFromSupabase,
-  listCreditCards,
-  updateCreditCardInSupabase,
-} from "../features/creditCards/creditCardsSupabaseService.js";
+import { useCreditCards } from "../features/creditCards/useCreditCards.js";
 import {
   listAllMonthlyBalances,
   upsertMonthlyBalance,
@@ -80,10 +75,6 @@ function FinanceTrackerApp() {
   const initialSelectedMonths = createInitialSelectedMonths();
   const [setupCheckLoading, setSetupCheckLoading] = useState(initialSetupStatusState.isLoading);
   const [setupCheckError, setSetupCheckError] = useState(initialSetupStatusState.error);
-  const [supabaseCreditCards, setSupabaseCreditCards] = useState([]);
-  const [creditCardsLoading, setCreditCardsLoading] = useState(true);
-  const [creditCardsSaving, setCreditCardsSaving] = useState(false);
-  const [creditCardsError, setCreditCardsError] = useState("");
   const [supabaseMonthlyBalances, setSupabaseMonthlyBalances] = useState({});
   const [selectedBalanceMonth, setSelectedBalanceMonth] = useState(initialSelectedMonths.balance);
   const [monthlyBalancesLoading, setMonthlyBalancesLoading] = useState(true);
@@ -168,32 +159,16 @@ function FinanceTrackerApp() {
     };
   }, [activeHousehold?.setupComplete, activeHouseholdId, completeActiveHouseholdSetup]);
 
-  const loadSupabaseCreditCards = useCallback(async () => {
-    if (!activeHouseholdId) {
-      setSupabaseCreditCards([]);
-      setCreditCardsLoading(false);
-      return [];
-    }
-
-    setCreditCardsLoading(true);
-    setCreditCardsError("");
-
-    try {
-      const cards = await listCreditCards(activeHouseholdId);
-      setSupabaseCreditCards(cards);
-      return cards;
-    } catch (error) {
-      setCreditCardsError(error.message || "Could not load credit cards.");
-      setSupabaseCreditCards([]);
-      return [];
-    } finally {
-      setCreditCardsLoading(false);
-    }
-  }, [activeHouseholdId]);
-
-  useEffect(() => {
-    loadSupabaseCreditCards();
-  }, [loadSupabaseCreditCards]);
+  const {
+    supabaseCreditCards,
+    creditCardsLoading,
+    creditCardsSaving,
+    creditCardsError,
+    loadSupabaseCreditCards,
+    createSupabaseCreditCard,
+    updateSupabaseCreditCard,
+    deleteSupabaseCreditCard,
+  } = useCreditCards({ activeHouseholdId });
 
   const loadSupabaseMonthlyBalances = useCallback(async () => {
     if (!activeHouseholdId) {
@@ -448,25 +423,6 @@ function FinanceTrackerApp() {
     loadRecurringData();
   }, [loadRecurringData]);
 
-  const createSupabaseCreditCard = useCallback(
-    async (input) => {
-      setCreditCardsSaving(true);
-      setCreditCardsError("");
-
-      try {
-        const card = await addCreditCardToSupabase(activeHouseholdId, input);
-        setSupabaseCreditCards((cards) => [...cards, card]);
-        return card;
-      } catch (error) {
-        setCreditCardsError(error.message || "Could not add credit card.");
-        throw error;
-      } finally {
-        setCreditCardsSaving(false);
-      }
-    },
-    [activeHouseholdId],
-  );
-
   const {
     householdProfiles,
     householdProfilesLoading,
@@ -482,39 +438,6 @@ function FinanceTrackerApp() {
     supabaseCreditCards,
     onProfilesChanged: loadSupabaseCreditCards,
   });
-
-  const updateSupabaseCreditCard = useCallback(async (cardId, input) => {
-    setCreditCardsSaving(true);
-    setCreditCardsError("");
-
-    try {
-      const card = await updateCreditCardInSupabase(cardId, input);
-      setSupabaseCreditCards((cards) =>
-        cards.map((currentCard) => (currentCard.id === card.id ? card : currentCard)),
-      );
-      return card;
-    } catch (error) {
-      setCreditCardsError(error.message || "Could not update credit card.");
-      throw error;
-    } finally {
-      setCreditCardsSaving(false);
-    }
-  }, []);
-
-  const deleteSupabaseCreditCard = useCallback(async (cardId) => {
-    setCreditCardsSaving(true);
-    setCreditCardsError("");
-
-    try {
-      await deleteCreditCardFromSupabase(cardId);
-      setSupabaseCreditCards((cards) => cards.filter((card) => card.id !== cardId));
-    } catch (error) {
-      setCreditCardsError(error.message || "Could not delete credit card.");
-      throw error;
-    } finally {
-      setCreditCardsSaving(false);
-    }
-  }, []);
 
   const saveSupabaseMonthlyBalance = useCallback(
     async (monthKey, cardId, entry) => {
