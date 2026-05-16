@@ -25,6 +25,7 @@ import { useActiveView } from "./useActiveView.js";
 import { useLocalAppData } from "./useLocalAppData.js";
 import {
   addBudgetCategoryToSupabase,
+  copyPreviousMonthBudgetCategories,
   deleteBudgetCategoryFromSupabase,
   importLocalBudgetCategories,
   listBudgetCategories,
@@ -832,6 +833,39 @@ function FinanceTrackerApp() {
     supabaseBudgets,
   ]);
 
+  const copyPreviousMonthBudgetsToSupabase = useCallback(async () => {
+    setBudgetsSaving(true);
+    setBudgetsError("");
+
+    try {
+      const copiedBudgets = await copyPreviousMonthBudgetCategories(
+        activeHouseholdId,
+        selectedBudgetMonth,
+      );
+
+      await runRefreshSequence([
+        loadSupabaseBudgets,
+        ...createDashboardInsightsRefreshers({
+          loadDashboardData,
+          loadInsightsData,
+        }),
+      ]);
+
+      return copiedBudgets;
+    } catch (error) {
+      setBudgetsError(error.message || "Could not copy previous month budget.");
+      throw error;
+    } finally {
+      setBudgetsSaving(false);
+    }
+  }, [
+    activeHouseholdId,
+    loadDashboardData,
+    loadInsightsData,
+    loadSupabaseBudgets,
+    selectedBudgetMonth,
+  ]);
+
   const createSupabaseTransaction = useCallback(
     async (input) => {
       setSpendingSaving(true);
@@ -1348,6 +1382,7 @@ function FinanceTrackerApp() {
     updateSupabaseBudget,
     deleteSupabaseBudget,
     addDefaultBudgetsToSupabase,
+    copyPreviousMonthBudgetsToSupabase,
     importLocalBudgetsToSupabase,
     createSupabaseTransaction,
     updateSupabaseTransaction,
