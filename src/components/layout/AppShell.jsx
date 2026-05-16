@@ -1,13 +1,6 @@
 import { WalletCards } from "lucide-react";
+import { footerLinks } from "./footerLinks.js";
 import Navigation from "./Navigation.jsx";
-
-const footerLinks = [
-  { targetView: "privacy-policy", label: "Privacy" },
-  { targetView: "terms-of-use", label: "Terms" },
-  { targetView: "help-support", label: "Help" },
-  { targetView: "release-notes", label: "Release Notes" },
-  { targetView: "about", label: "About" },
-];
 
 export default function AppShell({
   activeView,
