@@ -33,10 +33,7 @@ import {
 } from "../features/budgets/budgetsSupabaseService.js";
 import { defaultBudgetCategories } from "../features/budgets/budgetDefaults.js";
 import { useCreditCards } from "../features/creditCards/useCreditCards.js";
-import {
-  listAllMonthlyBalances,
-  upsertMonthlyBalance,
-} from "../features/creditCards/monthlyBalancesSupabaseService.js";
+import { useMonthlyBalances } from "../features/creditCards/useMonthlyBalances.js";
 import { useHouseholds } from "../features/households/HouseholdProvider.jsx";
 import { useHouseholdProfiles } from "../features/households/useHouseholdProfiles.js";
 import {
@@ -75,11 +72,6 @@ function FinanceTrackerApp() {
   const initialSelectedMonths = createInitialSelectedMonths();
   const [setupCheckLoading, setSetupCheckLoading] = useState(initialSetupStatusState.isLoading);
   const [setupCheckError, setSetupCheckError] = useState(initialSetupStatusState.error);
-  const [supabaseMonthlyBalances, setSupabaseMonthlyBalances] = useState({});
-  const [selectedBalanceMonth, setSelectedBalanceMonth] = useState(initialSelectedMonths.balance);
-  const [monthlyBalancesLoading, setMonthlyBalancesLoading] = useState(true);
-  const [monthlyBalancesSaving, setMonthlyBalancesSaving] = useState(false);
-  const [monthlyBalancesError, setMonthlyBalancesError] = useState("");
   const [supabaseBudgets, setSupabaseBudgets] = useState([]);
   const [selectedBudgetMonth, setSelectedBudgetMonth] = useState(initialSelectedMonths.budget);
   const [budgetsLoading, setBudgetsLoading] = useState(true);
@@ -169,33 +161,20 @@ function FinanceTrackerApp() {
     updateSupabaseCreditCard,
     deleteSupabaseCreditCard,
   } = useCreditCards({ activeHouseholdId });
-
-  const loadSupabaseMonthlyBalances = useCallback(async () => {
-    if (!activeHouseholdId) {
-      setSupabaseMonthlyBalances({});
-      setMonthlyBalancesLoading(false);
-      return {};
-    }
-
-    setMonthlyBalancesLoading(true);
-    setMonthlyBalancesError("");
-
-    try {
-      const balances = await listAllMonthlyBalances(activeHouseholdId, supabaseCreditCards);
-      setSupabaseMonthlyBalances(balances);
-      return balances;
-    } catch (error) {
-      setMonthlyBalancesError(error.message || "Could not load monthly balances.");
-      setSupabaseMonthlyBalances({});
-      return {};
-    } finally {
-      setMonthlyBalancesLoading(false);
-    }
-  }, [activeHouseholdId, supabaseCreditCards]);
-
-  useEffect(() => {
-    loadSupabaseMonthlyBalances();
-  }, [loadSupabaseMonthlyBalances, selectedBalanceMonth]);
+  const {
+    supabaseMonthlyBalances,
+    selectedBalanceMonth,
+    setSelectedBalanceMonth,
+    monthlyBalancesLoading,
+    monthlyBalancesSaving,
+    monthlyBalancesError,
+    loadSupabaseMonthlyBalances,
+    saveSupabaseMonthlyBalance,
+  } = useMonthlyBalances({
+    activeHouseholdId,
+    supabaseCreditCards,
+    initialSelectedMonth: initialSelectedMonths.balance,
+  });
 
   const loadSupabaseBudgets = useCallback(async () => {
     if (!activeHouseholdId) {
@@ -438,39 +417,6 @@ function FinanceTrackerApp() {
     supabaseCreditCards,
     onProfilesChanged: loadSupabaseCreditCards,
   });
-
-  const saveSupabaseMonthlyBalance = useCallback(
-    async (monthKey, cardId, entry) => {
-      const card = supabaseCreditCards.find((currentCard) => currentCard.id === cardId);
-      if (!card) return;
-
-      setMonthlyBalancesError("");
-      setSupabaseMonthlyBalances((balances) => ({
-        ...balances,
-        [monthKey]: {
-          ...(balances[monthKey] ?? {}),
-          [cardId]: {
-            balance: Number(entry.balance ?? 0) || 0,
-            paid: Boolean(entry.paid),
-            updatedAt: new Date().toISOString(),
-          },
-        },
-      }));
-
-      setMonthlyBalancesSaving(true);
-
-      try {
-        await upsertMonthlyBalance(activeHouseholdId, monthKey, card, entry);
-      } catch (error) {
-        setMonthlyBalancesError(error.message || "Could not save monthly balance.");
-        await loadSupabaseMonthlyBalances();
-        throw error;
-      } finally {
-        setMonthlyBalancesSaving(false);
-      }
-    },
-    [activeHouseholdId, loadSupabaseMonthlyBalances, supabaseCreditCards],
-  );
 
   const createSupabaseBudget = useCallback(
     async (input) => {
