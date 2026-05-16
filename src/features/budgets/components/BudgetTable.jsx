@@ -461,6 +461,6 @@ function getFilterCounts(rows) {
       if (Number(row.spent || 0) === 0) counts.unused += 1;
       return counts;
     },
-    { all: 0, over: 0, near, active: 0, unused: 0 },
+    { all: 0, over: 0, near: 0, active: 0, unused: 0 },
   );
 }
