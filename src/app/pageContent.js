@@ -47,6 +47,14 @@ export const pageContent = {
     title: "Terms of Use",
     description: "Review the rules, responsibilities, and disclaimers for using WalletFlow.",
   },
+  "help-support": {
+    title: "Help / Support",
+    description: "Get troubleshooting guidance, support notes, and contact information.",
+  },
+  "release-notes": {
+    title: "Release Notes",
+    description: "Review recent WalletFlow changes and improvements.",
+  },
 };
 
 export function getPageContent(view, fallbackView = "dashboard") {
