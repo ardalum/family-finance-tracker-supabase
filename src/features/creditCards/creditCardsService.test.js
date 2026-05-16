@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { normalizeCardFormInput, toSupabaseCardFormInput } from "./cardFormUtils.js";
-import { getMonthTotal, getOwnerCreditLimitTotal } from "./creditCardsService.js";
+import {
+  getMonthTotal,
+  getMonthlyBalanceSummary,
+  getOwnerCreditLimitTotal,
+} from "./creditCardsService.js";
 
 describe("credit card service", () => {
   it("calculates active credit limits for a selected owner", () => {
@@ -68,6 +72,42 @@ describe("credit card service", () => {
     assert.equal(getMonthTotal(undefined), 0);
     assert.equal(getMonthTotal({ card1: null, card2: { balance: "" } }), 0);
   });
+
+  it("summarizes monthly balances by payment and review state", () => {
+    const summary = getMonthlyBalanceSummary(
+      [
+        { id: "card1", dueDay: 20 },
+        { id: "card2", dueDay: 20 },
+        { id: "card3", dueDay: 20 },
+        { id: "card4", dueDay: 20 },
+      ],
+      {
+        card1: { balance: 100, paid: false },
+        card2: { balance: 50, paid: true },
+        card3: { balance: 0, paid: true },
+      },
+      "2099-05",
+    );
+
+    assert.deepEqual(summary, {
+      statementBalance: 150,
+      unpaidBalance: 100,
+      checkedNoBalanceCount: 1,
+      notCheckedCount: 1,
+    });
+  });
+
+  it("summarizes missing monthly balances safely", () => {
+    const summary = getMonthlyBalanceSummary([{ id: "card1", dueDay: 20 }], null, "2099-05");
+
+    assert.deepEqual(summary, {
+      statementBalance: 0,
+      unpaidBalance: 0,
+      checkedNoBalanceCount: 0,
+      notCheckedCount: 1,
+    });
+  });
+
   it("normalizes card form input", () => {
     const normalized = normalizeCardFormInput({
       name: "  Chase Freedom  ",
