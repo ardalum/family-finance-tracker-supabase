@@ -30,6 +30,8 @@ describe("view groups", () => {
       "about",
       "privacy-policy",
       "terms-of-use",
+      "help-support",
+      "release-notes",
     ]);
   });
 
@@ -45,6 +47,8 @@ describe("view groups", () => {
     assert.equal(isSecondaryView("household-settings"), true);
     assert.equal(isSecondaryView("privacy-policy"), true);
     assert.equal(isSecondaryView("terms-of-use"), true);
+    assert.equal(isSecondaryView("help-support"), true);
+    assert.equal(isSecondaryView("release-notes"), true);
     assert.equal(isSecondaryView("dashboard"), false);
     assert.equal(isSecondaryView("missing-view"), false);
   });
@@ -61,6 +65,8 @@ describe("view groups", () => {
     assert.equal(isKnownGroupedView("about"), true);
     assert.equal(isKnownGroupedView("privacy-policy"), true);
     assert.equal(isKnownGroupedView("terms-of-use"), true);
+    assert.equal(isKnownGroupedView("help-support"), true);
+    assert.equal(isKnownGroupedView("release-notes"), true);
     assert.equal(isKnownGroupedView("missing-view"), false);
   });
 
@@ -69,6 +75,8 @@ describe("view groups", () => {
     assert.equal(isKnownUngroupedView("about"), false);
     assert.equal(isKnownUngroupedView("privacy-policy"), false);
     assert.equal(isKnownUngroupedView("terms-of-use"), false);
+    assert.equal(isKnownUngroupedView("help-support"), false);
+    assert.equal(isKnownUngroupedView("release-notes"), false);
     assert.equal(isKnownUngroupedView("missing-view"), false);
   });
 });
