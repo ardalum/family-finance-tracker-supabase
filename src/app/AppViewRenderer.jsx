@@ -9,6 +9,8 @@ import PrivacyPolicy from "../features/legal/components/PrivacyPolicy.jsx";
 import TermsOfUse from "../features/legal/components/TermsOfUse.jsx";
 import RecurringPayments from "../features/recurring/components/RecurringPayments.jsx";
 import AppSettings from "../features/settings/components/AppSettings.jsx";
+import HelpSupport from "../features/support/components/HelpSupport.jsx";
+import ReleaseNotes from "../features/support/components/ReleaseNotes.jsx";
 import SpendingTracker from "../features/spending/components/SpendingTracker.jsx";
 
 export default function AppViewRenderer({
@@ -38,6 +40,8 @@ export default function AppViewRenderer({
       {activeView === "about" ? <AboutWalletFlow /> : null}
       {activeView === "privacy-policy" ? <PrivacyPolicy /> : null}
       {activeView === "terms-of-use" ? <TermsOfUse /> : null}
+      {activeView === "help-support" ? <HelpSupport /> : null}
+      {activeView === "release-notes" ? <ReleaseNotes /> : null}
     </>
   );
 }

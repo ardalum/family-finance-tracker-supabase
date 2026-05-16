@@ -64,6 +64,18 @@ export default function AppShell({
             <span className="text-app-border" aria-hidden="true">
               ·
             </span>
+            <FooterLink targetView="help-support" onNavigate={onViewChange}>
+              Help
+            </FooterLink>
+            <span className="text-app-border" aria-hidden="true">
+              ·
+            </span>
+            <FooterLink targetView="release-notes" onNavigate={onViewChange}>
+              Release Notes
+            </FooterLink>
+            <span className="text-app-border" aria-hidden="true">
+              ·
+            </span>
             <FooterLink targetView="about" onNavigate={onViewChange}>
               About
             </FooterLink>

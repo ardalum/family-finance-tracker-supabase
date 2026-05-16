@@ -1,4 +1,15 @@
-import { Clock3, DatabaseBackup, Home, Info, LogOut, Settings, UserCircle } from "lucide-react";
+import {
+  ClipboardList,
+  Clock3,
+  DatabaseBackup,
+  Home,
+  Info,
+  LifeBuoy,
+  LogOut,
+  Settings,
+  ShieldCheck,
+  UserCircle,
+} from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useHouseholds } from "../../households/HouseholdProvider.jsx";
 import { getAccountIdentity } from "../authAccountDisplayUtils.js";
@@ -17,6 +28,12 @@ const menuSections = [
         label: "Account Settings",
         description: "Profile identity, session details, and planned security controls.",
         view: AUTH_VIEW_TARGETS.accountSettings,
+      },
+      {
+        icon: ShieldCheck,
+        label: "Data & Privacy",
+        description: "Privacy policy, data handling, exports, and deletion notes.",
+        view: "privacy-policy",
       },
     ],
   },
@@ -56,6 +73,18 @@ const menuSections = [
         label: "About WalletFlow",
         description: "App purpose, version notes, and credits.",
         view: "about",
+      },
+      {
+        icon: LifeBuoy,
+        label: "Help / Support",
+        description: "Troubleshooting notes, safe testing reminders, and contact info.",
+        view: "help-support",
+      },
+      {
+        icon: ClipboardList,
+        label: "Release Notes",
+        description: "Recent app changes, cleanup passes, and improvements.",
+        view: "release-notes",
       },
     ],
   },
