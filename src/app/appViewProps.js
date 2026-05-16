@@ -59,6 +59,7 @@ export function createAppViewProps({
   updateSupabaseBudget,
   deleteSupabaseBudget,
   addDefaultBudgetsToSupabase,
+  copyPreviousMonthBudgetsToSupabase,
   importLocalBudgetsToSupabase,
   createSupabaseTransaction,
   updateSupabaseTransaction,
@@ -116,6 +117,7 @@ export function createAppViewProps({
       onUpdateBudget: updateSupabaseBudget,
       onDeleteBudget: deleteSupabaseBudget,
       onAddDefaultBudgets: addDefaultBudgetsToSupabase,
+      onCopyPreviousMonthBudgets: copyPreviousMonthBudgetsToSupabase,
       onImportLocalBudgets: importLocalBudgetsToSupabase,
     },
     spendingProps: {
