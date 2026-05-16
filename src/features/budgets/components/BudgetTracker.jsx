@@ -30,6 +30,7 @@ export default function BudgetTracker({
   onUpdateBudget,
   onDeleteBudget,
   onAddDefaultBudgets,
+  onCopyPreviousMonthBudgets,
   onImportLocalBudgets,
 }) {
   const { activeHouseholdId } = useHouseholds();
@@ -183,6 +184,7 @@ export default function BudgetTracker({
         onEdit={handleEditCategory}
         onDelete={handleDelete}
         onAddDefaults={onAddDefaultBudgets}
+        onCopyPreviousMonthBudgets={onCopyPreviousMonthBudgets}
         isSaving={isSaving}
       />
 
