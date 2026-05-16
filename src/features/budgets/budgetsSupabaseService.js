@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabase/client.js";
+import { createBudgetCopyPlan, getPreviousMonthKey } from "./budgetsService.js";
 
 function requireSupabase() {
   if (!supabase) {
@@ -198,6 +199,25 @@ export async function addBudgetCategoryToSupabase(householdId, monthKey, input) 
     category_model_id: category.id,
     monthly_budget_id: monthlyBudget.id,
   });
+}
+
+export async function copyPreviousMonthBudgetCategories(householdId, targetMonthKey) {
+  if (!householdId || !targetMonthKey) return [];
+
+  const sourceMonthKey = getPreviousMonthKey(targetMonthKey);
+  const [sourceBudgets, targetBudgets] = await Promise.all([
+    listBudgetCategories(householdId, sourceMonthKey),
+    listBudgetCategories(householdId, targetMonthKey),
+  ]);
+  const copyPlan = createBudgetCopyPlan(sourceBudgets, targetBudgets);
+
+  const createdBudgets = [];
+  for (const budgetInput of copyPlan) {
+    const budget = await addBudgetCategoryToSupabase(householdId, targetMonthKey, budgetInput);
+    createdBudgets.push(budget);
+  }
+
+  return createdBudgets;
 }
 
 export async function updateBudgetCategoryInSupabase(budgetId, input) {
