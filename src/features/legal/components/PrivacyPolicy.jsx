@@ -61,7 +61,11 @@ export default function PrivacyPolicy() {
 
       <Card className="p-5">
         <div className="flex gap-3">
-          <Database size={20} className="mt-0.5 shrink-0 text-brand-secondary" aria-hidden="true" />
+          <Database
+            size={20}
+            className="mt-0.5 shrink-0 text-brand-secondary"
+            aria-hidden="true"
+          />
           <div>
             <h3 className="text-lg font-semibold text-text-main">How information is used</h3>
             <ul className="mt-4 grid gap-3">
@@ -116,7 +120,11 @@ export default function PrivacyPolicy() {
 
       <Card className="p-5">
         <div className="flex gap-3">
-          <Trash2 size={20} className="mt-0.5 shrink-0 text-status-warning" aria-hidden="true" />
+          <Trash2
+            size={20}
+            className="mt-0.5 shrink-0 text-status-warning"
+            aria-hidden="true"
+          />
           <div>
             <h3 className="text-lg font-semibold text-text-main">Data deletion</h3>
             <p className="mt-3 text-sm leading-6 text-text-muted">
