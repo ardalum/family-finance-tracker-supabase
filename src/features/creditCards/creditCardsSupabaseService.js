@@ -1,5 +1,5 @@
 import { supabase } from "../../lib/supabase/client.js";
-
+import { toSupabaseCardFormInput } from "./cardFormUtils.js";
 function requireSupabase() {
   if (!supabase) {
     throw new Error(
@@ -8,21 +8,6 @@ function requireSupabase() {
   }
 
   return supabase;
-}
-
-function normalizeCardInput(input) {
-  return {
-    name: input.name.trim(),
-    url: input.url.trim(),
-    network: input.network,
-    owner_name: input.owner,
-    owner_profile_id: input.ownerProfileId || null,
-    last_four: input.lastFour.trim(),
-    credit_limit: Number(input.creditLimit) || 0,
-    statement_closing_day: Number(input.statementClosingDay) || Number(input.dueDay) || 1,
-    due_day: Number(input.dueDay) || 1,
-    is_active: input.isActive ?? true,
-  };
 }
 
 function toAppCreditCard(row) {
@@ -64,7 +49,7 @@ export async function addCreditCardToSupabase(householdId, input) {
     .from("credit_cards")
     .insert({
       household_id: householdId,
-      ...normalizeCardInput(input),
+      ...toSupabaseCardFormInput(input),
     })
     .select("*, household_profiles (display_name)")
     .single();
@@ -77,7 +62,7 @@ export async function updateCreditCardInSupabase(cardId, input) {
   const client = requireSupabase();
   const { data, error } = await client
     .from("credit_cards")
-    .update(normalizeCardInput(input))
+    .update(toSupabaseCardFormInput(input))
     .eq("id", cardId)
     .select("*, household_profiles (display_name)")
     .single();

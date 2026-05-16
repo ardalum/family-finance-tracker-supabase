@@ -1,22 +1,8 @@
+import { normalizeCardFormInput } from "./cardFormUtils.js";
 import { updateAppData } from "../../lib/storage/appStorage.js";
 
 function createId(prefix) {
   return `${prefix}_${crypto.randomUUID()}`;
-}
-
-function normalizeCard(input) {
-  return {
-    name: input.name.trim(),
-    url: input.url.trim(),
-    network: input.network,
-    owner: input.owner,
-    ownerProfileId: input.ownerProfileId || null,
-    lastFour: input.lastFour.trim(),
-    creditLimit: Number(input.creditLimit) || 0,
-    statementClosingDay: Number(input.statementClosingDay) || Number(input.dueDay) || 1,
-    dueDay: Number(input.dueDay) || 1,
-    isActive: input.isActive ?? true,
-  };
 }
 
 export function addCreditCard(input) {
@@ -28,7 +14,7 @@ export function addCreditCard(input) {
         ...data.creditCards,
         {
           id: createId("card"),
-          ...normalizeCard(input),
+          ...normalizeCardFormInput(input),
           createdAt: timestamp,
           updatedAt: timestamp,
         },
@@ -44,7 +30,7 @@ export function updateCreditCard(cardId, input) {
       card.id === cardId
         ? {
             ...card,
-            ...normalizeCard(input),
+            ...normalizeCardFormInput(input),
             updatedAt: new Date().toISOString(),
           }
         : card,
