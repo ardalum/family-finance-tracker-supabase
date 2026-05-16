@@ -27,7 +27,10 @@ export default function BudgetTable({
   const [selectedBudgetIds, setSelectedBudgetIds] = useState(() => new Set());
   const displayRows = rows ?? budgets ?? [];
 
-  const filterCounts = useMemo(() => getFilterCounts(displayRows), [displayRows]);
+  const filterCounts = useMemo(
+    () => getFilterCounts(displayRows),
+    [displayRows],
+  );
   const filteredRows = useMemo(
     () =>
       displayRows.filter(
@@ -40,13 +43,18 @@ export default function BudgetTable({
     [activeFilter, displayRows],
   );
   const selectedBudgets = useMemo(
-    () => displayRows.filter((budget) => selectedBudgetIds.has(getBudgetSelectionId(budget))),
+    () =>
+      displayRows.filter((budget) =>
+        selectedBudgetIds.has(getBudgetSelectionId(budget)),
+      ),
     [displayRows, selectedBudgetIds],
   );
   const selectedBudgetCount = selectedBudgets.length;
   const allFilteredSelected =
     filteredRows.length > 0 &&
-    filteredRows.every((budget) => selectedBudgetIds.has(getBudgetSelectionId(budget)));
+    filteredRows.every((budget) =>
+      selectedBudgetIds.has(getBudgetSelectionId(budget)),
+    );
 
   async function confirmDelete() {
     if (!budgetPendingDelete) return;
@@ -87,9 +95,13 @@ export default function BudgetTable({
     setSelectedBudgetIds((currentSelectedIds) => {
       const nextSelectedIds = new Set(currentSelectedIds);
       if (allFilteredSelected) {
-        filteredRows.forEach((budget) => nextSelectedIds.delete(getBudgetSelectionId(budget)));
+        filteredRows.forEach((budget) =>
+          nextSelectedIds.delete(getBudgetSelectionId(budget)),
+        );
       } else {
-        filteredRows.forEach((budget) => nextSelectedIds.add(getBudgetSelectionId(budget)));
+        filteredRows.forEach((budget) =>
+          nextSelectedIds.add(getBudgetSelectionId(budget)),
+        );
       }
       return nextSelectedIds;
     });
@@ -101,10 +113,12 @@ export default function BudgetTable({
         {displayRows.length === 0 ? (
           <div className="grid justify-items-center gap-4 p-8 text-center">
             <div>
-              <h2 className="text-lg font-semibold text-text-main">No budget categories yet</h2>
+              <h2 className="text-lg font-semibold text-text-main">
+                No budget categories yet
+              </h2>
               <p className="mt-1 text-sm text-text-muted">
-                Copy last month’s budget categories and amounts, add your own category, or start
-                with the default set for this month.
+                Copy last month’s budget categories and amounts, add your own
+                category, or start with the default set for this month.
               </p>
             </div>
             <div className="flex flex-wrap justify-center gap-3">
@@ -115,7 +129,12 @@ export default function BudgetTable({
               >
                 {isSaving ? "Copying..." : "Copy Previous Month’s Budget"}
               </Button>
-              <Button type="button" variant="secondary" onClick={onAddDefaults} disabled={isSaving}>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={onAddDefaults}
+                disabled={isSaving}
+              >
                 {isSaving ? "Adding..." : "Add Default Categories"}
               </Button>
             </div>
@@ -125,9 +144,12 @@ export default function BudgetTable({
             <div className="grid gap-3 border-b border-app-border p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <h3 className="text-lg font-semibold text-text-main">Budget categories</h3>
+                  <h3 className="text-lg font-semibold text-text-main">
+                    Budget categories
+                  </h3>
                   <p className="mt-1 text-sm text-text-muted">
-                    Review spending, remaining budget, and categories that need adjustment.
+                    Review spending, remaining budget, and categories that need
+                    adjustment.
                   </p>
                 </div>
                 <div className="flex flex-wrap justify-end gap-2">
@@ -148,7 +170,8 @@ export default function BudgetTable({
                     disabled={isSaving || selectedBudgetCount === 0}
                   >
                     <Trash2 size={16} aria-hidden="true" />
-                    Delete selected{selectedBudgetCount > 0 ? ` (${selectedBudgetCount})` : ""}
+                    Delete selected
+                    {selectedBudgetCount > 0 ? ` (${selectedBudgetCount})` : ""}
                   </Button>
                 </div>
               </div>
@@ -181,7 +204,9 @@ export default function BudgetTable({
             {filteredRows.length === 0 ? (
               <div className="grid gap-2 p-8 text-center text-sm text-text-muted">
                 <Filter className="mx-auto" size={20} aria-hidden="true" />
-                <p className="font-semibold text-text-main">No categories match this filter</p>
+                <p className="font-semibold text-text-main">
+                  No categories match this filter
+                </p>
                 <p>Try another budget filter or add/update a category.</p>
               </div>
             ) : (
@@ -216,12 +241,15 @@ export default function BudgetTable({
           <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white shadow-xl">
             <div className="flex items-start justify-between gap-4 border-b border-gray-200 p-5">
               <div>
-                <h2 id="delete-budget-title" className="text-lg font-semibold text-gray-950">
+                <h2
+                  id="delete-budget-title"
+                  className="text-lg font-semibold text-gray-950"
+                >
                   Delete budget category?
                 </h2>
                 <p className="mt-1 text-sm text-gray-500">
-                  This removes the category from this month’s budget. Existing transactions are not
-                  deleted.
+                  This removes the category from this month’s budget. Existing
+                  transactions are not deleted.
                 </p>
               </div>
               <button
@@ -238,8 +266,8 @@ export default function BudgetTable({
               <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-800">
                 <p className="font-semibold">{budgetPendingDelete.name}</p>
                 <p className="mt-1">
-                  Budget {formatCurrency(budgetPendingDelete.monthlyAmount)} · Spent{" "}
-                  {formatCurrency(budgetPendingDelete.spent || 0)}
+                  Budget {formatCurrency(budgetPendingDelete.monthlyAmount)} ·
+                  Spent {formatCurrency(budgetPendingDelete.spent || 0)}
                 </p>
               </div>
               <div className="flex flex-wrap justify-end gap-3">
@@ -251,7 +279,12 @@ export default function BudgetTable({
                 >
                   Cancel
                 </Button>
-                <Button type="button" variant="danger" onClick={confirmDelete} disabled={isSaving}>
+                <Button
+                  type="button"
+                  variant="danger"
+                  onClick={confirmDelete}
+                  disabled={isSaving}
+                >
                   <Trash2 size={16} aria-hidden="true" />
                   {isSaving ? "Deleting..." : "Delete category"}
                 </Button>
@@ -271,12 +304,15 @@ export default function BudgetTable({
           <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white shadow-xl">
             <div className="flex items-start justify-between gap-4 border-b border-gray-200 p-5">
               <div>
-                <h2 id="bulk-delete-budget-title" className="text-lg font-semibold text-gray-950">
+                <h2
+                  id="bulk-delete-budget-title"
+                  className="text-lg font-semibold text-gray-950"
+                >
                   Delete selected budget categories?
                 </h2>
                 <p className="mt-1 text-sm text-gray-500">
-                  This removes {selectedBudgetCount} categories from this month’s budget. Existing
-                  transactions are not deleted.
+                  This removes {selectedBudgetCount} categories from this
+                  month’s budget. Existing transactions are not deleted.
                 </p>
               </div>
               <button
@@ -315,7 +351,9 @@ export default function BudgetTable({
                   disabled={isSaving || selectedBudgetCount === 0}
                 >
                   <Trash2 size={16} aria-hidden="true" />
-                  {isSaving ? "Deleting..." : `Delete ${selectedBudgetCount} categories`}
+                  {isSaving
+                    ? "Deleting..."
+                    : `Delete ${selectedBudgetCount} categories`}
                 </Button>
               </div>
             </div>
@@ -336,7 +374,9 @@ function BudgetCard({
 }) {
   const over = budget.status === "over";
   const near = budget.status === "near";
-  const percentUsed = Number.isFinite(Number(budget.percentUsed)) ? Number(budget.percentUsed) : 0;
+  const percentUsed = Number.isFinite(Number(budget.percentUsed))
+    ? Number(budget.percentUsed)
+    : 0;
   const progressWidth = Math.min(Math.max(percentUsed, 0), 100);
 
   return (
@@ -358,7 +398,10 @@ function BudgetCard({
       <div className="flex min-w-0 items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex min-w-0 flex-wrap items-center gap-2">
-            <h4 className="truncate text-base font-semibold text-text-main" title={budget.name}>
+            <h4
+              className="truncate text-base font-semibold text-text-main"
+              title={budget.name}
+            >
               {budget.name}
             </h4>
             <span
@@ -374,7 +417,10 @@ function BudgetCard({
             </span>
           </div>
           {budget.notes ? (
-            <p className="mt-1 line-clamp-2 text-xs text-text-muted" title={budget.notes}>
+            <p
+              className="mt-1 line-clamp-2 text-xs text-text-muted"
+              title={budget.notes}
+            >
               {budget.notes}
             </p>
           ) : null}
@@ -389,8 +435,17 @@ function BudgetCard({
 
       <div className="grid gap-2 rounded-xl bg-app-background px-3 py-2 text-sm sm:grid-cols-3">
         <Metric label="Spent" value={budget.spent} />
-        <Metric label="Remaining" value={budget.remaining} danger={budget.remaining < 0} />
-        <Metric label="Used" value={`${percentUsed.toFixed(0)}%`} isText danger={over} />
+        <Metric
+          label="Remaining"
+          value={budget.remaining}
+          danger={budget.remaining < 0}
+        />
+        <Metric
+          label="Used"
+          value={`${percentUsed.toFixed(0)}%`}
+          isText
+          danger={over}
+        />
       </div>
 
       <div className="grid gap-1">
@@ -439,8 +494,12 @@ function BudgetCard({
 function Metric({ label, value, danger = false, isText = false }) {
   return (
     <div>
-      <p className="text-xs font-semibold uppercase tracking-normal text-text-muted">{label}</p>
-      <p className={`mt-0.5 font-semibold ${danger ? "text-status-danger" : "text-text-main"}`}>
+      <p className="text-xs font-semibold uppercase tracking-normal text-text-muted">
+        {label}
+      </p>
+      <p
+        className={`mt-0.5 font-semibold ${danger ? "text-status-danger" : "text-text-main"}`}
+      >
         {isText ? value : formatCurrency(value || 0)}
       </p>
     </div>
