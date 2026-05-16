@@ -1,10 +1,4 @@
-import {
-  Database,
-  Download,
-  LockKeyhole,
-  ShieldCheck,
-  Trash2,
-} from "lucide-react";
+import { Database, Download, LockKeyhole, ShieldCheck, Trash2 } from "lucide-react";
 import Card from "../../../components/ui/Card.jsx";
 
 const collectedItems = [
