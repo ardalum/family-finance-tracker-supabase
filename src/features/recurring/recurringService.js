@@ -1,3 +1,4 @@
+import { getDueDateForMonth } from "../../lib/dates.js";
 import { updateAppData } from "../../lib/storage/appStorage.js";
 import { UNCATEGORIZED_ID } from "../spending/spendingService.js";
 
@@ -140,9 +141,10 @@ export function getRecurringStatus(template, monthKey, transactions, statusByMon
 }
 
 export function getRecurringDueDate(monthKey, dueDay) {
-  const [year, month] = monthKey.split("-").map(Number);
-  const lastDay = new Date(year, month, 0).getDate();
-  return `${monthKey}-${String(Math.min(Number(dueDay), lastDay)).padStart(2, "0")}`;
+  const dueDate = getDueDateForMonth(monthKey, dueDay);
+  return `${dueDate.getFullYear()}-${String(dueDate.getMonth() + 1).padStart(2, "0")}-${String(
+    dueDate.getDate(),
+  ).padStart(2, "0")}`;
 }
 
 export function getRecurringDisplayStatus(template, monthKey, instance, today = new Date()) {
