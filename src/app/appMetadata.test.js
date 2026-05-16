@@ -3,7 +3,9 @@ import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import { appMetadata } from "./appMetadata.js";
 
-const packageJson = JSON.parse(readFileSync(new URL("../../package.json", import.meta.url), "utf8"));
+const packageJson = JSON.parse(
+  readFileSync(new URL("../../package.json", import.meta.url), "utf8"),
+);
 
 describe("app metadata", () => {
   it("keeps the displayed app version aligned with package.json", () => {
