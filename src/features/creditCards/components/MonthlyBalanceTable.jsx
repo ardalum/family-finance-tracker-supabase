@@ -15,7 +15,7 @@ import {
 import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
 import { getRowStatus } from "../creditCardStatus.js";
 import { getSortedCards } from "../creditCardSort.js";
-import { getMonthTotal } from "../creditCardsService.js";
+import { getMonthlyBalanceSummary } from "../creditCardsService.js";
 
 const defaultFilters = {
   search: "",
@@ -39,29 +39,6 @@ function getStatusFilterValue(status) {
   return "unpaid";
 }
 
-function getMonthlyBalanceSummary(cards, monthBalances, selectedMonth) {
-  return cards.reduce(
-    (summary, card) => {
-      const entry = monthBalances[card.id];
-      const status = getRowStatus(card, selectedMonth, entry);
-      const balance = Number(entry?.balance || 0);
-
-      return {
-        statementBalance: summary.statementBalance + balance,
-        unpaidBalance: summary.unpaidBalance + (entry?.paid ? 0 : balance),
-        checkedNoBalanceCount: summary.checkedNoBalanceCount + (status.isCheckedNoBalance ? 1 : 0),
-        notCheckedCount: summary.notCheckedCount + (status.isNotChecked ? 1 : 0),
-      };
-    },
-    {
-      statementBalance: 0,
-      unpaidBalance: 0,
-      checkedNoBalanceCount: 0,
-      notCheckedCount: 0,
-    },
-  );
-}
-
 export default function MonthlyBalanceTable({
   cards,
   monthlyBalances,
@@ -78,7 +55,6 @@ export default function MonthlyBalanceTable({
   const [filters, setFilters] = useState(defaultFilters);
   const monthBalances = monthlyBalances[selectedMonth] ?? {};
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
-  const monthTotal = getMonthTotal(monthBalances);
   const summary = useMemo(
     () => getMonthlyBalanceSummary(cards, monthBalances, selectedMonth),
     [cards, monthBalances, selectedMonth],
@@ -192,9 +168,9 @@ export default function MonthlyBalanceTable({
           />
           <MonthlyBalanceSummaryCard
             label="Unpaid balance"
-            value={formatCurrency(summary.unpaidBalance, { cents: true })}
+            value={formatCurrency(unpaidTotal, { cents: true })}
             helper="Still needs payment"
-            danger={summary.unpaidBalance > 0}
+            danger={unpaidTotal > 0}
           />
           <MonthlyBalanceSummaryCard
             label="Checked no balance"
@@ -410,9 +386,7 @@ function MonthlyBalanceSummaryCard({ label, value, helper, danger = false }) {
   return (
     <div className="rounded-2xl border border-app-border bg-app-surface p-4 shadow-sm">
       <p className="text-sm font-medium text-text-muted">{label}</p>
-      <p
-        className={`mt-1 text-2xl font-semibold ${danger ? "text-status-danger" : "text-text-main"}`}
-      >
+      <p className={`mt-1 text-2xl font-semibold ${danger ? "text-status-danger" : "text-text-main"}`}>
         {value}
       </p>
       <p className="mt-1 text-xs text-text-muted">{helper}</p>
