@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import {
   buildMonthOptions,
   daysBetween,
+  formatDateKey,
   getDueDateForMonth,
   getMonthDateRange,
   getNextDueDate,
@@ -11,6 +12,10 @@ import {
 } from "./dates.js";
 
 describe("date utilities", () => {
+  it("formats a date key", () => {
+    assert.equal(formatDateKey(new Date(2026, 0, 5)), "2026-01-05");
+  });
+
   it("builds thirteen month options centered on the selected month", () => {
     assert.deepEqual(buildMonthOptions("2026-05"), [
       "2025-11",
