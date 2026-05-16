@@ -1,6 +1,14 @@
 import { WalletCards } from "lucide-react";
 import Navigation from "./Navigation.jsx";
 
+const footerLinks = [
+  { targetView: "privacy-policy", label: "Privacy" },
+  { targetView: "terms-of-use", label: "Terms" },
+  { targetView: "help-support", label: "Help" },
+  { targetView: "release-notes", label: "Release Notes" },
+  { targetView: "about", label: "About" },
+];
+
 export default function AppShell({
   activeView,
   onViewChange,
@@ -46,39 +54,30 @@ export default function AppShell({
         {children}
       </main>
       <footer className="border-t border-app-border bg-app-background">
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-5 text-xs text-text-muted sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
-          <p>
-            <span className="font-semibold text-brand-primary">WalletFlow</span> © 2026 Arvin
-            Dalumpines. Made by Arvin Dalumpines.
-          </p>
-          <nav className="flex flex-wrap gap-x-3 gap-y-2" aria-label="Footer links">
-            <FooterLink targetView="privacy-policy" onNavigate={onViewChange}>
-              Privacy Policy
-            </FooterLink>
-            <span className="text-app-border" aria-hidden="true">
-              ·
-            </span>
-            <FooterLink targetView="terms-of-use" onNavigate={onViewChange}>
-              Terms of Use
-            </FooterLink>
-            <span className="text-app-border" aria-hidden="true">
-              ·
-            </span>
-            <FooterLink targetView="help-support" onNavigate={onViewChange}>
-              Help
-            </FooterLink>
-            <span className="text-app-border" aria-hidden="true">
-              ·
-            </span>
-            <FooterLink targetView="release-notes" onNavigate={onViewChange}>
-              Release Notes
-            </FooterLink>
-            <span className="text-app-border" aria-hidden="true">
-              ·
-            </span>
-            <FooterLink targetView="about" onNavigate={onViewChange}>
-              About
-            </FooterLink>
+        <div className="mx-auto grid max-w-7xl gap-4 px-4 py-5 text-xs text-text-muted sm:px-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-center lg:px-8">
+          <div className="grid gap-1">
+            <p>
+              <span className="font-semibold text-brand-primary">WalletFlow</span> © 2026 Arvin
+              Dalumpines.
+            </p>
+            <p className="max-w-2xl leading-5">
+              Personal finance tracking only. Verify balances, payments, and due dates with the
+              original provider.
+            </p>
+          </div>
+          <nav
+            className="flex flex-wrap gap-2 md:max-w-md md:justify-end"
+            aria-label="Footer links"
+          >
+            {footerLinks.map((link) => (
+              <FooterLink
+                key={link.targetView}
+                targetView={link.targetView}
+                onNavigate={onViewChange}
+              >
+                {link.label}
+              </FooterLink>
+            ))}
           </nav>
         </div>
       </footer>
@@ -92,7 +91,7 @@ function FooterLink({ targetView, onNavigate, children }) {
   return (
     <button
       type="button"
-      className="text-left font-semibold text-brand-primary transition hover:text-brand-accent focus:text-brand-accent focus:outline-none"
+      className="rounded-full border border-transparent px-2.5 py-1 text-left font-semibold text-brand-primary transition hover:border-app-border hover:bg-app-surface hover:text-brand-accent focus:border-app-border focus:bg-app-surface focus:text-brand-accent focus:outline-none"
       data-target-view={targetView}
       title={isEnabled ? undefined : "Coming soon"}
       aria-disabled={isEnabled ? undefined : "true"}
