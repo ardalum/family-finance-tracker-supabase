@@ -1,5 +1,6 @@
+import { getPreviousMonthKey } from "../../lib/dates.js";
 import { supabase } from "../../lib/supabase/client.js";
-import { createBudgetCopyPlan, getPreviousMonthKey } from "./budgetsService.js";
+import { createBudgetCopyPlan } from "./budgetsService.js";
 
 function requireSupabase() {
   if (!supabase) {
