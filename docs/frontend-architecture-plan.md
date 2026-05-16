@@ -2,24 +2,17 @@
 
 This document tracks frontend architecture and tooling cleanup work for WalletFlow.
 
-## Current areas to improve
+## Current status
 
 ### App orchestration
 
-`App.jsx` still coordinates many feature areas. It now delegates app providers, active view
-state, selected month defaults, local app data, setup status helpers, render wrappers, view
-rendering, and view prop construction to focused helpers, but it still owns many feature data
-states, loaders, and mutation callbacks.
+The feature-level hook extraction plan is complete for the current architecture pass.
 
-A better long-term structure is to move feature data logic into feature-level hooks.
+`App.jsx` now primarily composes feature hooks and app-level orchestration.
 
 ### Data refresh flow
 
-Shared refresh helper utilities now centralize the existing multi-feature refresh sequences for
-budget, spending, recurring, and full-import flows.
-
-A better long-term structure would still be to extract feature hooks or adopt a data-fetching
-library so mutations can invalidate or refresh data closer to the affected feature.
+Shared refresh helper utilities continue to centralize multi-feature refresh sequences.
 
 ### Project scripts and CI
 
@@ -69,6 +62,16 @@ remaining feature hook boundaries are clearer.
 - Added `AppFirstTimeSetupScreen.jsx`.
 - Added `AppShellFrame.jsx`.
 - Added `AppViewRenderer.jsx`.
+- Added `useHouseholdProfiles`.
+- Added `useCreditCards`.
+- Added `useMonthlyBalances`.
+- Added `useBudgets`.
+- Added `useSpendingCategories`.
+- Added `useSpendingTransactions`.
+- Added `useRecurringPayments`.
+- Added `useRecurringCategories`.
+- Added `useDashboardData`.
+- Added `useInsightsData`.
 
 ## Pull request sizing guidance
 
@@ -108,22 +111,24 @@ These App.jsx wiring passes are complete:
 
 1. Use the app with real household data and keep manual backups.
 2. Fix practical usage bugs before deep refactoring.
-3. Extract feature-level data hooks from `App.jsx` one feature at a time.
-4. Keep refresh behavior unchanged during hook extraction.
-5. Add tests for feature hook helper logic before wiring.
-6. Add shared finance data types after hook boundaries stabilize.
-7. Consider a gradual TypeScript migration for service files after practical use confirms the current
+3. Validate hook behavior during practical usage and issue triage.
+4. Add tests for feature hook helper logic where feasible.
+5. Add shared finance data types after hook boundaries stabilize.
+6. Consider a gradual TypeScript migration for service files after practical use confirms the current
    data model.
 
-## Proposed hooks
+## Implemented hooks
 
-- `useCreditCards(householdId)`
-- `useMonthlyBalances(householdId)`
-- `useBudgets(householdId, month)`
-- `useTransactions(householdId, month)`
-- `useRecurringPayments(householdId, month)`
-- `useDashboardData(householdId, month)`
-- `useInsightsData(householdId, month)`
+- `useHouseholdProfiles`
+- `useCreditCards`
+- `useMonthlyBalances`
+- `useBudgets`
+- `useSpendingCategories`
+- `useSpendingTransactions`
+- `useRecurringPayments`
+- `useRecurringCategories`
+- `useDashboardData`
+- `useInsightsData`
 
 ## Suggested next test targets
 

@@ -1,6 +1,6 @@
 # App wiring playbook
 
-This playbook tracks the remaining `App.jsx` wiring work for the frontend architecture cleanup.
+This playbook records the `App.jsx` wiring approach used for the frontend architecture cleanup.
 
 `App.jsx` is intentionally handled differently from small helper files. It is large, owns many app behaviors, and is risky to replace through tools that only support full-file updates.
 
@@ -37,17 +37,27 @@ For app-shell or navigation changes, also browser-check:
 
 ## Current helper status
 
-These helper modules already exist and are ready to wire into `App.jsx`:
+These helper modules and feature hooks are now wired into `App.jsx`:
 
 - `src/app/pageContent.js`
 - `src/app/useActiveView.js`
 - `src/app/useLocalAppData.js`
 - `src/app/setupStatusUtils.js`
 - `src/app/refreshDataUtils.js`
+- `src/features/households/useHouseholdProfiles.js`
+- `src/features/creditCards/useCreditCards.js`
+- `src/features/creditCards/useMonthlyBalances.js`
+- `src/features/budgets/useBudgets.js`
+- `src/features/spending/useSpendingCategories.js`
+- `src/features/spending/useSpendingTransactions.js`
+- `src/features/recurring/useRecurringPayments.js`
+- `src/features/recurring/useRecurringCategories.js`
+- `src/features/dashboard/useDashboardData.js`
+- `src/features/insights/useInsightsData.js`
 
 ## Recommended wiring order
 
-Use this order to reduce risk:
+This order was used to reduce risk:
 
 1. Wire `pageContent.js` into `App.jsx`.
 2. Wire `useActiveView.js` into `App.jsx`.
@@ -415,12 +425,10 @@ Run the full local command set and browser-check:
 
 ## After wiring helpers
 
-After these wiring PRs, start extracting feature hooks one at a time:
+The feature-hook extraction phase is complete for the current architecture pass.
 
-1. `useCreditCards(householdId)`
-2. `useMonthlyBalances(householdId, cards)`
-3. `useBudgets(householdId, month)`
-4. `useTransactions(householdId, month, cards, categories)`
-5. `useRecurringPayments(householdId, month)`
-6. `useDashboardData(householdId, month)`
-7. `useInsightsData(householdId, month)`
+Next focus:
+
+1. Practical usage validation and bug fixes.
+2. Targeted tests for hook helper logic.
+3. Optional data-shape typing strategy after boundaries stabilize.
