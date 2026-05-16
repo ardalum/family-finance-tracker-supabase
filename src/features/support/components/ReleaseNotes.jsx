@@ -32,9 +32,7 @@ export default function ReleaseNotes() {
             <Sparkles size={26} strokeWidth={2.2} aria-hidden="true" />
           </div>
           <div className="max-w-3xl">
-            <h2 className="text-3xl font-semibold tracking-normal text-text-main">
-              Release Notes
-            </h2>
+            <h2 className="text-3xl font-semibold tracking-normal text-text-main">Release Notes</h2>
             <p className="mt-4 text-sm leading-6 text-text-muted">
               Review recent WalletFlow changes, cleanup passes, and user-facing improvements.
             </p>
