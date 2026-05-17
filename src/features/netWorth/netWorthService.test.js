@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   calculateNetWorth,
   getLatestSnapshotsForMonth,
+  getNetWorthStatus,
   summarizeAssetsForMonth,
   summarizeLiabilitiesForMonth,
   summarizeNetWorthForMonth,
@@ -236,4 +237,47 @@ test("credit card statement balances are not included automatically", () => {
   ]);
   assert.equal(assets.totalAssets, 200);
   assert.equal(liabilities.totalLiabilities, 0);
+});
+
+test("savings goals are not included automatically in net worth", () => {
+  const summary = summarizeNetWorthForMonth({
+    cashAccounts,
+    accountBalanceSnapshots: [
+      {
+        cashAccountId: "cash-1",
+        monthKey: "2026-05",
+        snapshotDate: "2026-05-01",
+        balanceAmount: 100,
+      },
+    ],
+    liabilityAccounts,
+    liabilityBalanceSnapshots: [],
+    savingsGoals: [{ id: "goal-1", targetAmount: 10000 }],
+    monthKey: "2026-05",
+  });
+
+  assert.equal(summary.totalAssets, 100);
+  assert.equal(summary.netWorth, 100);
+});
+
+test("net worth status labels are stable", () => {
+  assert.equal(getNetWorthStatus(100, true), "positive");
+  assert.equal(getNetWorthStatus(-100, true), "negative");
+  assert.equal(getNetWorthStatus(0, true), "neutral");
+  assert.equal(getNetWorthStatus(0, false), "missing-data");
+});
+
+test("net worth helpers handle invalid or missing arrays safely", () => {
+  const summary = summarizeNetWorthForMonth({
+    cashAccounts: null,
+    accountBalanceSnapshots: null,
+    liabilityAccounts: null,
+    liabilityBalanceSnapshots: null,
+    monthKey: "2026-05",
+  });
+
+  assert.equal(summary.totalAssets, 0);
+  assert.equal(summary.totalLiabilities, 0);
+  assert.equal(summary.netWorth, 0);
+  assert.equal(summary.status, "missing-data");
 });

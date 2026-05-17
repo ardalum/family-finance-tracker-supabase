@@ -112,11 +112,15 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 
 - [ ] Net Worth page opens from Dashboard quick action and Account menu Tools.
 - [ ] Selected month updates net worth values.
+- [ ] Month-selection behavior is clear (latest snapshots recorded in selected month).
 - [ ] Total assets uses selected-month cash account snapshots.
 - [ ] Total liabilities uses selected-month liability snapshots.
 - [ ] Net worth equals assets minus liabilities.
 - [ ] Empty state guidance appears when snapshot data is missing.
+- [ ] Assets-only and liabilities-only guidance is clear.
 - [ ] Credit-card debt appears only when entered as liability snapshots.
+- [ ] Savings goals are not included unless represented by account balance snapshots.
+- [ ] Negative net-worth status copy is understandable.
 - [ ] Net worth does not change Spending, Budget, Income, Savings, or cash-flow leftover totals.
 
 ## 8) Backup and Export Verification
@@ -164,6 +168,7 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - Dashboard cash-flow MVP estimated leftover intentionally excludes unpaid card balance carry until card-payment cash modeling is explicitly added.
 - Liability/debt snapshots are now manual-entry MVP only; releases should not claim complete debt automation or full net-worth reporting coverage.
 - Net worth summary MVP is implemented from manual snapshots, but trend reporting and broader asset coverage are still out of scope.
+- Net worth values are computed from existing snapshot data and are not separately stored/exported as a standalone dataset.
 
 ## What Not To Test On Real Data
 

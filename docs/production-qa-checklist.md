@@ -140,11 +140,15 @@ Use this checklist before each production release.
 
 - [ ] Net Worth page opens from Dashboard quick action and Account menu Tools.
 - [ ] Selected month filter updates net worth summary.
+- [ ] Month-selection helper copy is clear (selected month uses latest snapshots recorded in that month).
 - [ ] Total assets reflects selected-month latest cash account snapshots.
 - [ ] Total liabilities reflects selected-month latest liability snapshots.
 - [ ] Net worth equals assets minus liabilities.
 - [ ] Empty state appears when account/debt snapshots are missing.
+- [ ] Assets-only and liabilities-only empty-state guidance is clear.
 - [ ] Credit-card debt appears only when entered as liability snapshots.
+- [ ] Savings goals are not counted unless represented by account snapshots.
+- [ ] Negative net-worth status copy is clear and understandable.
 - [ ] Net worth view does not change Spending totals.
 - [ ] Net worth view does not change Income totals.
 - [ ] Net worth view does not change Savings totals.

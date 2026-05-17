@@ -34,6 +34,11 @@ Scope: Design-only planning for liability/debt account snapshots (no implementat
 - Credit card statement balances are still not auto-counted as liabilities; debt appears in net worth only when entered as liability snapshots.
 - Trend reporting and deeper debt analytics remain future scope.
 
+## Phase 36 Status Update
+
+- Net Worth workflow hardening confirms liability snapshots are consumed as-is for monthly net worth summaries without changing spending, budget, income, savings, or cash-flow totals.
+- Liability data remains the only debt source in net worth; card statement/payment workflow data is intentionally not auto-imported into net worth.
+
 ## 1. Problem Statement
 
 WalletFlow cannot produce trustworthy net worth until liabilities are tracked with the same clarity as asset balances. Cash account snapshots now exist, but debt balances are still missing, so total household position is incomplete.
