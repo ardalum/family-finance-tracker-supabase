@@ -100,3 +100,8 @@ This audit reviews WalletFlow as of Phase 7 across these workflows:
 ## Suggested Next Step
 
 - Implement Phase 9 as a **lightweight Monthly Close Checklist MVP** using existing data signals first, manual confirmations second, and no schema change in initial iteration if possible.
+
+## Phase 23 Status Update
+
+- Income tracking is now **partially addressed** via manual Income Sources + Income Entries (no bank sync/imports).
+- Savings tracking and monthly cash-flow summary cards are still open product gaps.

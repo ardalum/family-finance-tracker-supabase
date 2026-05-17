@@ -45,6 +45,7 @@ export function createAllSupabaseRefreshers({
   loadInsightsData,
   loadRecurringCategories,
   loadRecurringData,
+  loadIncomeData,
 } = {}) {
   return [
     loadSupabaseCreditCards,
@@ -56,5 +57,6 @@ export function createAllSupabaseRefreshers({
     loadInsightsData,
     loadRecurringCategories,
     loadRecurringData,
+    loadIncomeData,
   ].filter(Boolean);
 }

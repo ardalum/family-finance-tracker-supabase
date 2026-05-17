@@ -23,6 +23,10 @@ export const pageContent = {
     title: "Insights",
     description: "Review spending trends, budget performance, and payment patterns.",
   },
+  income: {
+    title: "Income",
+    description: "Manually track income sources and monthly income entries.",
+  },
   backup: {
     title: "Backup & Restore",
     description: "Export Supabase household data and access legacy localStorage backup tools.",

@@ -4,6 +4,8 @@ Date: 2026-05-17
 Project: WalletFlow / Family Finance Tracker  
 Scope: Design-only planning for next major feature (no implementation in this phase)
 
+> Status update (Phase 23): Income Tracking MVP is now implemented with manual income sources and month/date income entries. Savings and cash-flow summary work remain planned.
+
 ## 1. Problem Statement
 
 WalletFlow currently provides strong credit-card, spending, budget, recurring bill, insight, backup/restore, and monthly-close workflows. However, the product is still incomplete as a household finance tracker because users cannot record where money comes from (income), where reserve money is intentionally moved (savings), or whether monthly inflows cover monthly outflows (cash flow).
