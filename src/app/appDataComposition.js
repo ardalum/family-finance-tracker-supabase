@@ -13,6 +13,8 @@ export function createFeatureAppData({
   savingsContributions,
   cashAccounts,
   accountBalanceSnapshots,
+  liabilityAccounts,
+  liabilityBalanceSnapshots,
 } = {}) {
   return {
     ...appData,
@@ -32,6 +34,8 @@ export function createFeatureAppData({
     savingsContributions,
     cashAccounts,
     accountBalanceSnapshots,
+    liabilityAccounts,
+    liabilityBalanceSnapshots,
   };
 }
 

@@ -94,6 +94,13 @@ const quickActions = [
     icon: Landmark,
   },
   {
+    label: "Manage debts",
+    description: "Track manual debt balance snapshots.",
+    view: "liabilities",
+    target: "monthly-liability-snapshots",
+    icon: CreditCard,
+  },
+  {
     label: "Review budget",
     description: "Open the monthly budget workspace.",
     view: "budgets",

@@ -31,6 +31,7 @@ import { useHouseholdProfiles } from "../features/households/useHouseholdProfile
 import { useInsightsData } from "../features/insights/useInsightsData.js";
 import { useIncomeData } from "../features/income/useIncomeData.js";
 import { useAccountsData } from "../features/accounts/useAccountsData.js";
+import { useLiabilitiesData } from "../features/liabilities/useLiabilitiesData.js";
 import { useSavingsData } from "../features/savings/useSavingsData.js";
 import { useRecurringCategories } from "../features/recurring/useRecurringCategories.js";
 import { useRecurringPayments } from "../features/recurring/useRecurringPayments.js";
@@ -61,6 +62,9 @@ function FinanceTrackerApp() {
   const [selectedSavingsMonth, setSelectedSavingsMonth] = useState(initialSelectedMonths.savings);
   const [selectedAccountsMonth, setSelectedAccountsMonth] = useState(
     initialSelectedMonths.accounts,
+  );
+  const [selectedLiabilitiesMonth, setSelectedLiabilitiesMonth] = useState(
+    initialSelectedMonths.liabilities,
   );
   useEffect(() => {
     let isCurrent = true;
@@ -279,6 +283,23 @@ function FinanceTrackerApp() {
   });
 
   const {
+    liabilityAccounts,
+    liabilityBalanceSnapshots,
+    liabilitiesLoading,
+    liabilitiesSaving,
+    liabilitiesError,
+    loadLiabilitiesData,
+    createSupabaseLiabilityAccount,
+    updateSupabaseLiabilityAccount,
+    deleteSupabaseLiabilityAccount,
+    createSupabaseLiabilityBalanceSnapshot,
+    updateSupabaseLiabilityBalanceSnapshot,
+    deleteSupabaseLiabilityBalanceSnapshot,
+  } = useLiabilitiesData({
+    activeHouseholdId,
+  });
+
+  const {
     savingsGoals,
     savingsContributions,
     savingsLoading,
@@ -348,6 +369,7 @@ function FinanceTrackerApp() {
         loadIncomeData,
         loadSavingsData,
         loadAccountsData,
+        loadLiabilitiesData,
       }),
     );
   }, [
@@ -356,6 +378,7 @@ function FinanceTrackerApp() {
     loadRecurringCategories,
     loadRecurringData,
     loadIncomeData,
+    loadLiabilitiesData,
     loadAccountsData,
     loadSavingsData,
     loadSpendingCategories,
@@ -385,6 +408,8 @@ function FinanceTrackerApp() {
         savingsContributions,
         cashAccounts,
         accountBalanceSnapshots,
+        liabilityAccounts,
+        liabilityBalanceSnapshots,
       }),
     [
       appData,
@@ -396,6 +421,8 @@ function FinanceTrackerApp() {
       savingsContributions,
       cashAccounts,
       accountBalanceSnapshots,
+      liabilityAccounts,
+      liabilityBalanceSnapshots,
       selectedDashboardMonth,
       supabaseCreditCards,
       supabaseMonthlyBalances,
@@ -418,6 +445,8 @@ function FinanceTrackerApp() {
         savingsContributions,
         cashAccounts,
         accountBalanceSnapshots,
+        liabilityAccounts,
+        liabilityBalanceSnapshots,
       }),
     [
       appData,
@@ -431,6 +460,8 @@ function FinanceTrackerApp() {
       savingsContributions,
       cashAccounts,
       accountBalanceSnapshots,
+      liabilityAccounts,
+      liabilityBalanceSnapshots,
       selectedInsightsMonth,
       supabaseCreditCards,
       supabaseMonthlyBalances,
@@ -489,6 +520,7 @@ function FinanceTrackerApp() {
     monthlyCloseReviewError,
     selectedInsightsMonth,
     selectedAccountsMonth,
+    selectedLiabilitiesMonth,
     selectedIncomeMonth,
     selectedSavingsMonth,
     insightsLoading,
@@ -497,9 +529,14 @@ function FinanceTrackerApp() {
     incomeEntries,
     cashAccounts,
     accountBalanceSnapshots,
+    liabilityAccounts,
+    liabilityBalanceSnapshots,
     accountsLoading,
     accountsError,
     accountsSaving,
+    liabilitiesLoading,
+    liabilitiesError,
+    liabilitiesSaving,
     incomeLoading,
     incomeError,
     incomeSaving,
@@ -515,6 +552,7 @@ function FinanceTrackerApp() {
     setSelectedRecurringMonth,
     setSelectedInsightsMonth,
     setSelectedAccountsMonth,
+    setSelectedLiabilitiesMonth,
     setSelectedIncomeMonth,
     setSelectedSavingsMonth,
     toggleMonthlyCloseManualCheck,
@@ -559,6 +597,12 @@ function FinanceTrackerApp() {
     createSupabaseAccountBalanceSnapshot,
     updateSupabaseAccountBalanceSnapshot,
     deleteSupabaseAccountBalanceSnapshot,
+    createSupabaseLiabilityAccount,
+    updateSupabaseLiabilityAccount,
+    deleteSupabaseLiabilityAccount,
+    createSupabaseLiabilityBalanceSnapshot,
+    updateSupabaseLiabilityBalanceSnapshot,
+    deleteSupabaseLiabilityBalanceSnapshot,
     createSupabaseSavingsGoal,
     updateSupabaseSavingsGoal,
     deleteSupabaseSavingsGoal,

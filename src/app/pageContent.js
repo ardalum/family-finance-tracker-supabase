@@ -27,6 +27,10 @@ export const pageContent = {
     title: "Accounts",
     description: "Manually track cash accounts and monthly balance snapshots.",
   },
+  liabilities: {
+    title: "Liabilities",
+    description: "Manually track debt accounts and monthly liability snapshots.",
+  },
   income: {
     title: "Income",
     description: "Manually track income sources and monthly income entries.",

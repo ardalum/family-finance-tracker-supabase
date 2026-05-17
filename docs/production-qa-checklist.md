@@ -115,6 +115,23 @@ Use this checklist before each production release.
 - [ ] Account snapshots do not change Savings totals.
 - [ ] Account snapshots do not change Budget totals.
 
+## Liabilities
+
+- [ ] Liabilities page opens from Dashboard quick action and Account menu Tools.
+- [ ] Add liability account works.
+- [ ] Edit liability account works.
+- [ ] Delete liability account works with confirmation wording.
+- [ ] Add liability balance snapshot works.
+- [ ] Edit liability balance snapshot works.
+- [ ] Delete liability balance snapshot works with confirmation wording.
+- [ ] Month switching filters liability snapshots correctly.
+- [ ] Total debt updates correctly for selected month.
+- [ ] Liability snapshots do not change Spending totals.
+- [ ] Liability snapshots do not change Income totals.
+- [ ] Liability snapshots do not change Savings totals.
+- [ ] Liability snapshots do not change Budget totals.
+- [ ] Liability snapshots do not change Dashboard cash-flow estimated leftover.
+
 ## Backup / Restore
 
 - [ ] Export backup works.
@@ -127,6 +144,8 @@ Use this checklist before each production release.
 - [ ] Excel export includes `Savings Goals` and `Savings Contributions` sheets.
 - [ ] Supabase JSON export includes `cashAccounts` and `accountBalanceSnapshots`.
 - [ ] Excel export includes `Cash Accounts` and `Account Balance Snapshots` sheets.
+- [ ] Supabase JSON export includes `liabilityAccounts` and `liabilityBalanceSnapshots`.
+- [ ] Excel export includes `Liability Accounts` and `Liability Balance Snapshots` sheets.
 
 ## Household / Settings
 

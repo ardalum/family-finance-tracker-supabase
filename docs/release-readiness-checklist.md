@@ -29,6 +29,7 @@ Use this checklist before each production release.
 - [ ] `016_income_tracking.sql` is included and applied.
 - [ ] `017_savings_tracking.sql` is included and applied.
 - [ ] `018_cash_account_snapshots.sql` is included and applied.
+- [ ] `019_liability_debt_snapshots.sql` is included and applied.
 - [ ] RLS policies are active for migrated tables.
 
 ### Migration mismatch safety
@@ -95,6 +96,15 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Liquid cash summary updates from snapshot data.
 - [ ] Account snapshots do not change Spending, Budget, Income, or Savings totals.
 
+## 7e) Liabilities Snapshot Verification
+
+- [ ] Liabilities page opens from Dashboard quick action and Account menu Tools.
+- [ ] Add/edit/delete liability account works.
+- [ ] Add/edit/delete liability balance snapshot works.
+- [ ] Selected month filters liability snapshots correctly.
+- [ ] Total debt summary updates from liability snapshots.
+- [ ] Liability snapshots do not change Spending, Budget, Income, Savings, or cash-flow leftover totals.
+
 ## 8) Backup and Export Verification
 
 - [ ] Supabase JSON export works.
@@ -105,6 +115,8 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Excel export includes `Savings Goals` and `Savings Contributions`.
 - [ ] Supabase JSON export includes `cashAccounts` and `accountBalanceSnapshots`.
 - [ ] Excel export includes `Cash Accounts` and `Account Balance Snapshots`.
+- [ ] Supabase JSON export includes `liabilityAccounts` and `liabilityBalanceSnapshots`.
+- [ ] Excel export includes `Liability Accounts` and `Liability Balance Snapshots`.
 
 ## 9) Destructive Action Safety
 
@@ -136,8 +148,8 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - Income export is included in Supabase JSON/Excel output, but income merge-import behavior is not yet a complete dedicated workflow with income-specific conflict handling.
 - Savings export is included in Supabase JSON/Excel output, but savings merge-import behavior is not yet a complete dedicated workflow with savings-specific conflict handling.
 - Dashboard cash-flow MVP estimated leftover intentionally excludes unpaid card balance carry until card-payment cash modeling is explicitly added.
-- Liability/debt snapshots and full net-worth reporting are not yet implemented; releases should not claim complete household position/net-worth coverage.
-- Current release readiness excludes full liability/debt account tracking and final net-worth calculations until Phase 33+ implementation is complete.
+- Liability/debt snapshots are now manual-entry MVP only; releases should not claim complete debt automation or full net-worth reporting coverage.
+- Current release readiness excludes final net-worth calculations and trend reporting until post-Phase 33 work is complete.
 
 ## What Not To Test On Real Data
 
