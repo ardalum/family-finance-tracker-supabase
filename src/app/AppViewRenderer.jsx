@@ -8,6 +8,7 @@ import Insights from "../features/insights/components/Insights.jsx";
 import Income from "../features/income/components/Income.jsx";
 import Accounts from "../features/accounts/components/Accounts.jsx";
 import Liabilities from "../features/liabilities/components/Liabilities.jsx";
+import NetWorth from "../features/netWorth/components/NetWorth.jsx";
 import Savings from "../features/savings/components/Savings.jsx";
 import PrivacyPolicy from "../features/legal/components/PrivacyPolicy.jsx";
 import TermsOfUse from "../features/legal/components/TermsOfUse.jsx";
@@ -28,6 +29,7 @@ export default function AppViewRenderer({
   insightsProps,
   accountsProps,
   liabilitiesProps,
+  netWorthProps,
   incomeProps,
   savingsProps,
   backupProps,
@@ -43,6 +45,7 @@ export default function AppViewRenderer({
       {activeView === "insights" ? <Insights {...insightsProps} /> : null}
       {activeView === "accounts" ? <Accounts {...accountsProps} /> : null}
       {activeView === "liabilities" ? <Liabilities {...liabilitiesProps} /> : null}
+      {activeView === "net-worth" ? <NetWorth {...netWorthProps} /> : null}
       {activeView === "income" ? <Income {...incomeProps} /> : null}
       {activeView === "savings" ? <Savings {...savingsProps} /> : null}
       {activeView === "backup" ? <BackupRestore {...backupProps} /> : null}

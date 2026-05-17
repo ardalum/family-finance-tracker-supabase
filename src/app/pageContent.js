@@ -31,6 +31,10 @@ export const pageContent = {
     title: "Liabilities",
     description: "Manually track debt accounts and monthly liability snapshots.",
   },
+  "net-worth": {
+    title: "Net Worth",
+    description: "Review net worth from manual asset and liability snapshots.",
+  },
   income: {
     title: "Income",
     description: "Manually track income sources and monthly income entries.",

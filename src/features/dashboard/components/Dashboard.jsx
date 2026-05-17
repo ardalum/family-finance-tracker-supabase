@@ -11,6 +11,7 @@ import {
   PiggyBank,
   WalletCards,
   Landmark,
+  Scale,
 } from "lucide-react";
 import Card from "../../../components/ui/Card.jsx";
 import Select from "../../../components/ui/Select.jsx";
@@ -99,6 +100,13 @@ const quickActions = [
     view: "liabilities",
     target: "monthly-liability-snapshots",
     icon: CreditCard,
+  },
+  {
+    label: "Net worth",
+    description: "Review assets, debts, and net worth.",
+    view: "net-worth",
+    target: "monthly-net-worth",
+    icon: Scale,
   },
   {
     label: "Review budget",

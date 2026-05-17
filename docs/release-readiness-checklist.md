@@ -108,6 +108,17 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Linked credit card behavior is explicit (informational only, no auto-filled balances).
 - [ ] Liability snapshots do not change Spending, Budget, Income, Savings, or cash-flow leftover totals.
 
+## 7f) Net Worth Summary Verification
+
+- [ ] Net Worth page opens from Dashboard quick action and Account menu Tools.
+- [ ] Selected month updates net worth values.
+- [ ] Total assets uses selected-month cash account snapshots.
+- [ ] Total liabilities uses selected-month liability snapshots.
+- [ ] Net worth equals assets minus liabilities.
+- [ ] Empty state guidance appears when snapshot data is missing.
+- [ ] Credit-card debt appears only when entered as liability snapshots.
+- [ ] Net worth does not change Spending, Budget, Income, Savings, or cash-flow leftover totals.
+
 ## 8) Backup and Export Verification
 
 - [ ] Supabase JSON export works.
@@ -152,7 +163,7 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - Savings export is included in Supabase JSON/Excel output, but savings merge-import behavior is not yet a complete dedicated workflow with savings-specific conflict handling.
 - Dashboard cash-flow MVP estimated leftover intentionally excludes unpaid card balance carry until card-payment cash modeling is explicitly added.
 - Liability/debt snapshots are now manual-entry MVP only; releases should not claim complete debt automation or full net-worth reporting coverage.
-- Current release readiness excludes final net-worth calculations and trend reporting until post-Phase 33 work is complete.
+- Net worth summary MVP is implemented from manual snapshots, but trend reporting and broader asset coverage are still out of scope.
 
 ## What Not To Test On Real Data
 

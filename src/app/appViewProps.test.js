@@ -29,6 +29,7 @@ const input = {
   selectedDashboardMonth: "dashboard-month",
   selectedInsightsMonth: "insights-month",
   selectedRecurringMonth: "recurring-month",
+  selectedNetWorthMonth: "net-worth-month",
   creditCardsLoading: true,
   creditCardsError: "credit card error",
   creditCardsSaving: true,
@@ -61,6 +62,7 @@ const input = {
   setSelectedSpendingMonth: callback,
   setSelectedRecurringMonth: callback,
   setSelectedInsightsMonth: callback,
+  setSelectedNetWorthMonth: callback,
   createSupabaseCreditCard: callback,
   updateSupabaseCreditCard: callback,
   deleteSupabaseCreditCard: callback,
@@ -232,6 +234,27 @@ describe("app view props", () => {
       props.recurringProps.onImportLocalRecurringPayments,
       input.importLocalRecurringToSupabase,
     );
+  });
+
+  it("maps net worth props", () => {
+    const props = createAppViewProps({
+      ...input,
+      cashAccounts: [{ id: "cash-1" }],
+      accountBalanceSnapshots: [{ id: "snap-1" }],
+      liabilityAccounts: [{ id: "debt-1" }],
+      liabilityBalanceSnapshots: [{ id: "debt-snap-1" }],
+      accountsLoading: true,
+      liabilitiesLoading: false,
+      accountsError: "",
+      liabilitiesError: "liability error",
+    });
+
+    assert.equal(props.netWorthProps.cashAccounts.length, 1);
+    assert.equal(props.netWorthProps.liabilityAccounts.length, 1);
+    assert.equal(props.netWorthProps.selectedMonth, input.selectedNetWorthMonth);
+    assert.equal(props.netWorthProps.loading, true);
+    assert.equal(props.netWorthProps.error, "liability error");
+    assert.equal(props.netWorthProps.onMonthChange, input.setSelectedNetWorthMonth);
   });
 
   it("maps household settings props", () => {

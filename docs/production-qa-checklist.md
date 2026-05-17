@@ -136,6 +136,21 @@ Use this checklist before each production release.
 - [ ] Linked credit card behavior is clear (informational only; no auto-filled balances).
 - [ ] Inactive liability accounts are excluded from active snapshot account options.
 
+## Net Worth
+
+- [ ] Net Worth page opens from Dashboard quick action and Account menu Tools.
+- [ ] Selected month filter updates net worth summary.
+- [ ] Total assets reflects selected-month latest cash account snapshots.
+- [ ] Total liabilities reflects selected-month latest liability snapshots.
+- [ ] Net worth equals assets minus liabilities.
+- [ ] Empty state appears when account/debt snapshots are missing.
+- [ ] Credit-card debt appears only when entered as liability snapshots.
+- [ ] Net worth view does not change Spending totals.
+- [ ] Net worth view does not change Income totals.
+- [ ] Net worth view does not change Savings totals.
+- [ ] Net worth view does not change Budget totals.
+- [ ] Net worth view does not change Dashboard cash-flow estimated leftover.
+
 ## Backup / Restore
 
 - [ ] Export backup works.

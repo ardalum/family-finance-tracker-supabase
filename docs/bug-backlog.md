@@ -56,4 +56,6 @@ Last updated: 2026-05-17 (Phase 16 real-data readiness review)
 - Liability/debt snapshots are a documented product capability gap (see `docs/liability-debt-snapshots-design.md`), not a bug in existing card/budget/spending calculations.
 - Liability tracking MVP is implemented and hardened for manual liability accounts and snapshots; this is a product capability increment, not a bug fix.
 - Remaining liability product gaps: debt trend analytics, net-worth integration, and automated/linked credit-card debt reconciliation (linked card is informational only in MVP).
+- Net worth summary MVP is now implemented from manual cash/liability snapshots; this partially addresses the net-worth product gap and is not a bug fix.
+- Remaining net-worth product gaps: trends over time, broader asset classes, and advanced household-position analytics.
 - Remaining income/savings-related product gaps: dedicated import/merge conflict workflows, emergency-fund specific guidance, and deeper cash-flow modeling.
