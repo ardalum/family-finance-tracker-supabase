@@ -8,6 +8,16 @@ export const releaseNotesHero = {
 
 export const releaseNotes = [
   {
+    version: "WalletFlow real-data readiness candidate",
+    date: "May 2026",
+    items: [
+      "Validated Monthly Close workflow readiness, including persisted month review state and manual check tracking by household/month.",
+      "Completed account and app settings cleanup so active controls and page destinations are explicit and non-working preferences are clearly marked.",
+      "Clarified backup and destructive-action guidance, including separation of Delete Account vs Reset Household Finance Data behavior.",
+      "Hardened release documentation and smoke-test workflow for GitHub Pages deployment, Supabase migrations, and Edge Function verification.",
+    ],
+  },
+  {
     version: "Monthly close and product hardening",
     date: "May 2026",
     items: [

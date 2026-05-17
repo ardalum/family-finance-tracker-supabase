@@ -40,4 +40,18 @@ describe("release notes data", () => {
       }
     }
   });
+
+  it("includes the real-data readiness candidate entry", () => {
+    const readinessEntry = releaseNotes.find(
+      (release) => release.version === "WalletFlow real-data readiness candidate",
+    );
+
+    assert.ok(readinessEntry);
+    assert.ok(
+      readinessEntry.items.some((item) => item.includes("Monthly Close workflow readiness")),
+    );
+    assert.ok(
+      readinessEntry.items.some((item) => item.includes("Delete Account vs Reset Household")),
+    );
+  });
 });
