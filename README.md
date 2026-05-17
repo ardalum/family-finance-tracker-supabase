@@ -9,6 +9,7 @@ A Vite + React household finance tracker backed by Supabase. The app supports Su
 - `docs/auth-session-qa.md` contains the authentication and session QA checklist.
 - `docs/production-qa-checklist.md` contains the release QA checklist and smoke test workflow.
 - `docs/release-readiness-checklist.md` contains the final pre-release checklist for deployment, migrations, auth redirects, and destructive-flow safety.
+- `docs/release-tag-deployment-handoff.md` contains release tag, deployment assumptions, and pre/post deploy handoff checks.
 
 ## Install
 
