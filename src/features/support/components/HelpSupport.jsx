@@ -1,7 +1,7 @@
 import { LifeBuoy, Mail, ShieldCheck, Wrench } from "lucide-react";
 import { appMetadata } from "../../../app/appMetadata.js";
+import InfoCard from "../../../components/layout/InfoCard.jsx";
 import PageHero from "../../../components/layout/PageHero.jsx";
-import Card from "../../../components/ui/Card.jsx";
 
 const supportItems = [
   {
@@ -32,60 +32,34 @@ export default function HelpSupport() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         {supportItems.map((item) => (
-          <Card key={item.title} className="p-5">
-            <h3 className="text-lg font-semibold text-text-main">{item.title}</h3>
-            <p className="mt-3 text-sm leading-6 text-text-muted">{item.description}</p>
-          </Card>
+          <InfoCard key={item.title} title={item.title} description={item.description} />
         ))}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="p-5">
-          <div className="flex gap-3">
-            <ShieldCheck
-              size={20}
-              className="mt-0.5 shrink-0 text-brand-accent"
-              aria-hidden="true"
-            />
-            <div>
-              <h3 className="text-lg font-semibold text-text-main">Before reporting a bug</h3>
-              <p className="mt-3 text-sm leading-6 text-text-muted">
-                Try refreshing the page, signing out and back in, and confirming the active
-                household. If the issue involves data, export a backup before making more changes.
-              </p>
-            </div>
-          </div>
-        </Card>
+        <InfoCard
+          icon={ShieldCheck}
+          iconClassName="text-brand-accent"
+          title="Before reporting a bug"
+          description="Try refreshing the page, signing out and back in, and confirming the active household. If the issue involves data, export a backup before making more changes."
+        />
 
-        <Card className="p-5">
-          <div className="flex gap-3">
-            <Wrench size={20} className="mt-0.5 shrink-0 text-brand-secondary" aria-hidden="true" />
-            <div>
-              <h3 className="text-lg font-semibold text-text-main">Useful details to include</h3>
-              <p className="mt-3 text-sm leading-6 text-text-muted">
-                Include the page name, the button or action used, the selected month, the household,
-                and any visible error message. Screenshots help when the issue is visual.
-              </p>
-            </div>
-          </div>
-        </Card>
+        <InfoCard
+          icon={Wrench}
+          title="Useful details to include"
+          description="Include the page name, the button or action used, the selected month, the household, and any visible error message. Screenshots help when the issue is visual."
+        />
       </div>
 
-      <Card className="p-5">
-        <div className="flex gap-3">
-          <Mail size={20} className="mt-0.5 shrink-0 text-brand-secondary" aria-hidden="true" />
-          <div>
-            <h3 className="text-lg font-semibold text-text-main">Contact</h3>
-            <p className="mt-3 text-sm text-text-muted">For feedback or support:</p>
-            <a
-              className="mt-1 inline-flex text-sm font-semibold text-brand-primary transition hover:text-brand-accent"
-              href={`mailto:${appMetadata.supportEmail}`}
-            >
-              {appMetadata.supportEmail}
-            </a>
-          </div>
-        </div>
-      </Card>
+      <InfoCard icon={Mail} title="Contact">
+        <p className="mt-3 text-sm text-text-muted">For feedback or support:</p>
+        <a
+          className="mt-1 inline-flex text-sm font-semibold text-brand-primary transition hover:text-brand-accent"
+          href={`mailto:${appMetadata.supportEmail}`}
+        >
+          {appMetadata.supportEmail}
+        </a>
+      </InfoCard>
     </section>
   );
 }
