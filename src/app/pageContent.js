@@ -27,6 +27,10 @@ export const pageContent = {
     title: "Income",
     description: "Manually track income sources and monthly income entries.",
   },
+  savings: {
+    title: "Savings",
+    description: "Manually track savings goals and monthly contributions.",
+  },
   backup: {
     title: "Backup & Restore",
     description: "Export Supabase household data and access legacy localStorage backup tools.",

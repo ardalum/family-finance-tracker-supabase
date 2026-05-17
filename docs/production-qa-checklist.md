@@ -76,6 +76,22 @@ Use this checklist before each production release.
 - [ ] Income entries do not change Budget totals.
 - [ ] Inactive income sources are not shown in active source selector options.
 
+## Savings
+
+- [ ] Savings page opens from Dashboard quick action and Account menu Tools.
+- [ ] Add savings goal works.
+- [ ] Edit savings goal works.
+- [ ] Delete savings goal works with confirmation wording.
+- [ ] Add savings contribution works.
+- [ ] Edit savings contribution works.
+- [ ] Delete savings contribution works with confirmation wording.
+- [ ] Month switching filters savings contributions correctly.
+- [ ] Monthly savings contribution total updates correctly for selected month.
+- [ ] Goal progress updates correctly after contribution changes.
+- [ ] Savings entries do not change Spending totals.
+- [ ] Savings goals/contributions do not change Budget totals.
+- [ ] Inactive savings goals are not shown in active goal selector options.
+
 ## Backup / Restore
 
 - [ ] Export backup works.
@@ -84,6 +100,8 @@ Use this checklist before each production release.
 - [ ] Team confirms backups contain sensitive finance data and are stored privately.
 - [ ] Supabase JSON export includes `incomeSources` and `incomeEntries`.
 - [ ] Excel export includes `Income Sources` and `Income Entries` sheets.
+- [ ] Supabase JSON export includes `savingsGoals` and `savingsContributions`.
+- [ ] Excel export includes `Savings Goals` and `Savings Contributions` sheets.
 
 ## Household / Settings
 

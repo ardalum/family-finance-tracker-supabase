@@ -11,6 +11,7 @@ const expectedSelectedMonthKeys = [
   "insights",
   "recurring",
   "income",
+  "savings",
 ];
 
 describe("selected month utilities", () => {
@@ -27,6 +28,7 @@ describe("selected month utilities", () => {
       insights: "2026-05",
       recurring: "2026-05",
       income: "2026-05",
+      savings: "2026-05",
     });
   });
 

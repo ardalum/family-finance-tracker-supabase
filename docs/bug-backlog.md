@@ -48,4 +48,5 @@ Last updated: 2026-05-17 (Phase 16 real-data readiness review)
 - Visual analytics/historical reporting gap is partially addressed by Insights chart MVP and YTD Review MVP; previous-year comparison and broader historical workflows remain open product scope.
 - Year-over-year comparison MVP is now partially addressed in Insights; richer long-range historical drill-down and forecast-guided reporting remain open product scope.
 - Income MVP is implemented and hardened for manual tracking; this is not a bug in existing totals.
-- Remaining income-related product gaps: dedicated income import/merge conflict workflow, savings tracking, and cash-flow summary layer.
+- Savings MVP is implemented for manual goal + contribution tracking; this is not a bug in existing totals.
+- Remaining income/savings-related product gaps: dedicated import/merge conflict workflows, emergency-fund specific guidance, and cash-flow summary layer.

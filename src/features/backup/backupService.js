@@ -4,8 +4,8 @@ import { deleteHouseholdFinanceDataSecurely } from "./secureDeletionService.js";
 
 const BACKUP_APP_NAME = "Credit Card Tracker";
 const SUPPORTED_SCHEMA_VERSION = 1;
-const SUPABASE_BACKUP_VERSION = 4;
-const SUPPORTED_SUPABASE_BACKUP_VERSIONS = [1, 2, 3, 4];
+const SUPABASE_BACKUP_VERSION = 5;
+const SUPPORTED_SUPABASE_BACKUP_VERSIONS = [1, 2, 3, 4, 5];
 const EXPECTED_SUPABASE_SECTIONS = [
   "household",
   "householdProfiles",
@@ -19,6 +19,8 @@ const EXPECTED_SUPABASE_SECTIONS = [
   "recurringPaymentInstances",
   "incomeSources",
   "incomeEntries",
+  "savingsGoals",
+  "savingsContributions",
 ];
 
 function requireSupabase() {
@@ -54,6 +56,8 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
       recurringInstancesResult,
       incomeSourcesResult,
       incomeEntriesResult,
+      savingsGoalsResult,
+      savingsContributionsResult,
     ] = await Promise.all([
       client
         .from("households")
@@ -118,6 +122,17 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
         .eq("household_id", householdId)
         .order("entry_date", { ascending: true })
         .order("created_at", { ascending: true }),
+      client
+        .from("savings_goals")
+        .select("*")
+        .eq("household_id", householdId)
+        .order("created_at", { ascending: true }),
+      client
+        .from("savings_contributions")
+        .select("*")
+        .eq("household_id", householdId)
+        .order("contribution_date", { ascending: true })
+        .order("created_at", { ascending: true }),
     ]);
 
     const error = [
@@ -133,6 +148,8 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
       recurringInstancesResult,
       incomeSourcesResult,
       incomeEntriesResult,
+      savingsGoalsResult,
+      savingsContributionsResult,
     ].find((result) => result?.error)?.error;
 
     if (error) throw error;
@@ -153,6 +170,8 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
       recurringPaymentInstances: recurringInstancesResult?.data ?? [],
       incomeSources: incomeSourcesResult?.data ?? [],
       incomeEntries: incomeEntriesResult?.data ?? [],
+      savingsGoals: savingsGoalsResult?.data ?? [],
+      savingsContributions: savingsContributionsResult?.data ?? [],
     };
 
     downloadJson(backup, `finance-tracker-supabase-backup-${getDateStamp()}.json`);
@@ -372,6 +391,41 @@ export async function exportSupabaseExcel(householdId, activeHousehold) {
       })),
     );
 
+    appendSheet(
+      workbook,
+      "Savings Goals",
+      data.savingsGoals.map((goal) => ({
+        Name: goal.name,
+        "Goal Type": goal.goal_type,
+        "Target Amount": Number(goal.target_amount || 0),
+        "Starting Amount": Number(goal.starting_amount || 0),
+        "Target Date": goal.target_date ?? "",
+        Owner: goal.household_profiles?.display_name ?? "",
+        Active: goal.is_active ? "Yes" : "No",
+        Notes: goal.notes ?? "",
+        "Created At": formatDateTime(goal.created_at),
+        "Updated At": formatDateTime(goal.updated_at),
+        ID: goal.id,
+      })),
+    );
+
+    appendSheet(
+      workbook,
+      "Savings Contributions",
+      data.savingsContributions.map((contribution) => ({
+        Date: contribution.contribution_date,
+        Month: contribution.month_key,
+        Amount: Number(contribution.amount || 0),
+        "Contribution Type": contribution.contribution_type,
+        Goal: contribution.savings_goals?.name ?? "",
+        Owner: contribution.household_profiles?.display_name ?? "",
+        Notes: contribution.notes ?? "",
+        "Created At": formatDateTime(contribution.created_at),
+        "Updated At": formatDateTime(contribution.updated_at),
+        ID: contribution.id,
+      })),
+    );
+
     const buffer = await workbook.xlsx.writeBuffer();
     downloadBlob(
       buffer,
@@ -449,6 +503,8 @@ async function loadHouseholdExportData(householdId, activeHousehold) {
     recurringInstancesResult,
     incomeSourcesResult,
     incomeEntriesResult,
+    savingsGoalsResult,
+    savingsContributionsResult,
   ] = await Promise.all([
     client
       .from("households")
@@ -513,6 +569,17 @@ async function loadHouseholdExportData(householdId, activeHousehold) {
       .eq("household_id", householdId)
       .order("entry_date", { ascending: true })
       .order("created_at", { ascending: true }),
+    client
+      .from("savings_goals")
+      .select("*, household_profiles (display_name)")
+      .eq("household_id", householdId)
+      .order("created_at", { ascending: true }),
+    client
+      .from("savings_contributions")
+      .select("*, savings_goals (name), household_profiles (display_name)")
+      .eq("household_id", householdId)
+      .order("contribution_date", { ascending: true })
+      .order("created_at", { ascending: true }),
   ]);
 
   const error = [
@@ -528,6 +595,8 @@ async function loadHouseholdExportData(householdId, activeHousehold) {
     recurringInstancesResult,
     incomeSourcesResult,
     incomeEntriesResult,
+    savingsGoalsResult,
+    savingsContributionsResult,
   ].find((result) => result?.error)?.error;
 
   if (error) throw error;
@@ -545,6 +614,8 @@ async function loadHouseholdExportData(householdId, activeHousehold) {
     recurringPaymentInstances: recurringInstancesResult?.data ?? [],
     incomeSources: incomeSourcesResult?.data ?? [],
     incomeEntries: incomeEntriesResult?.data ?? [],
+    savingsGoals: savingsGoalsResult?.data ?? [],
+    savingsContributions: savingsContributionsResult?.data ?? [],
   };
 }
 
@@ -1196,6 +1267,10 @@ function validateSupabaseBackup(backup) {
     cardStatements: Array.isArray(backup.cardStatements) ? backup.cardStatements : [],
     incomeSources: Array.isArray(backup.incomeSources) ? backup.incomeSources : [],
     incomeEntries: Array.isArray(backup.incomeEntries) ? backup.incomeEntries : [],
+    savingsGoals: Array.isArray(backup.savingsGoals) ? backup.savingsGoals : [],
+    savingsContributions: Array.isArray(backup.savingsContributions)
+      ? backup.savingsContributions
+      : [],
   };
 
   const missingSection = EXPECTED_SUPABASE_SECTIONS.find(

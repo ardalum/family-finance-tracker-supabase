@@ -8,6 +8,7 @@ export const SELECTED_MONTH_KEYS = [
   "insights",
   "recurring",
   "income",
+  "savings",
 ];
 
 export function createInitialSelectedMonths(monthKey = getCurrentMonthKey()) {

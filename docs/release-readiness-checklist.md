@@ -27,6 +27,7 @@ Use this checklist before each production release.
 - [ ] `npx supabase db push` is completed for the target environment.
 - [ ] `015_monthly_close_reviews.sql` is included and applied.
 - [ ] `016_income_tracking.sql` is included and applied.
+- [ ] `017_savings_tracking.sql` is included and applied.
 - [ ] RLS policies are active for migrated tables.
 
 ### Migration mismatch safety
@@ -80,6 +81,8 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Excel export works.
 - [ ] Import preview + merge flow works with trusted test backup files.
 - [ ] Team confirms backups contain sensitive finance data and are stored privately.
+- [ ] Supabase JSON export includes `savingsGoals` and `savingsContributions`.
+- [ ] Excel export includes `Savings Goals` and `Savings Contributions`.
 
 ## 9) Destructive Action Safety
 
@@ -109,6 +112,7 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - Migration history mismatches require careful repair workflow, not production reset.
 - Real-data readiness is currently limited by missing native income/savings/cash-flow tracking; releases before that feature is implemented should not claim full household cash-flow completeness.
 - Income export is included in Supabase JSON/Excel output, but income merge-import behavior is not yet a complete dedicated workflow with income-specific conflict handling.
+- Savings export is included in Supabase JSON/Excel output, but savings merge-import behavior is not yet a complete dedicated workflow with savings-specific conflict handling.
 
 ## What Not To Test On Real Data
 
