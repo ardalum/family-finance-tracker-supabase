@@ -1,6 +1,7 @@
-import { CheckCircle2, Mail, ShieldAlert } from "lucide-react";
+import { CheckCircle2, ShieldAlert } from "lucide-react";
 import { appMetadata } from "../../../app/appMetadata.js";
 import { AppBrandMark, AppBrandName } from "../../../components/branding/index.js";
+import ContactCard from "../../../components/layout/ContactCard.jsx";
 import InfoCard from "../../../components/layout/InfoCard.jsx";
 import PageHero from "../../../components/layout/PageHero.jsx";
 import Card from "../../../components/ui/Card.jsx";
@@ -72,15 +73,7 @@ export default function AboutWalletFlow() {
         ))}
       </InfoCard>
 
-      <InfoCard icon={Mail} title="Support / Contact">
-        <p className="mt-3 text-sm text-text-muted">For questions, feedback, or support:</p>
-        <a
-          className="mt-1 inline-flex text-sm font-semibold text-brand-primary transition hover:text-brand-accent"
-          href={`mailto:${appMetadata.supportEmail}`}
-        >
-          {appMetadata.supportEmail}
-        </a>
-      </InfoCard>
+      <ContactCard title="Support / Contact" prompt="For questions, feedback, or support:" />
     </section>
   );
 }
