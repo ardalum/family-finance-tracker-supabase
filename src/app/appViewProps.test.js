@@ -61,10 +61,32 @@ const input = {
   setSelectedSpendingMonth: callback,
   setSelectedRecurringMonth: callback,
   setSelectedInsightsMonth: callback,
+  createSupabaseCreditCard: callback,
+  updateSupabaseCreditCard: callback,
+  deleteSupabaseCreditCard: callback,
+  saveSupabaseMonthlyBalance: callback,
   refreshData: callback,
-  refreshSupabaseDataAfterImport: callback,
+  createSupabaseBudget: callback,
+  updateSupabaseBudget: callback,
+  deleteSupabaseBudget: callback,
   addDefaultBudgetsToSupabase: callback,
   copyPreviousMonthBudgetsToSupabase: callback,
+  importLocalBudgetsToSupabase: callback,
+  createSupabaseTransaction: callback,
+  updateSupabaseTransaction: callback,
+  deleteSupabaseTransaction: callback,
+  importLocalSpendingToSupabase: callback,
+  createSupabaseRecurringPayment: callback,
+  updateSupabaseRecurringPayment: callback,
+  deleteSupabaseRecurringPayment: callback,
+  markSupabaseRecurringPaid: callback,
+  markSupabaseRecurringUnpaid: callback,
+  skipSupabaseRecurringPayment: callback,
+  importLocalRecurringToSupabase: callback,
+  refreshSupabaseDataAfterImport: callback,
+  createHouseholdProfile: callback,
+  saveHouseholdProfile: callback,
+  deactivateProfile: callback,
   addDefaultProfiles: callback,
 };
 
@@ -106,6 +128,16 @@ describe("app view props", () => {
     assert.equal(props.creditCardProps.onBalanceMonthChange, input.setSelectedBalanceMonth);
   });
 
+  it("maps credit card mutation callbacks", () => {
+    const props = createAppViewProps(input);
+
+    assert.equal(props.creditCardProps.onCreateCard, input.createSupabaseCreditCard);
+    assert.equal(props.creditCardProps.onUpdateCard, input.updateSupabaseCreditCard);
+    assert.equal(props.creditCardProps.onDeleteCard, input.deleteSupabaseCreditCard);
+    assert.equal(props.creditCardProps.onMonthlyBalanceChange, input.saveSupabaseMonthlyBalance);
+    assert.equal(props.creditCardProps.onDataChange, input.refreshData);
+  });
+
   it("maps budget props", () => {
     const props = createAppViewProps(input);
 
@@ -123,6 +155,15 @@ describe("app view props", () => {
     );
   });
 
+  it("maps budget mutation and import callbacks", () => {
+    const props = createAppViewProps(input);
+
+    assert.equal(props.budgetProps.onCreateBudget, input.createSupabaseBudget);
+    assert.equal(props.budgetProps.onUpdateBudget, input.updateSupabaseBudget);
+    assert.equal(props.budgetProps.onDeleteBudget, input.deleteSupabaseBudget);
+    assert.equal(props.budgetProps.onImportLocalBudgets, input.importLocalBudgetsToSupabase);
+  });
+
   it("maps spending props", () => {
     const props = createAppViewProps(input);
 
@@ -137,6 +178,18 @@ describe("app view props", () => {
     assert.equal(props.spendingProps.categoriesLoading, input.spendingCategoriesLoading);
     assert.equal(props.spendingProps.categoriesError, input.spendingCategoriesError);
     assert.equal(props.spendingProps.onMonthChange, input.setSelectedSpendingMonth);
+  });
+
+  it("maps spending mutation and import callbacks", () => {
+    const props = createAppViewProps(input);
+
+    assert.equal(props.spendingProps.onCreateTransaction, input.createSupabaseTransaction);
+    assert.equal(props.spendingProps.onUpdateTransaction, input.updateSupabaseTransaction);
+    assert.equal(props.spendingProps.onDeleteTransaction, input.deleteSupabaseTransaction);
+    assert.equal(
+      props.spendingProps.onImportLocalTransactions,
+      input.importLocalSpendingToSupabase,
+    );
   });
 
   it("maps recurring props", () => {
@@ -157,6 +210,30 @@ describe("app view props", () => {
     assert.equal(props.recurringProps.onMonthChange, input.setSelectedRecurringMonth);
   });
 
+  it("maps recurring mutation and status callbacks", () => {
+    const props = createAppViewProps(input);
+
+    assert.equal(
+      props.recurringProps.onCreateRecurringPayment,
+      input.createSupabaseRecurringPayment,
+    );
+    assert.equal(
+      props.recurringProps.onUpdateRecurringPayment,
+      input.updateSupabaseRecurringPayment,
+    );
+    assert.equal(
+      props.recurringProps.onDeleteRecurringPayment,
+      input.deleteSupabaseRecurringPayment,
+    );
+    assert.equal(props.recurringProps.onMarkRecurringPaid, input.markSupabaseRecurringPaid);
+    assert.equal(props.recurringProps.onMarkRecurringUnpaid, input.markSupabaseRecurringUnpaid);
+    assert.equal(props.recurringProps.onSkipRecurringPayment, input.skipSupabaseRecurringPayment);
+    assert.equal(
+      props.recurringProps.onImportLocalRecurringPayments,
+      input.importLocalRecurringToSupabase,
+    );
+  });
+
   it("maps household settings props", () => {
     const props = createAppViewProps(input);
 
@@ -170,6 +247,15 @@ describe("app view props", () => {
       input.householdProfilesSaving,
     );
     assert.equal(props.householdSettingsProps.householdProfilesError, input.householdProfilesError);
+    assert.equal(props.householdSettingsProps.onCreateDefaultProfiles, input.addDefaultProfiles);
+  });
+
+  it("maps household settings mutation callbacks", () => {
+    const props = createAppViewProps(input);
+
+    assert.equal(props.householdSettingsProps.onCreateProfile, input.createHouseholdProfile);
+    assert.equal(props.householdSettingsProps.onUpdateProfile, input.saveHouseholdProfile);
+    assert.equal(props.householdSettingsProps.onDeactivateProfile, input.deactivateProfile);
     assert.equal(props.householdSettingsProps.onCreateDefaultProfiles, input.addDefaultProfiles);
   });
 
