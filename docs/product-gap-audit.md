@@ -64,6 +64,7 @@ This audit reviews WalletFlow as of Phase 7 across these workflows:
 - Monthly Close Checklist with auto-detected completion signals and manual confirmations.
 - Month reviewed state with clear reopen path.
 - Checklist-aware reminders on Dashboard (for incomplete month close items).
+- Income, savings, and monthly cash-flow tracking (manual-entry MVP) so households can track inflows, transfers to savings, and surplus/deficit status.
 
 ### Nice-To-Have (Later)
 

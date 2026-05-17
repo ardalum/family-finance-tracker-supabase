@@ -97,6 +97,7 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - Manual production smoke and real-device mobile checks are still required release-by-release.
 - Destructive-action validation must remain isolated to test accounts/households.
 - Migration history mismatches require careful repair workflow, not production reset.
+- Real-data readiness is currently limited by missing native income/savings/cash-flow tracking; releases before that feature is implemented should not claim full household cash-flow completeness.
 
 ## What Not To Test On Real Data
 
