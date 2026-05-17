@@ -99,6 +99,22 @@ Use this checklist before each production release.
 - [ ] Savings goals/contributions do not change Budget totals.
 - [ ] Inactive savings goals are not shown in active goal selector options.
 
+## Accounts
+
+- [ ] Accounts page opens from Dashboard quick action and Account menu Tools.
+- [ ] Add cash account works.
+- [ ] Edit cash account works.
+- [ ] Delete cash account works with confirmation wording.
+- [ ] Add account balance snapshot works.
+- [ ] Edit account balance snapshot works.
+- [ ] Delete account balance snapshot works with confirmation wording.
+- [ ] Month switching filters snapshot list correctly.
+- [ ] Liquid cash total updates correctly for selected month snapshots.
+- [ ] Account snapshots do not change Spending totals.
+- [ ] Account snapshots do not change Income totals.
+- [ ] Account snapshots do not change Savings totals.
+- [ ] Account snapshots do not change Budget totals.
+
 ## Backup / Restore
 
 - [ ] Export backup works.
@@ -109,6 +125,8 @@ Use this checklist before each production release.
 - [ ] Excel export includes `Income Sources` and `Income Entries` sheets.
 - [ ] Supabase JSON export includes `savingsGoals` and `savingsContributions`.
 - [ ] Excel export includes `Savings Goals` and `Savings Contributions` sheets.
+- [ ] Supabase JSON export includes `cashAccounts` and `accountBalanceSnapshots`.
+- [ ] Excel export includes `Cash Accounts` and `Account Balance Snapshots` sheets.
 
 ## Household / Settings
 

@@ -123,3 +123,11 @@ This audit reviews WalletFlow as of Phase 7 across these workflows:
 - Account balance snapshots and net worth tracking are now explicitly documented as a remaining product gap in `docs/account-balances-net-worth-design.md`.
 - WalletFlow still lacks manual account/liability snapshot workflows for true household position tracking (assets vs liabilities).
 - Net worth and liquid-cash trends remain open scope pending snapshot data model + MVP implementation.
+
+## Phase 30 Status Update
+
+- Cash account snapshots are now **partially addressed** with manual cash accounts, monthly/date snapshots, and an Accounts workspace entry point.
+- Remaining product gaps for this pillar:
+  - liability/debt snapshots
+  - full net worth summary
+  - net worth/liquid-cash trend reporting

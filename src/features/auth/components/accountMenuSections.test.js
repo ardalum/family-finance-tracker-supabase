@@ -18,7 +18,7 @@ describe("account menu sections", () => {
       [
         ["Account Settings", "Data & Privacy"],
         ["Household Settings"],
-        ["Income", "Savings", "Backup & Restore", "App Settings"],
+        ["Income", "Savings", "Accounts", "Backup & Restore", "App Settings"],
         ["Help / Support", "Release Notes", "About WalletFlow"],
       ],
     );
@@ -30,7 +30,7 @@ describe("account menu sections", () => {
       [
         ["account-settings", "privacy-policy"],
         ["household-settings"],
-        ["income", "savings", "backup", "app-settings"],
+        ["income", "savings", "accounts", "backup", "app-settings"],
         ["help-support", "release-notes", "about"],
       ],
     );

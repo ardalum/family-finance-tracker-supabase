@@ -252,7 +252,8 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
             <p className="mt-1 max-w-3xl text-sm text-gray-600">
               Export the finance data for your active household from Supabase. This includes cards,
               monthly balances, card statements, budgets, transactions, splits, recurring payments,
-              and recurring instances. Auth tokens, passwords, and secret keys are not included.
+              recurring instances, income, savings, and cash-account snapshots. Auth tokens,
+              passwords, and secret keys are not included.
             </p>
           </div>
 

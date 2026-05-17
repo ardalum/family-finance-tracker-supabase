@@ -11,6 +11,8 @@ export function createFeatureAppData({
   recurringStatusByMonth,
   incomeEntries,
   savingsContributions,
+  cashAccounts,
+  accountBalanceSnapshots,
 } = {}) {
   return {
     ...appData,
@@ -28,6 +30,8 @@ export function createFeatureAppData({
     recurringTransactions: transactions,
     incomeEntries,
     savingsContributions,
+    cashAccounts,
+    accountBalanceSnapshots,
   };
 }
 
