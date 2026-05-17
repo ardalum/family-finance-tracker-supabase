@@ -4,14 +4,20 @@ import { AppBrandMark, AppBrandName } from "../../../components/branding/index.j
 import InfoCard from "../../../components/layout/InfoCard.jsx";
 import PageHero from "../../../components/layout/PageHero.jsx";
 import Card from "../../../components/ui/Card.jsx";
+import {
+  aboutDisclaimerParagraphs,
+  aboutIntroDescription,
+  aboutTrackingItems,
+} from "../aboutPageData.js";
 
-const trackingItems = [
-  "Track credit card limits, balances, due dates, and payment status",
-  "Manage monthly budget categories",
-  "Record and review transactions",
-  "Track recurring payments such as rent, subscriptions, utilities, insurance, and other fixed bills",
-  "Review spending patterns through dashboard summaries and insights",
-];
+function AboutIntroDescription() {
+  return (
+    <>
+      <span className="block text-base font-medium text-text-soft">{appMetadata.tagline}</span>
+      <span className="mt-4 block">{aboutIntroDescription}</span>
+    </>
+  );
+}
 
 export default function AboutWalletFlow() {
   return (
@@ -19,25 +25,14 @@ export default function AboutWalletFlow() {
       <PageHero
         iconSlot={<AppBrandMark variant="lg" />}
         title={<AppBrandName />}
-        description={
-          <>
-            <span className="block text-base font-medium text-text-soft">
-              {appMetadata.tagline}
-            </span>
-            <span className="mt-4 block">
-              WalletFlow is a practical household finance tracker designed to help users organize
-              credit cards, monthly budgets, transactions, and recurring payments in one clean
-              dashboard.
-            </span>
-          </>
-        }
+        description={<AboutIntroDescription />}
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="p-5">
           <h3 className="text-lg font-semibold text-text-main">What WalletFlow Helps Track</h3>
           <ul className="mt-4 grid gap-3">
-            {trackingItems.map((item) => (
+            {aboutTrackingItems.map((item) => (
               <li key={item} className="flex gap-3 text-sm leading-6 text-text-soft">
                 <CheckCircle2
                   size={18}
@@ -70,16 +65,11 @@ export default function AboutWalletFlow() {
       </div>
 
       <InfoCard icon={ShieldAlert} iconClassName="text-status-warning" title="Disclaimer">
-        <p className="mt-3 text-sm leading-6 text-text-muted">
-          WalletFlow is for personal tracking and organization only. It does not provide financial,
-          legal, tax, or investment advice. Always verify balances, due dates, payments, and account
-          details with your financial institutions, lenders, service providers, or qualified
-          professionals.
-        </p>
-        <p className="mt-3 text-sm leading-6 text-text-muted">
-          WalletFlow only tracks information that users enter into the app. It is not a bank,
-          lender, payment processor, or financial institution.
-        </p>
+        {aboutDisclaimerParagraphs.map((paragraph) => (
+          <p key={paragraph} className="mt-3 text-sm leading-6 text-text-muted">
+            {paragraph}
+          </p>
+        ))}
       </InfoCard>
 
       <InfoCard icon={Mail} title="Support / Contact">
