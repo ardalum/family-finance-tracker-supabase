@@ -16,6 +16,7 @@ Scope: Design-only planning for account balance snapshots and net worth (no impl
   - liability/debt snapshot workflows
   - full net-worth summary and trends
   - net-worth Insights reporting
+- Liability/debt snapshot design is now documented separately in `docs/liability-debt-snapshots-design.md` (Phase 32).
 
 ## 1. Problem Statement
 

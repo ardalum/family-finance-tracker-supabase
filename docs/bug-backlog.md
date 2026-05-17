@@ -53,4 +53,5 @@ Last updated: 2026-05-17 (Phase 16 real-data readiness review)
 - Account balance snapshots and net worth tracking remain a product capability gap (design documented, implementation pending), not a bug in existing totals.
 - Cash account snapshots MVP is now implemented for manual tracking and remains separate from spending/income/savings/budget totals; this is a product capability increment, not a bug fix.
 - Remaining account-position product gaps are liability/debt snapshots and full net worth workflows.
+- Liability/debt snapshots are a documented product capability gap (see `docs/liability-debt-snapshots-design.md`), not a bug in existing card/budget/spending calculations.
 - Remaining income/savings-related product gaps: dedicated import/merge conflict workflows, emergency-fund specific guidance, and deeper cash-flow modeling.

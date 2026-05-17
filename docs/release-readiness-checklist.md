@@ -137,6 +137,7 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - Savings export is included in Supabase JSON/Excel output, but savings merge-import behavior is not yet a complete dedicated workflow with savings-specific conflict handling.
 - Dashboard cash-flow MVP estimated leftover intentionally excludes unpaid card balance carry until card-payment cash modeling is explicitly added.
 - Liability/debt snapshots and full net-worth reporting are not yet implemented; releases should not claim complete household position/net-worth coverage.
+- Current release readiness excludes full liability/debt account tracking and final net-worth calculations until Phase 33+ implementation is complete.
 
 ## What Not To Test On Real Data
 
