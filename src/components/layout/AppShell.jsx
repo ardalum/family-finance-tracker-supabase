@@ -1,4 +1,4 @@
-import { appMetadata } from "../../app/appMetadata.js";
+﻿import { appMetadata } from "../../app/appMetadata.js";
 import { AppBrandMark, AppBrandName } from "../branding/index.js";
 import { footerLinks } from "./footerLinks.js";
 import Navigation from "./Navigation.jsx";
@@ -82,6 +82,7 @@ function FooterLink({ targetView, onNavigate, children }) {
       data-target-view={targetView}
       title={isEnabled ? undefined : "Coming soon"}
       aria-disabled={isEnabled ? undefined : "true"}
+      aria-label={`Open ${children}`}
       onClick={(event) => {
         event.preventDefault();
         onNavigate?.(targetView);

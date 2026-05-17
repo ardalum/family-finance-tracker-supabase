@@ -39,6 +39,7 @@ export default function Navigation({ activeView, onChange }) {
             onFocus={() => setHoveredId(item.id)}
             onBlur={() => setHoveredId("")}
             aria-current={isActive ? "page" : undefined}
+            aria-label={`Go to ${item.label}`}
             title={item.label}
           >
             <Icon size={16} style={iconStyle} aria-hidden="true" />

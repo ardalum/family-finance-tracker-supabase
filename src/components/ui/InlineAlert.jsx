@@ -6,7 +6,11 @@ export default function InlineAlert({ children, tone = "danger", className = "" 
   };
 
   return (
-    <div className={`rounded-xl border px-3 py-2 text-sm ${tones[tone]} ${className}`}>
+    <div
+      className={`rounded-xl border px-3 py-2 text-sm ${tones[tone]} ${className}`}
+      role={tone === "danger" || tone === "warning" ? "alert" : "status"}
+      aria-live={tone === "danger" || tone === "warning" ? "assertive" : "polite"}
+    >
       {children}
     </div>
   );
