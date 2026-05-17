@@ -1,11 +1,6 @@
 import {
   ClipboardList,
-  HandCoins,
-  PiggyBank,
-  Landmark,
   WalletCards,
-  Scale,
-  CreditCard,
   DatabaseBackup,
   Home,
   Info,
@@ -53,36 +48,6 @@ export const accountMenuSections = [
         label: "Financial Position",
         description: "Income, savings, cash, debt, and net worth in one summary view.",
         view: "financial-position",
-      },
-      {
-        icon: HandCoins,
-        label: "Income",
-        description: "Manual income sources and monthly income entries.",
-        view: "income",
-      },
-      {
-        icon: PiggyBank,
-        label: "Savings",
-        description: "Manual savings goals and monthly contributions.",
-        view: "savings",
-      },
-      {
-        icon: Landmark,
-        label: "Accounts",
-        description: "Manual cash accounts and monthly balance snapshots.",
-        view: "accounts",
-      },
-      {
-        icon: Scale,
-        label: "Net Worth",
-        description: "Assets minus liabilities from manual monthly snapshots.",
-        view: "net-worth",
-      },
-      {
-        icon: CreditCard,
-        label: "Liabilities / Debt",
-        description: "Manual debt accounts and liability balance snapshots.",
-        view: "liabilities",
       },
       {
         icon: DatabaseBackup,

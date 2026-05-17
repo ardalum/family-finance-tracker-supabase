@@ -1,6 +1,6 @@
 # Bug Backlog
 
-Last updated: 2026-05-17 (Phase 48 release readiness and production QA pass)
+Last updated: 2026-05-17 (Phase 50 production UX bug audit and critical fixes)
 
 ## Triage Legend
 
@@ -30,28 +30,31 @@ Last updated: 2026-05-17 (Phase 48 release readiness and production QA pass)
 
 ## Fixed (recent notable)
 
-- Legacy backup copy implying Supabase import was unavailable (`fixed`, Phase 13)
-- Monthly Close reviewed/reopen clarity copy (`fixed`, Phase 11)
-- Account Settings dead-end navigation target (`fixed`, Phase 7)
-- App Settings non-functional controls surfaced as active (`fixed`, Phase 7)
-- Monthly balances wording consistency cleanup (`fixed`, Phase 6A)
-- Release notes/documentation lag for monthly-close hardening (`fixed`, Phase 14)
-- Backup/export full-finance section coverage omissions (`fixed`, Phase 46)
+- Account menu Tools length reduced to compact entries (`fixed`, Phase 50)
+- Browser back/forward support added for app views via hash-backed navigation (`fixed`, Phase 50)
+- Monthly-balance false `Checked � No balance` state after clearing balance fixed (`fixed`, Phase 50)
+- Numeric amount overwrite friction with default `0` reduced via focus-select behavior (`fixed`, Phase 50)
 - Restore/import validation hardening gaps for JSON shape safety (`fixed`, Phase 47)
+- Backup/export full-finance section coverage omissions (`fixed`, Phase 46)
 
 ## UX/Product Backlog (Not Bugs)
 
 - Future navigation promotion decision for Financial Position remains backlog scope (see `docs/financial-position-navigation-decision.md`).
-- Account-menu Tools density may need later IA tuning as scope grows.
+- Larger IA redesign for secondary tools remains future scope beyond compact menu cleanup.
 - Merge-import intentionally remains non-destructive (add/skip) rather than overwrite restore.
 
 ## Deferred Enhancements
 
-- Full overwrite restore mode with explicit conflict controls (future product enhancement).
-- Deeper automated reconciliation between liabilities and card statement debt (future product enhancement).
-- Broader long-horizon analytics and forecasting overlays (future product enhancement).
+- Full overwrite restore mode with explicit conflict controls.
+- Deeper automated reconciliation between liabilities and card statement debt.
+- Broader long-horizon analytics and forecasting overlays.
 
 ## Release Blocker Summary
 
-- No open code-level `critical` or `high` blockers identified in this Phase 48 pass.
+- No open code-level `critical` or `high` blockers identified after Phase 50 fixes.
 - Remaining deferred items are manual QA evidence tasks and future product enhancements.
+
+## Deployment risk tracking
+
+- GitHub Pages environment secret drift (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) remains a deployment risk and requires release-by-release smoke verification.
+- Supabase migration drift between environments remains a deployment risk and requires pre-release migration list checks.

@@ -125,3 +125,7 @@ No-Go if any are true:
 - navigation targets are broken
 - backup/export/restore regressions are detected
 - unresolved critical/high issues remain open
+
+## Phase 50 production UX follow-up
+
+Production smoke testing surfaced UX/navigation defects (account-menu length, browser history navigation, monthly-balance zero-check state, and numeric input overwrite friction). Phase 50 addressed these as critical/high-priority release blockers.

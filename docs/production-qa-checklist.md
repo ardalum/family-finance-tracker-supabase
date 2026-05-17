@@ -256,3 +256,27 @@ Use this checklist before each production release.
 ## Mobile Overflow Guard
 
 - [ ] No obvious horizontal scrolling on Dashboard, Cards, Spending, Bills, Insights, and Financial Position at common mobile widths.
+
+## Browser History Navigation
+
+- [ ] Dashboard -> Budget then browser Back returns to Dashboard.
+- [ ] Dashboard -> Financial Position then browser Back returns to Dashboard.
+- [ ] Browser Forward restores the later view after Back.
+- [ ] Direct hash URL opens expected view (for example #/spending).
+- [ ] Invalid hash falls back safely without app crash.
+
+## Account Menu UX
+
+- [ ] Account menu Tools section remains compact (Financial Position, Backup & Restore, App Settings).
+- [ ] Detailed finance pages remain reachable from Financial Position links.
+
+## Monthly Balance Check-State Safety
+
+- [ ] No monthly-balance entry renders Not checked.
+- [ ] Entering and then clearing balance does not leave false Checked � No balance.
+- [ ] Explicit Mark checked, no balance action renders Checked � No balance.
+
+## Amount Input Typing UX
+
+- [ ] Numeric amount fields allow direct typing over default   on focus.
+- [ ] Clearing amount fields does not create false complete/paid/checked states.

@@ -17,13 +17,22 @@ describe("credit card status", () => {
     assert.equal(status.isNoBalance, false);
   });
 
-  it("marks saved zero balance entries as checked with no balance", () => {
+  it("marks explicit paid zero-balance entries as checked with no balance", () => {
     const status = getRowStatus(card, "2099-05", { balance: 0, paid: true });
 
-    assert.equal(status.label, "Checked · No balance");
+    assert.equal(status.label, "Checked � No balance");
     assert.equal(status.isNotChecked, false);
     assert.equal(status.isCheckedNoBalance, true);
     assert.equal(status.isNoBalance, true);
+  });
+
+  it("keeps zero-balance unpaid entries as not checked", () => {
+    const status = getRowStatus(card, "2099-05", { balance: 0, paid: false });
+
+    assert.equal(status.label, "Not checked");
+    assert.equal(status.isNotChecked, true);
+    assert.equal(status.isCheckedNoBalance, false);
+    assert.equal(status.isNoBalance, false);
   });
 
   it("marks positive paid balances as paid", () => {

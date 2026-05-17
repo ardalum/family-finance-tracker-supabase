@@ -5,6 +5,7 @@ export function getRowStatus(card, monthKey, entry) {
   const hasEntry = Boolean(entry);
   const balance = Number(entry?.balance || 0);
   const paid = isStatementPaid(entry);
+  const hasExplicitPaidMarker = Boolean(entry?.paid);
   const daysUntilDue = getStatementDaysUntilDue(entry, monthKey, card);
 
   if (!hasEntry) {
@@ -19,15 +20,27 @@ export function getRowStatus(card, monthKey, entry) {
     };
   }
 
-  if (balance <= 0) {
+  if (balance <= 0 && hasExplicitPaidMarker) {
     return {
-      label: "Checked · No balance",
+      label: "Checked � No balance",
       rowClass: "bg-white",
       badgeClass: "bg-status-successBg text-status-successDark ring-status-successBg",
       balanceClass: "text-text-main",
       isNoBalance: true,
       isNotChecked: false,
       isCheckedNoBalance: true,
+    };
+  }
+
+  if (balance <= 0) {
+    return {
+      label: "Not checked",
+      rowClass: "bg-white",
+      badgeClass: "bg-app-muted text-text-muted ring-app-muted",
+      balanceClass: "text-text-main",
+      isNoBalance: false,
+      isNotChecked: true,
+      isCheckedNoBalance: false,
     };
   }
 

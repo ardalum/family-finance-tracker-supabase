@@ -199,3 +199,26 @@ export async function upsertMonthlyBalance(householdId, monthKey, card, patch) {
   await upsertCardStatement(client, householdId, monthKey, card, normalizedPatch);
   return data;
 }
+
+export async function deleteMonthlyBalance(householdId, monthKey, card) {
+  const client = requireSupabase();
+  const creditCardId = getSupabaseCardId(card);
+
+  const { error: balanceError } = await client
+    .from("monthly_card_balances")
+    .delete()
+    .eq("household_id", householdId)
+    .eq("credit_card_id", creditCardId)
+    .eq("month_key", monthKey);
+
+  if (balanceError) throw balanceError;
+
+  const { error: statementError } = await client
+    .from("card_statements")
+    .delete()
+    .eq("household_id", householdId)
+    .eq("credit_card_id", creditCardId)
+    .eq("month_key", monthKey);
+
+  if (statementError) throw statementError;
+}
