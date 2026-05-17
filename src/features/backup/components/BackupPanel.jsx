@@ -132,6 +132,7 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
         backup: result.backup,
         preview: result.preview,
         fileName: file.name,
+        warnings: result.warnings ?? [],
       });
       showMessage(result);
     } finally {
@@ -336,6 +337,12 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
                   <span className="font-medium text-gray-900">{cloudImport.fileName}</span>
                 </div>
                 <ImportSummary counts={cloudImport.preview} mode="preview" />
+                {cloudImport.warnings?.length ? (
+                  <ValidationWarnings
+                    warnings={cloudImport.warnings}
+                    title="Validation warnings before merge"
+                  />
+                ) : null}
                 {cloudImport.result ? (
                   <div className="grid gap-3 rounded-md border border-emerald-200 bg-emerald-50 p-3">
                     <div>
@@ -349,6 +356,11 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
                   </div>
                 ) : (
                   <div className="grid gap-3">
+                    <div className="rounded-md border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-800">
+                      Merge import adds missing records and skips already-matched records. Computed
+                      summaries (cash-flow/Net Worth/Financial Position/Insights outputs) are not
+                      restored as standalone records.
+                    </div>
                     <label className="flex gap-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
                       <input
                         className="mt-0.5 h-4 w-4 rounded border-amber-300 text-sky-700 focus:ring-sky-700"
@@ -619,6 +631,21 @@ function Message({ message }) {
       }`}
     >
       {message.text}
+    </div>
+  );
+}
+
+function ValidationWarnings({ warnings, title }) {
+  return (
+    <div className="rounded-md border border-amber-200 bg-amber-50 p-3">
+      <p className="text-sm font-semibold text-amber-900">{title}</p>
+      <div className="mt-2 grid gap-1">
+        {warnings.map((warning) => (
+          <p key={warning} className="text-sm text-amber-800">
+            - {warning}
+          </p>
+        ))}
+      </div>
     </div>
   );
 }

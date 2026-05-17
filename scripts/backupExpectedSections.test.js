@@ -8,8 +8,8 @@ function read(path) {
 
 describe("backup expected sections", () => {
   it("includes full persisted finance sections in expected Supabase backup sections", () => {
-    const source = read("src/features/backup/backupService.js");
-    assert.equal(source.includes("EXPECTED_SUPABASE_SECTIONS"), true);
+    const source = read("src/features/backup/backupValidation.js");
+    assert.equal(source.includes("PERSISTED_SUPABASE_SECTIONS"), true);
     assert.equal(source.includes('"householdProfiles"'), true);
     assert.equal(source.includes('"creditCards"'), true);
     assert.equal(source.includes('"monthlyCardBalances"'), true);

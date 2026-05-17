@@ -69,3 +69,4 @@ Last updated: 2026-05-17 (Phase 16 real-data readiness review)
 - Remaining navigation-density concern is primarily account-menu Tools sprawl, which remains a future UX/product IA tuning task (not a calculation bug).
 - Future decision on promoting Financial Position into main nav is documented in `docs/financial-position-navigation-decision.md` and remains a UX/product IA backlog item (not a bug).
 - Backup/export full-finance coverage is now audited in `docs/backup-export-finance-coverage-audit.md`; remaining risk is operational QA discipline after merge-import (manual verification), not missing persisted finance sections.
+- Restore/import validation hardening is now implemented for JSON parsing, empty backup rejection, unknown/computed-section warnings, and safer shape handling; remaining risk is that merge-import is intentionally non-destructive (no bulk overwrite mode), which is a product-scope tradeoff rather than a calculation bug.

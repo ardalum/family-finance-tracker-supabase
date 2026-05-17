@@ -137,3 +137,21 @@ Remaining caution areas:
 
 - merge behavior intentionally prefers non-destructive skip/insert patterns, so strict overwrite use-cases remain out of scope
 - manual post-import verification is still required in production QA
+
+## 8) Phase 47 Restore Safety Hardening
+
+Restore/import validation now includes:
+
+- explicit JSON parse guard with user-friendly error copy
+- empty persisted-record backup rejection
+- required-section missing detection for expected schema versions
+- warnings for unknown/future sections (ignored, not blindly restored)
+- warnings for computed-only sections (ignored for persisted restore)
+- continued strict record-shape and reference validation before merge
+
+Current restore behavior summary:
+
+- merge import only (add missing, skip duplicates, no destructive replace)
+- household-scoped import required (active household)
+- computed sections are never restored as standalone persisted records
+- unknown sections do not crash import and are ignored with warnings
