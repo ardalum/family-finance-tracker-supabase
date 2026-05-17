@@ -30,7 +30,7 @@ function StatusBadge({ status }) {
   if (status === "missing-income") {
     return (
       <span className="inline-flex w-fit rounded-full bg-status-warningBg px-3 py-1 text-xs font-semibold text-status-warningDark">
-        Missing income
+        Missing income data
       </span>
     );
   }
@@ -38,14 +38,14 @@ function StatusBadge({ status }) {
   if (status === "negative") {
     return (
       <span className="inline-flex w-fit rounded-full bg-status-dangerBg px-3 py-1 text-xs font-semibold text-status-danger">
-        Negative
+        Negative cash flow
       </span>
     );
   }
 
   return (
     <span className="inline-flex w-fit rounded-full bg-status-successBg px-3 py-1 text-xs font-semibold text-status-successDark">
-      Positive
+      Positive cash flow
     </span>
   );
 }
@@ -75,6 +75,12 @@ export default function DashboardCashFlowSummary({
         <p className="mt-1 text-sm text-text-muted">
           Savings lowers available cash here, but does not count as spending.
         </p>
+        <p className="mt-1 text-xs text-text-muted">
+          Estimated leftover formula: Income - spending - recurring remaining - savings.
+        </p>
+        <p className="mt-1 text-xs text-text-muted">
+          Unpaid card balances are not included in estimated leftover in this MVP.
+        </p>
       </div>
 
       <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-5">
@@ -95,6 +101,16 @@ export default function DashboardCashFlowSummary({
       {!cashFlow.hasIncomeData ? (
         <div className="px-4 pb-1 text-sm text-status-warningDark">
           Add income entries to calculate estimated leftover.
+        </div>
+      ) : null}
+      {!cashFlow.hasSavingsData ? (
+        <div className="px-4 pb-1 text-xs text-text-muted">
+          No savings contributions recorded for this month yet.
+        </div>
+      ) : null}
+      {!cashFlow.hasRecurringRemaining ? (
+        <div className="px-4 pb-1 text-xs text-text-muted">
+          No recurring bills remaining for this month.
         </div>
       ) : null}
 

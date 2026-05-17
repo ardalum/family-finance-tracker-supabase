@@ -81,6 +81,8 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Cash-flow status label is clear (`Positive`, `Negative`, or `Missing income`).
 - [ ] Missing-income guidance appears when selected month has no income entries.
 - [ ] Estimated leftover uses income, spending, recurring remaining, and savings contribution totals.
+- [ ] Cash-flow formula helper text is visible and understandable.
+- [ ] Cash-flow limitation note confirms unpaid card balances are excluded in MVP leftover.
 - [ ] Cash-flow actions route to Income, Savings, Spending, and Bills workspaces.
 
 ## 8) Backup and Export Verification
