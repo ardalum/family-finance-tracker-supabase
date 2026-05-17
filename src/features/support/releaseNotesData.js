@@ -1,5 +1,11 @@
 import { appMetadata } from "../../app/appMetadata.js";
 
+export const releaseNotesHero = {
+  eyebrow: `WalletFlow v${appMetadata.version}`,
+  title: "Release Notes",
+  description: "Review recent WalletFlow changes, cleanup passes, and user-facing improvements.",
+};
+
 export const releaseNotes = [
   {
     version: appMetadata.releaseLabel,
