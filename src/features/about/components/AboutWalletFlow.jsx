@@ -1,7 +1,6 @@
 import { CheckCircle2, Mail, ShieldAlert } from "lucide-react";
 import { appMetadata } from "../../../app/appMetadata.js";
-import AppBrandMark from "../../../components/branding/AppBrandMark.jsx";
-import AppBrandName from "../../../components/branding/AppBrandName.jsx";
+import { AppBrandMark, AppBrandName } from "../../../components/branding/index.js";
 import Card from "../../../components/ui/Card.jsx";
 
 const trackingItems = [
