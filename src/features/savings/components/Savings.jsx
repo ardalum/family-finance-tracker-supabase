@@ -164,6 +164,9 @@ export default function Savings({
               Savings contributions are tracked separately and do not change spending or budget
               totals.
             </p>
+            <p className="mt-1 text-sm text-text-muted">
+              Inactive goals stay in history but are hidden from new contribution goal options.
+            </p>
           </div>
           <Select
             label="Month"
@@ -409,7 +412,7 @@ export default function Savings({
                     <div>
                       <p className="text-sm font-semibold text-text-main">{goal.name}</p>
                       <p className="text-xs text-text-muted">
-                        {goal.goalType} � {goal.isActive ? "Active" : "Inactive"}
+                        {goal.goalType} - {goal.isActive ? "Active" : "Inactive"}
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -454,7 +457,7 @@ export default function Savings({
                       helperText={
                         Number(goal.targetAmount || 0) > 0
                           ? `${formatCurrency(totalSaved)} of ${formatCurrency(goal.targetAmount)} (${progress.percent}%)`
-                          : `${formatCurrency(totalSaved)} saved (target not set)`
+                          : `${formatCurrency(totalSaved)} saved. Set a target amount to track progress percentage.`
                       }
                     />
                   </div>
@@ -491,10 +494,10 @@ export default function Savings({
                 >
                   <div>
                     <p className="text-sm font-semibold text-text-main">
-                      {formatCurrency(contribution.amount)} � {contribution.contributionType}
+                      {formatCurrency(contribution.amount)} - {contribution.contributionType}
                     </p>
                     <p className="text-xs text-text-muted">
-                      {contribution.contributionDate} � {goalInfo.name}
+                      {contribution.contributionDate} - {goalInfo.name}
                       {goalInfo.isActive === false && goalInfo.name !== "Unlinked"
                         ? " (inactive)"
                         : ""}
