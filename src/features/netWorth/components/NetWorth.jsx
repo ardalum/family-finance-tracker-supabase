@@ -52,11 +52,19 @@ export default function NetWorth({
               {formatMonthLabel(selectedMonth)}
             </h2>
             <p className="mt-1 text-sm text-text-muted">
-              Net worth uses manual account and debt snapshots. It does not change spending, income,
-              savings, budget, or cash-flow totals.
+              Net worth uses manual account and debt snapshots.
             </p>
             <p className="mt-1 text-sm text-text-muted">
-              Credit card debt only appears here if entered as a liability snapshot.
+              Savings goals are not counted unless represented by account balance snapshots.
+            </p>
+            <p className="mt-1 text-sm text-text-muted">
+              Credit card balances are not counted unless entered as liability snapshots.
+            </p>
+            <p className="mt-1 text-sm text-text-muted">
+              Net worth does not change spending, income, savings, budget, or cash-flow totals.
+            </p>
+            <p className="mt-1 text-sm text-text-muted">
+              Use the month selector to review the latest snapshots recorded in that month.
             </p>
           </div>
           <Select
@@ -94,6 +102,11 @@ export default function NetWorth({
       <Card className="p-5">
         <p className="text-sm font-medium text-text-muted">Status</p>
         <p className="mt-1 text-base font-semibold text-text-main">{statusLabel}</p>
+        {summary.status === "negative" ? (
+          <p className="mt-1 text-sm text-text-muted">
+            Liabilities are currently higher than tracked assets for this month.
+          </p>
+        ) : null}
       </Card>
 
       {!summary.hasAnySnapshots ? (

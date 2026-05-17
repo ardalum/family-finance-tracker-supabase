@@ -32,6 +32,15 @@ Scope: Design-only planning for account balance snapshots and net worth (no impl
   - net worth trends/charts
   - expanded asset classes (home, retirement, investments)
 
+## Phase 36 Status Update
+
+- Net Worth Summary MVP is now hardened for QA/readiness with clearer empty/loading/error states and explicit inclusion/exclusion copy.
+- Net worth remains computed (not separately stored) from existing cash-account and liability snapshots.
+- Known limitations remain:
+  - no trend charts yet
+  - no broader asset classes in scope
+  - dependent on users keeping snapshots current
+
 ## 1. Problem Statement
 
 WalletFlow now covers transactions, budgets, recurring bills, cards, insights, income, savings goals, and a Dashboard cash-flow summary. It is still incomplete as a full household finance tracker because it does not capture real account balance snapshots or net worth over time.
