@@ -27,7 +27,7 @@ export default function AppShell({
                   <span className="text-brand-accent">Flow</span>
                 </h1>
                 <p className="mt-0.5 truncate text-xs text-text-muted sm:text-sm">
-                  Track your cards, budget, and spending in one clear place.
+                  {appMetadata.tagline}
                 </p>
               </div>
             </div>
