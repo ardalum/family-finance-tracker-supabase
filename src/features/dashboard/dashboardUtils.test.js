@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { getAlerts } from "./dashboardUtils.js";
+import { getAlerts, getDashboardData } from "./dashboardUtils.js";
 
 function createDashboardData(overrides = {}) {
   return {
@@ -156,5 +156,41 @@ describe("dashboard alerts", () => {
         text: "Total spending is higher than total budget.",
       },
     ]);
+  });
+});
+
+describe("dashboard data", () => {
+  it("keeps unpaid card rows first and summarizes statement and unpaid balances", () => {
+    const data = getDashboardData(
+      {
+        creditCards: [
+          { id: "cardPaid", name: "Paid Card", owner: "Arvin", dueDay: 8, isActive: true },
+          { id: "cardUnpaid", name: "Unpaid Card", owner: "Kristine", dueDay: 22, isActive: true },
+          { id: "cardZero", name: "Zero Card", owner: "Arvin", dueDay: 15, isActive: true },
+          { id: "inactive", name: "Inactive", owner: "Arvin", dueDay: 2, isActive: false },
+        ],
+        budgetsByMonth: {},
+        transactions: [],
+        recurringTransactions: [],
+        monthlyBalances: {
+          "2099-05": {
+            cardPaid: { balance: 125, paid: true },
+            cardUnpaid: { balance: 80, paid: false },
+            cardZero: { balance: 0, paid: false },
+            inactive: { balance: 500, paid: false },
+          },
+        },
+        recurringPayments: [],
+        recurringStatusByMonth: {},
+      },
+      "2099-05",
+    );
+
+    assert.equal(data.summary.statementBalanceTotal, 205);
+    assert.equal(data.summary.unpaidBalanceTotal, 80);
+    assert.deepEqual(
+      data.cardRows.map((row) => row.card.id),
+      ["cardUnpaid", "cardPaid", "cardZero"],
+    );
   });
 });
