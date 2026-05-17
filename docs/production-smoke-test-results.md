@@ -57,6 +57,7 @@ Test household used:
 ### Backup, Restore, and Destructive Flows
 
 - Backup/restore page reachability: PASS
+- Legacy backup copy clarity: PASS (legacy section now explicitly says Supabase cloud import is available above)
 - Reset household finance data (test data only): PENDING MANUAL PRODUCTION CHECK
 - Delete account warning/flow copy clarity: PASS (wording and separation from reset flow present)
 
