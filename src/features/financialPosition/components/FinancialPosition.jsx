@@ -110,12 +110,12 @@ export default function FinancialPosition({
   }, [summary.needsUpdate]);
 
   return (
-    <section className="grid gap-6">
-      <Card className="p-5">
+    <section className="grid gap-4 sm:gap-6">
+      <Card className="p-4 sm:p-5">
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-end">
           <div>
             <p className="text-sm font-medium text-text-muted">Financial position month</p>
-            <h2 className="mt-1 text-2xl font-semibold text-text-main">
+            <h2 className="mt-1 text-xl font-semibold text-text-main sm:text-2xl">
               {formatMonthLabel(selectedMonth)}
             </h2>
             <p className="mt-1 text-sm text-text-muted">
@@ -123,11 +123,8 @@ export default function FinancialPosition({
               data.
             </p>
             <p className="mt-1 text-sm text-text-muted">
-              This page does not change spending, income, savings, budget, cash-flow, or net-worth
-              totals.
-            </p>
-            <p className="mt-1 text-sm text-text-muted">
-              Net worth depends on manual account and debt snapshots.
+              This page does not change any totals. Net worth depends on manual account and debt
+              snapshots.
             </p>
           </div>
           <Select
@@ -146,7 +143,7 @@ export default function FinancialPosition({
 
       {error ? <InlineAlert>{error}</InlineAlert> : null}
       {loading ? (
-        <Card className="p-5">
+        <Card className="p-4 sm:p-5">
           <p className="text-sm text-text-muted">Loading financial position data...</p>
         </Card>
       ) : null}
@@ -158,7 +155,7 @@ export default function FinancialPosition({
         </EmptyState>
       ) : null}
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         <SummaryCard label="Income this month" value={summary.incomeTotal} />
         <SummaryCard label="Savings this month" value={summary.savingsTotal} />
         <SummaryCard label="Liquid cash" value={summary.liquidCashTotal} />
@@ -175,35 +172,41 @@ export default function FinancialPosition({
         />
       </div>
 
-      <Card className="p-5">
+      <Card className="p-4 sm:p-5">
         <h3 className="text-base font-semibold text-text-main">Needs update</h3>
         <p className="mt-1 text-sm text-text-muted">
           Advisory only. Missing items do not block month close.
         </p>
-        <div className="mt-4 grid gap-2">
+        <div className="mt-3 grid gap-2 sm:mt-4">
           {needsUpdateItems.length === 0 ? (
             <EmptyState>All core financial-position inputs are present for this month.</EmptyState>
           ) : (
-            needsUpdateItems.map((item) => (
-              <div key={item} className="rounded-xl border border-app-border bg-app-background p-3">
-                <p className="text-sm text-text-main">{item}</p>
-              </div>
-            ))
+            <ul className="grid gap-2">
+              {needsUpdateItems.map((item) => (
+                <li
+                  key={item}
+                  className="rounded-xl border border-app-border bg-app-background px-3 py-2.5"
+                >
+                  <p className="text-sm leading-6 text-text-main">{item}</p>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       </Card>
 
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid gap-3 sm:gap-4 xl:grid-cols-2">
         {sectionLinks.map((section) => (
-          <Card key={section.key} className="p-5">
+          <Card key={section.key} className="p-4 sm:p-5">
             <h3 className="text-base font-semibold text-text-main">{section.title}</h3>
             <p className="mt-1 text-sm text-text-muted">
               {getSectionSummary(section.key, summary)}
             </p>
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-3 flex flex-wrap gap-2 sm:mt-4">
               <Button
                 type="button"
                 variant="secondary"
+                className="w-full sm:w-auto"
                 onClick={() => dispatchNavigation(section.view, section.target)}
               >
                 {section.buttonLabel}
@@ -211,15 +214,16 @@ export default function FinancialPosition({
             </div>
           </Card>
         ))}
-        <Card className="p-5">
+        <Card className="p-4 sm:p-5">
           <h3 className="text-base font-semibold text-text-main">Insights</h3>
           <p className="mt-1 text-sm text-text-muted">
             Open trends for YTD, year-over-year, and net worth changes over time.
           </p>
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-3 flex flex-wrap gap-2 sm:mt-4">
             <Button
               type="button"
               variant="secondary"
+              className="w-full sm:w-auto"
               onClick={() => dispatchNavigation("insights")}
             >
               View trends
@@ -233,10 +237,12 @@ export default function FinancialPosition({
 
 function SummaryCard({ label, value, note = "" }) {
   return (
-    <Card className="p-5">
+    <Card className="p-4 sm:p-5">
       <p className="text-sm font-medium text-text-muted">{label}</p>
-      <p className="mt-2 text-3xl font-semibold text-text-main">{formatCurrency(value)}</p>
-      {note ? <p className="mt-1 text-xs text-text-muted">{note}</p> : null}
+      <p className="mt-1.5 text-2xl font-semibold text-text-main sm:mt-2 sm:text-3xl">
+        {formatCurrency(value)}
+      </p>
+      {note ? <p className="mt-1 text-xs leading-5 text-text-muted">{note}</p> : null}
     </Card>
   );
 }

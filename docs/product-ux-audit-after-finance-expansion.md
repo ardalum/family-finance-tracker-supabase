@@ -241,3 +241,12 @@ Future recommendation:
   - Review budget
   - Financial Position
 - Income/Savings/Accounts/Liabilities/Net Worth remain available as detailed pages via Financial Position and Account menu Tools.
+
+## Phase 44 Note
+
+- Financial Position mobile polish is now implemented to improve small-screen usability without changing workflows:
+  - tighter card spacing and cleaner stacking
+  - readable summary-card values at mobile widths
+  - easier-to-scan "Needs update" advisories
+  - full-width mobile action buttons for clearer tap flow
+- Main nav and financial calculations remain unchanged.
