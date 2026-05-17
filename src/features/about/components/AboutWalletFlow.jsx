@@ -20,7 +20,9 @@ export default function AboutWalletFlow() {
         title={<AppBrandName />}
         description={
           <>
-            <span className="block text-base font-medium text-text-soft">{appMetadata.tagline}</span>
+            <span className="block text-base font-medium text-text-soft">
+              {appMetadata.tagline}
+            </span>
             <span className="mt-4 block">
               WalletFlow is a practical household finance tracker designed to help users organize
               credit cards, monthly budgets, transactions, and recurring payments in one clean
