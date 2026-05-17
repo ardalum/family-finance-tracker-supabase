@@ -1,3 +1,9 @@
+export const helpSupportHero = {
+  title: "Help / Support",
+  description:
+    "Use this page for basic troubleshooting notes, safe testing reminders, and contact information for WalletFlow.",
+};
+
 export const supportGuidanceCards = [
   {
     title: "Check your data first",
