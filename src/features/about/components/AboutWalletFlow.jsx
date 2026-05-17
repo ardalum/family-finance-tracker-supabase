@@ -103,9 +103,9 @@ export default function AboutWalletFlow() {
             <p className="mt-3 text-sm text-text-muted">For questions, feedback, or support:</p>
             <a
               className="mt-1 inline-flex text-sm font-semibold text-brand-primary transition hover:text-brand-accent"
-              href="mailto:arvin0958@gmail.com"
+              href={`mailto:${appMetadata.supportEmail}`}
             >
-              arvin0958@gmail.com
+              {appMetadata.supportEmail}
             </a>
           </div>
         </div>
