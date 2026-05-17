@@ -64,4 +64,6 @@ Last updated: 2026-05-17 (Phase 16 real-data readiness review)
 - Post-expansion UX architecture risk is now documented in `docs/product-ux-audit-after-finance-expansion.md`; this is a product/UX backlog area (discoverability, page-length, terminology consistency), not a calculation defect.
 - Financial Position hub is a planned UX/product backlog improvement (see `docs/financial-position-hub-design.md`) to consolidate secondary finance-position tools; this is not a bug in existing workflows or totals.
 - Financial Position hub MVP is now implemented as a secondary page and partially addresses discoverability/IA pressure; remaining improvements are UX hardening and adoption tuning, not finance-calculation bugs.
-- Financial Position hub hardening is now implemented for missing-data, loading, and error messaging; remaining limitation is navigation density (Dashboard quick actions + Tools list), which is a future UX consolidation task, not a bug.
+- Financial Position hub hardening is now implemented for missing-data, loading, and error messaging.
+- Dashboard quick-action consolidation is now implemented: Financial Position is the Dashboard hub entry point for income/savings/accounts/liabilities/net-worth workflows, and separate dashboard entries for those tools were removed.
+- Remaining navigation-density concern is primarily account-menu Tools sprawl, which remains a future UX/product IA tuning task (not a calculation bug).

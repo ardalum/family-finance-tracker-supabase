@@ -172,6 +172,8 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Verify Financial Position secondary hub opens from Dashboard quick action and Account menu Tools.
 - [ ] Verify Financial Position links route to Income, Savings, Accounts, Liabilities, Net Worth, and Insights.
 - [ ] Verify Financial Position hardening states: all-data-missing empty state, partial net-worth advisory, and loading/error copy.
+- [ ] Verify Dashboard quick actions are consolidated to the compact set (Update card balances, Add transactions, Open recurring bills, Review budget, Financial Position).
+- [ ] Verify Financial Position is the Dashboard hub entry point for income/savings/accounts/debts/net-worth workflows.
 
 ## Known Limitations
 

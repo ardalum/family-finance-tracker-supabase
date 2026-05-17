@@ -7,10 +7,7 @@ import {
   CreditCard,
   ReceiptText,
   Repeat,
-  HandCoins,
-  PiggyBank,
   WalletCards,
-  Landmark,
   Scale,
 } from "lucide-react";
 import Card from "../../../components/ui/Card.jsx";
@@ -78,41 +75,6 @@ const quickActions = [
     description: "Review income, savings, cash, debt, and net worth.",
     view: "financial-position",
     target: "monthly-financial-position",
-    icon: Scale,
-  },
-  {
-    label: "Manage income",
-    description: "Open manual income tracking.",
-    view: "income",
-    target: "monthly-income",
-    icon: HandCoins,
-  },
-  {
-    label: "Manage savings",
-    description: "Open manual savings goal tracking.",
-    view: "savings",
-    target: "monthly-savings",
-    icon: PiggyBank,
-  },
-  {
-    label: "Manage accounts",
-    description: "Track manual cash account balances.",
-    view: "accounts",
-    target: "monthly-account-snapshots",
-    icon: Landmark,
-  },
-  {
-    label: "Manage debts",
-    description: "Track manual debt balance snapshots.",
-    view: "liabilities",
-    target: "monthly-liability-snapshots",
-    icon: CreditCard,
-  },
-  {
-    label: "Net worth",
-    description: "Review assets, debts, and net worth.",
-    view: "net-worth",
-    target: "monthly-net-worth",
     icon: Scale,
   },
   {
@@ -296,7 +258,7 @@ function DashboardQuickActions() {
       <div className="border-b border-app-border p-5">
         <h3 className="text-base font-semibold text-text-main">Quick actions</h3>
         <p className="mt-1 text-sm text-text-muted">
-          Jump to the exact workspace where you can fix the numbers.
+          Jump to the main workspaces that need regular updates.
         </p>
       </div>
       <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-4">
