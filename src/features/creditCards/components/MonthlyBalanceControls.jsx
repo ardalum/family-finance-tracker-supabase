@@ -89,7 +89,7 @@ export default function MonthlyBalanceControls({
         >
           <option value="">All statuses</option>
           <option value="not-checked">Not checked</option>
-          <option value="checked-no-balance">Checked no balance</option>
+          <option value="checked-no-balance">Confirmed $0 balance</option>
           <option value="paid">Paid</option>
           <option value="unpaid">Unpaid</option>
           <option value="due-soon">Due soon</option>

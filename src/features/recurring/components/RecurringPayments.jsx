@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { CalendarCheck2, ListChecks, X } from "lucide-react";
+import { X } from "lucide-react";
 import Card from "../../../components/ui/Card.jsx";
 import InlineAlert from "../../../components/ui/InlineAlert.jsx";
 import LoadingMessage from "../../../components/ui/LoadingMessage.jsx";
@@ -7,26 +7,13 @@ import Select from "../../../components/ui/Select.jsx";
 import { buildMonthOptions, getCurrentMonthKey } from "../../../lib/dates.js";
 import { formatMonthLabel } from "../../../lib/formatters.js";
 import { consumeNavigationTarget } from "../../../lib/navigationTargets.js";
+import { recurringSections } from "../recurringSections.js";
 import RecurringGenerationPanel from "./RecurringGenerationPanel.jsx";
 import RecurringMigrationPanel from "./RecurringMigrationPanel.jsx";
 import RecurringPaymentForm from "./RecurringPaymentForm.jsx";
+import RecurringSectionPicker from "./RecurringSectionPicker.jsx";
 import RecurringPaymentTable from "./RecurringPaymentTable.jsx";
 import RecurringSummary from "./RecurringSummary.jsx";
-
-const recurringSections = [
-  {
-    id: "this-month",
-    label: "This Month",
-    description: "Review bills for the selected month and mark them paid, unpaid, or skipped.",
-    icon: CalendarCheck2,
-  },
-  {
-    id: "templates",
-    label: "Templates",
-    description: "Add, edit, deactivate, or delete recurring bill templates.",
-    icon: ListChecks,
-  },
-];
 
 export default function RecurringPayments({
   creditCards,
@@ -144,7 +131,7 @@ export default function RecurringPayments({
             ) : null}
           </div>
           <Select
-            label="Generation month"
+            label="Bill month"
             value={selectedMonth}
             onChange={(event) => {
               closeTemplateModal();
@@ -171,31 +158,11 @@ export default function RecurringPayments({
         <p className="text-sm text-text-muted">{currentSection.description}</p>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-app-border bg-app-surface p-2">
-        <div className="flex min-w-max gap-2" role="toolbar" aria-label="Recurring sections">
-          {recurringSections.map((section) => {
-            const Icon = section.icon;
-            const isActive = activeSection === section.id;
-            return (
-              <button
-                key={section.id}
-                type="button"
-                className={`inline-flex min-h-11 items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition ${
-                  isActive
-                    ? "bg-text-main text-white shadow-sm"
-                    : "text-text-soft hover:bg-app-muted hover:text-text-main"
-                }`}
-                onClick={() => setActiveSection(section.id)}
-                aria-pressed={isActive}
-                aria-label={`Show ${section.label} section`}
-              >
-                <Icon size={16} aria-hidden="true" />
-                {section.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      <RecurringSectionPicker
+        sections={recurringSections}
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
+      />
 
       {activeSection === "this-month" ? (
         <RecurringGenerationPanel

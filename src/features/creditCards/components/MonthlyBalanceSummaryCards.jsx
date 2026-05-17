@@ -17,7 +17,7 @@ export default function MonthlyBalanceSummaryCards({ summary }) {
         danger={unpaidTotal > 0}
       />
       <MonthlyBalanceSummaryCard
-        label="Checked no balance"
+        label="Confirmed $0 balance"
         value={summary.checkedNoBalanceCount}
         helper="Confirmed $0 statement"
       />

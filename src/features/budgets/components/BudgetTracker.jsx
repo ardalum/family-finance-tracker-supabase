@@ -177,6 +177,9 @@ export default function BudgetTracker({
       </Card>
 
       <BudgetSummaryCards summary={summary} totalBudget={totalBudget} />
+      <p className="text-sm text-text-muted">
+        Spending totals come from transactions assigned to each category.
+      </p>
 
       <BudgetTable
         rows={budgetRows}

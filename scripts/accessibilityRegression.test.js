@@ -15,7 +15,7 @@ describe("accessibility regressions", () => {
 
   it("keeps section switchers exposing pressed state", () => {
     const creditCards = read("src/features/creditCards/components/CreditCardSectionPicker.jsx");
-    const recurring = read("src/features/recurring/components/RecurringPayments.jsx");
+    const recurring = read("src/features/recurring/components/RecurringSectionPicker.jsx");
     assert.equal(creditCards.includes("aria-pressed={isActive}"), true);
     assert.equal(recurring.includes("aria-pressed={isActive}"), true);
   });
