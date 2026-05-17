@@ -51,8 +51,8 @@ export default function AppShell({
         <div className="mx-auto grid max-w-7xl gap-4 px-4 py-5 text-xs text-text-muted sm:px-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-center lg:px-8">
           <div className="grid gap-1">
             <p>
-              <span className="font-semibold text-brand-primary">WalletFlow</span> © 2026{" "}
-              {appMetadata.creatorName}.
+              <span className="font-semibold text-brand-primary">{appMetadata.name}</span> ©{" "}
+              {appMetadata.copyrightYear} {appMetadata.creatorName}.
             </p>
             <p className="max-w-2xl leading-5">
               Personal finance tracking only. Verify balances, payments, and due dates with the
