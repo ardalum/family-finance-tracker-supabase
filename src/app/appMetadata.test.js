@@ -9,6 +9,7 @@ const packageJson = JSON.parse(
 
 const requiredMetadataFields = [
   "tagline",
+  "trackingDisclaimer",
   "creatorName",
   "copyrightYear",
   "version",
