@@ -1,6 +1,7 @@
 import { CheckCircle2, Mail, ShieldAlert } from "lucide-react";
 import { appMetadata } from "../../../app/appMetadata.js";
 import { AppBrandMark, AppBrandName } from "../../../components/branding/index.js";
+import InfoCard from "../../../components/layout/InfoCard.jsx";
 import PageHero from "../../../components/layout/PageHero.jsx";
 import Card from "../../../components/ui/Card.jsx";
 
@@ -68,44 +69,28 @@ export default function AboutWalletFlow() {
         </Card>
       </div>
 
-      <Card className="p-5">
-        <div className="flex gap-3">
-          <ShieldAlert
-            size={20}
-            className="mt-0.5 shrink-0 text-status-warning"
-            aria-hidden="true"
-          />
-          <div>
-            <h3 className="text-lg font-semibold text-text-main">Disclaimer</h3>
-            <p className="mt-3 text-sm leading-6 text-text-muted">
-              WalletFlow is for personal tracking and organization only. It does not provide
-              financial, legal, tax, or investment advice. Always verify balances, due dates,
-              payments, and account details with your financial institutions, lenders, service
-              providers, or qualified professionals.
-            </p>
-            <p className="mt-3 text-sm leading-6 text-text-muted">
-              WalletFlow only tracks information that users enter into the app. It is not a bank,
-              lender, payment processor, or financial institution.
-            </p>
-          </div>
-        </div>
-      </Card>
+      <InfoCard icon={ShieldAlert} iconClassName="text-status-warning" title="Disclaimer">
+        <p className="mt-3 text-sm leading-6 text-text-muted">
+          WalletFlow is for personal tracking and organization only. It does not provide financial,
+          legal, tax, or investment advice. Always verify balances, due dates, payments, and account
+          details with your financial institutions, lenders, service providers, or qualified
+          professionals.
+        </p>
+        <p className="mt-3 text-sm leading-6 text-text-muted">
+          WalletFlow only tracks information that users enter into the app. It is not a bank,
+          lender, payment processor, or financial institution.
+        </p>
+      </InfoCard>
 
-      <Card className="p-5">
-        <div className="flex gap-3">
-          <Mail size={20} className="mt-0.5 shrink-0 text-brand-secondary" aria-hidden="true" />
-          <div>
-            <h3 className="text-lg font-semibold text-text-main">Support / Contact</h3>
-            <p className="mt-3 text-sm text-text-muted">For questions, feedback, or support:</p>
-            <a
-              className="mt-1 inline-flex text-sm font-semibold text-brand-primary transition hover:text-brand-accent"
-              href={`mailto:${appMetadata.supportEmail}`}
-            >
-              {appMetadata.supportEmail}
-            </a>
-          </div>
-        </div>
-      </Card>
+      <InfoCard icon={Mail} title="Support / Contact">
+        <p className="mt-3 text-sm text-text-muted">For questions, feedback, or support:</p>
+        <a
+          className="mt-1 inline-flex text-sm font-semibold text-brand-primary transition hover:text-brand-accent"
+          href={`mailto:${appMetadata.supportEmail}`}
+        >
+          {appMetadata.supportEmail}
+        </a>
+      </InfoCard>
     </section>
   );
 }
