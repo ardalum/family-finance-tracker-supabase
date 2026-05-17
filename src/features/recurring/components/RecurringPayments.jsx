@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { CalendarCheck2, ListChecks, X } from "lucide-react";
 import Card from "../../../components/ui/Card.jsx";
+import InlineAlert from "../../../components/ui/InlineAlert.jsx";
+import LoadingMessage from "../../../components/ui/LoadingMessage.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { buildMonthOptions, getCurrentMonthKey } from "../../../lib/dates.js";
 import { formatMonthLabel } from "../../../lib/formatters.js";
@@ -111,16 +113,8 @@ export default function RecurringPayments({
 
   return (
     <section className="grid gap-6">
-      {error ? (
-        <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-          {error}
-        </div>
-      ) : null}
-      {categoriesError ? (
-        <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-          {categoriesError}
-        </div>
-      ) : null}
+      {error ? <InlineAlert>{error}</InlineAlert> : null}
+      {categoriesError ? <InlineAlert>{categoriesError}</InlineAlert> : null}
 
       <RecurringMigrationPanel
         localTemplates={localRecurringPayments}
@@ -140,13 +134,13 @@ export default function RecurringPayments({
               Manage bill templates and track what is paid each month.
             </p>
             {loading ? (
-              <p className="mt-2 text-sm text-gray-500">Loading recurring payments...</p>
+              <LoadingMessage className="mt-2">Loading recurring payments...</LoadingMessage>
             ) : null}
             {categoriesLoading ? (
-              <p className="mt-2 text-sm text-gray-500">Loading categories...</p>
+              <LoadingMessage className="mt-2">Loading categories...</LoadingMessage>
             ) : null}
             {isSaving ? (
-              <p className="mt-2 text-sm text-gray-500">Saving recurring payments...</p>
+              <LoadingMessage className="mt-2">Saving recurring payments...</LoadingMessage>
             ) : null}
           </div>
           <Select
@@ -178,7 +172,7 @@ export default function RecurringPayments({
       </div>
 
       <div className="overflow-x-auto rounded-2xl border border-app-border bg-app-surface p-2">
-        <div className="flex min-w-max gap-2">
+        <div className="flex min-w-max gap-2" role="toolbar" aria-label="Recurring sections">
           {recurringSections.map((section) => {
             const Icon = section.icon;
             const isActive = activeSection === section.id;
@@ -192,6 +186,8 @@ export default function RecurringPayments({
                     : "text-text-soft hover:bg-app-muted hover:text-text-main"
                 }`}
                 onClick={() => setActiveSection(section.id)}
+                aria-pressed={isActive}
+                aria-label={`Show ${section.label} section`}
               >
                 <Icon size={16} aria-hidden="true" />
                 {section.label}

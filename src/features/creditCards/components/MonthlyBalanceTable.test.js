@@ -17,6 +17,7 @@ describe("monthly balance display row", () => {
     );
 
     assert.equal(row.card.id, "card-1");
+    assert.equal(row.card.owner, "Owner");
     assert.equal(row.displayEntry.balance, 100);
     assert.equal(row.status.label.length > 0, true);
     assert.equal(row.dueDateText.includes("2099"), true);

@@ -24,6 +24,8 @@ export default function TransactionQuickFilters({
               }`}
               onClick={() => onApplyQuickFilter(option.id)}
               title={option.description}
+              aria-pressed={isActive}
+              aria-label={`${option.label} quick filter`}
             >
               {option.label}
               <span

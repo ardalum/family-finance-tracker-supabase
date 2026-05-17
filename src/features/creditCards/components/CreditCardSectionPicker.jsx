@@ -16,7 +16,11 @@ export default function CreditCardSectionPicker({ sections, activeSection, onSec
           ))}
         </Select>
       </div>
-      <div className="hidden flex-wrap gap-2 sm:flex">
+      <div
+        className="hidden flex-wrap gap-2 sm:flex"
+        role="toolbar"
+        aria-label="Credit card sections"
+      >
         {sections.map((section) => {
           const Icon = section.icon;
           const isActive = activeSection === section.id;
@@ -30,6 +34,8 @@ export default function CreditCardSectionPicker({ sections, activeSection, onSec
                   : "text-text-soft hover:bg-app-muted hover:text-text-main"
               }`}
               onClick={() => onSectionChange(section.id)}
+              aria-pressed={isActive}
+              aria-label={`Show ${section.label} section`}
             >
               <Icon size={16} aria-hidden="true" />
               {section.label}
