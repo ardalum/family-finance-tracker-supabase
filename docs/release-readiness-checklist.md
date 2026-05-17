@@ -175,6 +175,7 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Verify Dashboard quick actions are consolidated to the compact set (Update card balances, Add transactions, Open recurring bills, Review budget, Financial Position).
 - [ ] Verify Financial Position is the Dashboard hub entry point for income/savings/accounts/debts/net-worth workflows.
 - [ ] Verify Financial Position mobile layout at small widths: no horizontal scrolling, readable summary cards, and easy-to-tap action buttons.
+- [ ] Verify Financial Position remains a secondary view for this release and is not promoted into top-level main nav.
 
 ## Known Limitations
 
