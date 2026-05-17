@@ -58,3 +58,8 @@ Last updated: 2026-05-17 (Phase 50 production UX bug audit and critical fixes)
 
 - GitHub Pages environment secret drift (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) remains a deployment risk and requires release-by-release smoke verification.
 - Supabase migration drift between environments remains a deployment risk and requires pre-release migration list checks.
+
+## Phase 51 note
+
+- Phase 50 high-priority UX fixes remain marked fixed after local regression verification.
+- Deployed-app confirmation remains pending until manual smoke evidence is captured in docs/post-fix-production-smoke-test-results.md.

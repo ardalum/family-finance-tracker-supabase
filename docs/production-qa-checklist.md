@@ -278,5 +278,5 @@ Use this checklist before each production release.
 
 ## Amount Input Typing UX
 
-- [ ] Numeric amount fields allow direct typing over default   on focus.
+- [ ] Numeric amount fields allow direct typing over default `0` on focus.
 - [ ] Clearing amount fields does not create false complete/paid/checked states.
