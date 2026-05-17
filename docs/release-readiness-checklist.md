@@ -124,6 +124,7 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - Income export is included in Supabase JSON/Excel output, but income merge-import behavior is not yet a complete dedicated workflow with income-specific conflict handling.
 - Savings export is included in Supabase JSON/Excel output, but savings merge-import behavior is not yet a complete dedicated workflow with savings-specific conflict handling.
 - Dashboard cash-flow MVP estimated leftover intentionally excludes unpaid card balance carry until card-payment cash modeling is explicitly added.
+- Full account-balance snapshot and net-worth tracking are not yet implemented; releases should not claim complete household position/net-worth coverage.
 
 ## What Not To Test On Real Data
 

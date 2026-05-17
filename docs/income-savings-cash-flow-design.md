@@ -337,3 +337,7 @@ Future income/savings datasets should be structured to support later visual repo
 ## Cash Flow Navigation Readiness Note
 
 `Cash Flow` should become a dedicated page and main navigation item only after income/savings MVP functionality is real and usable (not a placeholder shell).
+
+## Account Balance Snapshot Relationship Note
+
+Future account balance snapshots and net-worth tracking should complement (not replace) cash-flow workflows: cash flow answers monthly movement, while snapshots answer current financial position and emergency-fund liquidity coverage. Snapshot records must remain separate from transactions and must not modify spending, income, or budget totals.
