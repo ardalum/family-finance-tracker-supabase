@@ -176,6 +176,9 @@ Use this checklist before each production release.
 - [ ] Financial Position month selector updates summaries.
 - [ ] Summary cards show income, savings, liquid cash, total debt, net worth, and estimated leftover.
 - [ ] Needs update advisories appear when month data is missing.
+- [ ] Empty-state guidance appears when all summarized inputs are missing for selected month.
+- [ ] Net-worth partial-data advisory appears when only account or only liability snapshots exist.
+- [ ] Loading and error states are clear and non-alarming when data is still available elsewhere.
 - [ ] Hub links open Income, Savings, Accounts, Liabilities, Net Worth, and Insights.
 - [ ] Hub does not change Spending, Budget, Cards, Bills, Income, Savings, Accounts, Liabilities, or Net Worth calculations.
 

@@ -101,6 +101,11 @@ export default function FinancialPosition({
     if (summary.needsUpdate.netWorth) {
       items.push("Net worth review appears once account or liability snapshots are added.");
     }
+    if (summary.needsUpdate.netWorthIncomplete) {
+      items.push(
+        "Net worth is partially computed until both account and liability snapshots exist.",
+      );
+    }
     return items;
   }, [summary.needsUpdate]);
 
@@ -114,8 +119,15 @@ export default function FinancialPosition({
               {formatMonthLabel(selectedMonth)}
             </h2>
             <p className="mt-1 text-sm text-text-muted">
-              Financial Position summarizes existing income, savings, cash account, debt, and net
-              worth data. It does not change your financial totals.
+              Financial Position summarizes existing income, savings, cash, debt, and net worth
+              data.
+            </p>
+            <p className="mt-1 text-sm text-text-muted">
+              This page does not change spending, income, savings, budget, cash-flow, or net-worth
+              totals.
+            </p>
+            <p className="mt-1 text-sm text-text-muted">
+              Net worth depends on manual account and debt snapshots.
             </p>
           </div>
           <Select
@@ -137,6 +149,13 @@ export default function FinancialPosition({
         <Card className="p-5">
           <p className="text-sm text-text-muted">Loading financial position data...</p>
         </Card>
+      ) : null}
+
+      {!loading && !error && !summary.hasAnySummaryData ? (
+        <EmptyState>
+          No financial-position data found for this month yet. Add income, savings, account
+          snapshots, or liability snapshots to start your summary.
+        </EmptyState>
       ) : null}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
