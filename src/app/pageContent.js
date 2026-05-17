@@ -35,6 +35,10 @@ export const pageContent = {
     title: "App Settings",
     description: "Customize display and app preferences.",
   },
+  "account-settings": {
+    title: "Account Settings",
+    description: "Review account identity, session status, and sign-out controls.",
+  },
   about: {
     title: "About WalletFlow",
     description: "Learn more about WalletFlow.",

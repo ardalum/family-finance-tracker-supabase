@@ -6,15 +6,17 @@ import Input from "../../../components/ui/Input.jsx";
 import { signOut } from "../../auth/authService.js";
 import { useHouseholds } from "../../households/HouseholdProvider.jsx";
 import {
-  deleteSupabaseAccount,
   exportBackup,
-  exportSupabaseExcel,
   exportSupabaseBackup,
+  exportSupabaseExcel,
   importSupabaseBackupMerge,
+  deleteSupabaseAccount,
   importBackupFile,
   previewSupabaseBackupImport,
   resetAllData,
+  resetSupabaseHouseholdFinanceData,
 } from "../backupService.js";
+import { getHouseholdFinanceDeletePhrase } from "../secureDeletionService.js";
 
 const summaryLabels = {
   householdProfiles: "Household profiles",
@@ -53,8 +55,10 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
   const [isPreviewingCloudImport, setIsPreviewingCloudImport] = useState(false);
   const [isImportingCloud, setIsImportingCloud] = useState(false);
   const [isWorkingLegacy, setIsWorkingLegacy] = useState(false);
-  const [isDeletingData, setIsDeletingData] = useState(false);
-  const [deletePhrase, setDeletePhrase] = useState("");
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [isResettingFinanceData, setIsResettingFinanceData] = useState(false);
+  const [deleteAccountPhrase, setDeleteAccountPhrase] = useState("");
+  const [resetFinancePhrase, setResetFinancePhrase] = useState("");
   const [cloudImport, setCloudImport] = useState(null);
   const [importAcknowledged, setImportAcknowledged] = useState(false);
 
@@ -190,25 +194,49 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
     setIsWorkingLegacy(false);
   }
 
-  async function handleDeleteHouseholdData() {
-    if (deletePhrase !== "DELETE") return;
+  const financeDeletePhrase = getHouseholdFinanceDeletePhrase();
+
+  async function handleResetHouseholdFinanceData() {
+    if (resetFinancePhrase !== financeDeletePhrase) return;
 
     const confirmed = window.confirm(
-      "This will permanently delete your account and this private household's finance data. This action cannot be undone.",
+      "This will permanently delete household finance records for the active household, but keep your login account. Continue?",
     );
     if (!confirmed) return;
 
-    setIsDeletingData(true);
+    setIsResettingFinanceData(true);
     setMessage(null);
 
     try {
-      const result = await deleteSupabaseAccount(activeHouseholdId, deletePhrase);
+      const result = await resetSupabaseHouseholdFinanceData(activeHouseholdId, resetFinancePhrase);
       showMessage(result);
       if (result.ok) {
         await signOut();
       }
     } finally {
-      setIsDeletingData(false);
+      setIsResettingFinanceData(false);
+    }
+  }
+
+  async function handleDeleteAccount() {
+    if (deleteAccountPhrase !== "DELETE") return;
+
+    const confirmed = window.confirm(
+      "This will permanently delete your Supabase Auth login and private household data under strict owner/member checks. Continue?",
+    );
+    if (!confirmed) return;
+
+    setIsDeletingAccount(true);
+    setMessage(null);
+
+    try {
+      const result = await deleteSupabaseAccount(activeHouseholdId, deleteAccountPhrase);
+      showMessage(result);
+      if (result.ok) {
+        await signOut();
+      }
+    } finally {
+      setIsDeletingAccount(false);
     }
   }
 
@@ -365,18 +393,18 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
             <p className="text-xs font-semibold uppercase tracking-wide text-red-700">
               Danger Zone
             </p>
-            <h2 className="mt-1 text-lg font-semibold text-gray-950">Delete Account</h2>
+            <h2 className="mt-1 text-lg font-semibold text-gray-950">
+              Reset Household Finance Data
+            </h2>
             <p className="mt-1 max-w-3xl text-sm text-gray-600">
-              This permanently deletes your Supabase Auth login and the active household only when
-              you are its only active member and owner. Shared households or extra households you
-              created will block deletion. The service role key stays server-side in a Supabase Edge
-              Function and is never exposed in this browser app.
+              This keeps your login account but permanently deletes the active household's finance
+              records (cards, budgets, transactions, recurring data, and related records). You must
+              be the active household owner.
             </p>
           </div>
 
           <div className="rounded-md border border-red-200 bg-white px-3 py-2 text-sm text-red-700">
-            This will permanently delete your account and this private household's finance data.
-            This action cannot be undone.
+            This action resets household finance data and cannot be undone.
           </div>
 
           <div className="flex flex-wrap gap-3">
@@ -402,19 +430,63 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
 
           <div className="grid max-w-sm gap-3">
             <Input
-              label="Type DELETE to confirm"
-              value={deletePhrase}
-              onChange={(event) => setDeletePhrase(event.target.value)}
+              label={`Type ${financeDeletePhrase} to confirm`}
+              value={resetFinancePhrase}
+              onChange={(event) => setResetFinancePhrase(event.target.value)}
               autoComplete="off"
             />
             <Button
               type="button"
               variant="danger"
-              onClick={handleDeleteHouseholdData}
-              disabled={deletePhrase !== "DELETE" || isDeletingData || !activeHouseholdId}
+              onClick={handleResetHouseholdFinanceData}
+              disabled={
+                resetFinancePhrase !== financeDeletePhrase ||
+                isResettingFinanceData ||
+                !activeHouseholdId
+              }
             >
               <Trash2 size={16} aria-hidden="true" />
-              {isDeletingData ? "Deleting..." : "Delete Account"}
+              {isResettingFinanceData ? "Resetting..." : "Reset Household Finance Data"}
+            </Button>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="border-red-200 bg-red-50/40 p-5">
+        <div className="grid gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-red-700">
+              Danger Zone
+            </p>
+            <h2 className="mt-1 text-lg font-semibold text-gray-950">Delete Account</h2>
+            <p className="mt-1 max-w-3xl text-sm text-gray-600">
+              This permanently deletes your Supabase Auth login and the active household only when
+              you are its only active member and owner. Shared households or extra households you
+              created will block deletion. The service role key stays server-side in a Supabase Edge
+              Function and is never exposed in this browser app.
+            </p>
+          </div>
+
+          <div className="rounded-md border border-red-200 bg-white px-3 py-2 text-sm text-red-700">
+            This action deletes your login account and the private household tied to it. Household
+            reset above does not delete login access.
+          </div>
+
+          <div className="grid max-w-sm gap-3">
+            <Input
+              label="Type DELETE to confirm account deletion"
+              value={deleteAccountPhrase}
+              onChange={(event) => setDeleteAccountPhrase(event.target.value)}
+              autoComplete="off"
+            />
+            <Button
+              type="button"
+              variant="danger"
+              onClick={handleDeleteAccount}
+              disabled={deleteAccountPhrase !== "DELETE" || isDeletingAccount || !activeHouseholdId}
+            >
+              <Trash2 size={16} aria-hidden="true" />
+              {isDeletingAccount ? "Deleting..." : "Delete Account"}
             </Button>
           </div>
         </div>

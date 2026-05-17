@@ -27,6 +27,7 @@ describe("view groups", () => {
       "backup",
       "household-settings",
       "app-settings",
+      "account-settings",
       "about",
       "privacy-policy",
       "terms-of-use",
@@ -45,6 +46,7 @@ describe("view groups", () => {
   it("checks utility views", () => {
     assert.equal(isSecondaryView("backup"), true);
     assert.equal(isSecondaryView("household-settings"), true);
+    assert.equal(isSecondaryView("account-settings"), true);
     assert.equal(isSecondaryView("privacy-policy"), true);
     assert.equal(isSecondaryView("terms-of-use"), true);
     assert.equal(isSecondaryView("help-support"), true);

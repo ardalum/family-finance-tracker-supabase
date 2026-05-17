@@ -68,6 +68,7 @@ describe("page content config", () => {
   it("detects known page views", () => {
     assert.equal(isKnownPageView("dashboard"), true);
     assert.equal(isKnownPageView("household-settings"), true);
+    assert.equal(isKnownPageView("account-settings"), true);
     assert.equal(isKnownPageView("privacy-policy"), true);
     assert.equal(isKnownPageView("terms-of-use"), true);
     assert.equal(isKnownPageView("missing-view"), false);
