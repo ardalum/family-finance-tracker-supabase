@@ -145,14 +145,16 @@ export default function Liabilities({
 
   async function handleDeleteAccount(accountId, accountName) {
     const confirmed = window.confirm(
-      `Delete liability account "${accountName}"? Existing debt snapshots for this account will also be deleted.`,
+      `Delete liability account "${accountName}"? This also permanently deletes all snapshots for this debt account.`,
     );
     if (!confirmed) return;
     await onDeleteLiabilityAccount(accountId);
   }
 
   async function handleDeleteSnapshot(snapshotId) {
-    const confirmed = window.confirm("Delete this liability balance snapshot?");
+    const confirmed = window.confirm(
+      "Delete this liability balance snapshot? This cannot be undone.",
+    );
     if (!confirmed) return;
     await onDeleteLiabilityBalanceSnapshot(snapshotId);
   }
@@ -175,6 +177,9 @@ export default function Liabilities({
             </p>
             <p className="mt-1 text-sm text-text-muted">
               Debt balances do not change spending or cash-flow totals in this MVP.
+            </p>
+            <p className="mt-1 text-sm text-text-muted">
+              Linked credit cards are informational only in this MVP and do not auto-fill balances.
             </p>
           </div>
           <Select
@@ -455,6 +460,9 @@ export default function Liabilities({
                 </option>
               ))}
             </Select>
+            <p className="-mt-1 text-xs text-text-muted">
+              Only active debt accounts appear here. Reactivate an account to add new snapshots.
+            </p>
             <Select
               label="Owner"
               value={snapshotDraft.ownerProfileId || ""}

@@ -171,3 +171,10 @@ test("linked credit card metadata does not affect totals automatically", () => {
 
   assert.equal(calculateLiabilityBalanceTotal(accounts, snapshots, "2026-06"), 250);
 });
+
+test("liability helpers handle missing arrays safely", () => {
+  assert.equal(calculateLiabilityBalanceTotal(undefined, undefined, "2026-06"), 0);
+  assert.deepEqual(summarizeLiabilitiesByType(undefined, undefined, "2026-06"), []);
+  assert.deepEqual(getLiabilitySnapshotsForMonth(undefined, "2026-06"), []);
+  assert.equal(getLatestLiabilitySnapshotByAccount(undefined, "2026-06").size, 0);
+});

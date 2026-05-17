@@ -16,6 +16,18 @@ Scope: Design-only planning for liability/debt account snapshots (no implementat
   - hardening pass and edge-case UX polish
   - full net worth summary and trends
 
+## Phase 34 Status Update
+
+- Liability/Debt Snapshots MVP is now hardened for QA/readiness:
+  - clearer empty/loading/error states and helper copy
+  - explicit credit-card double-counting guidance in-product
+  - explicit linked-card behavior (informational only, no auto-sync)
+  - stronger regression coverage for normalization/filtering/summary edge cases
+- Backup/export status is explicit: liability accounts and snapshots are included in Supabase JSON and Excel exports.
+- Still missing after Phase 34:
+  - liability automation/sync (intentionally out of scope)
+  - full net worth summary/trends and debt trend Insights
+
 ## 1. Problem Statement
 
 WalletFlow cannot produce trustworthy net worth until liabilities are tracked with the same clarity as asset balances. Cash account snapshots now exist, but debt balances are still missing, so total household position is incomplete.
