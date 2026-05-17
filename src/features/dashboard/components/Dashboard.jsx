@@ -74,6 +74,13 @@ const quickActions = [
     icon: Repeat,
   },
   {
+    label: "Financial Position",
+    description: "Review income, savings, cash, debt, and net worth.",
+    view: "financial-position",
+    target: "monthly-financial-position",
+    icon: Scale,
+  },
+  {
     label: "Manage income",
     description: "Open manual income tracking.",
     view: "income",

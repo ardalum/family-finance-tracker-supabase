@@ -7,6 +7,14 @@ function read(path) {
 }
 
 describe("dashboard quick actions", () => {
+  it("includes Financial Position quick action target", () => {
+    const source = read("src/features/dashboard/components/Dashboard.jsx");
+
+    assert.equal(source.includes('label: "Financial Position"'), true);
+    assert.equal(source.includes('view: "financial-position"'), true);
+    assert.equal(source.includes('target: "monthly-financial-position"'), true);
+  });
+
   it("includes Manage income quick action target", () => {
     const source = read("src/features/dashboard/components/Dashboard.jsx");
 

@@ -3,6 +3,7 @@ import {
   HandCoins,
   PiggyBank,
   Landmark,
+  WalletCards,
   Scale,
   CreditCard,
   DatabaseBackup,
@@ -47,6 +48,12 @@ export const accountMenuSections = [
   {
     title: "Tools",
     items: [
+      {
+        icon: WalletCards,
+        label: "Financial Position",
+        description: "Income, savings, cash, debt, and net worth in one summary view.",
+        view: "financial-position",
+      },
       {
         icon: HandCoins,
         label: "Income",

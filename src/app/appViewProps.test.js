@@ -28,6 +28,7 @@ const input = {
   selectedSpendingMonth: "spending-month",
   selectedDashboardMonth: "dashboard-month",
   selectedInsightsMonth: "insights-month",
+  selectedFinancialPositionMonth: "financial-position-month",
   selectedRecurringMonth: "recurring-month",
   selectedNetWorthMonth: "net-worth-month",
   creditCardsLoading: true,
@@ -62,6 +63,7 @@ const input = {
   setSelectedSpendingMonth: callback,
   setSelectedRecurringMonth: callback,
   setSelectedInsightsMonth: callback,
+  setSelectedFinancialPositionMonth: callback,
   setSelectedNetWorthMonth: callback,
   createSupabaseCreditCard: callback,
   updateSupabaseCreditCard: callback,
@@ -111,6 +113,41 @@ describe("app view props", () => {
     assert.equal(props.dashboardProps.error, input.dashboardError);
     assert.equal(props.insightsProps.loading, input.insightsLoading);
     assert.equal(props.insightsProps.error, input.insightsError);
+  });
+
+  it("maps financial position props", () => {
+    const props = createAppViewProps({
+      ...input,
+      appData: { transactions: [{ id: "tx-1" }] },
+      recurringPayments: [{ id: "rec-1" }],
+      recurringStatusByMonth: { "2026-05": {} },
+      incomeEntries: [{ id: "inc-1" }],
+      savingsContributions: [{ id: "sav-1" }],
+      cashAccounts: [{ id: "cash-1" }],
+      accountBalanceSnapshots: [{ id: "acc-snap-1" }],
+      liabilityAccounts: [{ id: "debt-1" }],
+      liabilityBalanceSnapshots: [{ id: "debt-snap-1" }],
+      incomeLoading: true,
+      savingsLoading: false,
+      accountsLoading: false,
+      liabilitiesLoading: false,
+      incomeError: "",
+      savingsError: "",
+      accountsError: "",
+      liabilitiesError: "",
+    });
+
+    assert.equal(props.financialPositionProps.selectedMonth, input.selectedFinancialPositionMonth);
+    assert.equal(
+      props.financialPositionProps.onMonthChange,
+      input.setSelectedFinancialPositionMonth,
+    );
+    assert.equal(props.financialPositionProps.loading, true);
+    assert.equal(props.financialPositionProps.error, "");
+    assert.equal(props.financialPositionProps.transactions.length, 1);
+    assert.equal(props.financialPositionProps.recurringPayments.length, 1);
+    assert.equal(props.financialPositionProps.incomeEntries.length, 1);
+    assert.equal(props.financialPositionProps.savingsContributions.length, 1);
   });
 
   it("maps credit card props", () => {

@@ -1,0 +1,247 @@
+import { useMemo } from "react";
+import Button from "../../../components/ui/Button.jsx";
+import Card from "../../../components/ui/Card.jsx";
+import EmptyState from "../../../components/ui/EmptyState.jsx";
+import InlineAlert from "../../../components/ui/InlineAlert.jsx";
+import Select from "../../../components/ui/Select.jsx";
+import { buildMonthOptions, getCurrentMonthKey } from "../../../lib/dates.js";
+import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
+import { dispatchNavigation } from "../../../lib/navigationTargets.js";
+import { summarizeFinancialPositionForMonth } from "../financialPositionService.js";
+
+const sectionLinks = [
+  {
+    key: "income",
+    title: "Income",
+    buttonLabel: "Manage income",
+    view: "income",
+    target: "monthly-income",
+  },
+  {
+    key: "savings",
+    title: "Savings",
+    buttonLabel: "Manage savings",
+    view: "savings",
+    target: "monthly-savings",
+  },
+  {
+    key: "accounts",
+    title: "Accounts",
+    buttonLabel: "Manage accounts",
+    view: "accounts",
+    target: "monthly-account-snapshots",
+  },
+  {
+    key: "liabilities",
+    title: "Liabilities",
+    buttonLabel: "Manage debts",
+    view: "liabilities",
+    target: "monthly-liability-snapshots",
+  },
+  {
+    key: "net-worth",
+    title: "Net Worth",
+    buttonLabel: "Review net worth",
+    view: "net-worth",
+    target: "monthly-net-worth",
+  },
+];
+
+export default function FinancialPosition({
+  selectedMonth,
+  onMonthChange,
+  loading = false,
+  error = "",
+  transactions = [],
+  recurringPayments = [],
+  recurringStatusByMonth = {},
+  incomeEntries = [],
+  savingsContributions = [],
+  cashAccounts = [],
+  accountBalanceSnapshots = [],
+  liabilityAccounts = [],
+  liabilityBalanceSnapshots = [],
+}) {
+  const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
+  const summary = useMemo(
+    () =>
+      summarizeFinancialPositionForMonth({
+        selectedMonth,
+        transactions,
+        recurringPayments,
+        recurringStatusByMonth,
+        incomeEntries,
+        savingsContributions,
+        cashAccounts,
+        accountBalanceSnapshots,
+        liabilityAccounts,
+        liabilityBalanceSnapshots,
+      }),
+    [
+      selectedMonth,
+      transactions,
+      recurringPayments,
+      recurringStatusByMonth,
+      incomeEntries,
+      savingsContributions,
+      cashAccounts,
+      accountBalanceSnapshots,
+      liabilityAccounts,
+      liabilityBalanceSnapshots,
+    ],
+  );
+
+  const needsUpdateItems = useMemo(() => {
+    const items = [];
+    if (summary.needsUpdate.income) items.push("No income entries for this month yet.");
+    if (summary.needsUpdate.savings) items.push("No savings contributions for this month yet.");
+    if (summary.needsUpdate.accounts)
+      items.push("No account balance snapshots for this month yet.");
+    if (summary.needsUpdate.liabilities) items.push("No liability snapshots for this month yet.");
+    if (summary.needsUpdate.netWorth) {
+      items.push("Net worth review appears once account or liability snapshots are added.");
+    }
+    return items;
+  }, [summary.needsUpdate]);
+
+  return (
+    <section className="grid gap-6">
+      <Card className="p-5">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-end">
+          <div>
+            <p className="text-sm font-medium text-text-muted">Financial position month</p>
+            <h2 className="mt-1 text-2xl font-semibold text-text-main">
+              {formatMonthLabel(selectedMonth)}
+            </h2>
+            <p className="mt-1 text-sm text-text-muted">
+              Financial Position summarizes existing income, savings, cash account, debt, and net
+              worth data. It does not change your financial totals.
+            </p>
+          </div>
+          <Select
+            label="Month"
+            value={selectedMonth}
+            onChange={(event) => onMonthChange(event.target.value)}
+          >
+            {monthOptions.map((month) => (
+              <option key={month} value={month}>
+                {formatMonthLabel(month)}
+              </option>
+            ))}
+          </Select>
+        </div>
+      </Card>
+
+      {error ? <InlineAlert>{error}</InlineAlert> : null}
+      {loading ? (
+        <Card className="p-5">
+          <p className="text-sm text-text-muted">Loading financial position data...</p>
+        </Card>
+      ) : null}
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <SummaryCard label="Income this month" value={summary.incomeTotal} />
+        <SummaryCard label="Savings this month" value={summary.savingsTotal} />
+        <SummaryCard label="Liquid cash" value={summary.liquidCashTotal} />
+        <SummaryCard label="Total debt" value={summary.totalDebt} />
+        <SummaryCard label="Net worth" value={summary.netWorthSummary.netWorth} />
+        <SummaryCard
+          label="Estimated leftover"
+          value={summary.cashFlowSummary.estimatedLeftover}
+          note={
+            summary.cashFlowSummary.hasIncomeData
+              ? "Income - spending - recurring remaining - savings"
+              : "Add income entries to make leftover fully meaningful."
+          }
+        />
+      </div>
+
+      <Card className="p-5">
+        <h3 className="text-base font-semibold text-text-main">Needs update</h3>
+        <p className="mt-1 text-sm text-text-muted">
+          Advisory only. Missing items do not block month close.
+        </p>
+        <div className="mt-4 grid gap-2">
+          {needsUpdateItems.length === 0 ? (
+            <EmptyState>All core financial-position inputs are present for this month.</EmptyState>
+          ) : (
+            needsUpdateItems.map((item) => (
+              <div key={item} className="rounded-xl border border-app-border bg-app-background p-3">
+                <p className="text-sm text-text-main">{item}</p>
+              </div>
+            ))
+          )}
+        </div>
+      </Card>
+
+      <div className="grid gap-4 xl:grid-cols-2">
+        {sectionLinks.map((section) => (
+          <Card key={section.key} className="p-5">
+            <h3 className="text-base font-semibold text-text-main">{section.title}</h3>
+            <p className="mt-1 text-sm text-text-muted">
+              {getSectionSummary(section.key, summary)}
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => dispatchNavigation(section.view, section.target)}
+              >
+                {section.buttonLabel}
+              </Button>
+            </div>
+          </Card>
+        ))}
+        <Card className="p-5">
+          <h3 className="text-base font-semibold text-text-main">Insights</h3>
+          <p className="mt-1 text-sm text-text-muted">
+            Open trends for YTD, year-over-year, and net worth changes over time.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => dispatchNavigation("insights")}
+            >
+              View trends
+            </Button>
+          </div>
+        </Card>
+      </div>
+    </section>
+  );
+}
+
+function SummaryCard({ label, value, note = "" }) {
+  return (
+    <Card className="p-5">
+      <p className="text-sm font-medium text-text-muted">{label}</p>
+      <p className="mt-2 text-3xl font-semibold text-text-main">{formatCurrency(value)}</p>
+      {note ? <p className="mt-1 text-xs text-text-muted">{note}</p> : null}
+    </Card>
+  );
+}
+
+function getSectionSummary(sectionKey, summary) {
+  if (sectionKey === "income") {
+    return `Tracked this month: ${formatCurrency(summary.incomeTotal)}.`;
+  }
+  if (sectionKey === "savings") {
+    return `Tracked contributions this month: ${formatCurrency(summary.savingsTotal)}.`;
+  }
+  if (sectionKey === "accounts") {
+    return `Liquid cash from snapshots: ${formatCurrency(summary.liquidCashTotal)}.`;
+  }
+  if (sectionKey === "liabilities") {
+    return `Tracked debt from snapshots: ${formatCurrency(summary.totalDebt)}.`;
+  }
+  if (sectionKey === "net-worth") {
+    return `Current net worth from snapshots: ${formatCurrency(summary.netWorthSummary.netWorth)}.`;
+  }
+  return "";
+}
+
+FinancialPosition.defaultProps = {
+  selectedMonth: getCurrentMonthKey(),
+  onMonthChange: () => {},
+};

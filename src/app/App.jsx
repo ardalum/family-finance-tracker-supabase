@@ -63,6 +63,9 @@ function FinanceTrackerApp() {
   const [selectedAccountsMonth, setSelectedAccountsMonth] = useState(
     initialSelectedMonths.accounts,
   );
+  const [selectedFinancialPositionMonth, setSelectedFinancialPositionMonth] = useState(
+    initialSelectedMonths.financialPosition,
+  );
   const [selectedLiabilitiesMonth, setSelectedLiabilitiesMonth] = useState(
     initialSelectedMonths.liabilities,
   );
@@ -522,6 +525,7 @@ function FinanceTrackerApp() {
     monthlyCloseReviewSaving,
     monthlyCloseReviewError,
     selectedInsightsMonth,
+    selectedFinancialPositionMonth,
     selectedAccountsMonth,
     selectedLiabilitiesMonth,
     selectedNetWorthMonth,
@@ -555,6 +559,7 @@ function FinanceTrackerApp() {
     setSelectedSpendingMonth,
     setSelectedRecurringMonth,
     setSelectedInsightsMonth,
+    setSelectedFinancialPositionMonth,
     setSelectedAccountsMonth,
     setSelectedLiabilitiesMonth,
     setSelectedNetWorthMonth,

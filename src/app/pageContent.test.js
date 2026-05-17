@@ -11,6 +11,7 @@ describe("page content config", () => {
     assert.equal(pageContent.spending.title, "Transactions");
     assert.equal(pageContent.recurring.title, "Recurring Payments");
     assert.equal(pageContent.insights.title, "Insights");
+    assert.equal(pageContent["financial-position"].title, "Financial Position");
   });
 
   it("contains titles and descriptions for legal views", () => {

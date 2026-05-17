@@ -5,6 +5,7 @@ import CreditCardTracker from "../features/creditCards/components/CreditCardTrac
 import Dashboard from "../features/dashboard/components/Dashboard.jsx";
 import HouseholdSettings from "../features/households/components/HouseholdSettings.jsx";
 import Insights from "../features/insights/components/Insights.jsx";
+import FinancialPosition from "../features/financialPosition/components/FinancialPosition.jsx";
 import Income from "../features/income/components/Income.jsx";
 import Accounts from "../features/accounts/components/Accounts.jsx";
 import Liabilities from "../features/liabilities/components/Liabilities.jsx";
@@ -27,6 +28,7 @@ export default function AppViewRenderer({
   spendingProps,
   recurringProps,
   insightsProps,
+  financialPositionProps,
   accountsProps,
   liabilitiesProps,
   netWorthProps,
@@ -43,6 +45,9 @@ export default function AppViewRenderer({
       {activeView === "spending" ? <SpendingTracker {...spendingProps} /> : null}
       {activeView === "recurring" ? <RecurringPayments {...recurringProps} /> : null}
       {activeView === "insights" ? <Insights {...insightsProps} /> : null}
+      {activeView === "financial-position" ? (
+        <FinancialPosition {...financialPositionProps} />
+      ) : null}
       {activeView === "accounts" ? <Accounts {...accountsProps} /> : null}
       {activeView === "liabilities" ? <Liabilities {...liabilitiesProps} /> : null}
       {activeView === "net-worth" ? <NetWorth {...netWorthProps} /> : null}
