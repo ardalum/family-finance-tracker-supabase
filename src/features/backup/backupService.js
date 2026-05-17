@@ -4,8 +4,8 @@ import { deleteHouseholdFinanceDataSecurely } from "./secureDeletionService.js";
 
 const BACKUP_APP_NAME = "Credit Card Tracker";
 const SUPPORTED_SCHEMA_VERSION = 1;
-const SUPABASE_BACKUP_VERSION = 3;
-const SUPPORTED_SUPABASE_BACKUP_VERSIONS = [1, 2, 3];
+const SUPABASE_BACKUP_VERSION = 4;
+const SUPPORTED_SUPABASE_BACKUP_VERSIONS = [1, 2, 3, 4];
 const EXPECTED_SUPABASE_SECTIONS = [
   "household",
   "householdProfiles",
@@ -17,6 +17,8 @@ const EXPECTED_SUPABASE_SECTIONS = [
   "transactionSplits",
   "recurringPayments",
   "recurringPaymentInstances",
+  "incomeSources",
+  "incomeEntries",
 ];
 
 function requireSupabase() {
@@ -1192,6 +1194,8 @@ function validateSupabaseBackup(backup) {
     ...backup,
     householdProfiles: Array.isArray(backup.householdProfiles) ? backup.householdProfiles : [],
     cardStatements: Array.isArray(backup.cardStatements) ? backup.cardStatements : [],
+    incomeSources: Array.isArray(backup.incomeSources) ? backup.incomeSources : [],
+    incomeEntries: Array.isArray(backup.incomeEntries) ? backup.incomeEntries : [],
   };
 
   const missingSection = EXPECTED_SUPABASE_SECTIONS.find(

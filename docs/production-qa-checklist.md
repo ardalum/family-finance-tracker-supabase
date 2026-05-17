@@ -61,12 +61,29 @@ Use this checklist before each production release.
 - [ ] Variable bill actual amount flow works.
 - [ ] Recurring-generated transactions appear correctly.
 
+## Income
+
+- [ ] Income page opens from Dashboard quick action and Account menu Tools.
+- [ ] Add income source works.
+- [ ] Edit income source works.
+- [ ] Delete income source works with confirmation wording.
+- [ ] Add income entry works.
+- [ ] Edit income entry works.
+- [ ] Delete income entry works with confirmation wording.
+- [ ] Month switching filters income entries correctly.
+- [ ] Monthly income total updates correctly for selected month.
+- [ ] Income entries do not change Spending totals.
+- [ ] Income entries do not change Budget totals.
+- [ ] Inactive income sources are not shown in active source selector options.
+
 ## Backup / Restore
 
 - [ ] Export backup works.
 - [ ] Import backup works with trusted files only.
 - [ ] No obvious duplicate records after import.
 - [ ] Team confirms backups contain sensitive finance data and are stored privately.
+- [ ] Supabase JSON export includes `incomeSources` and `incomeEntries`.
+- [ ] Excel export includes `Income Sources` and `Income Entries` sheets.
 
 ## Household / Settings
 

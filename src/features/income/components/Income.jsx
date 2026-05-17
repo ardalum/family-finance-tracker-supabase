@@ -120,6 +120,20 @@ export default function Income({
     resetSourceDraft();
   }
 
+  async function handleDeleteIncomeSource(sourceId, sourceName) {
+    const confirmed = window.confirm(
+      `Delete income source "${sourceName}"? Existing income entries will stay and appear as unlinked/deleted source history.`,
+    );
+    if (!confirmed) return;
+    await onDeleteIncomeSource(sourceId);
+  }
+
+  async function handleDeleteIncomeEntry(entryId) {
+    const confirmed = window.confirm("Delete this income entry?");
+    if (!confirmed) return;
+    await onDeleteIncomeEntry(entryId);
+  }
+
   return (
     <section className="grid gap-6">
       <Card className="p-5">
@@ -131,6 +145,9 @@ export default function Income({
             </h2>
             <p className="mt-1 text-sm text-text-muted">
               Manual income entries only for this MVP. No sync or imports.
+            </p>
+            <p className="mt-1 text-sm text-text-muted">
+              Income entries are tracked separately and do not change spending or budget totals.
             </p>
           </div>
           <Select
@@ -154,8 +171,17 @@ export default function Income({
         </p>
       </Card>
 
-      {error ? <InlineAlert>{error}</InlineAlert> : null}
-      {loading ? <p className="text-sm text-text-muted">Loading income data...</p> : null}
+      {error ? (
+        <InlineAlert>
+          Could not load income data right now. Income remains separate from spending and budgets.
+          {error ? ` ${error}` : ""}
+        </InlineAlert>
+      ) : null}
+      {loading ? (
+        <Card className="p-5">
+          <p className="text-sm text-text-muted">Loading income data...</p>
+        </Card>
+      ) : null}
 
       <div className="grid gap-6 xl:grid-cols-2">
         <Card className="p-5">
@@ -341,7 +367,8 @@ export default function Income({
           <div className="mt-4 grid gap-2">
             {incomeSources.length === 0 ? (
               <EmptyState>
-                No income sources yet. Add one source to speed up monthly entry.
+                No income sources yet. Add a source first, then link entries for cleaner monthly
+                reporting.
               </EmptyState>
             ) : (
               incomeSources.map((source) => {
@@ -386,7 +413,7 @@ export default function Income({
                         variant="danger"
                         className="min-h-8 px-3 py-1 text-xs"
                         disabled={isSaving}
-                        onClick={() => onDeleteIncomeSource(sourceId)}
+                        onClick={() => handleDeleteIncomeSource(sourceId, source.name)}
                       >
                         Delete
                       </Button>
@@ -404,12 +431,13 @@ export default function Income({
           Income entries for {formatMonthLabel(selectedMonth)}
         </h3>
         <p className="mt-1 text-sm text-text-muted">
-          Income entries are tracked separately from spending and do not modify spending totals.
+          Income entries are tracked separately and do not change spending or budget totals.
         </p>
         <div className="mt-4 grid gap-2">
           {monthEntries.length === 0 ? (
             <EmptyState>
-              Income reporting appears here after you add entries for this month.
+              No income entries for this month yet. Add an income entry above to track this
+              month&apos;s inflows.
             </EmptyState>
           ) : (
             monthEntries.map((entry) => {
@@ -463,7 +491,7 @@ export default function Income({
                       variant="danger"
                       className="min-h-8 px-3 py-1 text-xs"
                       disabled={isSaving}
-                      onClick={() => onDeleteIncomeEntry(entryId)}
+                      onClick={() => handleDeleteIncomeEntry(entryId)}
                     >
                       Delete
                     </Button>
