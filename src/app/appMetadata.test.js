@@ -15,9 +15,14 @@ describe("app metadata", () => {
   it("keeps required app metadata fields populated", () => {
     assert.equal(appMetadata.name, "WalletFlow");
 
-    for (const field of ["version", "releaseLabel", "releaseDate"]) {
+    for (const field of ["version", "releaseLabel", "releaseDate", "supportEmail"]) {
       assert.equal(typeof appMetadata[field], "string");
       assert.notEqual(appMetadata[field].trim(), "");
     }
+  });
+
+  it("keeps support email metadata usable", () => {
+    assert.equal(appMetadata.supportEmail.includes("@"), true);
+    assert.equal(appMetadata.supportEmail.includes("."), true);
   });
 });
