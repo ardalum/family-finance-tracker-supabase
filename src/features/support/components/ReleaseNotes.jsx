@@ -1,5 +1,6 @@
-import { CheckCircle2, ClipboardList, Sparkles } from "lucide-react";
+import { ClipboardList, Sparkles } from "lucide-react";
 import { appMetadata } from "../../../app/appMetadata.js";
+import CheckList from "../../../components/layout/CheckList.jsx";
 import PageHero from "../../../components/layout/PageHero.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import { releaseNotes } from "../releaseNotesData.js";
@@ -28,18 +29,7 @@ export default function ReleaseNotes() {
                 aria-hidden="true"
               />
             </div>
-            <ul className="mt-4 grid gap-3">
-              {release.items.map((item) => (
-                <li key={item} className="flex gap-3 text-sm leading-6 text-text-soft">
-                  <CheckCircle2
-                    size={18}
-                    className="mt-0.5 shrink-0 text-brand-accent"
-                    aria-hidden="true"
-                  />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
+            <CheckList items={release.items} />
           </Card>
         ))}
       </div>

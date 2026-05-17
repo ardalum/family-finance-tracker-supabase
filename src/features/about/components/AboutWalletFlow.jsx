@@ -1,6 +1,7 @@
-import { CheckCircle2, ShieldAlert } from "lucide-react";
+import { ShieldAlert } from "lucide-react";
 import { appMetadata } from "../../../app/appMetadata.js";
 import { AppBrandMark, AppBrandName } from "../../../components/branding/index.js";
+import CheckList from "../../../components/layout/CheckList.jsx";
 import ContactCard from "../../../components/layout/ContactCard.jsx";
 import InfoCard from "../../../components/layout/InfoCard.jsx";
 import PageHero from "../../../components/layout/PageHero.jsx";
@@ -32,18 +33,7 @@ export default function AboutWalletFlow() {
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="p-5">
           <h3 className="text-lg font-semibold text-text-main">What WalletFlow Helps Track</h3>
-          <ul className="mt-4 grid gap-3">
-            {aboutTrackingItems.map((item) => (
-              <li key={item} className="flex gap-3 text-sm leading-6 text-text-soft">
-                <CheckCircle2
-                  size={18}
-                  className="mt-0.5 shrink-0 text-brand-accent"
-                  aria-hidden="true"
-                />
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
+          <CheckList items={aboutTrackingItems} />
         </Card>
 
         <Card className="p-5">
