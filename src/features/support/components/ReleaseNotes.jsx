@@ -1,5 +1,6 @@
 import { CheckCircle2, ClipboardList, Sparkles } from "lucide-react";
 import { appMetadata } from "../../../app/appMetadata.js";
+import PageHero from "../../../components/layout/PageHero.jsx";
 import Card from "../../../components/ui/Card.jsx";
 
 const releaseNotes = [
@@ -27,24 +28,12 @@ const releaseNotes = [
 export default function ReleaseNotes() {
   return (
     <section className="grid gap-6">
-      <Card className="p-6">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-brand-primary text-white shadow-sm">
-            <Sparkles size={26} strokeWidth={2.2} aria-hidden="true" />
-          </div>
-          <div className="max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
-              WalletFlow v{appMetadata.version}
-            </p>
-            <h2 className="mt-2 text-3xl font-semibold tracking-normal text-text-main">
-              Release Notes
-            </h2>
-            <p className="mt-4 text-sm leading-6 text-text-muted">
-              Review recent WalletFlow changes, cleanup passes, and user-facing improvements.
-            </p>
-          </div>
-        </div>
-      </Card>
+      <PageHero
+        icon={Sparkles}
+        eyebrow={`WalletFlow v${appMetadata.version}`}
+        title="Release Notes"
+        description="Review recent WalletFlow changes, cleanup passes, and user-facing improvements."
+      />
 
       <div className="grid gap-6">
         {releaseNotes.map((release) => (
