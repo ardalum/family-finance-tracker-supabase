@@ -41,6 +41,15 @@ Scope: Design-only planning for account balance snapshots and net worth (no impl
   - no broader asset classes in scope
   - dependent on users keeping snapshots current
 
+## Phase 37 Status Update
+
+- Net Worth Trends is now implemented in Insights using existing manual snapshot data:
+  - assets from cash account snapshots
+  - liabilities from liability snapshots
+  - net worth trend calculated per month (`assets - liabilities`)
+- Missing months are displayed as no data rather than inferred balances.
+- No new schema or persisted net-worth tables were introduced.
+
 ## 1. Problem Statement
 
 WalletFlow now covers transactions, budgets, recurring bills, cards, insights, income, savings goals, and a Dashboard cash-flow summary. It is still incomplete as a full household finance tracker because it does not capture real account balance snapshots or net worth over time.

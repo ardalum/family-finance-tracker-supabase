@@ -59,4 +59,5 @@ Last updated: 2026-05-17 (Phase 16 real-data readiness review)
 - Net worth summary MVP is now implemented from manual cash/liability snapshots; this partially addresses the net-worth product gap and is not a bug fix.
 - Remaining net-worth product gaps: trends over time, broader asset classes, and advanced household-position analytics.
 - Net worth summary hardening is complete for MVP clarity/QA; remaining limitations are expected product scope (manual snapshots, no trend visuals, no standalone net-worth export dataset).
+- Net worth trends are now partially addressed in Insights using existing manual snapshots; remaining product gaps are broader asset coverage and deeper long-range analytics, not bugs.
 - Remaining income/savings-related product gaps: dedicated import/merge conflict workflows, emergency-fund specific guidance, and deeper cash-flow modeling.
