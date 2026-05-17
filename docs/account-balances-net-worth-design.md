@@ -50,6 +50,15 @@ Scope: Design-only planning for account balance snapshots and net worth (no impl
 - Missing months are displayed as no data rather than inferred balances.
 - No new schema or persisted net-worth tables were introduced.
 
+## Phase 38 Status Update
+
+- Monthly Close now includes optional/manual review prompts for:
+  - account balance snapshots
+  - debt balance snapshots
+  - net worth summary
+  - net worth trends in Insights
+- These prompts help complete household review workflows without introducing hard blockers when snapshot data is missing.
+
 ## 1. Problem Statement
 
 WalletFlow now covers transactions, budgets, recurring bills, cards, insights, income, savings goals, and a Dashboard cash-flow summary. It is still incomplete as a full household finance tracker because it does not capture real account balance snapshots or net worth over time.

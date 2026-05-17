@@ -95,6 +95,24 @@ Provide one guided monthly workflow that:
 - Soft lock/reopen with audit trail.
 - Automated reminder notifications for incomplete close items.
 
+## Phase 38 Integration Update
+
+Monthly Close now includes optional/manual review prompts for household balance-sheet context:
+
+- Review account balance snapshots
+- Review debt balance snapshots
+- Review net worth summary
+- Review net worth trends (Insights)
+
+Navigation targets:
+
+- Account balances -> `accounts`
+- Debt snapshots -> `liabilities`
+- Net worth summary -> `net-worth`
+- Net worth trends -> `insights`
+
+These new items are guidance-only and do not block month close completion. Existing required checks and reviewed/reopen persistence behavior remain unchanged.
+
 ## Suggested Implementation Phases
 
 ### Phase A: Checklist MVP (No Schema Change)

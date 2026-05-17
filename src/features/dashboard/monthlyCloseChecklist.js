@@ -4,6 +4,8 @@ export function getMonthlyCloseChecklist(data, monthKey, review = null) {
   const recurringRows = data.recurringRows ?? [];
   const budgetRows = data.budgetRows ?? [];
   const transactions = data.transactions ?? [];
+  const accountBalanceSnapshots = data.accountBalanceSnapshots ?? [];
+  const liabilityBalanceSnapshots = data.liabilityBalanceSnapshots ?? [];
   const manualChecks = review?.manualChecks ?? {};
 
   const cardsWithBalanceEntryCount = cardRows.filter((row) => row.balance > 0 || row.paid).length;
@@ -18,8 +20,19 @@ export function getMonthlyCloseChecklist(data, monthKey, review = null) {
   ).length;
   const hasTransactionData = transactions.length > 0;
   const hasInsightData = hasTransactionData || budgetRows.length > 0;
+  const hasAccountSnapshotsForMonth = accountBalanceSnapshots.some(
+    (snapshot) => snapshot?.monthKey === monthKey,
+  );
+  const hasLiabilitySnapshotsForMonth = liabilityBalanceSnapshots.some(
+    (snapshot) => snapshot?.monthKey === monthKey,
+  );
+  const hasNetWorthSnapshotData = hasAccountSnapshotsForMonth || hasLiabilitySnapshotsForMonth;
   const insightsReviewed = Boolean(manualChecks.reviewInsights);
   const cashFlowReviewed = Boolean(manualChecks.reviewCashFlow);
+  const balancesReviewed = Boolean(manualChecks.reviewAccountBalances);
+  const debtsReviewed = Boolean(manualChecks.reviewDebtBalances);
+  const netWorthReviewed = Boolean(manualChecks.reviewNetWorthSummary);
+  const netWorthTrendsReviewed = Boolean(manualChecks.reviewNetWorthTrends);
   const backupExportChecked = Boolean(manualChecks.exportBackup);
 
   const items = [
@@ -118,6 +131,70 @@ export function getMonthlyCloseChecklist(data, monthKey, review = null) {
       isComplete: cashFlowReviewed,
       isManual: true,
       manualCheckId: "reviewCashFlow",
+    },
+    {
+      id: "review-account-balance-snapshots",
+      title: "Review account balance snapshots",
+      status: balancesReviewed ? "complete" : "recommended",
+      description: hasAccountSnapshotsForMonth
+        ? balancesReviewed
+          ? "Account balance snapshot review confirmed for this month."
+          : "Review this month's account balance snapshots. Snapshots are separate from transactions."
+        : "No balance snapshots found for this month.",
+      view: "accounts",
+      target: "monthly-account-snapshots",
+      countsTowardCompletion: false,
+      isComplete: balancesReviewed,
+      isManual: true,
+      manualCheckId: "reviewAccountBalances",
+    },
+    {
+      id: "review-debt-balance-snapshots",
+      title: "Review debt balance snapshots",
+      status: debtsReviewed ? "complete" : "recommended",
+      description: hasLiabilitySnapshotsForMonth
+        ? debtsReviewed
+          ? "Debt snapshot review confirmed for this month."
+          : "Review this month's debt snapshots. Debt snapshots are separate from credit card payment tracking."
+        : "No debt snapshots found for this month.",
+      view: "liabilities",
+      target: "monthly-liability-snapshots",
+      countsTowardCompletion: false,
+      isComplete: debtsReviewed,
+      isManual: true,
+      manualCheckId: "reviewDebtBalances",
+    },
+    {
+      id: "review-net-worth-summary",
+      title: "Review net worth summary",
+      status: netWorthReviewed ? "complete" : "recommended",
+      description: hasNetWorthSnapshotData
+        ? netWorthReviewed
+          ? "Net worth summary review confirmed for this month."
+          : "Review net worth summary computed from account and debt snapshots."
+        : "Net worth review appears once account or debt snapshots exist.",
+      view: "net-worth",
+      target: "monthly-net-worth",
+      countsTowardCompletion: false,
+      isComplete: netWorthReviewed,
+      isManual: true,
+      manualCheckId: "reviewNetWorthSummary",
+    },
+    {
+      id: "review-net-worth-trends",
+      title: "Review net worth trends",
+      status: netWorthTrendsReviewed ? "complete" : "recommended",
+      description: hasNetWorthSnapshotData
+        ? netWorthTrendsReviewed
+          ? "Net worth trend review confirmed for this month."
+          : "Review net worth trend context in Insights (missing months are shown as no data)."
+        : "Add account/debt snapshots to unlock net worth trend review.",
+      view: "insights",
+      target: "",
+      countsTowardCompletion: false,
+      isComplete: netWorthTrendsReviewed,
+      isManual: true,
+      manualCheckId: "reviewNetWorthTrends",
     },
     {
       id: "export-backup",
