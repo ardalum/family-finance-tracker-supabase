@@ -1,5 +1,6 @@
 export const appMetadata = {
   name: "WalletFlow",
+  tagline: "Track your cards, budget, and spending in one clear place.",
   creatorName: "Arvin Dalumpines",
   copyrightYear: "2026",
   version: "0.1.0",

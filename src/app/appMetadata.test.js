@@ -8,6 +8,7 @@ const packageJson = JSON.parse(
 );
 
 const requiredMetadataFields = [
+  "tagline",
   "creatorName",
   "copyrightYear",
   "version",
