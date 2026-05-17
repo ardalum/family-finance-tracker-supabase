@@ -168,3 +168,11 @@ This audit reviews WalletFlow as of Phase 7 across these workflows:
 - Financial Position hub design is now documented in `docs/financial-position-hub-design.md`.
 - This is a UX/product architecture improvement, not a bug fix and not a calculation/schema change.
 - Goal: unify Income/Savings/Accounts/Liabilities/Net Worth discoverability and month-level position review while preserving Dashboard and Insights roles.
+
+## Phase 41 Status Update
+
+- Financial Position hub MVP is now **partially addressed** as an implemented secondary page that summarizes existing income/savings/accounts/liabilities/net-worth position data.
+- Remaining gap scope:
+  - hardening and mobile polish
+  - workflow tuning between Dashboard, Monthly Close, and hub usage
+  - longer-term decision on whether hub promotion to main nav is warranted

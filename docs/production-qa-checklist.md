@@ -169,6 +169,16 @@ Use this checklist before each production release.
 - [ ] Net worth trend values use snapshot data only.
 - [ ] Net worth trends do not change Spending, Income, Savings, Budget, or cash-flow totals.
 
+## Financial Position Hub
+
+- [ ] Financial Position opens from Dashboard quick action.
+- [ ] Financial Position opens from Account menu Tools.
+- [ ] Financial Position month selector updates summaries.
+- [ ] Summary cards show income, savings, liquid cash, total debt, net worth, and estimated leftover.
+- [ ] Needs update advisories appear when month data is missing.
+- [ ] Hub links open Income, Savings, Accounts, Liabilities, Net Worth, and Insights.
+- [ ] Hub does not change Spending, Budget, Cards, Bills, Income, Savings, Accounts, Liabilities, or Net Worth calculations.
+
 ## Backup / Restore
 
 - [ ] Export backup works.

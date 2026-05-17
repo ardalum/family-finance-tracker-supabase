@@ -217,3 +217,8 @@ Future recommendation:
 
 - The recommended next IA improvement is now documented as a dedicated **Financial Position hub** design in `docs/financial-position-hub-design.md`.
 - This hub is intended to consolidate secondary finance-position workflows (Income, Savings, Accounts, Liabilities, Net Worth) without changing primary nav yet.
+
+## Phase 41 Note
+
+- Financial Position hub MVP is now implemented as a secondary page and discoverable from Dashboard quick actions and Account menu Tools.
+- Main nav remains unchanged; Dashboard and Insights responsibilities remain intentionally separate.

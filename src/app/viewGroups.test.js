@@ -24,6 +24,7 @@ describe("view groups", () => {
 
   it("keeps the expected utility views", () => {
     assert.deepEqual(secondaryViewIds, [
+      "financial-position",
       "accounts",
       "liabilities",
       "net-worth",

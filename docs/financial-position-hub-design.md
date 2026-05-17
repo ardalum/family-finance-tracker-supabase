@@ -4,6 +4,19 @@ Date: 2026-05-17
 Project: WalletFlow / Family Finance Tracker  
 Scope: Design-only plan for a future Financial Position hub (no implementation in this phase)
 
+## Phase 41 Status Update
+
+- Financial Position hub MVP is now implemented as a secondary page using existing data only.
+- Current MVP includes:
+  - month selector
+  - summary cards for income, savings, liquid cash, total debt, net worth, and estimated leftover
+  - advisory "Needs update" prompts
+  - quick links to Income, Savings, Accounts, Liabilities, Net Worth, and Insights
+- Known limitations:
+  - no dedicated trend visualizations inside the hub (Insights remains trend center)
+  - no new schema or stored hub dataset (all values are composed from existing sources)
+  - hub remains secondary (not main nav) until adoption is validated
+
 ## 1. Problem Statement
 
 WalletFlow now includes Income, Savings, Accounts, Liabilities, and Net Worth as separate secondary tools. Each tool works on its own, but the overall household financial-position workflow is scattered across multiple entry points.

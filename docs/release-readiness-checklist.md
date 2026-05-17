@@ -169,7 +169,8 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Capture and store required smoke-test screenshots.
 - [ ] Update `docs/bug-backlog.md` statuses for any discovered issues.
 - [ ] Complete post-expansion UX spot-check from `docs/product-ux-audit-after-finance-expansion.md` (Dashboard action density, secondary-tool discoverability, Insights scanability, Monthly Close clarity).
-- [ ] Note that current release UX still uses separate secondary tools (Income/Savings/Accounts/Liabilities/Net Worth) until the planned Financial Position hub is implemented.
+- [ ] Verify Financial Position secondary hub opens from Dashboard quick action and Account menu Tools.
+- [ ] Verify Financial Position links route to Income, Savings, Accounts, Liabilities, Net Worth, and Insights.
 
 ## Known Limitations
 

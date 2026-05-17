@@ -19,6 +19,7 @@ describe("account menu sections", () => {
         ["Account Settings", "Data & Privacy"],
         ["Household Settings"],
         [
+          "Financial Position",
           "Income",
           "Savings",
           "Accounts",
@@ -38,7 +39,16 @@ describe("account menu sections", () => {
       [
         ["account-settings", "privacy-policy"],
         ["household-settings"],
-        ["income", "savings", "accounts", "net-worth", "liabilities", "backup", "app-settings"],
+        [
+          "financial-position",
+          "income",
+          "savings",
+          "accounts",
+          "net-worth",
+          "liabilities",
+          "backup",
+          "app-settings",
+        ],
         ["help-support", "release-notes", "about"],
       ],
     );

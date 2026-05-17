@@ -23,6 +23,10 @@ export const pageContent = {
     title: "Insights",
     description: "Review spending trends, budget performance, and payment patterns.",
   },
+  "financial-position": {
+    title: "Financial Position",
+    description: "Review income, savings, cash, debts, and net worth in one place.",
+  },
   accounts: {
     title: "Accounts",
     description: "Manually track cash accounts and monthly balance snapshots.",
