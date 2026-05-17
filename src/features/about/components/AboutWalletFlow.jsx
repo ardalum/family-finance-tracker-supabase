@@ -9,6 +9,7 @@ import Card from "../../../components/ui/Card.jsx";
 import {
   aboutDisclaimerParagraphs,
   aboutIntroDescription,
+  aboutProductDetailRows,
   aboutTrackingItems,
 } from "../aboutPageData.js";
 
@@ -39,18 +40,12 @@ export default function AboutWalletFlow() {
         <Card className="p-5">
           <h3 className="text-lg font-semibold text-text-main">Product Details</h3>
           <dl className="mt-4 grid gap-4 text-sm">
-            <div>
-              <dt className="font-medium text-text-muted">Created by</dt>
-              <dd className="mt-1 font-semibold text-text-main">{appMetadata.creatorName}</dd>
-            </div>
-            <div>
-              <dt className="font-medium text-text-muted">Version</dt>
-              <dd className="mt-1 font-semibold text-text-main">{appMetadata.version}</dd>
-            </div>
-            <div>
-              <dt className="font-medium text-text-muted">Release</dt>
-              <dd className="mt-1 font-semibold text-text-main">{appMetadata.releaseLabel}</dd>
-            </div>
+            {aboutProductDetailRows.map((row) => (
+              <div key={row.valueKey}>
+                <dt className="font-medium text-text-muted">{row.label}</dt>
+                <dd className="mt-1 font-semibold text-text-main">{appMetadata[row.valueKey]}</dd>
+              </div>
+            ))}
           </dl>
         </Card>
       </div>
