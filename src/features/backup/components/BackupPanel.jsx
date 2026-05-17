@@ -517,7 +517,8 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
           <div className="mt-4 grid gap-4 border-t border-gray-100 pt-4">
             <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
               Use this only if you still need access to the original localStorage backup format.
-              Supabase import is intentionally separate and not enabled yet.
+              Supabase cloud backup import is available in the section above and is intentionally
+              separate from these legacy tools.
             </div>
 
             <div className="flex flex-wrap gap-3">
