@@ -19,6 +19,7 @@ import { dispatchNavigation } from "../../../lib/navigationTargets.js";
 import BudgetVsSpendingTable from "./BudgetVsSpendingTable.jsx";
 import CreditCardPaymentOverview from "./CreditCardPaymentOverview.jsx";
 import DashboardActionCards from "./DashboardActionCards.jsx";
+import DashboardCashFlowSummary from "./DashboardCashFlowSummary.jsx";
 import MonthlyCloseChecklist from "./MonthlyCloseChecklist.jsx";
 import RecentTransactionsTable from "./RecentTransactionsTable.jsx";
 import RecurringOverview from "./RecurringOverview.jsx";
@@ -165,6 +166,13 @@ export default function Dashboard({
         cardRows={data.cardRows}
         recurringRows={data.recurringRows}
         budgetRows={data.budgetRows}
+      />
+      <DashboardCashFlowSummary
+        selectedMonth={selectedMonth}
+        incomeEntries={appData.incomeEntries}
+        savingsContributions={appData.savingsContributions}
+        spendingTotal={data.summary.spendingTotal}
+        recurringRemaining={data.summary.recurringRemaining}
       />
 
       <DashboardQuickActions />

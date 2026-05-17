@@ -16,6 +16,11 @@ Use this checklist before each production release.
 - [ ] Due soon and past due credit-card alerts appear correctly.
 - [ ] Budget overage and near-limit alerts appear correctly.
 - [ ] Recurring unpaid and past-due alerts appear correctly.
+- [ ] Cash-flow summary card appears.
+- [ ] Cash-flow income/spending/savings/recurring values match selected month data.
+- [ ] Missing-income state appears when no income entries exist for selected month.
+- [ ] Cash-flow action buttons route to Income, Savings, Spending, and Bills workspaces.
+- [ ] Estimated leftover updates when income/savings/spending/recurring values change.
 
 ## Cards
 
