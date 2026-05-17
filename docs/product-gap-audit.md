@@ -136,3 +136,11 @@ This audit reviews WalletFlow as of Phase 7 across these workflows:
 
 - Liability/debt snapshots are now documented as the next remaining implementation gap in `docs/liability-debt-snapshots-design.md`.
 - Product remains intentionally incomplete for household position tracking until liability snapshots and net-worth summary layers are implemented.
+
+## Phase 33 Status Update
+
+- Liability/debt snapshots are now **partially addressed** with manual liability accounts and monthly debt balance snapshots.
+- Remaining product gaps for household position:
+  - net worth summary layer
+  - net worth and debt trend reporting
+  - broader asset/liability scope beyond current manual cash/debt snapshots

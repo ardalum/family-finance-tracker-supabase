@@ -4,6 +4,18 @@ Date: 2026-05-17
 Project: WalletFlow / Family Finance Tracker  
 Scope: Design-only planning for liability/debt account snapshots (no implementation in this phase)
 
+## Phase 33 Status Update
+
+- Liability/Debt Snapshots MVP is now implemented for manual tracking:
+  - liability account list
+  - liability balance snapshots by month/date
+  - total debt summary for selected month
+  - Dashboard quick action + Tools entry point
+- Liability snapshots remain separate from transactions and do not alter spending, budget, income, savings, card workflow, or dashboard cash-flow calculations.
+- Still missing after Phase 33:
+  - hardening pass and edge-case UX polish
+  - full net worth summary and trends
+
 ## 1. Problem Statement
 
 WalletFlow cannot produce trustworthy net worth until liabilities are tracked with the same clarity as asset balances. Cash account snapshots now exist, but debt balances are still missing, so total household position is incomplete.

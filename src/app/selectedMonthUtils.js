@@ -10,6 +10,7 @@ export const SELECTED_MONTH_KEYS = [
   "income",
   "savings",
   "accounts",
+  "liabilities",
 ];
 
 export function createInitialSelectedMonths(monthKey = getCurrentMonthKey()) {

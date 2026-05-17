@@ -4,8 +4,8 @@ import { deleteHouseholdFinanceDataSecurely } from "./secureDeletionService.js";
 
 const BACKUP_APP_NAME = "Credit Card Tracker";
 const SUPPORTED_SCHEMA_VERSION = 1;
-const SUPABASE_BACKUP_VERSION = 6;
-const SUPPORTED_SUPABASE_BACKUP_VERSIONS = [1, 2, 3, 4, 5, 6];
+const SUPABASE_BACKUP_VERSION = 7;
+const SUPPORTED_SUPABASE_BACKUP_VERSIONS = [1, 2, 3, 4, 5, 6, 7];
 const EXPECTED_SUPABASE_SECTIONS = [
   "household",
   "householdProfiles",
@@ -23,6 +23,8 @@ const EXPECTED_SUPABASE_SECTIONS = [
   "savingsContributions",
   "cashAccounts",
   "accountBalanceSnapshots",
+  "liabilityAccounts",
+  "liabilityBalanceSnapshots",
 ];
 
 function requireSupabase() {
@@ -62,6 +64,8 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
       savingsContributionsResult,
       cashAccountsResult,
       accountBalanceSnapshotsResult,
+      liabilityAccountsResult,
+      liabilityBalanceSnapshotsResult,
     ] = await Promise.all([
       client
         .from("households")
@@ -148,6 +152,17 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
         .eq("household_id", householdId)
         .order("snapshot_date", { ascending: true })
         .order("created_at", { ascending: true }),
+      client
+        .from("liability_accounts")
+        .select("*")
+        .eq("household_id", householdId)
+        .order("created_at", { ascending: true }),
+      client
+        .from("liability_balance_snapshots")
+        .select("*")
+        .eq("household_id", householdId)
+        .order("snapshot_date", { ascending: true })
+        .order("created_at", { ascending: true }),
     ]);
 
     const error = [
@@ -167,6 +182,8 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
       savingsContributionsResult,
       cashAccountsResult,
       accountBalanceSnapshotsResult,
+      liabilityAccountsResult,
+      liabilityBalanceSnapshotsResult,
     ].find((result) => result?.error)?.error;
 
     if (error) throw error;
@@ -191,6 +208,8 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
       savingsContributions: savingsContributionsResult?.data ?? [],
       cashAccounts: cashAccountsResult?.data ?? [],
       accountBalanceSnapshots: accountBalanceSnapshotsResult?.data ?? [],
+      liabilityAccounts: liabilityAccountsResult?.data ?? [],
+      liabilityBalanceSnapshots: liabilityBalanceSnapshotsResult?.data ?? [],
     };
 
     downloadJson(backup, `finance-tracker-supabase-backup-${getDateStamp()}.json`);
@@ -477,6 +496,42 @@ export async function exportSupabaseExcel(householdId, activeHousehold) {
       })),
     );
 
+    appendSheet(
+      workbook,
+      "Liability Accounts",
+      data.liabilityAccounts.map((account) => ({
+        Name: account.name,
+        "Liability Type": account.liability_type,
+        "Linked Credit Card": account.credit_cards?.name ?? "",
+        Institution: account.institution_name ?? "",
+        "Interest Rate": account.interest_rate ?? "",
+        "Minimum Payment": Number(account.minimum_payment || 0),
+        "Due Day": account.due_day ?? "",
+        Owner: account.household_profiles?.display_name ?? "",
+        Active: account.is_active ? "Yes" : "No",
+        Notes: account.notes ?? "",
+        "Created At": formatDateTime(account.created_at),
+        "Updated At": formatDateTime(account.updated_at),
+        ID: account.id,
+      })),
+    );
+
+    appendSheet(
+      workbook,
+      "Liability Balance Snapshots",
+      data.liabilityBalanceSnapshots.map((snapshot) => ({
+        Date: snapshot.snapshot_date,
+        Month: snapshot.month_key,
+        Liability: snapshot.liability_accounts?.name ?? snapshot.liability_account_id,
+        "Balance Amount": Number(snapshot.balance_amount || 0),
+        Owner: snapshot.household_profiles?.display_name ?? "",
+        Notes: snapshot.notes ?? "",
+        "Created At": formatDateTime(snapshot.created_at),
+        "Updated At": formatDateTime(snapshot.updated_at),
+        ID: snapshot.id,
+      })),
+    );
+
     const buffer = await workbook.xlsx.writeBuffer();
     downloadBlob(
       buffer,
@@ -558,6 +613,8 @@ async function loadHouseholdExportData(householdId, activeHousehold) {
     savingsContributionsResult,
     cashAccountsResult,
     accountBalanceSnapshotsResult,
+    liabilityAccountsResult,
+    liabilityBalanceSnapshotsResult,
   ] = await Promise.all([
     client
       .from("households")
@@ -644,6 +701,17 @@ async function loadHouseholdExportData(householdId, activeHousehold) {
       .eq("household_id", householdId)
       .order("snapshot_date", { ascending: true })
       .order("created_at", { ascending: true }),
+    client
+      .from("liability_accounts")
+      .select("*, credit_cards (name), household_profiles (display_name)")
+      .eq("household_id", householdId)
+      .order("created_at", { ascending: true }),
+    client
+      .from("liability_balance_snapshots")
+      .select("*, liability_accounts (name), household_profiles (display_name)")
+      .eq("household_id", householdId)
+      .order("snapshot_date", { ascending: true })
+      .order("created_at", { ascending: true }),
   ]);
 
   const error = [
@@ -663,6 +731,8 @@ async function loadHouseholdExportData(householdId, activeHousehold) {
     savingsContributionsResult,
     cashAccountsResult,
     accountBalanceSnapshotsResult,
+    liabilityAccountsResult,
+    liabilityBalanceSnapshotsResult,
   ].find((result) => result?.error)?.error;
 
   if (error) throw error;
@@ -684,6 +754,8 @@ async function loadHouseholdExportData(householdId, activeHousehold) {
     savingsContributions: savingsContributionsResult?.data ?? [],
     cashAccounts: cashAccountsResult?.data ?? [],
     accountBalanceSnapshots: accountBalanceSnapshotsResult?.data ?? [],
+    liabilityAccounts: liabilityAccountsResult?.data ?? [],
+    liabilityBalanceSnapshots: liabilityBalanceSnapshotsResult?.data ?? [],
   };
 }
 
@@ -1343,6 +1415,10 @@ function validateSupabaseBackup(backup) {
     accountBalanceSnapshots: Array.isArray(backup.accountBalanceSnapshots)
       ? backup.accountBalanceSnapshots
       : [],
+    liabilityAccounts: Array.isArray(backup.liabilityAccounts) ? backup.liabilityAccounts : [],
+    liabilityBalanceSnapshots: Array.isArray(backup.liabilityBalanceSnapshots)
+      ? backup.liabilityBalanceSnapshots
+      : [],
   };
 
   const missingSection = EXPECTED_SUPABASE_SECTIONS.find(
@@ -1413,6 +1489,14 @@ function validateSupabaseBackup(backup) {
     return invalid("Supabase backup contains an invalid account balance snapshot record.");
   }
 
+  if (!normalizedBackup.liabilityAccounts.every(isValidSupabaseLiabilityAccount)) {
+    return invalid("Supabase backup contains an invalid liability account record.");
+  }
+
+  if (!normalizedBackup.liabilityBalanceSnapshots.every(isValidSupabaseLiabilityBalanceSnapshot)) {
+    return invalid("Supabase backup contains an invalid liability balance snapshot record.");
+  }
+
   const profileIds = new Set(normalizedBackup.householdProfiles.map((profile) => profile.id));
   const cardIds = new Set(normalizedBackup.creditCards.map((card) => card.id));
   const categoryIds = new Set(normalizedBackup.budgetCategories.map((category) => category.id));
@@ -1421,6 +1505,9 @@ function validateSupabaseBackup(backup) {
   );
   const recurringIds = new Set(normalizedBackup.recurringPayments.map((payment) => payment.id));
   const cashAccountIds = new Set(normalizedBackup.cashAccounts.map((account) => account.id));
+  const liabilityAccountIds = new Set(
+    normalizedBackup.liabilityAccounts.map((account) => account.id),
+  );
 
   if (
     !normalizedBackup.creditCards.every((card) => nullableSetHas(profileIds, card.owner_profile_id))
@@ -1490,6 +1577,28 @@ function validateSupabaseBackup(backup) {
     )
   ) {
     return invalid("Supabase backup has balance snapshots with invalid related records.");
+  }
+
+  if (
+    !normalizedBackup.liabilityAccounts.every(
+      (account) =>
+        nullableSetHas(profileIds, account.owner_profile_id) &&
+        nullableSetHas(cardIds, account.linked_credit_card_id),
+    )
+  ) {
+    return invalid(
+      "Supabase backup has liability accounts with invalid household profile or card references.",
+    );
+  }
+
+  if (
+    !normalizedBackup.liabilityBalanceSnapshots.every(
+      (snapshot) =>
+        liabilityAccountIds.has(snapshot.liability_account_id) &&
+        nullableSetHas(profileIds, snapshot.owner_profile_id),
+    )
+  ) {
+    return invalid("Supabase backup has liability snapshots with invalid related records.");
   }
 
   return {
@@ -2009,6 +2118,51 @@ function isValidSupabaseAccountBalanceSnapshot(snapshot) {
     isValidDateKey(snapshot.snapshot_date) &&
     isValidMonthKey(snapshot.month_key) &&
     Number.isFinite(Number(snapshot.balance_amount)) &&
+    typeof snapshot.notes === "string"
+  );
+}
+
+function isValidSupabaseLiabilityAccount(account) {
+  return (
+    account &&
+    typeof account === "object" &&
+    isValidUuidLike(account.id) &&
+    typeof account.name === "string" &&
+    account.name.trim().length > 0 &&
+    [
+      "credit_card",
+      "auto_loan",
+      "student_loan",
+      "personal_loan",
+      "mortgage",
+      "medical_debt",
+      "buy_now_pay_later",
+      "family_loan",
+      "other",
+    ].includes(account.liability_type) &&
+    isNullableUuidLike(account.owner_profile_id) &&
+    isNullableUuidLike(account.linked_credit_card_id) &&
+    typeof account.institution_name === "string" &&
+    (account.interest_rate === null ||
+      account.interest_rate === undefined ||
+      isNonNegativeNumber(account.interest_rate)) &&
+    isNonNegativeNumber(account.minimum_payment) &&
+    (account.due_day === null || account.due_day === undefined || isValidDay(account.due_day)) &&
+    typeof account.is_active === "boolean" &&
+    typeof account.notes === "string"
+  );
+}
+
+function isValidSupabaseLiabilityBalanceSnapshot(snapshot) {
+  return (
+    snapshot &&
+    typeof snapshot === "object" &&
+    isValidUuidLike(snapshot.id) &&
+    isValidUuidLike(snapshot.liability_account_id) &&
+    isNullableUuidLike(snapshot.owner_profile_id) &&
+    isValidDateKey(snapshot.snapshot_date) &&
+    isValidMonthKey(snapshot.month_key) &&
+    isNonNegativeNumber(snapshot.balance_amount) &&
     typeof snapshot.notes === "string"
   );
 }

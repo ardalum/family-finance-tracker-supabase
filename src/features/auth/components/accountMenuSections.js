@@ -3,6 +3,7 @@ import {
   HandCoins,
   PiggyBank,
   Landmark,
+  CreditCard,
   DatabaseBackup,
   Home,
   Info,
@@ -62,6 +63,12 @@ export const accountMenuSections = [
         label: "Accounts",
         description: "Manual cash accounts and monthly balance snapshots.",
         view: "accounts",
+      },
+      {
+        icon: CreditCard,
+        label: "Debts",
+        description: "Manual debt accounts and liability balance snapshots.",
+        view: "liabilities",
       },
       {
         icon: DatabaseBackup,
