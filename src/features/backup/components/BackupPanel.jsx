@@ -28,6 +28,15 @@ const summaryLabels = {
   transactionSplits: "Transaction splits",
   recurringPayments: "Recurring payments",
   recurringPaymentInstances: "Recurring instances",
+  monthlyCloseReviews: "Monthly close reviews",
+  incomeSources: "Income sources",
+  incomeEntries: "Income entries",
+  savingsGoals: "Savings goals",
+  savingsContributions: "Savings contributions",
+  cashAccounts: "Cash accounts",
+  accountBalanceSnapshots: "Account balance snapshots",
+  liabilityAccounts: "Liability accounts",
+  liabilityBalanceSnapshots: "Liability snapshots",
 };
 
 function getCountTotals(counts) {
@@ -252,8 +261,9 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
             <p className="mt-1 max-w-3xl text-sm text-gray-600">
               Export the finance data for your active household from Supabase. This includes cards,
               monthly balances, card statements, budgets, transactions, splits, recurring payments,
-              recurring instances, income, savings, cash-account snapshots, and liability debt
-              snapshots. Auth tokens, passwords, and secret keys are not included.
+              recurring instances, monthly close reviews, income, savings, cash-account snapshots,
+              and liability debt snapshots. Auth tokens, passwords, and secret keys are not
+              included.
             </p>
           </div>
 

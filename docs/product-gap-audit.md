@@ -176,3 +176,13 @@ This audit reviews WalletFlow as of Phase 7 across these workflows:
   - hardening and mobile polish
   - workflow tuning between Dashboard, Monthly Close, and hub usage
   - longer-term decision on whether hub promotion to main nav is warranted
+
+## Phase 46 Status Update
+
+- Backup/export full-finance coverage is now audited in `docs/backup-export-finance-coverage-audit.md`.
+- Supabase JSON export, merge-import restore coverage, and Excel export now include persisted finance sections for:
+  - monthly close reviews
+  - income/savings
+  - cash accounts/snapshots
+  - liability accounts/snapshots
+- Computed views (Dashboard cash-flow summary, Net Worth summary/trends, Financial Position summary, Insights computed outputs) remain intentionally excluded as standalone persisted backup sections.
