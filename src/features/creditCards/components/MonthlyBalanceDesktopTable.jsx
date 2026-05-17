@@ -82,6 +82,7 @@ export default function MonthlyBalanceDesktopTable({
                         min="0"
                         step="0.01"
                         value={displayEntry.balance}
+                        onFocus={(event) => event.target.select()}
                         onChange={(event) => onBalanceChange(card.id, event.target.value)}
                       />
                     </div>

@@ -18,16 +18,7 @@ describe("account menu sections", () => {
       [
         ["Account Settings", "Data & Privacy"],
         ["Household Settings"],
-        [
-          "Financial Position",
-          "Income",
-          "Savings",
-          "Accounts",
-          "Net Worth",
-          "Liabilities / Debt",
-          "Backup & Restore",
-          "App Settings",
-        ],
+        ["Financial Position", "Backup & Restore", "App Settings"],
         ["Help / Support", "Release Notes", "About WalletFlow"],
       ],
     );
@@ -39,19 +30,24 @@ describe("account menu sections", () => {
       [
         ["account-settings", "privacy-policy"],
         ["household-settings"],
-        [
-          "financial-position",
-          "income",
-          "savings",
-          "accounts",
-          "net-worth",
-          "liabilities",
-          "backup",
-          "app-settings",
-        ],
+        ["financial-position", "backup", "app-settings"],
         ["help-support", "release-notes", "about"],
       ],
     );
+  });
+
+  it("keeps tools focused on compact hub-level entries", () => {
+    const toolsSection = accountMenuSections.find((section) => section.title === "Tools");
+    const toolLabels = toolsSection?.items.map((item) => item.label) ?? [];
+
+    assert.equal(toolLabels.includes("Financial Position"), true);
+    assert.equal(toolLabels.includes("Backup & Restore"), true);
+    assert.equal(toolLabels.includes("App Settings"), true);
+    assert.equal(toolLabels.includes("Income"), false);
+    assert.equal(toolLabels.includes("Savings"), false);
+    assert.equal(toolLabels.includes("Accounts"), false);
+    assert.equal(toolLabels.includes("Net Worth"), false);
+    assert.equal(toolLabels.includes("Liabilities / Debt"), false);
   });
 
   it("keeps account menu item targets aligned with known app or auth views", () => {

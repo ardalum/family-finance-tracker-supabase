@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { listAllMonthlyBalances, upsertMonthlyBalance } from "./monthlyBalancesSupabaseService.js";
+import {
+  deleteMonthlyBalance,
+  listAllMonthlyBalances,
+  upsertMonthlyBalance,
+} from "./monthlyBalancesSupabaseService.js";
 
 export function useMonthlyBalances({
   activeHouseholdId,
@@ -45,22 +49,33 @@ export function useMonthlyBalances({
       if (!card) return;
 
       setMonthlyBalancesError("");
-      setSupabaseMonthlyBalances((balances) => ({
-        ...balances,
-        [monthKey]: {
-          ...(balances[monthKey] ?? {}),
-          [cardId]: {
+      setSupabaseMonthlyBalances((balances) => {
+        const monthEntries = { ...(balances[monthKey] ?? {}) };
+
+        if (!entry) {
+          delete monthEntries[cardId];
+        } else {
+          monthEntries[cardId] = {
             balance: Number(entry.balance ?? 0) || 0,
             paid: Boolean(entry.paid),
             updatedAt: new Date().toISOString(),
-          },
-        },
-      }));
+          };
+        }
+
+        return {
+          ...balances,
+          [monthKey]: monthEntries,
+        };
+      });
 
       setMonthlyBalancesSaving(true);
 
       try {
-        await upsertMonthlyBalance(activeHouseholdId, monthKey, card, entry);
+        if (!entry) {
+          await deleteMonthlyBalance(activeHouseholdId, monthKey, card);
+        } else {
+          await upsertMonthlyBalance(activeHouseholdId, monthKey, card, entry);
+        }
       } catch (error) {
         setMonthlyBalancesError(error.message || "Could not save monthly balance.");
         await loadSupabaseMonthlyBalances();

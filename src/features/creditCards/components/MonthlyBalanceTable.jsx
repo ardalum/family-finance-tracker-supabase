@@ -83,8 +83,13 @@ export default function MonthlyBalanceTable({
   );
 
   function handleBalanceChange(cardId, value) {
+    if (value === "") {
+      onBalanceChange(selectedMonth, cardId, null);
+      return;
+    }
+
     const currentEntry = monthBalances[cardId] ?? { balance: 0, paid: false };
-    const balance = value === "" ? 0 : Number.parseFloat(value);
+    const balance = Number.parseFloat(value);
     onBalanceChange(selectedMonth, cardId, {
       ...currentEntry,
       balance: Number.isFinite(balance) ? balance : 0,
