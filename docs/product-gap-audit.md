@@ -162,3 +162,9 @@ This audit reviews WalletFlow as of Phase 7 across these workflows:
   - Dashboard quick-action density and long-scroll fatigue
   - Insights section length and reporting scanability
   - terminology drift across Cards/Bills/Accounts/Liabilities/Net Worth labels
+
+## Phase 40 Status Update
+
+- Financial Position hub design is now documented in `docs/financial-position-hub-design.md`.
+- This is a UX/product architecture improvement, not a bug fix and not a calculation/schema change.
+- Goal: unify Income/Savings/Accounts/Liabilities/Net Worth discoverability and month-level position review while preserving Dashboard and Insights roles.

@@ -212,3 +212,8 @@ Future recommendation:
 - Main near-term risk is not missing features; it is discoverability, terminology drift, and progressive clutter.
 - No major navigation restructure is required in Phase 39.
 - Copy consistency, optional checklist guidance, and reporting scanability should be the next UX priorities.
+
+## Phase 40 Note
+
+- The recommended next IA improvement is now documented as a dedicated **Financial Position hub** design in `docs/financial-position-hub-design.md`.
+- This hub is intended to consolidate secondary finance-position workflows (Income, Savings, Accounts, Liabilities, Net Worth) without changing primary nav yet.
