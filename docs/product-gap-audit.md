@@ -105,3 +105,9 @@ This audit reviews WalletFlow as of Phase 7 across these workflows:
 
 - Income tracking is now **partially addressed** via manual Income Sources + Income Entries (no bank sync/imports).
 - Savings tracking and monthly cash-flow summary cards are still open product gaps.
+
+## Phase 25 Status Update
+
+- Savings tracking is now **partially addressed** via manual Savings Goals + Savings Contributions (no bank sync/imports).
+- Savings progress tracking is available via goal progress cards, but cash-flow summaries and emergency-fund specific guidance remain open scope.
+- Income + savings import automation, net cash-flow summary cards, and forecasting remain product gaps.

@@ -1,6 +1,7 @@
 import {
   ClipboardList,
   HandCoins,
+  PiggyBank,
   DatabaseBackup,
   Home,
   Info,
@@ -48,6 +49,12 @@ export const accountMenuSections = [
         label: "Income",
         description: "Manual income sources and monthly income entries.",
         view: "income",
+      },
+      {
+        icon: PiggyBank,
+        label: "Savings",
+        description: "Manual savings goals and monthly contributions.",
+        view: "savings",
       },
       {
         icon: DatabaseBackup,

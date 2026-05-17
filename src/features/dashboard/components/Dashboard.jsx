@@ -8,6 +8,7 @@ import {
   ReceiptText,
   Repeat,
   HandCoins,
+  PiggyBank,
   WalletCards,
 } from "lucide-react";
 import Card from "../../../components/ui/Card.jsx";
@@ -75,6 +76,13 @@ const quickActions = [
     view: "income",
     target: "monthly-income",
     icon: HandCoins,
+  },
+  {
+    label: "Manage savings",
+    description: "Open manual savings goal tracking.",
+    view: "savings",
+    target: "monthly-savings",
+    icon: PiggyBank,
   },
   {
     label: "Review budget",
