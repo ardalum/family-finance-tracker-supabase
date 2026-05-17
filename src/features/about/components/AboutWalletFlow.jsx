@@ -58,7 +58,7 @@ export default function AboutWalletFlow() {
           <dl className="mt-4 grid gap-4 text-sm">
             <div>
               <dt className="font-medium text-text-muted">Created by</dt>
-              <dd className="mt-1 font-semibold text-text-main">Arvin Dalumpines</dd>
+              <dd className="mt-1 font-semibold text-text-main">{appMetadata.creatorName}</dd>
             </div>
             <div>
               <dt className="font-medium text-text-muted">Version</dt>
