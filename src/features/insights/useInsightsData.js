@@ -3,6 +3,15 @@ import { listBudgetCategories } from "../budgets/budgetsSupabaseService.js";
 import { listTransactions } from "../spending/spendingSupabaseService.js";
 import { formatMonthKeyRange } from "./insightsYtdUtils.js";
 
+function getPreviousYearMonthRange(selectedMonth) {
+  if (!selectedMonth) return [];
+  const [year, month] = selectedMonth.split("-").map(Number);
+  return Array.from({ length: month }, (_, index) => {
+    const monthNumber = index + 1;
+    return `${year - 1}-${String(monthNumber).padStart(2, "0")}`;
+  });
+}
+
 export function useInsightsData({ activeHouseholdId, initialSelectedMonth, supabaseCreditCards }) {
   const [selectedInsightsMonth, setSelectedInsightsMonth] = useState(initialSelectedMonth);
   const [insightsBudgets, setInsightsBudgets] = useState([]);
@@ -27,8 +36,10 @@ export function useInsightsData({ activeHouseholdId, initialSelectedMonth, supab
 
     try {
       const monthKeys = formatMonthKeyRange(selectedInsightsMonth);
+      const previousYearMonthKeys = getPreviousYearMonthRange(selectedInsightsMonth);
+      const allMonthKeys = [...new Set([...monthKeys, ...previousYearMonthKeys])];
       const monthPairs = await Promise.all(
-        monthKeys.map(async (monthKey) => {
+        allMonthKeys.map(async (monthKey) => {
           const budgets = await listBudgetCategories(activeHouseholdId, monthKey);
           const transactions = await listTransactions(
             activeHouseholdId,
@@ -48,12 +59,12 @@ export function useInsightsData({ activeHouseholdId, initialSelectedMonth, supab
       setInsightsTransactions(transactions);
       setYtdBudgetsByMonth(
         Object.fromEntries(
-          monthKeys.map((monthKey) => [monthKey, byMonth[monthKey]?.budgets ?? []]),
+          allMonthKeys.map((monthKey) => [monthKey, byMonth[monthKey]?.budgets ?? []]),
         ),
       );
       setYtdTransactionsByMonth(
         Object.fromEntries(
-          monthKeys.map((monthKey) => [monthKey, byMonth[monthKey]?.transactions ?? []]),
+          allMonthKeys.map((monthKey) => [monthKey, byMonth[monthKey]?.transactions ?? []]),
         ),
       );
     } catch (error) {

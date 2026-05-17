@@ -16,6 +16,7 @@ import {
   getTransactionTypeMixRows,
 } from "../insightsChartData.js";
 import { getYtdInsightsData } from "../insightsYtdUtils.js";
+import { getYearOverYearInsightsData } from "../insightsYearComparisonUtils.js";
 
 const BUDGET_STATUS_COPY = {
   over: {
@@ -70,6 +71,15 @@ export default function Insights({
       appData.ytdTransactionsByMonth,
       selectedMonth,
     ],
+  );
+  const yearComparison = useMemo(
+    () =>
+      getYearOverYearInsightsData({
+        selectedMonth,
+        transactionsByMonth: appData.ytdTransactionsByMonth ?? {},
+        budgetsByMonth: appData.ytdBudgetsByMonth ?? {},
+      }),
+    [appData.ytdBudgetsByMonth, appData.ytdTransactionsByMonth, selectedMonth],
   );
 
   const hasInsightData = data.transactions.length > 0 || data.budgets.length > 0;
@@ -243,6 +253,95 @@ export default function Insights({
           </div>
         </Card>
       </section>
+
+      <section className="grid gap-6">
+        <Card>
+          <SectionHeader
+            title="Year-over-Year"
+            description="Comparison with the same month and same YTD period from the previous year."
+          />
+          <div className="grid gap-5 p-5">
+            {!yearComparison.hasPreviousYearData ? (
+              <EmptyState description="Previous-year comparison will appear once you have tracked data for the same period last year." />
+            ) : (
+              <>
+                {yearComparison.isPartialPreviousYear ? (
+                  <p className="text-xs text-text-muted">
+                    Comparison is based only on months with tracked data.
+                  </p>
+                ) : null}
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                  <ComparisonMetricCard
+                    label="This Month vs Last Year"
+                    currentLabel={yearComparison.selectedMonthComparison.labelCurrent}
+                    currentValue={yearComparison.selectedMonthComparison.formattedCurrent}
+                    previousLabel={yearComparison.selectedMonthComparison.labelPrevious}
+                    previousValue={yearComparison.selectedMonthComparison.formattedPrevious}
+                    delta={yearComparison.selectedMonthComparison.delta}
+                  />
+                  <ComparisonMetricCard
+                    label="YTD vs Prior YTD"
+                    currentLabel="Current YTD"
+                    currentValue={yearComparison.ytdComparison.formattedCurrent}
+                    previousLabel="Previous YTD"
+                    previousValue={yearComparison.ytdComparison.formattedPrevious}
+                    delta={yearComparison.ytdComparison.delta}
+                  />
+                  <ComparisonMetricCard
+                    label="Average Monthly Spending"
+                    currentLabel="Current YTD Avg"
+                    currentValue={yearComparison.averageComparison.formattedCurrent}
+                    previousLabel="Previous YTD Avg"
+                    previousValue={yearComparison.averageComparison.formattedPrevious}
+                    delta={yearComparison.averageComparison.delta}
+                  />
+                  <ComparisonTopCard
+                    label="Top Comparisons"
+                    topCategoryCurrent={yearComparison.topCategoryComparison.current}
+                    topCategoryPrevious={yearComparison.topCategoryComparison.previous}
+                    topMerchantCurrent={yearComparison.topMerchantComparison.current}
+                    topMerchantPrevious={yearComparison.topMerchantComparison.previous}
+                  />
+                </div>
+                <div className="grid gap-6 xl:grid-cols-2">
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold text-text-main">Category Deltas</h4>
+                    <HorizontalBarChart
+                      title="Category Deltas"
+                      description="Current YTD category spending values, with delta helper text versus prior YTD."
+                      items={yearComparison.categoryDeltas.map((row) => ({
+                        id: row.id,
+                        label: row.label,
+                        value: row.current,
+                        formattedValue: row.formattedCurrent,
+                        helperText: `Prev ${row.formattedPrevious} | Delta ${row.formattedDelta}`,
+                      }))}
+                      valueLabel="Current YTD"
+                      emptyMessage="No comparable category data yet."
+                    />
+                  </div>
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold text-text-main">Merchant Deltas</h4>
+                    <HorizontalBarChart
+                      title="Merchant Deltas"
+                      description="Current YTD merchant spending values, with delta helper text versus prior YTD."
+                      items={yearComparison.merchantDeltas.map((row) => ({
+                        id: row.id,
+                        label: row.label,
+                        value: row.current,
+                        formattedValue: row.formattedCurrent,
+                        helperText: `Prev ${row.formattedPrevious} | Delta ${row.formattedDelta}`,
+                      }))}
+                      valueLabel="Current YTD"
+                      emptyMessage="No comparable merchant data yet."
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </Card>
+      </section>
     </section>
   );
 }
@@ -381,6 +480,84 @@ function YtdSummaryCards({ ytdData }) {
           <p className="mt-1 text-sm font-semibold text-text-main">{card.value}</p>
         </div>
       ))}
+    </div>
+  );
+}
+
+function ComparisonMetricCard({
+  label,
+  currentLabel,
+  currentValue,
+  previousLabel,
+  previousValue,
+  delta,
+}) {
+  const deltaDirection =
+    delta > 0
+      ? "Higher than previous year"
+      : delta < 0
+        ? "Lower than previous year"
+        : "No change vs previous year";
+  const deltaText = `${delta >= 0 ? "+" : ""}${formatCurrency(delta)}`;
+
+  return (
+    <div className="rounded-xl border border-app-border bg-app-background p-3">
+      <p className="text-xs font-medium uppercase tracking-wide text-text-muted">{label}</p>
+      <p className="mt-1 text-sm text-text-muted">
+        {currentLabel}: <span className="font-semibold text-text-main">{currentValue}</span>
+      </p>
+      <p className="text-sm text-text-muted">
+        {previousLabel}: <span className="font-semibold text-text-main">{previousValue}</span>
+      </p>
+      <p className="mt-1 text-xs font-semibold text-text-main">
+        Delta {deltaText} ({deltaDirection})
+      </p>
+    </div>
+  );
+}
+
+function ComparisonTopCard({
+  label,
+  topCategoryCurrent,
+  topCategoryPrevious,
+  topMerchantCurrent,
+  topMerchantPrevious,
+}) {
+  return (
+    <div className="rounded-xl border border-app-border bg-app-background p-3">
+      <p className="text-xs font-medium uppercase tracking-wide text-text-muted">{label}</p>
+      <p className="mt-1 text-xs text-text-muted">
+        Top Category (Current):{" "}
+        <span className="font-semibold text-text-main">
+          {topCategoryCurrent
+            ? `${topCategoryCurrent.label} (${topCategoryCurrent.formattedValue})`
+            : "No data"}
+        </span>
+      </p>
+      <p className="text-xs text-text-muted">
+        Top Category (Previous):{" "}
+        <span className="font-semibold text-text-main">
+          {topCategoryPrevious
+            ? `${topCategoryPrevious.label} (${topCategoryPrevious.formattedValue})`
+            : "No data"}
+        </span>
+      </p>
+      <p className="mt-1 text-xs text-text-muted">
+        Top Merchant (Current):{" "}
+        <span className="font-semibold text-text-main">
+          {topMerchantCurrent
+            ? `${topMerchantCurrent.label} (${topMerchantCurrent.formattedValue})`
+            : "No data"}
+        </span>
+      </p>
+      <p className="text-xs text-text-muted">
+        Top Merchant (Previous):{" "}
+        <span className="font-semibold text-text-main">
+          {topMerchantPrevious
+            ? `${topMerchantPrevious.label} (${topMerchantPrevious.formattedValue})`
+            : "No data"}
+        </span>
+      </p>
     </div>
   );
 }

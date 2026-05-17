@@ -321,3 +321,4 @@ For page-level organization and Dashboard/Insights/Cash Flow responsibility boun
 
 - YTD Review MVP has started in Insights using existing transaction/budget data (no chart library, no schema changes).
 - Implemented scope includes YTD summary cards and YTD month/category/merchant breakdown sections.
+- Previous-year comparison MVP has started with same-month and same-period YTD comparisons plus category/merchant delta views.
