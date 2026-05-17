@@ -1,5 +1,6 @@
 import { WalletCards } from "lucide-react";
 import { appMetadata } from "../../app/appMetadata.js";
+import AppBrandName from "../branding/AppBrandName.jsx";
 import { footerLinks } from "./footerLinks.js";
 import Navigation from "./Navigation.jsx";
 
@@ -23,8 +24,7 @@ export default function AppShell({
               </div>
               <div className="min-w-0 leading-tight">
                 <h1 className="truncate text-base font-semibold tracking-normal sm:text-lg">
-                  <span className="text-brand-primary">Wallet</span>
-                  <span className="text-brand-accent">Flow</span>
+                  <AppBrandName />
                 </h1>
                 <p className="mt-0.5 truncate text-xs text-text-muted sm:text-sm">
                   {appMetadata.tagline}
