@@ -42,6 +42,29 @@ test("runRefreshSequence waits for async callbacks", async () => {
   assert.deepEqual(calls, ["async-first", "second"]);
 });
 
+test("runRefreshSequence resolves safely with no callbacks", async () => {
+  await runRefreshSequence([]);
+});
+
+test("runRefreshSequence rejects and stops before later callbacks", async () => {
+  const calls = [];
+
+  await assert.rejects(
+    () =>
+      runRefreshSequence([
+        createNamedCallback("first", calls),
+        async () => {
+          calls.push("second");
+          throw new Error("Refresh rejected");
+        },
+        createNamedCallback("third", calls),
+      ]),
+    /Refresh rejected/,
+  );
+
+  assert.deepEqual(calls, ["first", "second"]);
+});
+
 test("createDashboardInsightsRefreshers returns dashboard and insights refreshers", () => {
   const loadDashboardData = () => {};
   const loadInsightsData = () => {};
@@ -127,6 +150,43 @@ test("createAllSupabaseRefreshers returns all Supabase refreshers in app refresh
 
 test("refresher factories omit missing callbacks", () => {
   const loadDashboardData = () => {};
+  const loadSpendingTransactions = () => {};
+  const loadRecurringData = () => {};
 
   assert.deepEqual(createDashboardInsightsRefreshers({ loadDashboardData }), [loadDashboardData]);
+  assert.deepEqual(createSpendingDashboardInsightsRefreshers({ loadSpendingTransactions }), [
+    loadSpendingTransactions,
+  ]);
+  assert.deepEqual(createRecurringDashboardInsightsRefreshers({ loadRecurringData }), [
+    loadRecurringData,
+  ]);
+  assert.deepEqual(
+    createRecurringSpendingDashboardInsightsRefreshers({
+      loadRecurringData,
+      loadSpendingTransactions,
+    }),
+    [loadRecurringData, loadSpendingTransactions],
+  );
+});
+
+test("refresher factories return empty arrays without callbacks", () => {
+  assert.deepEqual(createDashboardInsightsRefreshers(), []);
+  assert.deepEqual(createSpendingDashboardInsightsRefreshers(), []);
+  assert.deepEqual(createRecurringDashboardInsightsRefreshers(), []);
+  assert.deepEqual(createRecurringSpendingDashboardInsightsRefreshers(), []);
+  assert.deepEqual(createAllSupabaseRefreshers(), []);
+});
+
+test("createAllSupabaseRefreshers omits missing callbacks while preserving order", () => {
+  const refreshers = {
+    loadSupabaseCreditCards: () => {},
+    loadSpendingTransactions: () => {},
+    loadRecurringData: () => {},
+  };
+
+  assert.deepEqual(createAllSupabaseRefreshers(refreshers), [
+    refreshers.loadSupabaseCreditCards,
+    refreshers.loadSpendingTransactions,
+    refreshers.loadRecurringData,
+  ]);
 });
