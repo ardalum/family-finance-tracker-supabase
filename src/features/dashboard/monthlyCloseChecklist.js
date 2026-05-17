@@ -19,6 +19,7 @@ export function getMonthlyCloseChecklist(data, monthKey, review = null) {
   const hasTransactionData = transactions.length > 0;
   const hasInsightData = hasTransactionData || budgetRows.length > 0;
   const insightsReviewed = Boolean(manualChecks.reviewInsights);
+  const cashFlowReviewed = Boolean(manualChecks.reviewCashFlow);
   const backupExportChecked = Boolean(manualChecks.exportBackup);
 
   const items = [
@@ -103,6 +104,20 @@ export function getMonthlyCloseChecklist(data, monthKey, review = null) {
       isManual: true,
       manualCheckId: "reviewInsights",
       disabledReason: hasInsightData ? "" : "Insights data is not ready yet.",
+    },
+    {
+      id: "review-cash-flow",
+      title: "Review cash flow",
+      status: cashFlowReviewed ? "complete" : "recommended",
+      description: cashFlowReviewed
+        ? "Cash-flow summary review confirmed for this month."
+        : "Review income, spending, savings, and recurring remaining in Dashboard cash-flow summary.",
+      view: "dashboard",
+      target: "",
+      countsTowardCompletion: false,
+      isComplete: cashFlowReviewed,
+      isManual: true,
+      manualCheckId: "reviewCashFlow",
     },
     {
       id: "export-backup",

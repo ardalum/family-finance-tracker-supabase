@@ -8,15 +8,22 @@ export function getDashboardCashFlow({
   spendingTotal = 0,
   recurringRemaining = 0,
 } = {}) {
-  const incomeTotal = summarizeIncomeForMonth(incomeEntries, selectedMonth);
-  const savingsContributionTotal = summarizeSavingsForMonth(savingsContributions, selectedMonth);
+  const safeIncomeEntries = Array.isArray(incomeEntries) ? incomeEntries : [];
+  const safeSavingsContributions = Array.isArray(savingsContributions) ? savingsContributions : [];
+  const incomeTotal = summarizeIncomeForMonth(safeIncomeEntries, selectedMonth);
+  const savingsContributionTotal = summarizeSavingsForMonth(
+    safeSavingsContributions,
+    selectedMonth,
+  );
   const normalizedSpendingTotal = Number(spendingTotal) || 0;
   const normalizedRecurringRemaining = Number(recurringRemaining) || 0;
 
   const estimatedLeftover =
     incomeTotal - normalizedSpendingTotal - normalizedRecurringRemaining - savingsContributionTotal;
 
-  const hasIncomeData = incomeEntries.some((entry) => entry.monthKey === selectedMonth);
+  const hasIncomeData = safeIncomeEntries.some((entry) => entry.monthKey === selectedMonth);
+  const hasSavingsData = safeSavingsContributions.some((entry) => entry.monthKey === selectedMonth);
+  const hasRecurringRemaining = normalizedRecurringRemaining > 0;
   const status = !hasIncomeData
     ? "missing-income"
     : estimatedLeftover < 0
@@ -30,6 +37,8 @@ export function getDashboardCashFlow({
     recurringRemaining: normalizedRecurringRemaining,
     estimatedLeftover,
     hasIncomeData,
+    hasSavingsData,
+    hasRecurringRemaining,
     status,
   };
 }

@@ -19,6 +19,8 @@ Use this checklist before each production release.
 - [ ] Cash-flow summary card appears.
 - [ ] Cash-flow income/spending/savings/recurring values match selected month data.
 - [ ] Missing-income state appears when no income entries exist for selected month.
+- [ ] Cash-flow formula copy is clear: Income - spending - recurring remaining - savings.
+- [ ] Cash-flow limitation copy is clear: unpaid card balances are excluded from MVP leftover.
 - [ ] Cash-flow action buttons route to Income, Savings, Spending, and Bills workspaces.
 - [ ] Estimated leftover updates when income/savings/spending/recurring values change.
 

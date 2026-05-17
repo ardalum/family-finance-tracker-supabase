@@ -53,6 +53,18 @@ test("savings reduces estimated leftover", () => {
   assert.equal(withoutSavings.estimatedLeftover - withSavings.estimatedLeftover, 500);
 });
 
+test("formula correctness: income - spending - recurring remaining - savings", () => {
+  const result = getDashboardCashFlow({
+    selectedMonth: "2026-05",
+    incomeEntries: [{ monthKey: "2026-05", amount: 4200 }],
+    savingsContributions: [{ monthKey: "2026-05", amount: 350 }],
+    spendingTotal: 1800,
+    recurringRemaining: 650,
+  });
+
+  assert.equal(result.estimatedLeftover, 1400);
+});
+
 test("recurring remaining reduces estimated leftover", () => {
   const result = getDashboardCashFlow({
     selectedMonth: "2026-05",
@@ -79,6 +91,32 @@ test("zero savings works and negative leftover is flagged", () => {
   assert.equal(result.status, "negative");
 });
 
+test("no recurring bills is handled safely", () => {
+  const result = getDashboardCashFlow({
+    selectedMonth: "2026-05",
+    incomeEntries: [{ monthKey: "2026-05", amount: 2000 }],
+    savingsContributions: [],
+    spendingTotal: 500,
+    recurringRemaining: 0,
+  });
+
+  assert.equal(result.recurringRemaining, 0);
+  assert.equal(result.hasRecurringRemaining, false);
+  assert.equal(result.estimatedLeftover, 1500);
+});
+
+test("refund-style lower spending preserves available cash", () => {
+  const result = getDashboardCashFlow({
+    selectedMonth: "2026-05",
+    incomeEntries: [{ monthKey: "2026-05", amount: 1500 }],
+    savingsContributions: [],
+    spendingTotal: 200,
+    recurringRemaining: 100,
+  });
+
+  assert.equal(result.estimatedLeftover, 1200);
+});
+
 test("income does not change spending total field", () => {
   const result = getDashboardCashFlow({
     selectedMonth: "2026-05",
@@ -102,4 +140,18 @@ test("unpaid card balance is not included in estimated leftover formula", () => 
   });
 
   assert.equal(result.estimatedLeftover, 700);
+});
+
+test("invalid or missing arrays are handled safely", () => {
+  const result = getDashboardCashFlow({
+    selectedMonth: "2026-05",
+    incomeEntries: null,
+    savingsContributions: undefined,
+    spendingTotal: 0,
+    recurringRemaining: 0,
+  });
+
+  assert.equal(result.incomeTotal, 0);
+  assert.equal(result.savingsContributionTotal, 0);
+  assert.equal(result.status, "missing-income");
 });

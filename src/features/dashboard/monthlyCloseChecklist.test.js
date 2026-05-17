@@ -112,6 +112,16 @@ describe("monthly close checklist", () => {
     assert.equal(checklist.completedCount, requiredItems.filter((item) => item.isComplete).length);
   });
 
+  it("includes optional manual review cash flow item without blocking completion", () => {
+    const checklist = getMonthlyCloseChecklist(createDashboardData(), "2099-05");
+    const cashFlowItem = getItem(checklist, "review-cash-flow");
+
+    assert.equal(cashFlowItem.isManual, true);
+    assert.equal(cashFlowItem.manualCheckId, "reviewCashFlow");
+    assert.equal(cashFlowItem.countsTowardCompletion, false);
+    assert.equal(cashFlowItem.status, "recommended");
+  });
+
   it("requires manual insights confirmation even when insight data exists", () => {
     const checklist = getMonthlyCloseChecklist(
       createDashboardData({
