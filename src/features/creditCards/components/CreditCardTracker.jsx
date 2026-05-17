@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { BarChart3, CreditCard, ListChecks, Plus, ReceiptText } from "lucide-react";
+import { Plus } from "lucide-react";
 import Button from "../../../components/ui/Button.jsx";
+import Select from "../../../components/ui/Select.jsx";
 import { consumeNavigationTarget } from "../../../lib/navigationTargets.js";
+import { creditCardSections } from "../creditCardSections.js";
 import CreditCardModal from "./CreditCardModal.jsx";
 import CreditCardList from "./CreditCardList.jsx";
 import CreditLimitSummary from "./CreditLimitSummary.jsx";
@@ -9,33 +11,6 @@ import MonthlyBalanceGraph from "./MonthlyBalanceGraph.jsx";
 import MonthlyBalanceTable from "./MonthlyBalanceTable.jsx";
 import StatementCycleSummary from "./StatementCycleSummary.jsx";
 import StatementDetailsEditor from "./StatementDetailsEditor.jsx";
-
-const creditCardSections = [
-  {
-    id: "overview",
-    label: "Overview",
-    description: "Quick totals and balance trend.",
-    icon: BarChart3,
-  },
-  {
-    id: "monthly-balances",
-    label: "Monthly Balances",
-    description: "Enter balances and mark cards paid.",
-    icon: ListChecks,
-  },
-  {
-    id: "statement-details",
-    label: "Statement Details",
-    description: "Track paid amount, minimum payment, autopay, and confirmation details.",
-    icon: ReceiptText,
-  },
-  {
-    id: "card-list",
-    label: "Card List",
-    description: "Add, edit, deactivate, or delete cards.",
-    icon: CreditCard,
-  },
-];
 
 export default function CreditCardTracker({
   creditCards,
@@ -130,8 +105,21 @@ export default function CreditCardTracker({
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-app-border bg-app-surface p-2">
-        <div className="flex min-w-max gap-2">
+      <div className="grid gap-3 rounded-2xl border border-app-border bg-app-surface p-3">
+        <div className="sm:hidden">
+          <Select
+            label="Workspace section"
+            value={activeSection}
+            onChange={(event) => setActiveSection(event.target.value)}
+          >
+            {creditCardSections.map((section) => (
+              <option key={section.id} value={section.id}>
+                {section.label}
+              </option>
+            ))}
+          </Select>
+        </div>
+        <div className="hidden flex-wrap gap-2 sm:flex">
           {creditCardSections.map((section) => {
             const Icon = section.icon;
             const isActive = activeSection === section.id;

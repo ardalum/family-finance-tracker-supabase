@@ -164,18 +164,46 @@ describe("dashboard data", () => {
     const data = getDashboardData(
       {
         creditCards: [
-          { id: "cardPaid", name: "Paid Card", owner: "Arvin", dueDay: 8, isActive: true },
-          { id: "cardUnpaid", name: "Unpaid Card", owner: "Kristine", dueDay: 22, isActive: true },
-          { id: "cardZero", name: "Zero Card", owner: "Arvin", dueDay: 15, isActive: true },
-          { id: "inactive", name: "Inactive", owner: "Arvin", dueDay: 2, isActive: false },
+          {
+            id: "cardPaid",
+            name: "Paid Card",
+            owner: "Arvin",
+            dueDay: 8,
+            creditLimit: 1000,
+            isActive: true,
+          },
+          {
+            id: "cardUnpaid",
+            name: "Unpaid Card",
+            owner: "Test Owner",
+            dueDay: 22,
+            creditLimit: 1500,
+            isActive: true,
+          },
+          {
+            id: "cardZero",
+            name: "Zero Card",
+            owner: "Household",
+            dueDay: 15,
+            creditLimit: 300,
+            isActive: true,
+          },
+          {
+            id: "inactive",
+            name: "Inactive",
+            owner: "Kristine",
+            dueDay: 2,
+            creditLimit: 10000,
+            isActive: false,
+          },
         ],
         budgetsByMonth: {},
         transactions: [],
         recurringTransactions: [],
         monthlyBalances: {
           "2099-05": {
-            cardPaid: { balance: 125, paid: true },
-            cardUnpaid: { balance: 80, paid: false },
+            cardPaid: { balance: 125, paidAmount: 125, paid: false },
+            cardUnpaid: { balance: 80, paidAmount: 30, paid: false },
             cardZero: { balance: 0, paid: false },
             inactive: { balance: 500, paid: false },
           },
@@ -186,11 +214,34 @@ describe("dashboard data", () => {
       "2099-05",
     );
 
+    assert.equal(data.summary.totalCreditLimit, 2800);
     assert.equal(data.summary.statementBalanceTotal, 205);
-    assert.equal(data.summary.unpaidBalanceTotal, 80);
+    assert.equal(data.summary.unpaidBalanceTotal, 50);
     assert.deepEqual(
       data.cardRows.map((row) => row.card.id),
       ["cardUnpaid", "cardPaid", "cardZero"],
     );
+  });
+
+  it("uses payment due date from next month and stored paymentDueDate for due logic", () => {
+    const data = getDashboardData(
+      {
+        creditCards: [{ id: "card1", name: "Card", owner: "Owner", dueDay: 15, isActive: true }],
+        budgetsByMonth: {},
+        transactions: [],
+        recurringTransactions: [],
+        monthlyBalances: {
+          "2099-05": {
+            card1: { balance: 100, paid: false, paymentDueDate: "1999-01-01" },
+          },
+        },
+        recurringPayments: [],
+        recurringStatusByMonth: {},
+      },
+      "2099-05",
+    );
+
+    assert.equal(data.cardRows[0].paymentDueDate, "1999-01-01");
+    assert.equal(data.cardRows[0].daysUntilDue < 0, true);
   });
 });

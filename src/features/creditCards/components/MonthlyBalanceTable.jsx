@@ -5,17 +5,12 @@ import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import Input from "../../../components/ui/Input.jsx";
 import Select from "../../../components/ui/Select.jsx";
-import {
-  buildMonthOptions,
-  getCurrentMonthKey,
-  getDueDateForMonth,
-  getStatementClosingDateForMonth,
-  isDateOnOrBeforeToday,
-} from "../../../lib/dates.js";
+import { buildMonthOptions, getCurrentMonthKey } from "../../../lib/dates.js";
 import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
 import { getRowStatus } from "../creditCardStatus.js";
 import { getSortedCards } from "../creditCardSort.js";
 import { getMonthlyBalanceSummary } from "../creditCardsService.js";
+import { getMonthlyBalanceDisplayRow } from "../monthlyBalanceDisplay.js";
 
 const defaultFilters = {
   search: "",
@@ -80,6 +75,13 @@ export default function MonthlyBalanceTable({
       return matchesSearch && matchesOwner && matchesStatus;
     });
   }, [filters, monthBalances, selectedMonth, sortedCards]);
+  const visibleCardRows = useMemo(
+    () =>
+      visibleCards.map((card) =>
+        getMonthlyBalanceDisplayRow(card, monthBalances[card.id], selectedMonth),
+      ),
+    [monthBalances, selectedMonth, visibleCards],
+  );
 
   function handleBalanceChange(cardId, value) {
     const currentEntry = monthBalances[cardId] ?? { balance: 0, paid: false };
@@ -239,146 +241,259 @@ export default function MonthlyBalanceTable({
           No cards match the current filters.
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full border-separate border-spacing-0 text-left text-sm">
-            <thead className="bg-app-background text-xs uppercase tracking-normal text-text-muted">
-              <tr>
-                <th className="px-5 py-3 font-semibold">Card</th>
-                <th className="px-5 py-3 font-semibold">Owner</th>
-                <th className="px-5 py-3 font-semibold">Statement closes</th>
-                <th className="px-5 py-3 font-semibold">Due date</th>
-                <th className="px-5 py-3 font-semibold">Balance</th>
-                <th className="px-5 py-3 font-semibold">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-app-border">
-              {visibleCards.map((card) => {
-                const entry = monthBalances[card.id];
-                const displayEntry = entry ?? { balance: 0, paid: false };
-                const status = getRowStatus(card, selectedMonth, entry);
-                const statementClosingDay = card.statementClosingDay ?? card.dueDay;
-                const closingDate = getStatementClosingDateForMonth(
-                  selectedMonth,
-                  statementClosingDay,
-                );
-                const statementGenerated = isDateOnOrBeforeToday(closingDate);
-                const dueDate = getDueDateForMonth(selectedMonth, card.dueDay);
-
-                return (
-                  <tr key={card.id} className={status.rowClass}>
-                    <td className="px-5 py-4 align-middle">
-                      <div className="flex min-w-0 items-center gap-2">
-                        <div className="min-w-0">
-                          <LinkedCardName card={card} />
+        <>
+          <div className="grid gap-3 p-4 sm:hidden">
+            {visibleCardRows.map((row) => (
+              <MonthlyBalanceMobileCard
+                key={row.card.id}
+                row={row}
+                saving={saving}
+                isCardSaving={isCardSaving}
+                onEditCard={onEditCard}
+                onBalanceChange={handleBalanceChange}
+                onCheckedNoBalance={handleCheckedNoBalance}
+                onPaidChange={handlePaidChange}
+              />
+            ))}
+          </div>
+          <div className="hidden overflow-x-auto sm:block">
+            <table className="min-w-full border-separate border-spacing-0 text-left text-sm">
+              <thead className="bg-app-background text-xs uppercase tracking-normal text-text-muted">
+                <tr>
+                  <th className="px-5 py-3 font-semibold">Card</th>
+                  <th className="px-5 py-3 font-semibold">Owner</th>
+                  <th className="px-5 py-3 font-semibold">Statement closes</th>
+                  <th className="px-5 py-3 font-semibold">Due date</th>
+                  <th className="px-5 py-3 font-semibold">Balance</th>
+                  <th className="px-5 py-3 font-semibold">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-app-border">
+                {visibleCardRows.map((row) => {
+                  const {
+                    card,
+                    displayEntry,
+                    status,
+                    closingDateText,
+                    dueDateText,
+                    statementGenerated,
+                  } = row;
+                  return (
+                    <tr key={card.id} className={status.rowClass}>
+                      <td className="px-5 py-4 align-middle">
+                        <div className="flex min-w-0 items-center gap-2">
+                          <div className="min-w-0">
+                            <LinkedCardName card={card} />
+                          </div>
+                          {onEditCard ? (
+                            <button
+                              type="button"
+                              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-text-muted transition hover:bg-app-muted hover:text-text-main focus:outline-none focus:ring-2 focus:ring-brand-primary/10"
+                              onClick={() => onEditCard(card)}
+                              disabled={isCardSaving}
+                              aria-label={`Edit ${card.name}`}
+                            >
+                              <Pencil size={15} aria-hidden="true" />
+                            </button>
+                          ) : null}
                         </div>
-                        {onEditCard ? (
-                          <button
-                            type="button"
-                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-text-muted transition hover:bg-app-muted hover:text-text-main focus:outline-none focus:ring-2 focus:ring-brand-primary/10"
-                            onClick={() => onEditCard(card)}
-                            disabled={isCardSaving}
-                            aria-label={`Edit ${card.name}`}
-                          >
-                            <Pencil size={15} aria-hidden="true" />
-                          </button>
-                        ) : null}
-                      </div>
-                      <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-muted">
-                        <span>{card.network}</span>
-                        <span>**** {card.lastFour}</span>
-                      </div>
-                    </td>
-                    <td className="px-5 py-4 align-middle font-medium text-text-soft">
-                      {card.owner}
-                    </td>
-                    <td className="px-5 py-4 align-middle text-text-soft">
-                      <div className="grid gap-1">
-                        <span>
-                          {closingDate.toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
-                        </span>
-                        <span
-                          className={`w-fit rounded-md px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ${
-                            statementGenerated
-                              ? "bg-status-infoBg text-status-infoDark ring-status-infoBg"
-                              : "bg-app-muted text-text-muted ring-app-muted"
-                          }`}
-                        >
-                          {statementGenerated ? "Generated" : "Not yet"}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-5 py-4 align-middle text-text-soft">
-                      {dueDate.toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </td>
-                    <td className="px-5 py-4 align-middle">
-                      <label className="sr-only" htmlFor={`balance-${card.id}`}>
-                        Statement balance for {card.name}
-                      </label>
-                      <div className="grid gap-2">
-                        <div className="flex items-center gap-2">
-                          <span className={`font-semibold ${status.balanceClass}`}>$</span>
-                          <input
-                            id={`balance-${card.id}`}
-                            className={`h-10 w-32 rounded-xl border border-app-border bg-app-surface px-3 text-sm font-semibold outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/10 ${status.balanceClass}`}
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={displayEntry.balance}
-                            onChange={(event) => handleBalanceChange(card.id, event.target.value)}
-                          />
+                        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-muted">
+                          <span>{card.network}</span>
+                          <span>**** {card.lastFour}</span>
                         </div>
-                        {status.isNotChecked ? (
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            className="w-fit min-h-8 px-3 py-1 text-xs"
-                            onClick={() => handleCheckedNoBalance(card.id)}
-                            disabled={saving}
+                      </td>
+                      <td className="px-5 py-4 align-middle font-medium text-text-soft">
+                        {card.owner}
+                      </td>
+                      <td className="px-5 py-4 align-middle text-text-soft">
+                        <div className="grid gap-1">
+                          <span>{closingDateText}</span>
+                          <span
+                            className={`w-fit rounded-md px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ${
+                              statementGenerated
+                                ? "bg-status-infoBg text-status-infoDark ring-status-infoBg"
+                                : "bg-app-muted text-text-muted ring-app-muted"
+                            }`}
                           >
-                            Mark checked, no balance
-                          </Button>
-                        ) : null}
-                      </div>
-                    </td>
-                    <td className="px-5 py-4 align-middle">
-                      <div className="flex flex-wrap items-center gap-3">
-                        <span
-                          className={`rounded-lg px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${status.badgeClass}`}
-                        >
-                          {status.label}
-                        </span>
-                        <label className="inline-flex items-center gap-2 text-sm font-medium text-text-soft">
-                          <input
-                            className="h-4 w-4 rounded border-app-border text-brand-primary focus:ring-brand-primary"
-                            type="checkbox"
-                            checked={status.isNoBalance ? false : Boolean(displayEntry.paid)}
-                            disabled={status.isNoBalance || status.isNotChecked}
-                            onChange={(event) => handlePaidChange(card.id, event.target.checked)}
-                          />
-                          {status.isNoBalance
-                            ? "No payment needed"
-                            : status.isNotChecked
-                              ? "Check first"
-                              : "Paid"}
+                            {statementGenerated ? "Generated" : "Not yet"}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-5 py-4 align-middle text-text-soft">{dueDateText}</td>
+                      <td className="px-5 py-4 align-middle">
+                        <label className="sr-only" htmlFor={`balance-${card.id}`}>
+                          Statement balance for {card.name}
                         </label>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                        <div className="grid gap-2">
+                          <div className="flex items-center gap-2">
+                            <span className={`font-semibold ${status.balanceClass}`}>$</span>
+                            <input
+                              id={`balance-${card.id}`}
+                              className={`h-10 w-32 rounded-xl border border-app-border bg-app-surface px-3 text-sm font-semibold outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/10 ${status.balanceClass}`}
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={displayEntry.balance}
+                              onChange={(event) => handleBalanceChange(card.id, event.target.value)}
+                            />
+                          </div>
+                          {status.isNotChecked ? (
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              className="w-fit min-h-8 px-3 py-1 text-xs"
+                              onClick={() => handleCheckedNoBalance(card.id)}
+                              disabled={saving}
+                            >
+                              Mark checked, no balance
+                            </Button>
+                          ) : null}
+                        </div>
+                      </td>
+                      <td className="px-5 py-4 align-middle">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <span
+                            className={`rounded-lg px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${status.badgeClass}`}
+                          >
+                            {status.label}
+                          </span>
+                          <label className="inline-flex items-center gap-2 text-sm font-medium text-text-soft">
+                            <input
+                              className="h-4 w-4 rounded border-app-border text-brand-primary focus:ring-brand-primary"
+                              type="checkbox"
+                              checked={status.isNoBalance ? false : Boolean(displayEntry.paid)}
+                              disabled={status.isNoBalance || status.isNotChecked}
+                              onChange={(event) => handlePaidChange(card.id, event.target.checked)}
+                            />
+                            {status.isNoBalance
+                              ? "No payment needed"
+                              : status.isNotChecked
+                                ? "Check first"
+                                : "Paid"}
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </Card>
+  );
+}
+
+function MonthlyBalanceMobileCard({
+  row,
+  saving,
+  isCardSaving,
+  onEditCard,
+  onBalanceChange,
+  onCheckedNoBalance,
+  onPaidChange,
+}) {
+  const { card, displayEntry, status, closingDateText, dueDateText, statementGenerated } = row;
+  return (
+    <article className={`rounded-2xl border border-app-border p-4 ${status.rowClass}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <LinkedCardName card={card} />
+          <p className="mt-1 text-xs text-text-muted">
+            {card.network} **** {card.lastFour}
+          </p>
+          <p className="text-xs text-text-muted">{card.owner}</p>
+        </div>
+        {onEditCard ? (
+          <button
+            type="button"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-text-muted transition hover:bg-app-muted hover:text-text-main focus:outline-none focus:ring-2 focus:ring-brand-primary/10"
+            onClick={() => onEditCard(card)}
+            disabled={isCardSaving}
+            aria-label={`Edit ${card.name}`}
+          >
+            <Pencil size={15} aria-hidden="true" />
+          </button>
+        ) : null}
+      </div>
+
+      <div className="mt-3 grid gap-2 text-sm text-text-soft">
+        <div className="flex items-center justify-between gap-2">
+          <span>Statement closes</span>
+          <span className="font-medium text-text-main">{closingDateText}</span>
+        </div>
+        <div className="flex items-center justify-between gap-2">
+          <span>Payment due</span>
+          <span className="font-medium text-text-main">{dueDateText}</span>
+        </div>
+        <div className="flex items-center justify-between gap-2">
+          <span>Cycle</span>
+          <span
+            className={`rounded-md px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ${
+              statementGenerated
+                ? "bg-status-infoBg text-status-infoDark ring-status-infoBg"
+                : "bg-app-muted text-text-muted ring-app-muted"
+            }`}
+          >
+            {statementGenerated ? "Generated" : "Not yet"}
+          </span>
+        </div>
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <span
+          className={`rounded-lg px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${status.badgeClass}`}
+        >
+          {status.label}
+        </span>
+      </div>
+
+      <div className="mt-3 grid gap-2">
+        <label
+          className="text-xs font-medium text-text-muted"
+          htmlFor={`mobile-balance-${card.id}`}
+        >
+          Statement balance
+        </label>
+        <div className="flex items-center gap-2">
+          <span className={`font-semibold ${status.balanceClass}`}>$</span>
+          <input
+            id={`mobile-balance-${card.id}`}
+            className={`h-10 w-full rounded-xl border border-app-border bg-app-surface px-3 text-sm font-semibold outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/10 ${status.balanceClass}`}
+            type="number"
+            min="0"
+            step="0.01"
+            value={displayEntry.balance}
+            onChange={(event) => onBalanceChange(card.id, event.target.value)}
+          />
+        </div>
+        {status.isNotChecked ? (
+          <Button
+            type="button"
+            variant="secondary"
+            className="w-fit min-h-8 px-3 py-1 text-xs"
+            onClick={() => onCheckedNoBalance(card.id)}
+            disabled={saving}
+          >
+            Mark checked, no balance
+          </Button>
+        ) : null}
+      </div>
+
+      <div className="mt-3">
+        <label className="inline-flex items-center gap-2 text-sm font-medium text-text-soft">
+          <input
+            className="h-4 w-4 rounded border-app-border text-brand-primary focus:ring-brand-primary"
+            type="checkbox"
+            checked={status.isNoBalance ? false : Boolean(displayEntry.paid)}
+            disabled={status.isNoBalance || status.isNotChecked}
+            onChange={(event) => onPaidChange(card.id, event.target.checked)}
+          />
+          {status.isNoBalance ? "No payment needed" : status.isNotChecked ? "Check first" : "Paid"}
+        </label>
+      </div>
+    </article>
   );
 }
 

@@ -1,10 +1,11 @@
-import { daysBetween, getDueDateForMonth } from "../../lib/dates.js";
+import { getStatementDaysUntilDue } from "./statementCycleUtils.js";
+import { isStatementPaid } from "./statementPaymentUtils.js";
 
 export function getRowStatus(card, monthKey, entry) {
   const hasEntry = Boolean(entry);
   const balance = Number(entry?.balance || 0);
-  const paid = Boolean(entry?.paid);
-  const daysUntilDue = daysBetween(new Date(), getDueDateForMonth(monthKey, card.dueDay));
+  const paid = isStatementPaid(entry);
+  const daysUntilDue = getStatementDaysUntilDue(entry, monthKey, card);
 
   if (!hasEntry) {
     return {

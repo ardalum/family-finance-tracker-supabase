@@ -12,6 +12,7 @@ import {
   UNCATEGORIZED_ID,
   UNCATEGORIZED_NAME,
 } from "./spendingService.js";
+import { validateSplitReplacementInput } from "./splitValidation.js";
 
 const categories = [
   { id: "cat-grocery", name: "Groceries" },
@@ -144,5 +145,38 @@ describe("spending service", () => {
       { name: "Walmart", amount: 50 },
       { name: "Target", amount: 30 },
     ]);
+  });
+
+  it("validates split replacement input safely", () => {
+    assert.throws(
+      () => validateSplitReplacementInput({ splitMode: true, amount: 100, splits: [] }),
+      /at least one split row/i,
+    );
+    assert.throws(
+      () =>
+        validateSplitReplacementInput({
+          splitMode: true,
+          amount: 100,
+          splits: [{ amount: 0 }],
+        }),
+      /must be positive/i,
+    );
+    assert.throws(
+      () =>
+        validateSplitReplacementInput({
+          splitMode: true,
+          amount: 100,
+          splits: [{ amount: 60 }, { amount: 30 }],
+        }),
+      /must equal the transaction amount/i,
+    );
+
+    assert.doesNotThrow(() =>
+      validateSplitReplacementInput({
+        splitMode: true,
+        amount: 100,
+        splits: [{ amount: 50 }, { amount: 50 }],
+      }),
+    );
   });
 });

@@ -6,11 +6,15 @@ const defaultAllowedOrigins = [
   "https://ardalum.github.io",
 ];
 
-const deleteOrder = [
+export const deleteOrder = [
+  "activity_log",
   "recurring_payment_instances",
   "transaction_splits",
   "transactions",
+  "card_statements",
   "monthly_card_balances",
+  "monthly_category_budgets",
+  "categories",
   "recurring_payments",
   "credit_cards",
   "budget_categories",
