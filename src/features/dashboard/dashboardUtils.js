@@ -1,5 +1,13 @@
+import {
+  getStatementDaysUntilDue,
+  getStatementCycleDates,
+} from "../creditCards/statementCycleUtils.js";
+import {
+  getStatementPaidAmount,
+  getStatementUnpaidAmount,
+  isStatementPaid,
+} from "../creditCards/statementPaymentUtils.js";
 import { daysBetween, getDueDateForMonth } from "../../lib/dates.js";
-import { getOwnerCreditLimitTotal } from "../creditCards/creditCardsService.js";
 import {
   getCategoryName,
   getMonthTransactions,
@@ -26,11 +34,10 @@ export function getDashboardData(appData, monthKey) {
     (sum, card) => sum + Number(monthlyBalances[card.id]?.balance || 0),
     0,
   );
-  const unpaidBalanceTotal = cards.reduce((sum, card) => {
-    const entry = monthlyBalances[card.id] ?? { balance: 0, paid: false };
-    const balance = Number(entry.balance || 0);
-    return entry.paid || balance <= 0 ? sum : sum + balance;
-  }, 0);
+  const unpaidBalanceTotal = cards.reduce(
+    (sum, card) => sum + getStatementUnpaidAmount(monthlyBalances[card.id]),
+    0,
+  );
   const recurringSummary = getRecurringSummary(
     appData.recurringPayments,
     monthKey,
@@ -52,8 +59,7 @@ export function getDashboardData(appData, monthKey) {
       recurringRemaining: recurringSummary.remainingTotal,
       recurringUpcomingCount: recurringSummary.upcomingUnpaidCount,
       recurringPastDueCount: recurringSummary.pastDueUnpaidCount,
-      totalCreditLimit:
-        getOwnerCreditLimitTotal(cards, "Arvin") + getOwnerCreditLimitTotal(cards, "Kristine"),
+      totalCreditLimit: cards.reduce((sum, card) => sum + Number(card.creditLimit || 0), 0),
       statementBalanceTotal,
       unpaidBalanceTotal,
     },
@@ -210,12 +216,13 @@ function getBudgetRows(budgets, transactions) {
 
 function getCardRows(cards, monthlyBalances, monthKey) {
   const rows = cards.map((card) => {
-    const dueDate = getDueDateForMonth(monthKey, card.dueDay);
     const entry = monthlyBalances[card.id] ?? { balance: 0, paid: false };
     const balance = Number(entry.balance || 0);
-    const paidAmount = Number(entry.paidAmount || 0);
-    const paid = Boolean(entry.paid) || (balance > 0 && paidAmount >= balance);
+    const paidAmount = getStatementPaidAmount(entry);
+    const paid = isStatementPaid(entry);
     const minimumPayment = Number(entry.minimumPayment || 0);
+    const { paymentDueDate } = getStatementCycleDates(monthKey, card, entry);
+    const daysUntilDue = getStatementDaysUntilDue(entry, monthKey, card);
     return {
       card,
       balance,
@@ -227,7 +234,8 @@ function getCardRows(cards, monthlyBalances, monthKey) {
       autopayDate: entry.autopayDate ?? null,
       statementStatus: entry.statementStatus ?? (paid ? "paid" : "unpaid"),
       hasPaymentDue: balance > 0 && !paid,
-      daysUntilDue: daysBetween(new Date(), dueDate),
+      paymentDueDate,
+      daysUntilDue,
     };
   });
   const hasUnpaidBalanceCards = rows.some((row) => row.hasPaymentDue);

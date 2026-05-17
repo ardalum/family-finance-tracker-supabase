@@ -1,10 +1,8 @@
 import Card from "../../../components/ui/Card.jsx";
-import {
-  getDueDateForMonth,
-  getStatementClosingDateForMonth,
-  isDateOnOrBeforeToday,
-} from "../../../lib/dates.js";
+import { isDateOnOrBeforeToday } from "../../../lib/dates.js";
 import { formatCurrency } from "../../../lib/formatters.js";
+import { getStatementCycleDates } from "../statementCycleUtils.js";
+import { isStatementPaid } from "../statementPaymentUtils.js";
 
 function formatDate(date) {
   return date.toLocaleDateString("en-US", {
@@ -16,7 +14,7 @@ function formatDate(date) {
 
 function getStatementStatus(entry, closingDate, dueDate) {
   const balance = Number(entry?.balance || 0);
-  const paid = Boolean(entry?.paid);
+  const paid = isStatementPaid(entry);
 
   if (balance === 0)
     return { label: "No balance", className: "bg-app-muted text-text-muted ring-app-muted" };
@@ -46,11 +44,9 @@ export default function StatementCycleSummary({ cards, monthlyBalances, selected
   const cardsWithBalances = cards
     .map((card) => {
       const entry = monthBalances[card.id] ?? { balance: 0, paid: false };
-      const closingDate = getStatementClosingDateForMonth(
-        selectedMonth,
-        card.statementClosingDay ?? card.dueDay,
-      );
-      const dueDate = getDueDateForMonth(selectedMonth, card.dueDay);
+      const cycleDates = getStatementCycleDates(selectedMonth, card, entry);
+      const closingDate = new Date(`${cycleDates.statementCloseDate}T00:00:00`);
+      const dueDate = new Date(`${cycleDates.paymentDueDate}T00:00:00`);
       const status = getStatementStatus(entry, closingDate, dueDate);
 
       return {

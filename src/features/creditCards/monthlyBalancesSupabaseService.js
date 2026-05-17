@@ -1,4 +1,13 @@
 import { supabase } from "../../lib/supabase/client.js";
+import {
+  getPaymentDueDateForStatementMonth,
+  getStatementCloseDateForStatementMonth,
+} from "./statementCycleUtils.js";
+import {
+  getStatementPaidAmount,
+  getStatementUnpaidAmount,
+  isStatementPaid,
+} from "./statementPaymentUtils.js";
 
 function requireSupabase() {
   if (!supabase) {
@@ -33,58 +42,36 @@ function toMonthBalanceEntry(row, cardsBySupabaseId, statementsByCardMonth = new
     cardId,
     {
       balance,
-      paid: Boolean(row.paid),
+      paid: isStatementPaid({
+        balance,
+        paid: row.paid,
+        paidAmount: statement?.paid_amount ?? (row.paid ? balance : 0),
+      }),
       updatedAt: row.updated_at,
       statementId: statement?.id,
       statementCloseDate: statement?.statement_close_date ?? null,
       paymentDueDate: statement?.payment_due_date ?? null,
       minimumPayment: Number(statement?.minimum_payment || 0),
-      paidAmount: Number(statement?.paid_amount ?? (row.paid ? balance : 0)),
+      paidAmount: getStatementPaidAmount({
+        paidAmount: statement?.paid_amount ?? (row.paid ? balance : 0),
+      }),
       paidDate: statement?.paid_date ?? null,
       autopayEnabled: Boolean(statement?.autopay_enabled),
       autopayDate: statement?.autopay_date ?? null,
       confirmationNumber: statement?.confirmation_number ?? "",
-      statementStatus: statement?.status ?? (row.paid || balance === 0 ? "paid" : "unpaid"),
+      statementStatus:
+        statement?.status ??
+        (getStatementUnpaidAmount({ balance, paid: row.paid }) > 0 ? "unpaid" : "paid"),
     },
   ];
 }
 
-function getDaysInMonth(year, month) {
-  return new Date(year, month, 0).getDate();
-}
-
-function clampDay(year, month, day) {
-  return Math.min(Math.max(Number(day) || 1, 1), getDaysInMonth(year, month));
-}
-
-function toIsoDate(year, month, day) {
-  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-}
-
-function getNextMonth(year, month) {
-  return month === 12 ? { year: year + 1, month: 1 } : { year, month: month + 1 };
-}
-
-function getStatementDates(monthKey, card) {
-  const [year, month] = monthKey.split("-").map(Number);
-  const closeDay = clampDay(year, month, card?.statementClosingDay ?? card?.dueDay ?? 1);
-  const statementCloseDate = toIsoDate(year, month, closeDay);
-
-  const nextMonth = getNextMonth(year, month);
-  const dueDay = clampDay(nextMonth.year, nextMonth.month, card?.dueDay ?? 1);
-  const paymentDueDate = toIsoDate(nextMonth.year, nextMonth.month, dueDay);
-
-  return {
-    statementCloseDate,
-    paymentDueDate,
-  };
-}
-
 function getStatementStatus(patch) {
   const balance = Number(patch.balance ?? 0) || 0;
-  const paidAmount = Number(patch.paidAmount ?? (patch.paid ? balance : 0)) || 0;
-
-  if (balance === 0 || paidAmount >= balance || Boolean(patch.paid)) return "paid";
+  const paidAmount = getStatementPaidAmount({
+    paidAmount: patch.paidAmount ?? (patch.paid ? balance : 0),
+  });
+  if (isStatementPaid({ ...patch, balance, paidAmount })) return "paid";
   if (paidAmount > 0) return "partial";
   return "unpaid";
 }
@@ -101,9 +88,12 @@ async function listCardStatements(client, householdId, monthKey = null) {
 async function upsertCardStatement(client, householdId, monthKey, card, patch) {
   const creditCardId = getSupabaseCardId(card);
   const balance = Number(patch.balance ?? 0) || 0;
-  const paidAmount = Number(patch.paidAmount ?? (patch.paid ? balance : 0)) || 0;
-  const paid = Boolean(patch.paid) || paidAmount >= balance || balance === 0;
-  const { statementCloseDate, paymentDueDate } = getStatementDates(monthKey, card);
+  const paidAmount = getStatementPaidAmount({
+    paidAmount: patch.paidAmount ?? (patch.paid ? balance : 0),
+  });
+  const paid = isStatementPaid({ ...patch, balance, paidAmount });
+  const statementCloseDate = getStatementCloseDateForStatementMonth(monthKey, card);
+  const paymentDueDate = getPaymentDueDateForStatementMonth(monthKey, card);
 
   const { error } = await client.from("card_statements").upsert(
     {
@@ -181,11 +171,11 @@ export async function upsertMonthlyBalance(householdId, monthKey, card, patch) {
   const client = requireSupabase();
   const creditCardId = getSupabaseCardId(card);
   const balance = Number(patch.balance ?? 0) || 0;
-  const paidAmount = Number(patch.paidAmount ?? (patch.paid ? balance : 0)) || 0;
+  const paidAmount = getStatementPaidAmount(patch);
   const normalizedPatch = {
     ...patch,
     balance,
-    paid: Boolean(patch.paid) || paidAmount >= balance || balance === 0,
+    paid: isStatementPaid({ ...patch, balance, paidAmount }),
     paidAmount,
   };
 

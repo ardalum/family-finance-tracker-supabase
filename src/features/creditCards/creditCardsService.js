@@ -1,5 +1,6 @@
 import { normalizeCardFormInput } from "./cardFormUtils.js";
 import { getRowStatus } from "./creditCardStatus.js";
+import { getStatementUnpaidAmount } from "./statementPaymentUtils.js";
 import { updateAppData } from "../../lib/storage/appStorage.js";
 
 function createId(prefix) {
@@ -99,7 +100,7 @@ export function getMonthlyBalanceSummary(cards, monthBalances, selectedMonth) {
 
       return {
         statementBalance: summary.statementBalance + balance,
-        unpaidBalance: summary.unpaidBalance + (entry?.paid ? 0 : balance),
+        unpaidBalance: summary.unpaidBalance + getStatementUnpaidAmount(entry),
         checkedNoBalanceCount: summary.checkedNoBalanceCount + (status.isCheckedNoBalance ? 1 : 0),
         notCheckedCount: summary.notCheckedCount + (status.isNotChecked ? 1 : 0),
       };

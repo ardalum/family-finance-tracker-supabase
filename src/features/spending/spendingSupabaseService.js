@@ -1,5 +1,6 @@
 import { getMonthDateRange } from "../../lib/dates.js";
 import { supabase } from "../../lib/supabase/client.js";
+import { validateSplitReplacementInput } from "./splitValidation.js";
 import { normalizeTransactionType, UNCATEGORIZED_ID } from "./spendingService.js";
 
 function requireSupabase() {
@@ -116,6 +117,7 @@ export async function listTransactions(householdId, monthKey, cards, categories)
 }
 
 export async function addTransactionToSupabase(householdId, input, cards, categories) {
+  validateSplitReplacementInput(input);
   const client = requireSupabase();
   const cardsByAppId = new Map(cards.map((card) => [card.id, card]));
   const categoriesByAppId = new Map(categories.map((category) => [category.id, category]));
@@ -144,6 +146,7 @@ export async function addTransactionToSupabase(householdId, input, cards, catego
 }
 
 export async function updateTransactionInSupabase(transactionId, input, cards, categories) {
+  validateSplitReplacementInput(input);
   const client = requireSupabase();
   const cardsByAppId = new Map(cards.map((card) => [card.id, card]));
   const categoriesByAppId = new Map(categories.map((category) => [category.id, category]));
@@ -157,6 +160,7 @@ export async function updateTransactionInSupabase(transactionId, input, cards, c
 
   if (error) throw error;
 
+  // TODO: Move split replacement into a single RPC transaction for full DB-level atomicity.
   await client.from("transaction_splits").delete().eq("transaction_id", transaction.id);
   if (input.splitMode) {
     await replaceTransactionSplits(
@@ -221,6 +225,11 @@ export async function importLocalTransactions(householdId, localTransactions, ca
 
   const insertedIds = [];
   for (const transaction of transactionsToImport) {
+    validateSplitReplacementInput({
+      ...transaction,
+      splitMode: Boolean(transaction.splits?.length),
+      splits: transaction.splits ?? [],
+    });
     const { data: inserted, error } = await client
       .from("transactions")
       .insert({

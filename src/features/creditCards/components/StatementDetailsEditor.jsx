@@ -4,6 +4,7 @@ import Card from "../../../components/ui/Card.jsx";
 import Input from "../../../components/ui/Input.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
+import { isStatementPaid } from "../statementPaymentUtils.js";
 
 function emptyStatement(entry = {}) {
   return {
@@ -21,7 +22,7 @@ function getStatusLabel(entry) {
   const paidAmount = Number(entry?.paidAmount || 0);
 
   if (balance === 0) return "No balance";
-  if (paidAmount >= balance || entry?.paid) return "Paid";
+  if (isStatementPaid(entry)) return "Paid";
   if (paidAmount > 0) return "Partially paid";
   return "Unpaid";
 }
@@ -69,9 +70,10 @@ export default function StatementDetailsEditor({
       autopayEnabled: Boolean(form.autopayEnabled),
       autopayDate: form.autopayDate || null,
       confirmationNumber: form.confirmationNumber,
-      paid:
-        Number(form.paidAmount || 0) >= Number(selectedEntry.balance || 0) &&
-        Number(selectedEntry.balance || 0) > 0,
+      paid: isStatementPaid({
+        ...selectedEntry,
+        paidAmount: Number(form.paidAmount || 0),
+      }),
     });
 
     setMessage("Statement details saved.");
