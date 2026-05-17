@@ -7,6 +7,14 @@ const packageJson = JSON.parse(
   readFileSync(new URL("../../package.json", import.meta.url), "utf8"),
 );
 
+const requiredMetadataFields = [
+  "creatorName",
+  "version",
+  "releaseLabel",
+  "releaseDate",
+  "supportEmail",
+];
+
 describe("app metadata", () => {
   it("keeps the displayed app version aligned with package.json", () => {
     assert.equal(appMetadata.version, packageJson.version);
@@ -15,7 +23,7 @@ describe("app metadata", () => {
   it("keeps required app metadata fields populated", () => {
     assert.equal(appMetadata.name, "WalletFlow");
 
-    for (const field of ["version", "releaseLabel", "releaseDate", "supportEmail"]) {
+    for (const field of requiredMetadataFields) {
       assert.equal(typeof appMetadata[field], "string");
       assert.notEqual(appMetadata[field].trim(), "");
     }
