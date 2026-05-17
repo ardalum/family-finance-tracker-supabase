@@ -199,6 +199,10 @@ Use this checklist before each production release.
 - [ ] Excel export includes `Monthly Close Reviews` sheet.
 - [ ] Supabase merge preview/import summary shows counts for monthly close, income, savings, cash accounts, and liabilities sections.
 - [ ] Supabase merge import keeps computed-only outputs out of persisted restore payloads.
+- [ ] Invalid JSON backup selection shows a clear validation error and blocks merge.
+- [ ] Empty/shape-invalid backup files are rejected before merge.
+- [ ] Unknown backup sections show warnings and do not crash import.
+- [ ] Computed-only backup sections (if present) show warnings and are not restored as persisted rows.
 - [ ] Supabase JSON export includes `incomeSources` and `incomeEntries`.
 - [ ] Excel export includes `Income Sources` and `Income Entries` sheets.
 - [ ] Supabase JSON export includes `savingsGoals` and `savingsContributions`.

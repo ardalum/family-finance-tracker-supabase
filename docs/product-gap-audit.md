@@ -186,3 +186,12 @@ This audit reviews WalletFlow as of Phase 7 across these workflows:
   - cash accounts/snapshots
   - liability accounts/snapshots
 - Computed views (Dashboard cash-flow summary, Net Worth summary/trends, Financial Position summary, Insights computed outputs) remain intentionally excluded as standalone persisted backup sections.
+
+## Phase 47 Status Update
+
+- Restore/import validation safety is now hardened:
+  - invalid JSON rejection with helpful copy
+  - empty persisted-record backup rejection
+  - warnings for unknown/future sections (ignored safely)
+  - warnings for computed-only sections (ignored as persisted restore inputs)
+- Merge-import remains intentionally non-destructive (add/skip model), with overwrite-style restore still out of scope.

@@ -1,32 +1,18 @@
 import { readAppData, resetAppData, writeAppData } from "../../lib/storage/appStorage.js";
 import { supabase } from "../../lib/supabase/client.js";
 import { deleteHouseholdFinanceDataSecurely } from "./secureDeletionService.js";
+import {
+  getSupabaseBackupWarnings,
+  hasAnyPersistedSupabaseRecords,
+  parseBackupJsonText,
+  PERSISTED_SUPABASE_SECTIONS,
+} from "./backupValidation.js";
 
 const BACKUP_APP_NAME = "Credit Card Tracker";
 const SUPPORTED_SCHEMA_VERSION = 1;
 const SUPABASE_BACKUP_VERSION = 8;
 const SUPPORTED_SUPABASE_BACKUP_VERSIONS = [1, 2, 3, 4, 5, 6, 7, 8];
-const EXPECTED_SUPABASE_SECTIONS = [
-  "household",
-  "householdProfiles",
-  "creditCards",
-  "monthlyCardBalances",
-  "cardStatements",
-  "budgetCategories",
-  "transactions",
-  "transactionSplits",
-  "recurringPayments",
-  "recurringPaymentInstances",
-  "monthlyCloseReviews",
-  "incomeSources",
-  "incomeEntries",
-  "savingsGoals",
-  "savingsContributions",
-  "cashAccounts",
-  "accountBalanceSnapshots",
-  "liabilityAccounts",
-  "liabilityBalanceSnapshots",
-];
+const EXPECTED_SUPABASE_SECTIONS = PERSISTED_SUPABASE_SECTIONS;
 
 function requireSupabase() {
   if (!supabase) {
@@ -868,9 +854,15 @@ export async function previewSupabaseBackupImport(file, householdId) {
 
     return {
       ok: true,
-      message: "Backup file is ready to import.",
+      message:
+        (parsed.warnings?.length ?? 0) > 0
+          ? `Backup file is ready to import with ${parsed.warnings.length} warning${
+              parsed.warnings.length === 1 ? "" : "s"
+            }.`
+          : "Backup file is ready to import.",
       backup: parsed.backup,
       preview,
+      warnings: parsed.warnings ?? [],
     };
   } catch (error) {
     return {
@@ -1766,6 +1758,7 @@ export async function importSupabaseBackupMerge(householdId, backup) {
       ok: true,
       message: "Supabase backup imported successfully.",
       counts,
+      warnings: validation.warnings ?? [],
     };
   } catch (error) {
     return {
@@ -1810,13 +1803,22 @@ async function parseSupabaseBackupFile(file) {
   }
 
   try {
-    const backup = JSON.parse(await file.text());
+    const parsedJson = parseBackupJsonText(await file.text());
+    if (!parsedJson.ok) {
+      return {
+        ok: false,
+        message: parsedJson.message,
+      };
+    }
+
+    const backup = parsedJson.data;
     const validation = validateSupabaseBackup(backup);
     if (!validation.ok) return validation;
 
     return {
       ok: true,
       backup: validation.backup,
+      warnings: validation.warnings ?? [],
     };
   } catch {
     return {
@@ -1895,6 +1897,12 @@ function validateSupabaseBackup(backup) {
 
   if (!normalizedBackup.exportedAt || Number.isNaN(Date.parse(normalizedBackup.exportedAt))) {
     return invalid("Supabase backup is missing a valid exportedAt timestamp.");
+  }
+
+  if (!hasAnyPersistedSupabaseRecords(normalizedBackup)) {
+    return invalid(
+      "Supabase backup has no persisted finance records to import. Export a complete household backup and try again.",
+    );
   }
 
   if (containsForbiddenBackupKeys(normalizedBackup)) {
@@ -2132,6 +2140,7 @@ function validateSupabaseBackup(backup) {
     ok: true,
     message: "Supabase backup is valid.",
     backup: normalizedBackup,
+    warnings: getSupabaseBackupWarnings(normalizedBackup, { requiredSections }),
   };
 }
 

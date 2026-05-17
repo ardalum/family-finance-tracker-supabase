@@ -146,6 +146,10 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Supabase JSON export includes all persisted finance sections used by cards, budgets, spending, recurring, monthly close, income, savings, accounts, and liabilities.
 - [ ] Supabase merge-import preview/counts include all persisted finance sections listed above.
 - [ ] Computed outputs (Dashboard cash-flow summary, Net Worth summary/trends, Financial Position summary, Insights computed outputs) are not treated as standalone persisted backup sections.
+- [ ] Invalid JSON backup files are rejected with clear user-facing error copy.
+- [ ] Empty persisted-record backups are rejected before merge.
+- [ ] Missing expected persisted sections are surfaced via validation errors/warnings before merge.
+- [ ] Unknown or future backup sections are ignored safely and surfaced as validation warnings.
 - [ ] Supabase JSON export includes `savingsGoals` and `savingsContributions`.
 - [ ] Excel export includes `Savings Goals` and `Savings Contributions`.
 - [ ] Supabase JSON export includes `cashAccounts` and `accountBalanceSnapshots`.
