@@ -4,6 +4,19 @@ Date: 2026-05-17
 Project: WalletFlow / Family Finance Tracker  
 Scope: Design-only planning for account balance snapshots and net worth (no implementation in this phase)
 
+## Phase 30 Status Update
+
+- Cash Account Snapshots MVP is now implemented for manual tracking:
+  - cash account list
+  - account balance snapshots by month/date
+  - liquid cash summary on the Accounts workspace
+  - Dashboard quick action entry point
+- Snapshot data is intentionally separate from spending, budget, cards, bills, income, savings, and dashboard cash-flow calculations.
+- Still missing after Phase 30:
+  - liability/debt snapshot workflows
+  - full net-worth summary and trends
+  - net-worth Insights reporting
+
 ## 1. Problem Statement
 
 WalletFlow now covers transactions, budgets, recurring bills, cards, insights, income, savings goals, and a Dashboard cash-flow summary. It is still incomplete as a full household finance tracker because it does not capture real account balance snapshots or net worth over time.

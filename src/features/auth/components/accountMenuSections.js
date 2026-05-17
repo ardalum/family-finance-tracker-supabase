@@ -2,6 +2,7 @@ import {
   ClipboardList,
   HandCoins,
   PiggyBank,
+  Landmark,
   DatabaseBackup,
   Home,
   Info,
@@ -55,6 +56,12 @@ export const accountMenuSections = [
         label: "Savings",
         description: "Manual savings goals and monthly contributions.",
         view: "savings",
+      },
+      {
+        icon: Landmark,
+        label: "Accounts",
+        description: "Manual cash accounts and monthly balance snapshots.",
+        view: "accounts",
       },
       {
         icon: DatabaseBackup,

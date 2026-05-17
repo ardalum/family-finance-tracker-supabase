@@ -10,6 +10,7 @@ import {
   HandCoins,
   PiggyBank,
   WalletCards,
+  Landmark,
 } from "lucide-react";
 import Card from "../../../components/ui/Card.jsx";
 import Select from "../../../components/ui/Select.jsx";
@@ -84,6 +85,13 @@ const quickActions = [
     view: "savings",
     target: "monthly-savings",
     icon: PiggyBank,
+  },
+  {
+    label: "Manage accounts",
+    description: "Track manual cash account balances.",
+    view: "accounts",
+    target: "monthly-account-snapshots",
+    icon: Landmark,
   },
   {
     label: "Review budget",

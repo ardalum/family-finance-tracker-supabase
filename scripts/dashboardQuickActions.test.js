@@ -22,4 +22,12 @@ describe("dashboard quick actions", () => {
     assert.equal(source.includes('view: "savings"'), true);
     assert.equal(source.includes('target: "monthly-savings"'), true);
   });
+
+  it("includes Manage accounts quick action target", () => {
+    const source = read("src/features/dashboard/components/Dashboard.jsx");
+
+    assert.equal(source.includes('label: "Manage accounts"'), true);
+    assert.equal(source.includes('view: "accounts"'), true);
+    assert.equal(source.includes('target: "monthly-account-snapshots"'), true);
+  });
 });

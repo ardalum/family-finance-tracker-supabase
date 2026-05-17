@@ -15,6 +15,8 @@ describe("backup expected sections", () => {
     assert.equal(source.includes('"incomeEntries"'), true);
     assert.equal(source.includes('"savingsGoals"'), true);
     assert.equal(source.includes('"savingsContributions"'), true);
+    assert.equal(source.includes('"cashAccounts"'), true);
+    assert.equal(source.includes('"accountBalanceSnapshots"'), true);
   });
 
   it("includes income sheets in Excel export", () => {
@@ -23,5 +25,7 @@ describe("backup expected sections", () => {
     assert.equal(source.includes('"Income Entries"'), true);
     assert.equal(source.includes('"Savings Goals"'), true);
     assert.equal(source.includes('"Savings Contributions"'), true);
+    assert.equal(source.includes('"Cash Accounts"'), true);
+    assert.equal(source.includes('"Account Balance Snapshots"'), true);
   });
 });

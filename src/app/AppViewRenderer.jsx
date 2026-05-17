@@ -6,6 +6,7 @@ import Dashboard from "../features/dashboard/components/Dashboard.jsx";
 import HouseholdSettings from "../features/households/components/HouseholdSettings.jsx";
 import Insights from "../features/insights/components/Insights.jsx";
 import Income from "../features/income/components/Income.jsx";
+import Accounts from "../features/accounts/components/Accounts.jsx";
 import Savings from "../features/savings/components/Savings.jsx";
 import PrivacyPolicy from "../features/legal/components/PrivacyPolicy.jsx";
 import TermsOfUse from "../features/legal/components/TermsOfUse.jsx";
@@ -24,6 +25,7 @@ export default function AppViewRenderer({
   spendingProps,
   recurringProps,
   insightsProps,
+  accountsProps,
   incomeProps,
   savingsProps,
   backupProps,
@@ -37,6 +39,7 @@ export default function AppViewRenderer({
       {activeView === "spending" ? <SpendingTracker {...spendingProps} /> : null}
       {activeView === "recurring" ? <RecurringPayments {...recurringProps} /> : null}
       {activeView === "insights" ? <Insights {...insightsProps} /> : null}
+      {activeView === "accounts" ? <Accounts {...accountsProps} /> : null}
       {activeView === "income" ? <Income {...incomeProps} /> : null}
       {activeView === "savings" ? <Savings {...savingsProps} /> : null}
       {activeView === "backup" ? <BackupRestore {...backupProps} /> : null}
