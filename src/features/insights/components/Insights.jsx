@@ -15,6 +15,7 @@ import {
   getTopMerchants,
   getTransactionTypeMixRows,
 } from "../insightsChartData.js";
+import { getYtdInsightsData } from "../insightsYtdUtils.js";
 
 const BUDGET_STATUS_COPY = {
   over: {
@@ -55,6 +56,21 @@ export default function Insights({
     () => getTransactionTypeMixRows(data.transactions),
     [data.transactions],
   );
+  const ytdData = useMemo(
+    () =>
+      getYtdInsightsData({
+        selectedMonth,
+        transactionsByMonth: appData.ytdTransactionsByMonth ?? {},
+        budgetsByMonth: appData.ytdBudgetsByMonth ?? {},
+        monthlyCloseReviewsByMonth: appData.monthlyCloseReviewsByMonth ?? null,
+      }),
+    [
+      appData.monthlyCloseReviewsByMonth,
+      appData.ytdBudgetsByMonth,
+      appData.ytdTransactionsByMonth,
+      selectedMonth,
+    ],
+  );
 
   const hasInsightData = data.transactions.length > 0 || data.budgets.length > 0;
 
@@ -68,8 +84,8 @@ export default function Insights({
               {formatMonthLabel(selectedMonth)}
             </h2>
             <p className="mt-1 max-w-2xl text-sm text-text-muted">
-              Reporting center for spending patterns, budget pressure, merchant concentration, and
-              transaction mix using current tracked month data.
+              Reporting center for spending patterns, budget pressure, merchant concentration,
+              transaction mix, and year-to-date progress using current tracked data.
             </p>
             {loading ? <p className="mt-2 text-sm text-text-muted">Loading insights...</p> : null}
             {error ? <p className="mt-2 text-sm font-medium text-status-danger">{error}</p> : null}
@@ -157,6 +173,74 @@ export default function Insights({
               ))}
             </div>
           )}
+        </Card>
+      </section>
+
+      <section className="grid gap-6">
+        <Card>
+          <SectionHeader
+            title="YTD Review"
+            description="Year-to-date reporting from January through the selected month using currently tracked transactions."
+          />
+          <div className="grid gap-5 p-5">
+            {!ytdData.hasData ? (
+              <EmptyState
+                title="No YTD spending data yet."
+                description="YTD reporting appears after transactions are added for the year."
+              />
+            ) : (
+              <>
+                <YtdSummaryCards ytdData={ytdData} />
+                {ytdData.isPartialYear ? (
+                  <p className="text-xs text-text-muted">
+                    YTD is based on tracked data from January through the selected month.
+                  </p>
+                ) : null}
+                <div className="grid gap-6 xl:grid-cols-3">
+                  <div className="xl:col-span-1">
+                    <h4 className="mb-2 text-sm font-semibold text-text-main">
+                      YTD Spending by Month
+                    </h4>
+                    <HorizontalBarChart
+                      title="YTD Spending by Month"
+                      description="Year-to-date month-by-month spending totals"
+                      items={ytdData.ytdSpendingByMonth.map((row) => ({
+                        id: row.monthKey,
+                        label: row.label,
+                        value: row.value,
+                        formattedValue: row.formattedValue,
+                      }))}
+                      valueLabel="Net spending"
+                      emptyMessage="No YTD month data."
+                      maxItems={12}
+                    />
+                  </div>
+                  <div className="xl:col-span-1">
+                    <h4 className="mb-2 text-sm font-semibold text-text-main">
+                      YTD Spending by Category
+                    </h4>
+                    <HorizontalBarChart
+                      title="YTD Spending by Category"
+                      description="Year-to-date category totals"
+                      items={ytdData.ytdSpendingByCategory}
+                      valueLabel="Net spending"
+                      emptyMessage="No YTD category spending yet."
+                    />
+                  </div>
+                  <div className="xl:col-span-1">
+                    <h4 className="mb-2 text-sm font-semibold text-text-main">Top Merchants YTD</h4>
+                    <HorizontalBarChart
+                      title="Top Merchants YTD"
+                      description="Year-to-date top merchant spending totals"
+                      items={ytdData.ytdTopMerchants}
+                      valueLabel="Net spending"
+                      emptyMessage="No YTD merchant spending yet."
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         </Card>
       </section>
     </section>
@@ -250,9 +334,53 @@ function TransactionTypeMixRow({ row, rows }) {
           value={Math.abs(row.netImpact)}
           max={totalAbsImpact}
           label={`${row.label} net impact share`}
-          helperText={`Net impact ${formatCurrency(row.netImpact)} � ${share.toFixed(0)}% of total net impact`}
+          helperText={`Net impact ${formatCurrency(row.netImpact)} | ${share.toFixed(0)}% of total net impact`}
         />
       </div>
+    </div>
+  );
+}
+
+function YtdSummaryCards({ ytdData }) {
+  const cards = [
+    {
+      label: "YTD Spending",
+      value: formatCurrency(ytdData.ytdSpendingTotal),
+    },
+    {
+      label: "Average Monthly Spending",
+      value: formatCurrency(ytdData.averageMonthlySpending),
+    },
+    {
+      label: "Highest Spending Month",
+      value: ytdData.highestSpendingMonth
+        ? `${ytdData.highestSpendingMonth.label} (${ytdData.highestSpendingMonth.formattedValue})`
+        : "No spending yet",
+    },
+    {
+      label: "Top Category YTD",
+      value: ytdData.topCategoryYtd
+        ? `${ytdData.topCategoryYtd.label} (${ytdData.topCategoryYtd.formattedValue})`
+        : "No category data",
+    },
+    {
+      label: "Top Merchant YTD",
+      value: ytdData.topMerchantYtd
+        ? `${ytdData.topMerchantYtd.label} (${ytdData.topMerchantYtd.formattedValue})`
+        : "No merchant data",
+    },
+  ];
+
+  return (
+    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+      {cards.map((card) => (
+        <div key={card.label} className="rounded-xl border border-app-border bg-app-background p-3">
+          <p className="text-xs font-medium uppercase tracking-wide text-text-muted">
+            {card.label}
+          </p>
+          <p className="mt-1 text-sm font-semibold text-text-main">{card.value}</p>
+        </div>
+      ))}
     </div>
   );
 }

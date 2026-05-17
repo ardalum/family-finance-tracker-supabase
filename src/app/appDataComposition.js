@@ -5,6 +5,8 @@ export function createFeatureAppData({
   selectedMonth,
   budgets,
   transactions,
+  ytdBudgetsByMonth,
+  ytdTransactionsByMonth,
   recurringPayments,
   recurringStatusByMonth,
 } = {}) {
@@ -17,6 +19,8 @@ export function createFeatureAppData({
       [selectedMonth]: budgets,
     },
     transactions,
+    ytdBudgetsByMonth,
+    ytdTransactionsByMonth,
     recurringPayments,
     recurringStatusByMonth,
     recurringTransactions: transactions,
