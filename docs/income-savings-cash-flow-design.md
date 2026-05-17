@@ -4,7 +4,7 @@ Date: 2026-05-17
 Project: WalletFlow / Family Finance Tracker  
 Scope: Design-only planning for next major feature (no implementation in this phase)
 
-> Status update (Phase 23): Income Tracking MVP is now implemented with manual income sources and month/date income entries. Savings and cash-flow summary work remain planned.
+> Status update (Phase 24): Income Tracking MVP is implemented and hardened (manual income sources, manual income entries, month filtering, and monthly income total). Income is tracked separately from spending/budget totals. Still missing: savings goals/contributions, cash-flow summary card, emergency-fund tracking, and income-driven reporting overlays.
 
 ## 1. Problem Statement
 

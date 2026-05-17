@@ -26,6 +26,7 @@ Use this checklist before each production release.
 - [ ] `npx supabase link --project-ref <project-ref>` is run for the correct project.
 - [ ] `npx supabase db push` is completed for the target environment.
 - [ ] `015_monthly_close_reviews.sql` is included and applied.
+- [ ] `016_income_tracking.sql` is included and applied.
 - [ ] RLS policies are active for migrated tables.
 
 ### Migration mismatch safety
@@ -64,6 +65,15 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] `Reopen month as in progress` works.
 - [ ] Switching months loads the correct persisted review state.
 
+## 7b) Income Verification
+
+- [ ] Income page opens from Dashboard quick action and Account menu Tools.
+- [ ] Add/edit/delete income source works.
+- [ ] Add/edit/delete income entry works.
+- [ ] Month switch filters income entries correctly.
+- [ ] Monthly income total updates for selected month.
+- [ ] Income does not change Spending or Budget totals.
+
 ## 8) Backup and Export Verification
 
 - [ ] Supabase JSON export works.
@@ -98,6 +108,7 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - Destructive-action validation must remain isolated to test accounts/households.
 - Migration history mismatches require careful repair workflow, not production reset.
 - Real-data readiness is currently limited by missing native income/savings/cash-flow tracking; releases before that feature is implemented should not claim full household cash-flow completeness.
+- Income export is included in Supabase JSON/Excel output, but income merge-import behavior is not yet a complete dedicated workflow with income-specific conflict handling.
 
 ## What Not To Test On Real Data
 

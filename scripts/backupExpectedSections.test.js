@@ -7,9 +7,17 @@ function read(path) {
 }
 
 describe("backup expected sections", () => {
-  it("includes cardStatements in expected Supabase backup sections", () => {
+  it("includes income sections in expected Supabase backup sections", () => {
     const source = read("src/features/backup/backupService.js");
     assert.equal(source.includes("EXPECTED_SUPABASE_SECTIONS"), true);
     assert.equal(source.includes('"cardStatements"'), true);
+    assert.equal(source.includes('"incomeSources"'), true);
+    assert.equal(source.includes('"incomeEntries"'), true);
+  });
+
+  it("includes income sheets in Excel export", () => {
+    const source = read("src/features/backup/backupService.js");
+    assert.equal(source.includes('"Income Sources"'), true);
+    assert.equal(source.includes('"Income Entries"'), true);
   });
 });
