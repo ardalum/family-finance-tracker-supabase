@@ -78,3 +78,8 @@ Source: production smoke-test findings + targeted code audit
    - click `Mark checked, no balance` and confirm `Checked � No balance`
 7. Focus numeric amount inputs containing `0` and confirm direct typing overwrites value without manual delete.
 8. Confirm no critical console errors during the above flows.
+
+## Phase 51 verification note
+
+- Phase 50 fixes are code/test-verified in local regression runs.
+- Deployed-app manual pass/fail logging is tracked in docs/post-fix-production-smoke-test-results.md.
