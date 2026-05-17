@@ -40,3 +40,7 @@
 - Many position/reporting flows are manual-entry MVPs (no bank sync/import automation).
 - Restore remains merge-safe (add/skip) rather than destructive overwrite mode.
 - Final release sign-off still requires deployed manual smoke execution and evidence capture.
+
+### Release Handoff
+
+- Phase 53 release-tag/deployment handoff guide: docs/release-tag-deployment-handoff.md`r
