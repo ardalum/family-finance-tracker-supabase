@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Card from "../../../components/ui/Card.jsx";
 import EmptyState from "../../../components/ui/EmptyState.jsx";
 import HorizontalBarChart from "../../../components/ui/HorizontalBarChart.jsx";
@@ -17,6 +17,15 @@ import {
 } from "../insightsChartData.js";
 import { getYtdInsightsData } from "../insightsYtdUtils.js";
 import { getYearOverYearInsightsData } from "../insightsYearComparisonUtils.js";
+import {
+  buildNetWorthTrendRows,
+  calculateNetWorthChange,
+  getMonthKeysForRange,
+  getNetWorthTrendStatus,
+  summarizeAssetTrend,
+  summarizeLiabilityTrend,
+  summarizeNetWorthByMonth,
+} from "../../netWorth/netWorthTrendService.js";
 
 const BUDGET_STATUS_COPY = {
   over: {
@@ -44,6 +53,7 @@ export default function Insights({
   loading = false,
   error = "",
 }) {
+  const [netWorthRangeMonths, setNetWorthRangeMonths] = useState("6");
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const data = useMemo(() => getDashboardData(appData, selectedMonth), [appData, selectedMonth]);
 
@@ -80,6 +90,53 @@ export default function Insights({
         budgetsByMonth: appData.ytdBudgetsByMonth ?? {},
       }),
     [appData.ytdBudgetsByMonth, appData.ytdTransactionsByMonth, selectedMonth],
+  );
+  const netWorthMonthKeys = useMemo(
+    () => getMonthKeysForRange(selectedMonth, Number(netWorthRangeMonths)),
+    [selectedMonth, netWorthRangeMonths],
+  );
+  const netWorthByMonth = useMemo(
+    () =>
+      summarizeNetWorthByMonth({
+        monthKeys: netWorthMonthKeys,
+        cashAccounts: appData.cashAccounts ?? [],
+        accountBalanceSnapshots: appData.accountBalanceSnapshots ?? [],
+        liabilityAccounts: appData.liabilityAccounts ?? [],
+        liabilityBalanceSnapshots: appData.liabilityBalanceSnapshots ?? [],
+      }),
+    [
+      appData.accountBalanceSnapshots,
+      appData.cashAccounts,
+      appData.liabilityAccounts,
+      appData.liabilityBalanceSnapshots,
+      netWorthMonthKeys,
+    ],
+  );
+  const netWorthTrendRows = useMemo(
+    () => buildNetWorthTrendRows(netWorthByMonth),
+    [netWorthByMonth],
+  );
+  const netWorthMonthsWithData = useMemo(
+    () => netWorthByMonth.filter((row) => row.hasData && Number.isFinite(Number(row.netWorth))),
+    [netWorthByMonth],
+  );
+  const currentNetWorth = netWorthMonthsWithData.at(-1)?.netWorth ?? null;
+  const startingNetWorth = netWorthMonthsWithData[0]?.netWorth ?? null;
+  const netWorthChange = calculateNetWorthChange(currentNetWorth, startingNetWorth);
+  const netWorthTrendStatus = getNetWorthTrendStatus(netWorthChange);
+  const assetTrend = useMemo(() => summarizeAssetTrend(netWorthByMonth), [netWorthByMonth]);
+  const liabilityTrend = useMemo(() => summarizeLiabilityTrend(netWorthByMonth), [netWorthByMonth]);
+  const bestMonth = useMemo(() => {
+    if (netWorthMonthsWithData.length === 0) return null;
+    return [...netWorthMonthsWithData].sort((a, b) => b.netWorth - a.netWorth)[0];
+  }, [netWorthMonthsWithData]);
+  const worstMonth = useMemo(() => {
+    if (netWorthMonthsWithData.length === 0) return null;
+    return [...netWorthMonthsWithData].sort((a, b) => a.netWorth - b.netWorth)[0];
+  }, [netWorthMonthsWithData]);
+  const hasAnyNetWorthSnapshots = netWorthByMonth.some((row) => row.hasData);
+  const hasAnyLiabilitySnapshots = netWorthByMonth.some(
+    (row) => row.hasData && Number(row.totalLiabilities) > 0,
   );
 
   const hasInsightData = data.transactions.length > 0 || data.budgets.length > 0;
@@ -342,6 +399,134 @@ export default function Insights({
           </div>
         </Card>
       </section>
+
+      <section className="grid gap-6">
+        <Card>
+          <SectionHeader
+            title="Net Worth Trends"
+            description="Historical net worth from manual account and debt snapshots."
+          />
+          <div className="grid gap-5 p-5">
+            <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px] md:items-end">
+              <div>
+                <p className="text-sm text-text-muted">
+                  Net worth trends use manual account and debt snapshots.
+                </p>
+                <p className="mt-1 text-sm text-text-muted">
+                  Savings goals are not counted unless represented by account balance snapshots.
+                </p>
+                <p className="mt-1 text-sm text-text-muted">
+                  Credit card balances are not included unless entered as liability snapshots.
+                </p>
+                <p className="mt-1 text-sm text-text-muted">Missing months are shown as no data.</p>
+              </div>
+              <Select
+                label="Trend range"
+                value={netWorthRangeMonths}
+                onChange={(event) => setNetWorthRangeMonths(event.target.value)}
+              >
+                <option value="6">Last 6 months</option>
+                <option value="12">Last 12 months</option>
+              </Select>
+            </div>
+
+            {!hasAnyNetWorthSnapshots ? (
+              <EmptyState description="Net worth trends will appear after you add account and debt snapshots." />
+            ) : (
+              <>
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                  <SimpleMetricCard
+                    label="Current Net Worth"
+                    value={currentNetWorth}
+                    emptyLabel="No data"
+                  />
+                  <SimpleMetricCard
+                    label="Starting Net Worth"
+                    value={startingNetWorth}
+                    emptyLabel="No data"
+                  />
+                  <SimpleMetricCard
+                    label="Net Worth Change"
+                    value={netWorthChange}
+                    emptyLabel="Need 2+ months"
+                    helperText={
+                      netWorthTrendStatus === "up"
+                        ? "Improved over range"
+                        : netWorthTrendStatus === "down"
+                          ? "Declined over range"
+                          : netWorthTrendStatus === "flat"
+                            ? "No change over range"
+                            : "Add more monthly snapshots"
+                    }
+                  />
+                  <Card className="p-4">
+                    <p className="text-xs font-semibold uppercase tracking-normal text-text-muted">
+                      Best / Worst Month
+                    </p>
+                    <p className="mt-2 text-sm font-semibold text-text-main">
+                      {bestMonth
+                        ? `${formatMonthLabel(bestMonth.monthKey)} (${formatCurrency(bestMonth.netWorth)})`
+                        : "No data"}
+                    </p>
+                    <p className="mt-1 text-xs text-text-muted">
+                      {worstMonth
+                        ? `${formatMonthLabel(worstMonth.monthKey)} (${formatCurrency(worstMonth.netWorth)})`
+                        : "No data"}
+                    </p>
+                  </Card>
+                </div>
+
+                {netWorthMonthsWithData.length === 1 ? (
+                  <p className="text-sm text-text-muted">
+                    Add snapshots for more months to see a trend.
+                  </p>
+                ) : null}
+                {!hasAnyLiabilitySnapshots ? (
+                  <p className="text-sm text-text-muted">
+                    Liability snapshots are missing, so net worth may be incomplete without debt
+                    data.
+                  </p>
+                ) : null}
+
+                <div className="grid gap-6 xl:grid-cols-3">
+                  <div className="xl:col-span-2">
+                    <h4 className="mb-2 text-sm font-semibold text-text-main">
+                      Net Worth by Month
+                    </h4>
+                    <HorizontalBarChart
+                      title="Net Worth by Month"
+                      description="Monthly net worth trend from manual snapshots"
+                      items={netWorthTrendRows}
+                      valueLabel="Net worth"
+                      emptyMessage="No net worth trend data yet."
+                      maxItems={12}
+                    />
+                  </div>
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold text-text-main">Trend Breakdown</h4>
+                    <div className="grid gap-3">
+                      <TrendBreakdownRow
+                        label="Assets"
+                        current={assetTrend.current}
+                        start={assetTrend.start}
+                        change={assetTrend.change}
+                        status={assetTrend.status}
+                      />
+                      <TrendBreakdownRow
+                        label="Liabilities"
+                        current={liabilityTrend.current}
+                        start={liabilityTrend.start}
+                        change={liabilityTrend.change}
+                        status={liabilityTrend.status}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </Card>
+      </section>
     </section>
   );
 }
@@ -573,4 +758,45 @@ function SectionHeader({ title, description }) {
 
 function EmptyPanel({ message }) {
   return <EmptyState className="p-8" description={message} />;
+}
+
+function SimpleMetricCard({ label, value, emptyLabel = "No data", helperText = "" }) {
+  const hasValue = Number.isFinite(Number(value));
+  return (
+    <Card className="p-4">
+      <p className="text-xs font-semibold uppercase tracking-normal text-text-muted">{label}</p>
+      <p className="mt-2 text-lg font-semibold text-text-main">
+        {hasValue ? formatCurrency(Number(value)) : emptyLabel}
+      </p>
+      {helperText ? <p className="mt-1 text-xs text-text-muted">{helperText}</p> : null}
+    </Card>
+  );
+}
+
+function TrendBreakdownRow({ label, current, start, change, status }) {
+  const hasData = Number.isFinite(Number(current)) && Number.isFinite(Number(start));
+  return (
+    <Card className="p-4">
+      <p className="text-xs font-semibold uppercase tracking-normal text-text-muted">{label}</p>
+      <p className="mt-1 text-sm text-text-muted">
+        Current: {hasData ? formatCurrency(Number(current)) : "No data"}
+      </p>
+      <p className="mt-1 text-sm text-text-muted">
+        Start: {hasData ? formatCurrency(Number(start)) : "No data"}
+      </p>
+      <p className="mt-1 text-sm font-semibold text-text-main">
+        Change:{" "}
+        {Number.isFinite(Number(change)) ? formatCurrency(Number(change)) : "Need 2+ months"}
+      </p>
+      <p className="mt-1 text-xs text-text-muted">
+        {status === "up"
+          ? "Trend up"
+          : status === "down"
+            ? "Trend down"
+            : status === "flat"
+              ? "No change"
+              : "Insufficient data"}
+      </p>
+    </Card>
+  );
 }

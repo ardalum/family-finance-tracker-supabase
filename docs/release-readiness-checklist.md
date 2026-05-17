@@ -123,6 +123,15 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Negative net-worth status copy is understandable.
 - [ ] Net worth does not change Spending, Budget, Income, Savings, or cash-flow leftover totals.
 
+## 7g) Net Worth Trends Verification
+
+- [ ] Insights Net Worth Trends section renders.
+- [ ] Last 6 / last 12 month range control works.
+- [ ] Missing-data and one-month guidance states are clear.
+- [ ] Missing months are shown as no data.
+- [ ] Asset/liability trend rows reflect snapshot data only.
+- [ ] Net worth trends do not change Spending, Budget, Income, Savings, or cash-flow leftover totals.
+
 ## 8) Backup and Export Verification
 
 - [ ] Supabase JSON export works.
@@ -168,6 +177,7 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - Dashboard cash-flow MVP estimated leftover intentionally excludes unpaid card balance carry until card-payment cash modeling is explicitly added.
 - Liability/debt snapshots are now manual-entry MVP only; releases should not claim complete debt automation or full net-worth reporting coverage.
 - Net worth summary MVP is implemented from manual snapshots, but trend reporting and broader asset coverage are still out of scope.
+- Net worth trends now exist in Insights using snapshot data, but broader asset coverage and richer analytics remain future scope.
 - Net worth values are computed from existing snapshot data and are not separately stored/exported as a standalone dataset.
 
 ## What Not To Test On Real Data

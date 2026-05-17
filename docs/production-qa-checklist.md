@@ -155,6 +155,17 @@ Use this checklist before each production release.
 - [ ] Net worth view does not change Budget totals.
 - [ ] Net worth view does not change Dashboard cash-flow estimated leftover.
 
+## Net Worth Trends (Insights)
+
+- [ ] Insights Net Worth Trends section appears.
+- [ ] Trend range switch works for last 6 and last 12 months.
+- [ ] Empty state appears when no account/debt snapshots exist.
+- [ ] One-month state appears with guidance to add more months.
+- [ ] Missing months are shown as no data.
+- [ ] Assets-only and liabilities-only scenarios render clearly.
+- [ ] Net worth trend values use snapshot data only.
+- [ ] Net worth trends do not change Spending, Income, Savings, Budget, or cash-flow totals.
+
 ## Backup / Restore
 
 - [ ] Export backup works.
