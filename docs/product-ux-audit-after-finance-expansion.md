@@ -250,3 +250,12 @@ Future recommendation:
   - easier-to-scan "Needs update" advisories
   - full-width mobile action buttons for clearer tap flow
 - Main nav and financial calculations remain unchanged.
+
+## Phase 45 Note
+
+- Financial Position navigation promotion decision is now documented in
+  `docs/financial-position-navigation-decision.md`.
+- Current UX recommendation:
+  - keep Financial Position as a secondary view for now
+  - keep Dashboard quick action as primary entry path
+  - defer main-nav promotion until usage/testing supports it

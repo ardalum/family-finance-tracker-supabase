@@ -49,6 +49,14 @@ Scope: Design-only plan for a future Financial Position hub (no implementation i
   - clean mobile stacking for detailed section cards
 - Desktop layout intent remains unchanged except minor responsive class tuning.
 
+## Phase 45 Status Update
+
+- Navigation promotion decision is now documented in `docs/financial-position-navigation-decision.md`.
+- Current recommendation remains:
+  - keep Financial Position secondary for now
+  - keep Dashboard quick action as primary entry
+  - revisit main-nav promotion after usage/testing evidence
+
 ## 1. Problem Statement
 
 WalletFlow now includes Income, Savings, Accounts, Liabilities, and Net Worth as separate secondary tools. Each tool works on its own, but the overall household financial-position workflow is scattered across multiple entry points.
