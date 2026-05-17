@@ -244,4 +244,44 @@ describe("dashboard data", () => {
     assert.equal(data.cardRows[0].paymentDueDate, "1999-01-01");
     assert.equal(data.cardRows[0].daysUntilDue < 0, true);
   });
+
+  it("excludes inactive cards from dashboard credit and statement summaries", () => {
+    const data = getDashboardData(
+      {
+        creditCards: [
+          {
+            id: "active",
+            name: "Active",
+            owner: "Owner",
+            dueDay: 10,
+            creditLimit: 2000,
+            isActive: true,
+          },
+          {
+            id: "inactive",
+            name: "Inactive",
+            owner: "Owner",
+            dueDay: 10,
+            creditLimit: 9999,
+            isActive: false,
+          },
+        ],
+        budgetsByMonth: {},
+        transactions: [],
+        recurringTransactions: [],
+        monthlyBalances: {
+          "2099-05": {
+            active: { balance: 100, paid: false },
+            inactive: { balance: 5000, paid: false },
+          },
+        },
+        recurringPayments: [],
+        recurringStatusByMonth: {},
+      },
+      "2099-05",
+    );
+
+    assert.equal(data.summary.totalCreditLimit, 2000);
+    assert.equal(data.summary.statementBalanceTotal, 100);
+  });
 });
