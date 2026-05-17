@@ -7,6 +7,7 @@ import {
   CreditCard,
   ReceiptText,
   Repeat,
+  HandCoins,
   WalletCards,
 } from "lucide-react";
 import Card from "../../../components/ui/Card.jsx";
@@ -67,6 +68,13 @@ const quickActions = [
     view: "recurring",
     target: "this-month",
     icon: Repeat,
+  },
+  {
+    label: "Manage income",
+    description: "Open manual income tracking.",
+    view: "income",
+    target: "monthly-income",
+    icon: HandCoins,
   },
   {
     label: "Review budget",

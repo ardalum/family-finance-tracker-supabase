@@ -10,6 +10,7 @@ const expectedSelectedMonthKeys = [
   "dashboard",
   "insights",
   "recurring",
+  "income",
 ];
 
 describe("selected month utilities", () => {
@@ -25,6 +26,7 @@ describe("selected month utilities", () => {
       dashboard: "2026-05",
       insights: "2026-05",
       recurring: "2026-05",
+      income: "2026-05",
     });
   });
 

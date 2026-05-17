@@ -43,6 +43,7 @@ Last updated: 2026-05-17 (Phase 16 real-data readiness review)
 ## Product Gap Notes (Not Bugs)
 
 - Missing income/savings/cash-flow tracking is a **product capability gap**, not a defect in existing calculations.
-- Planned handling: Phase 17 design complete in `docs/income-savings-cash-flow-design.md`, with implementation phases tracked separately (Phase 18+).
+- Planned handling: Phase 17 design complete in `docs/income-savings-cash-flow-design.md`; Phase 23 now partially addresses this with manual income tracking MVP.
+- Remaining gap scope: savings tracking, monthly cash-flow summaries, and emergency-fund progress.
 - Visual analytics/historical reporting gap is partially addressed by Insights chart MVP and YTD Review MVP; previous-year comparison and broader historical workflows remain open product scope.
 - Year-over-year comparison MVP is now partially addressed in Insights; richer long-range historical drill-down and forecast-guided reporting remain open product scope.

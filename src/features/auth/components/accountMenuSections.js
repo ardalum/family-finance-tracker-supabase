@@ -1,5 +1,6 @@
 import {
   ClipboardList,
+  HandCoins,
   DatabaseBackup,
   Home,
   Info,
@@ -42,6 +43,12 @@ export const accountMenuSections = [
   {
     title: "Tools",
     items: [
+      {
+        icon: HandCoins,
+        label: "Income",
+        description: "Manual income sources and monthly income entries.",
+        view: "income",
+      },
       {
         icon: DatabaseBackup,
         label: "Backup & Restore",

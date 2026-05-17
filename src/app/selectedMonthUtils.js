@@ -7,6 +7,7 @@ export const SELECTED_MONTH_KEYS = [
   "dashboard",
   "insights",
   "recurring",
+  "income",
 ];
 
 export function createInitialSelectedMonths(monthKey = getCurrentMonthKey()) {

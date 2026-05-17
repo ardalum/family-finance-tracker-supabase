@@ -50,6 +50,8 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
       transactionSplitsResult,
       recurringPaymentsResult,
       recurringInstancesResult,
+      incomeSourcesResult,
+      incomeEntriesResult,
     ] = await Promise.all([
       client
         .from("households")
@@ -103,6 +105,17 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
         .select("*")
         .eq("household_id", householdId)
         .order("month_key", { ascending: true }),
+      client
+        .from("income_sources")
+        .select("*")
+        .eq("household_id", householdId)
+        .order("created_at", { ascending: true }),
+      client
+        .from("income_entries")
+        .select("*")
+        .eq("household_id", householdId)
+        .order("entry_date", { ascending: true })
+        .order("created_at", { ascending: true }),
     ]);
 
     const error = [
@@ -116,6 +129,8 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
       transactionSplitsResult,
       recurringPaymentsResult,
       recurringInstancesResult,
+      incomeSourcesResult,
+      incomeEntriesResult,
     ].find((result) => result?.error)?.error;
 
     if (error) throw error;
@@ -134,6 +149,8 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
       transactionSplits: transactionSplitsResult?.data ?? [],
       recurringPayments: recurringPaymentsResult?.data ?? [],
       recurringPaymentInstances: recurringInstancesResult?.data ?? [],
+      incomeSources: incomeSourcesResult?.data ?? [],
+      incomeEntries: incomeEntriesResult?.data ?? [],
     };
 
     downloadJson(backup, `finance-tracker-supabase-backup-${getDateStamp()}.json`);
@@ -319,6 +336,40 @@ export async function exportSupabaseExcel(householdId, activeHousehold) {
       })),
     );
 
+    appendSheet(
+      workbook,
+      "Income Sources",
+      data.incomeSources.map((source) => ({
+        Name: source.name,
+        "Source Type": source.source_type,
+        Owner: source.household_profiles?.display_name ?? "",
+        "Expected Amount": Number(source.expected_amount || 0),
+        Frequency: source.frequency,
+        Active: source.is_active ? "Yes" : "No",
+        Notes: source.notes ?? "",
+        "Created At": formatDateTime(source.created_at),
+        "Updated At": formatDateTime(source.updated_at),
+        ID: source.id,
+      })),
+    );
+
+    appendSheet(
+      workbook,
+      "Income Entries",
+      data.incomeEntries.map((entry) => ({
+        Date: entry.entry_date,
+        Month: entry.month_key,
+        Amount: Number(entry.amount || 0),
+        "Entry Type": entry.entry_type,
+        Source: entry.income_sources?.name ?? "",
+        Owner: entry.household_profiles?.display_name ?? "",
+        Notes: entry.notes ?? "",
+        "Created At": formatDateTime(entry.created_at),
+        "Updated At": formatDateTime(entry.updated_at),
+        ID: entry.id,
+      })),
+    );
+
     const buffer = await workbook.xlsx.writeBuffer();
     downloadBlob(
       buffer,
@@ -394,6 +445,8 @@ async function loadHouseholdExportData(householdId, activeHousehold) {
     transactionSplitsResult,
     recurringPaymentsResult,
     recurringInstancesResult,
+    incomeSourcesResult,
+    incomeEntriesResult,
   ] = await Promise.all([
     client
       .from("households")
@@ -447,6 +500,17 @@ async function loadHouseholdExportData(householdId, activeHousehold) {
       .select("*, recurring_payments (name)")
       .eq("household_id", householdId)
       .order("month_key", { ascending: true }),
+    client
+      .from("income_sources")
+      .select("*, household_profiles (display_name)")
+      .eq("household_id", householdId)
+      .order("created_at", { ascending: true }),
+    client
+      .from("income_entries")
+      .select("*, income_sources (name), household_profiles (display_name)")
+      .eq("household_id", householdId)
+      .order("entry_date", { ascending: true })
+      .order("created_at", { ascending: true }),
   ]);
 
   const error = [
@@ -460,6 +524,8 @@ async function loadHouseholdExportData(householdId, activeHousehold) {
     transactionSplitsResult,
     recurringPaymentsResult,
     recurringInstancesResult,
+    incomeSourcesResult,
+    incomeEntriesResult,
   ].find((result) => result?.error)?.error;
 
   if (error) throw error;
@@ -475,6 +541,8 @@ async function loadHouseholdExportData(householdId, activeHousehold) {
     transactionSplits: transactionSplitsResult?.data ?? [],
     recurringPayments: recurringPaymentsResult?.data ?? [],
     recurringPaymentInstances: recurringInstancesResult?.data ?? [],
+    incomeSources: incomeSourcesResult?.data ?? [],
+    incomeEntries: incomeEntriesResult?.data ?? [],
   };
 }
 

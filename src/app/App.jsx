@@ -29,6 +29,7 @@ import { useMonthlyBalances } from "../features/creditCards/useMonthlyBalances.j
 import { useHouseholds } from "../features/households/HouseholdProvider.jsx";
 import { useHouseholdProfiles } from "../features/households/useHouseholdProfiles.js";
 import { useInsightsData } from "../features/insights/useInsightsData.js";
+import { useIncomeData } from "../features/income/useIncomeData.js";
 import { useRecurringCategories } from "../features/recurring/useRecurringCategories.js";
 import { useRecurringPayments } from "../features/recurring/useRecurringPayments.js";
 import { householdHasFinanceData } from "../features/setup/setupService.js";
@@ -54,6 +55,7 @@ function FinanceTrackerApp() {
   const [spendingCategoriesForTransactions, setSpendingCategoriesForTransactions] = useState([]);
   const [recurringCategoriesForPayments, setRecurringCategoriesForPayments] = useState([]);
   const { activeView, currentPage, setActiveView } = useActiveView();
+  const [selectedIncomeMonth, setSelectedIncomeMonth] = useState(initialSelectedMonths.income);
   useEffect(() => {
     let isCurrent = true;
 
@@ -237,6 +239,23 @@ function FinanceTrackerApp() {
   }, [recurringCategories]);
 
   const {
+    incomeSources,
+    incomeEntries,
+    incomeLoading,
+    incomeSaving,
+    incomeError,
+    loadIncomeData,
+    createSupabaseIncomeSource,
+    updateSupabaseIncomeSource,
+    deleteSupabaseIncomeSource,
+    createSupabaseIncomeEntry,
+    updateSupabaseIncomeEntry,
+    deleteSupabaseIncomeEntry,
+  } = useIncomeData({
+    activeHouseholdId,
+  });
+
+  const {
     householdProfiles,
     householdProfilesLoading,
     householdProfilesSaving,
@@ -286,6 +305,7 @@ function FinanceTrackerApp() {
         loadInsightsData,
         loadRecurringCategories,
         loadRecurringData,
+        loadIncomeData,
       }),
     );
   }, [
@@ -293,6 +313,7 @@ function FinanceTrackerApp() {
     loadInsightsData,
     loadRecurringCategories,
     loadRecurringData,
+    loadIncomeData,
     loadSpendingCategories,
     loadSpendingTransactions,
     loadSupabaseBudgets,
@@ -407,14 +428,21 @@ function FinanceTrackerApp() {
     monthlyCloseReviewSaving,
     monthlyCloseReviewError,
     selectedInsightsMonth,
+    selectedIncomeMonth,
     insightsLoading,
     insightsError,
+    incomeSources,
+    incomeEntries,
+    incomeLoading,
+    incomeError,
+    incomeSaving,
     setSelectedDashboardMonth,
     setSelectedBalanceMonth,
     setSelectedBudgetMonth,
     setSelectedSpendingMonth,
     setSelectedRecurringMonth,
     setSelectedInsightsMonth,
+    setSelectedIncomeMonth,
     toggleMonthlyCloseManualCheck,
     markMonthlyCloseReviewed,
     reopenMonthlyCloseReview,
@@ -445,6 +473,12 @@ function FinanceTrackerApp() {
     saveHouseholdProfile,
     deactivateProfile,
     addDefaultProfiles,
+    createSupabaseIncomeSource,
+    updateSupabaseIncomeSource,
+    deleteSupabaseIncomeSource,
+    createSupabaseIncomeEntry,
+    updateSupabaseIncomeEntry,
+    deleteSupabaseIncomeEntry,
   });
   if (setupCheckLoading) {
     return <AppSetupLoadingScreen />;
