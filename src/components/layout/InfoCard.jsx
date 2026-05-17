@@ -21,7 +21,11 @@ export default function InfoCard({
     <Card className="p-5">
       {Icon ? (
         <div className="flex gap-3">
-          <Icon size={20} className={`mt-0.5 shrink-0 ${iconClassName}`} aria-hidden="true" />
+          <Icon
+            size={20}
+            className={`mt-0.5 shrink-0 ${iconClassName}`}
+            aria-hidden="true"
+          />
           <div>{content}</div>
         </div>
       ) : (
