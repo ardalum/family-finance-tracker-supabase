@@ -8,6 +8,16 @@ export const releaseNotesHero = {
 
 export const releaseNotes = [
   {
+    version: "Monthly close and product hardening",
+    date: "May 2026",
+    items: [
+      "Added the Monthly Close Checklist MVP on Dashboard to guide month-end review using existing app data.",
+      "Added persisted monthly close review state by household/month, including manual checks and reviewed/in-progress status.",
+      "Completed product-completeness fixes for Account Settings and App Settings so working controls and destinations are explicit.",
+      "Applied smoke-test follow-up fixes, including clearer backup wording and production QA/backlog documentation updates.",
+    ],
+  },
+  {
     version: appMetadata.releaseLabel,
     date: appMetadata.releaseDate,
     items: [
