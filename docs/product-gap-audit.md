@@ -1,197 +1,56 @@
 # Product Gap Audit
 
+Last updated: 2026-05-17 (Phase 48 release readiness and production QA pass)
+
 ## Scope
 
-This audit reviews WalletFlow as of Phase 7 across these workflows:
+This audit tracks capability gaps after implementation of:
 
-- First-time setup
-- Account menu, Account Settings, App Settings
-- Household Settings
-- Dashboard
-- Cards (overview, monthly balances, statement details, card list)
-- Budget
-- Spending (including split transactions)
-- Recurring bills
-- Insights
-- Backup/Restore
-- Reset household finance data
-- Delete account
+- Dashboard, Cards, Budget, Spending, Bills, Insights
+- Monthly Close checklist
+- Income, Savings, Accounts, Liabilities, Net Worth
+- Financial Position hub
+- Backup/export with restore/import validation hardening
 
-## Current App Strengths
+## Implemented Capability Status
 
-- Financial accuracy foundation is strong after Phase 1: statement due-date logic and paid/unpaid handling are centralized and tested.
-- Core monthly workflows exist end-to-end: cards, transactions, budgets, recurring, and dashboard rollups.
-- Insights now includes lightweight visual reporting foundations and initial YTD review sections using existing data.
-- Insights now includes an initial year-over-year comparison layer for same-month and same-period YTD checks.
-- Mobile usability improved in critical areas (especially Monthly Balances and section navigation patterns).
-- Primary navigation is focused and clear: Dashboard, Cards, Budget, Spending, Bills, Insights.
-- Destructive actions are now clearer and server-side protected via Edge Functions.
-- Backup posture is practical for production use: Supabase JSON export/import, Excel export, and validation checks.
-- Test coverage is broad across data shaping, sections/navigation consistency, and critical utility logic.
+Implemented (current release scope):
 
-## Current App Weaknesses
+- main-nav financial workflows: Dashboard, Cards, Budget, Spending, Bills, Insights
+- monthly close review and reopen workflow
+- income and savings manual tracking
+- cash accounts and debt/liability snapshot tracking
+- net worth summary + trend reporting from manual snapshots
+- financial position consolidated hub (secondary view)
+- backup/export full-finance coverage and restore validation hardening
 
-- Monthly workflow is distributed across multiple features with no single "close the month" flow.
-- Users must remember manual sequencing (cards -> statement details -> recurring -> spending -> budget -> insights -> backup).
-- There is no explicit monthly completion marker/status.
-- Insight-to-action handoff is weak: Insights are read-only with no guided next steps.
-- Some settings remain intentionally deferred (honest now, but still a product gap).
-- Backup import is merge-focused and safe, but lacks guided post-import verification checklist in-product.
-- Reporting and cash-flow feature expansion currently lacks finalized page-level IA guardrails; without structure, Dashboard/Insights can become cluttered or overlapping.
+## Remaining Product Gaps (Not Bugs)
 
-## Remaining Dead-End UI
+- no bank sync/aggregation and no automatic account import
+- no full overwrite restore mode (merge-safe add/skip only)
+- no advanced conflict-resolution UX for restore/import
+- no broader non-cash asset coverage (investments, retirement, property)
+- no predictive forecasting workflow for upcoming monthly cash pressure
+- limited guided recommendations in Insights (mostly descriptive analytics)
 
-- No hard dead-end page was identified in current grouped views.
-- Account Settings now resolves correctly and provides actionable sign-out controls.
-- Secondary pages (privacy/terms/help/release notes/about) all resolve and render.
+## Release Blockers vs Product Gaps
 
-## Remaining Misleading Wording Risks
+Release blockers (current):
 
-- "Legacy localStorage Backup" section is clearly labeled, but users can still confuse it with Supabase backups if they skim.
-- "Review Insights" is conceptually clear, but there is no explicit UX prompt that insights do not mark a month complete.
-- App Settings is now honest; no fake working controls remain.
+- none identified from automated verification in this phase
 
-## Missing Features For A Complete Household Finance Tracker
+Product gaps (deferred roadmap):
 
-- Monthly close workflow with progress tracking and a final review state.
-- Period lock/reopen workflow (soft lock) to reduce accidental back-edits after month review.
-- Household activity/audit timeline surfaced in UI for who changed what and when.
-- Planned-vs-actual bill forecasting view for upcoming month cash pressure.
-- Better uncategorized/categorization triage queue (if uncategorized traffic grows).
-- Cross-month carryover helpers for budgets and recurring exceptions.
-- Visual analytics and historical reporting (YTD summaries, previous-year comparisons, and trend views for spending/budgets/bills).
-- Reporting IA/UX architecture enforcement so Dashboard, Insights, and future Cash Flow remain focused as scope grows.
+- broader automation and deeper planning/reporting layers listed above
 
-## Must-Have vs Nice-To-Have
+## Future Enhancements (Deferred)
 
-### Must-Have (Next)
+- richer historical drill-down and forecasting across Dashboard/Insights
+- stronger post-import in-app guided verification checklist
+- optional IA evolution if Financial Position eventually moves to grouped main-nav model
 
-- Monthly Close Checklist with auto-detected completion signals and manual confirmations.
-- Month reviewed state with clear reopen path.
-- Checklist-aware reminders on Dashboard (for incomplete month close items).
-- Income, savings, and monthly cash-flow tracking (manual-entry MVP) so households can track inflows, transfers to savings, and surplus/deficit status.
-- YTD performance reporting, previous-year comparison, and visual Insights analytics so households can evaluate progress over time.
+## Notes
 
-### Nice-To-Have (Later)
-
-- Forecasting and payment calendar visualization.
-- Household activity feed and change history UX.
-- Advanced insights drill-down and guided recommendations.
-- Soft lock with role-based override controls.
-
-## Recommended Next Feature Priority
-
-**Monthly Close Checklist** should be the next feature.
-
-## Why This Should Come Next
-
-- It stitches together existing strong modules into one reliable month-end workflow.
-- It reduces user error from missed steps without changing financial formulas.
-- It provides a high-value product layer with relatively low backend risk (can start with existing data and light metadata).
-- It improves perceived product completeness more than any isolated page enhancement.
-
-## Risks If This Feature Is Skipped
-
-- Users will continue to miss one or more month-end actions, reducing trust in totals despite correct calculations.
-- Support/QA burden rises because issues become workflow gaps, not math bugs.
-- Insights remain underutilized without an explicit close process.
-- Product may feel "many tools, no workflow" for households doing disciplined monthly reviews.
-
-## Suggested Next Step
-
-- Implement Phase 9 as a **lightweight Monthly Close Checklist MVP** using existing data signals first, manual confirmations second, and no schema change in initial iteration if possible.
-
-## Phase 23 Status Update
-
-- Income tracking is now **partially addressed** via manual Income Sources + Income Entries (no bank sync/imports).
-- Savings tracking and monthly cash-flow summary cards are still open product gaps.
-
-## Phase 25 Status Update
-
-- Savings tracking is now **partially addressed** via manual Savings Goals + Savings Contributions (no bank sync/imports).
-- Savings progress tracking is available via goal progress cards, but cash-flow summaries and emergency-fund specific guidance remain open scope.
-- Income + savings import automation, net cash-flow summary cards, and forecasting remain product gaps.
-
-## Phase 27 Status Update
-
-- Dashboard cash-flow summary is now **partially addressed** with a compact monthly card for income, spending, savings contributions, recurring remaining, and estimated leftover.
-- Current cash-flow MVP intentionally excludes unpaid card balance carry from the leftover formula until card payment cash modeling is explicitly defined.
-- Remaining gaps: emergency-fund specific workflow, fuller cash-balance modeling, and forecasting.
-
-## Phase 29 Status Update
-
-- Account balance snapshots and net worth tracking are now explicitly documented as a remaining product gap in `docs/account-balances-net-worth-design.md`.
-- WalletFlow still lacks manual account/liability snapshot workflows for true household position tracking (assets vs liabilities).
-- Net worth and liquid-cash trends remain open scope pending snapshot data model + MVP implementation.
-
-## Phase 30 Status Update
-
-- Cash account snapshots are now **partially addressed** with manual cash accounts, monthly/date snapshots, and an Accounts workspace entry point.
-- Remaining product gaps for this pillar:
-  - liability/debt snapshots
-  - full net worth summary
-  - net worth/liquid-cash trend reporting
-
-## Phase 32 Status Update
-
-- Liability/debt snapshots are now documented as the next remaining implementation gap in `docs/liability-debt-snapshots-design.md`.
-- Product remains intentionally incomplete for household position tracking until liability snapshots and net-worth summary layers are implemented.
-
-## Phase 33 Status Update
-
-- Liability/debt snapshots are now **partially addressed** with manual liability accounts and monthly debt balance snapshots.
-- Remaining product gaps for household position:
-  - net worth summary layer
-  - net worth and debt trend reporting
-  - broader asset/liability scope beyond current manual cash/debt snapshots
-
-## Phase 35 Status Update
-
-- Net worth summary is now **partially addressed** with a manual snapshot-based MVP (`assets - liabilities`) using existing cash account and liability snapshots.
-- Remaining product gaps for this pillar:
-  - net worth trends and historical reporting
-  - broader asset coverage (home/retirement/investments)
-  - deeper debt analytics and automation
-
-## Phase 39 Status Update
-
-- A full post-expansion UX audit is now documented in `docs/product-ux-audit-after-finance-expansion.md`.
-- Primary risk has shifted from missing core modules to UX architecture pressure as scope expands.
-- Current risk focus:
-  - secondary-tool discoverability for Income/Savings/Accounts/Liabilities/Net Worth
-  - Dashboard quick-action density and long-scroll fatigue
-  - Insights section length and reporting scanability
-  - terminology drift across Cards/Bills/Accounts/Liabilities/Net Worth labels
-
-## Phase 40 Status Update
-
-- Financial Position hub design is now documented in `docs/financial-position-hub-design.md`.
-- This is a UX/product architecture improvement, not a bug fix and not a calculation/schema change.
-- Goal: unify Income/Savings/Accounts/Liabilities/Net Worth discoverability and month-level position review while preserving Dashboard and Insights roles.
-
-## Phase 41 Status Update
-
-- Financial Position hub MVP is now **partially addressed** as an implemented secondary page that summarizes existing income/savings/accounts/liabilities/net-worth position data.
-- Remaining gap scope:
-  - hardening and mobile polish
-  - workflow tuning between Dashboard, Monthly Close, and hub usage
-  - longer-term decision on whether hub promotion to main nav is warranted
-
-## Phase 46 Status Update
-
-- Backup/export full-finance coverage is now audited in `docs/backup-export-finance-coverage-audit.md`.
-- Supabase JSON export, merge-import restore coverage, and Excel export now include persisted finance sections for:
-  - monthly close reviews
-  - income/savings
-  - cash accounts/snapshots
-  - liability accounts/snapshots
-- Computed views (Dashboard cash-flow summary, Net Worth summary/trends, Financial Position summary, Insights computed outputs) remain intentionally excluded as standalone persisted backup sections.
-
-## Phase 47 Status Update
-
-- Restore/import validation safety is now hardened:
-  - invalid JSON rejection with helpful copy
-  - empty persisted-record backup rejection
-  - warnings for unknown/future sections (ignored safely)
-  - warnings for computed-only sections (ignored as persisted restore inputs)
-- Merge-import remains intentionally non-destructive (add/skip model), with overwrite-style restore still out of scope.
+- Keep product gaps separate from defects in `docs/bug-backlog.md`.
+- For current release, Financial Position remains secondary by design (see `docs/financial-position-navigation-decision.md`).
+- Computed summaries remain intentionally derived from persisted records and are not backed up/restored as standalone persisted datasets.

@@ -1,0 +1,127 @@
+# Release Readiness Production QA Pass (Phase 48)
+
+Date: 2026-05-17  
+Project: WalletFlow / Family Finance Tracker  
+Scope: Final release-readiness review after backup/export coverage and restore/import validation hardening.
+
+## 1) Release scope
+
+This pass covers WalletFlow production readiness for current implemented scope:
+
+- main-nav workflows (Dashboard, Cards, Budget, Spending, Bills, Insights)
+- secondary finance workflows (Income, Savings, Accounts, Liabilities, Net Worth, Financial Position)
+- monthly close operations
+- backup/export and restore validation behavior
+- account/settings/support/legal pages
+- release checklist and QA checklist consistency
+
+## 2) Features included
+
+Included in this release candidate:
+
+- Dashboard action center with compact quick actions
+- credit card tracking and monthly balances
+- statement/payment details
+- budget setup and month copy flows
+- transaction tracking and split transactions
+- recurring bill tracking
+- monthly close checklist (review + reopen)
+- insights charts, YTD, and year-over-year comparison
+- manual income tracking
+- manual savings tracking
+- manual cash account + balance snapshots
+- manual liabilities/debt + snapshots
+- net worth summary and trends based on snapshots
+- financial position hub (secondary view)
+- backup/export (Supabase JSON + Excel)
+- restore/import validation hardening (merge-safe behavior)
+
+## 3) Features intentionally excluded
+
+Not in scope for this release:
+
+- bank sync/import automation
+- destructive overwrite restore mode
+- automatic debt reconciliation with card statements
+- broader non-cash asset classes (home/investments/retirement)
+- advanced forecasting/planning workflows
+- main-nav promotion of Financial Position
+
+## 4) Critical workflows tested
+
+Validated via automated checks (`npm run verify`) and focused static QA audit:
+
+- navigation integrity for primary/secondary views
+- Dashboard quick action compact set + Financial Position target
+- account menu target integrity and ordering
+- page-content coverage for all grouped views
+- backup/export expected section coverage and uniqueness
+- restore validation behavior for invalid/empty/unknown/computed sections
+- Financial Position detailed links and dashboard entry path
+
+## 5) Known limitations
+
+- production smoke evidence and screenshots still require manual execution on deployed environment
+- restore is merge-style (add/skip) by design; full overwrite restore is intentionally out of scope
+- real-device mobile matrix checks still require manual pass each release
+- computed summaries are derived and intentionally not restored/exported as standalone datasets
+
+## 6) Known product gaps
+
+Product gaps (not release defects):
+
+- deeper forecasting/planning flows
+- richer long-horizon reporting/drill-down workflows
+- advanced import/conflict tooling for income/savings
+- broader household asset coverage beyond current manual snapshot scope
+
+## 7) Required manual browser checks
+
+- Dashboard opens and quick actions work
+- Cards/Budget/Spending/Bills workflows run create-update-delete paths
+- Insights opens and all major sections render
+- Income/Savings/Accounts/Liabilities/Net Worth/Financial Position open and route correctly
+- Monthly Close review and reopen flows work
+- account menu and settings/legal/support pages open
+- main nav remains: Dashboard, Cards, Budget, Spending, Bills, Insights
+
+## 8) Required Supabase checks
+
+- latest required migrations are applied in target environment
+- RLS policies are active on finance tables
+- `delete-account` and `delete-household-finance-data` functions are deployed
+- auth redirect URLs match target environment
+
+## 9) Required backup/restore checks
+
+- Supabase JSON export generates successfully
+- Excel export generates successfully
+- restore preview accepts valid backup files
+- invalid JSON is blocked with clear validation copy
+- empty/invalid-shape backups are rejected
+- missing/unknown/computed sections surface warnings and do not crash restore
+- merge import remains household-scoped and non-destructive
+
+## 10) Required mobile checks
+
+- Dashboard, Cards, Spending, Bills, Insights render without obvious horizontal scrolling
+- Financial Position hub remains readable and tappable on small widths
+- account menu and key forms remain usable at mobile widths
+
+## 11) Go/No-Go checklist
+
+Go only if all are true:
+
+- `npm run verify` passes
+- release-readiness and production QA checklists are completed
+- no unresolved critical/high release blockers
+- manual browser + mobile + deployed smoke checks are completed and recorded
+- backup/export/restore validation checks pass in QA environment
+- no schema/calculation changes outside approved scope
+
+No-Go if any are true:
+
+- verify pipeline fails
+- navigation targets are broken
+- backup/export/restore regressions are detected
+- unresolved critical/high issues remain open

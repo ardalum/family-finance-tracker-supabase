@@ -1,72 +1,57 @@
 # Bug Backlog
 
-Last updated: 2026-05-17 (Phase 16 real-data readiness review)
+Last updated: 2026-05-17 (Phase 48 release readiness and production QA pass)
 
 ## Triage Legend
 
 - Severity: `critical`, `high`, `medium`, `low`
 - Status: `open`, `fixed`, `deferred`
 
-## Backlog Items
+## Critical
 
-| Bug title                                                                     | Affected area                          | Severity | Status   | Recommended phase | Notes                                                                                                                          |
-| ----------------------------------------------------------------------------- | -------------------------------------- | -------- | -------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| GitHub Pages production smoke pass not yet documented with screenshots        | Deployment / QA                        | medium   | deferred | Post-Phase 13 QA  | Requires live production smoke run and screenshots in deployed environment; not safely resolvable via local code-only changes. |
-| Reset household finance data needs explicit production smoke execution record | Backup & Restore / Destructive actions | medium   | deferred | Post-Phase 13 QA  | Must be executed and recorded using disposable test household data in production-style testing.                                |
-| Release notes did not reflect monthly close and hardening phases              | Release Notes / Documentation          | medium   | fixed    | Phase 14          | Added release notes for Monthly Close MVP, persisted monthly review state, product completeness fixes, and smoke-test updates. |
-| Cross-device mobile verification coverage incomplete in latest smoke record   | Mobile UX                              | low      | deferred | Post-Phase 13 QA  | Requires manual real-device pass (iOS/Android) and evidence capture.                                                           |
-| Legacy backup copy implied Supabase import was unavailable                    | Backup & Restore wording               | medium   | fixed    | Phase 13          | Updated legacy section copy to clearly state Supabase cloud import is available above and separate from legacy tools.          |
-| Monthly Close Checklist reviewed/reopen state messaging clarity               | Dashboard / Monthly Close              | low      | fixed    | Phase 11          | Improved explanatory copy, saving states, and reviewed/reopen wording.                                                         |
-| Account Settings dead-end navigation target                                   | Account menu / navigation              | high     | fixed    | Phase 7           | `account-settings` added as a real renderable secondary view.                                                                  |
-| App Settings surfaced non-functional controls                                 | App Settings                           | medium   | fixed    | Phase 7           | Limited active controls to working settings and moved others to planned info.                                                  |
-| Inconsistent Monthly Balances wording (`Checked no balance`)                  | Cards / Monthly Balances               | low      | fixed    | Phase 6A          | User-facing copy updated to `Confirmed $0 balance` while preserving logic.                                                     |
+- None open.
 
-## Prioritization Notes
+## High
 
-1. Complete manual production smoke run on GitHub Pages and attach screenshots.
-2. Validate destructive actions end-to-end only against disposable test household data.
-3. Close mobile verification gap with device/browser matrix evidence.
+- None open.
 
-## Phase 14 Review Note
+## Medium
 
-- Reviewed medium-priority backlog scope and applied safe documentation/release-note fixes only.
-- Kept production-only/manual validation items deferred because they require deployed-environment execution evidence.
+| Item                                                                          | Status   | Notes                                                                    |
+| ----------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------ |
+| GitHub Pages production smoke pass not yet documented with screenshots        | deferred | Requires manual deployed-environment execution evidence.                 |
+| Reset household finance data needs explicit production smoke execution record | deferred | Must be validated only with disposable test household data and recorded. |
 
-## Release Blockers
+## Low
 
-- No code-level `critical` or `high` release blockers remain open in the backlog.
-- Remaining deferred items are manual validation/documentation tasks:
-  - GitHub Pages production smoke evidence with screenshots (`medium`)
-  - Reset household finance data production-style execution record with test data (`medium`)
-  - Cross-device iOS/Android evidence capture (`low`)
+| Item                                                                 | Status   | Notes                                                     |
+| -------------------------------------------------------------------- | -------- | --------------------------------------------------------- |
+| Cross-device mobile verification coverage incomplete in smoke record | deferred | Requires manual iOS/Android verification matrix evidence. |
 
-## Product Gap Notes (Not Bugs)
+## Fixed (recent notable)
 
-- Missing income/savings/cash-flow tracking is a **product capability gap**, not a defect in existing calculations.
-- Planned handling: Phase 17 design complete in `docs/income-savings-cash-flow-design.md`; Phase 23 now partially addresses this with manual income tracking MVP.
-- Remaining gap scope: monthly cash-flow summaries, emergency-fund specific workflows, and deeper savings automation/import support.
-- Visual analytics/historical reporting gap is partially addressed by Insights chart MVP and YTD Review MVP; previous-year comparison and broader historical workflows remain open product scope.
-- Year-over-year comparison MVP is now partially addressed in Insights; richer long-range historical drill-down and forecast-guided reporting remain open product scope.
-- Income MVP is implemented and hardened for manual tracking; this is not a bug in existing totals.
-- Savings MVP is implemented for manual goal + contribution tracking; this is not a bug in existing totals.
-- Dashboard cash-flow summary MVP is implemented; current limitation is that estimated leftover excludes unpaid card balance in MVP until card payment cash-flow modeling is defined.
-- Account balance snapshots and net worth tracking remain a product capability gap (design documented, implementation pending), not a bug in existing totals.
-- Cash account snapshots MVP is now implemented for manual tracking and remains separate from spending/income/savings/budget totals; this is a product capability increment, not a bug fix.
-- Remaining account-position product gaps are liability/debt snapshots and full net worth workflows.
-- Liability/debt snapshots are a documented product capability gap (see `docs/liability-debt-snapshots-design.md`), not a bug in existing card/budget/spending calculations.
-- Liability tracking MVP is implemented and hardened for manual liability accounts and snapshots; this is a product capability increment, not a bug fix.
-- Remaining liability product gaps: debt trend analytics, net-worth integration, and automated/linked credit-card debt reconciliation (linked card is informational only in MVP).
-- Net worth summary MVP is now implemented from manual cash/liability snapshots; this partially addresses the net-worth product gap and is not a bug fix.
-- Remaining net-worth product gaps: trends over time, broader asset classes, and advanced household-position analytics.
-- Net worth summary hardening is complete for MVP clarity/QA; remaining limitations are expected product scope (manual snapshots, no trend visuals, no standalone net-worth export dataset).
-- Net worth trends are now partially addressed in Insights using existing manual snapshots; remaining product gaps are broader asset coverage and deeper long-range analytics, not bugs.
-- Remaining income/savings-related product gaps: dedicated import/merge conflict workflows, emergency-fund specific guidance, and deeper cash-flow modeling.
-- Post-expansion UX architecture risk is now documented in `docs/product-ux-audit-after-finance-expansion.md`; this is a product/UX backlog area (discoverability, page-length, terminology consistency), not a calculation defect.
-- Financial Position hub is a planned UX/product backlog improvement (see `docs/financial-position-hub-design.md`) to consolidate secondary finance-position tools; this is not a bug in existing workflows or totals.
-- Financial Position hub MVP is now implemented as a secondary page and partially addresses discoverability/IA pressure; remaining improvements are UX hardening and adoption tuning, not finance-calculation bugs.
-- Financial Position hub hardening is now implemented for missing-data, loading, and error messaging.
-- Dashboard quick-action consolidation is now implemented: Financial Position is the Dashboard hub entry point for income/savings/accounts/liabilities/net-worth workflows, and separate dashboard entries for those tools were removed.
-- Remaining navigation-density concern is primarily account-menu Tools sprawl, which remains a future UX/product IA tuning task (not a calculation bug).
-- Future decision on promoting Financial Position into main nav is documented in `docs/financial-position-navigation-decision.md` and remains a UX/product IA backlog item (not a bug).
-- Backup/export full-finance coverage is now audited in `docs/backup-export-finance-coverage-audit.md`; remaining risk is operational QA discipline after merge-import (manual verification), not missing persisted finance sections.
-- Restore/import validation hardening is now implemented for JSON parsing, empty backup rejection, unknown/computed-section warnings, and safer shape handling; remaining risk is that merge-import is intentionally non-destructive (no bulk overwrite mode), which is a product-scope tradeoff rather than a calculation bug.
+- Legacy backup copy implying Supabase import was unavailable (`fixed`, Phase 13)
+- Monthly Close reviewed/reopen clarity copy (`fixed`, Phase 11)
+- Account Settings dead-end navigation target (`fixed`, Phase 7)
+- App Settings non-functional controls surfaced as active (`fixed`, Phase 7)
+- Monthly balances wording consistency cleanup (`fixed`, Phase 6A)
+- Release notes/documentation lag for monthly-close hardening (`fixed`, Phase 14)
+- Backup/export full-finance section coverage omissions (`fixed`, Phase 46)
+- Restore/import validation hardening gaps for JSON shape safety (`fixed`, Phase 47)
+
+## UX/Product Backlog (Not Bugs)
+
+- Future navigation promotion decision for Financial Position remains backlog scope (see `docs/financial-position-navigation-decision.md`).
+- Account-menu Tools density may need later IA tuning as scope grows.
+- Merge-import intentionally remains non-destructive (add/skip) rather than overwrite restore.
+
+## Deferred Enhancements
+
+- Full overwrite restore mode with explicit conflict controls (future product enhancement).
+- Deeper automated reconciliation between liabilities and card statement debt (future product enhancement).
+- Broader long-horizon analytics and forecasting overlays (future product enhancement).
+
+## Release Blocker Summary
+
+- No open code-level `critical` or `high` blockers identified in this Phase 48 pass.
+- Remaining deferred items are manual QA evidence tasks and future product enhancements.

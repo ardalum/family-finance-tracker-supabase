@@ -206,3 +206,16 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - Household finance reset on live household data.
 - Backup import experiments using untrusted files.
 - Any destructive or merge-heavy workflow without a fresh private backup.
+
+## 12) Final Release QA Gate
+
+- [ ] Auth/session behavior verified (sign-in, sign-out, session persistence, and account-settings visibility).
+- [ ] Active household loading and household setup-complete behavior verified.
+- [ ] Main workflow pages verified: Dashboard, Cards, Budget, Spending, Bills, Insights.
+- [ ] Secondary workflow pages verified: Income, Savings, Accounts, Liabilities, Net Worth, Financial Position.
+- [ ] Monthly Close checklist review + reopen verified.
+- [ ] Backup/export and restore/import validation checks completed.
+- [ ] Mobile layout checked for key pages with no obvious horizontal scrolling.
+- [ ] Dark/light mode behavior checked if theme switching is enabled in environment.
+- [ ] Main nav remains exactly: Dashboard, Cards, Budget, Spending, Bills, Insights.
+- [ ] Finance totals behavior remains unchanged from expected baselines.

@@ -235,3 +235,24 @@ Use this checklist before each production release.
 - [ ] Spending opens and transaction list renders.
 - [ ] Bills opens and recurring sections render.
 - [ ] Insights opens and charts render.
+
+## Cross-Page Month Switching
+
+- [ ] Month switching works on Dashboard, Cards, Budget, Spending, Bills, Insights, Income, Savings, Accounts, Liabilities, Net Worth, and Financial Position.
+- [ ] Month switches do not crash pages when a month has little/no data.
+
+## Empty and Missing-Data States
+
+- [ ] Empty-state guidance appears on pages with no records.
+- [ ] Missing-data advisories are readable and actionable (especially Financial Position and Net Worth).
+- [ ] No dead buttons are present in empty states.
+
+## Navigation and Account Menu Integrity
+
+- [ ] Dashboard quick actions route to valid targets.
+- [ ] Account menu opens and each entry routes to a valid view.
+- [ ] Secondary views (backup/settings/legal/support) open without dead-end behavior.
+
+## Mobile Overflow Guard
+
+- [ ] No obvious horizontal scrolling on Dashboard, Cards, Spending, Bills, Insights, and Financial Position at common mobile widths.
