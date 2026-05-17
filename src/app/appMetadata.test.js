@@ -15,7 +15,13 @@ describe("app metadata", () => {
   it("keeps required app metadata fields populated", () => {
     assert.equal(appMetadata.name, "WalletFlow");
 
-    for (const field of ["version", "releaseLabel", "releaseDate", "supportEmail"]) {
+    for (const field of [
+      "creatorName",
+      "version",
+      "releaseLabel",
+      "releaseDate",
+      "supportEmail",
+    ]) {
       assert.equal(typeof appMetadata[field], "string");
       assert.notEqual(appMetadata[field].trim(), "");
     }
