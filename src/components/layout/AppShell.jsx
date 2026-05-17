@@ -1,5 +1,5 @@
-import { WalletCards } from "lucide-react";
 import { appMetadata } from "../../app/appMetadata.js";
+import AppBrandMark from "../branding/AppBrandMark.jsx";
 import AppBrandName from "../branding/AppBrandName.jsx";
 import { footerLinks } from "./footerLinks.js";
 import Navigation from "./Navigation.jsx";
@@ -18,10 +18,7 @@ export default function AppShell({
         <div className="mx-auto grid max-w-7xl gap-4 px-4 py-4 sm:px-6 lg:px-8">
           <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
             <div className="flex min-w-0 items-center gap-3.5">
-              <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-primary text-white shadow-sm">
-                <WalletCards size={21} strokeWidth={2.2} aria-hidden="true" />
-                <span className="absolute bottom-2 right-2 h-1.5 w-5 rounded-full bg-brand-accent" />
-              </div>
+              <AppBrandMark />
               <div className="min-w-0 leading-tight">
                 <h1 className="truncate text-base font-semibold tracking-normal sm:text-lg">
                   <AppBrandName />

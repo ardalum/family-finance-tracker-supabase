@@ -1,5 +1,6 @@
-import { CheckCircle2, Mail, ShieldAlert, WalletCards } from "lucide-react";
+import { CheckCircle2, Mail, ShieldAlert } from "lucide-react";
 import { appMetadata } from "../../../app/appMetadata.js";
+import AppBrandMark from "../../../components/branding/AppBrandMark.jsx";
 import AppBrandName from "../../../components/branding/AppBrandName.jsx";
 import Card from "../../../components/ui/Card.jsx";
 
@@ -16,10 +17,7 @@ export default function AboutWalletFlow() {
     <section className="grid gap-6">
       <Card className="p-6">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-          <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-brand-primary text-white shadow-sm">
-            <WalletCards size={26} strokeWidth={2.2} aria-hidden="true" />
-            <span className="absolute bottom-2 right-2 h-1.5 w-6 rounded-full bg-brand-accent" />
-          </div>
+          <AppBrandMark variant="lg" />
           <div className="max-w-3xl">
             <h2 className="text-3xl font-semibold tracking-normal text-text-main">
               <AppBrandName />
