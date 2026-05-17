@@ -1,6 +1,5 @@
 import { appMetadata } from "../../app/appMetadata.js";
-import AppBrandMark from "../branding/AppBrandMark.jsx";
-import AppBrandName from "../branding/AppBrandName.jsx";
+import { AppBrandMark, AppBrandName } from "../branding/index.js";
 import { footerLinks } from "./footerLinks.js";
 import Navigation from "./Navigation.jsx";
 
