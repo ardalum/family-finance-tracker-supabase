@@ -34,12 +34,17 @@ describe("monthly close checklist", () => {
           { balance: 0, paid: true, hasPaymentDue: false },
           { balance: 100, paid: true, hasPaymentDue: false },
         ],
+        transactions: [{ id: "tx1" }],
+        budgetRows: [{ category: "Food", remaining: 5, percentUsed: 50 }],
       }),
       "2099-05",
+      { manualChecks: { reviewInsights: true } },
     );
 
     assert.equal(getItem(checklist, "confirm-card-balances").status, "complete");
     assert.equal(getItem(checklist, "pay-or-confirm-cards").status, "complete");
+    assert.equal(getItem(checklist, "review-insights").status, "complete");
+    assert.equal(checklist.canMarkReviewed, true);
   });
 
   it("marks unpaid card as needs review", () => {
@@ -105,5 +110,46 @@ describe("monthly close checklist", () => {
     assert.equal(backupItem.countsTowardCompletion, false);
     assert.equal(checklist.totalCount, requiredItems.length);
     assert.equal(checklist.completedCount, requiredItems.filter((item) => item.isComplete).length);
+  });
+
+  it("requires manual insights confirmation even when insight data exists", () => {
+    const checklist = getMonthlyCloseChecklist(
+      createDashboardData({
+        transactions: [{ id: "tx1" }],
+      }),
+      "2099-05",
+      { manualChecks: { reviewInsights: false } },
+    );
+
+    assert.equal(getItem(checklist, "review-insights").status, "needs-review");
+    assert.equal(checklist.canMarkReviewed, false);
+  });
+
+  it("marks backup as complete when manual backup check is set", () => {
+    const checklist = getMonthlyCloseChecklist(createDashboardData(), "2099-05", {
+      manualChecks: { exportBackup: true },
+    });
+
+    assert.equal(getItem(checklist, "export-backup").status, "complete");
+    assert.equal(getItem(checklist, "export-backup").countsTowardCompletion, false);
+  });
+
+  it("reflects reviewed status from persisted review row", () => {
+    const checklist = getMonthlyCloseChecklist(
+      createDashboardData({
+        cards: [],
+        transactions: [{ id: "tx1" }],
+        budgetRows: [{ category: "Food", remaining: 5, percentUsed: 25 }],
+      }),
+      "2099-05",
+      {
+        status: "reviewed",
+        reviewedAt: "2099-06-01T00:00:00.000Z",
+        manualChecks: { reviewInsights: true },
+      },
+    );
+
+    assert.equal(checklist.isReviewed, true);
+    assert.equal(checklist.reviewedAt, "2099-06-01T00:00:00.000Z");
   });
 });

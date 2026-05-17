@@ -17,9 +17,11 @@ import { dispatchNavigation } from "../../../lib/navigationTargets.js";
 import BudgetVsSpendingTable from "./BudgetVsSpendingTable.jsx";
 import CreditCardPaymentOverview from "./CreditCardPaymentOverview.jsx";
 import DashboardActionCards from "./DashboardActionCards.jsx";
+import MonthlyCloseChecklist from "./MonthlyCloseChecklist.jsx";
 import RecentTransactionsTable from "./RecentTransactionsTable.jsx";
 import RecurringOverview from "./RecurringOverview.jsx";
 import { getAlerts, getDashboardData } from "../dashboardUtils.js";
+import { getMonthlyCloseChecklist } from "../monthlyCloseChecklist.js";
 
 const ACTIVE_VIEW_KEY = "personalFinanceApp:activeView:v1";
 
@@ -81,11 +83,22 @@ export default function Dashboard({
   onMonthChange,
   loading = false,
   error = "",
+  monthlyCloseReview,
+  monthlyCloseReviewLoading = false,
+  monthlyCloseReviewSaving = false,
+  monthlyCloseReviewError = "",
+  onToggleMonthlyCloseManualCheck,
+  onMarkMonthlyCloseReviewed,
+  onReopenMonthlyCloseReview,
 }) {
   const [activeSection, setActiveSection] = useState("attention");
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const data = useMemo(() => getDashboardData(appData, selectedMonth), [appData, selectedMonth]);
   const alerts = useMemo(() => getAlerts(data), [data]);
+  const monthlyCloseChecklist = useMemo(
+    () => getMonthlyCloseChecklist(data, selectedMonth, monthlyCloseReview),
+    [data, monthlyCloseReview, selectedMonth],
+  );
   const priorityAlerts = alerts.slice(0, 5);
   const currentSection =
     dashboardSections.find((section) => section.id === activeSection) ?? dashboardSections[0];
@@ -139,6 +152,17 @@ export default function Dashboard({
       />
 
       <DashboardQuickActions />
+      <MonthlyCloseChecklist
+        monthKey={selectedMonth}
+        checklist={monthlyCloseChecklist}
+        onNavigate={navigateToView}
+        reviewLoading={monthlyCloseReviewLoading}
+        reviewSaving={monthlyCloseReviewSaving}
+        reviewError={monthlyCloseReviewError}
+        onToggleManualCheck={onToggleMonthlyCloseManualCheck}
+        onMarkReviewed={onMarkMonthlyCloseReviewed}
+        onReopenReview={onReopenMonthlyCloseReview}
+      />
 
       <DashboardPriorityPanel alerts={priorityAlerts} totalAlertCount={alerts.length} />
 
