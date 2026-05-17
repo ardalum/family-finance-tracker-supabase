@@ -113,7 +113,7 @@ export default function MonthlyCloseChecklist({
             disabled={reviewSaving}
             onClick={onReopenReview}
           >
-            {reviewSaving ? "Saving..." : "Reopen month review"}
+            {reviewSaving ? "Saving..." : "Reopen month as in progress"}
           </Button>
         ) : (
           <Button
@@ -121,7 +121,7 @@ export default function MonthlyCloseChecklist({
             disabled={!checklist.canMarkReviewed || reviewSaving}
             onClick={onMarkReviewed}
           >
-            {reviewSaving ? "Saving..." : "Mark month reviewed"}
+            {reviewSaving ? "Saving..." : "Mark month as reviewed"}
           </Button>
         )}
       </div>
