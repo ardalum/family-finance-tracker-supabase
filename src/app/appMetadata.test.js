@@ -9,6 +9,7 @@ const packageJson = JSON.parse(
 
 const requiredMetadataFields = [
   "creatorName",
+  "copyrightYear",
   "version",
   "releaseLabel",
   "releaseDate",
@@ -27,6 +28,11 @@ describe("app metadata", () => {
       assert.equal(typeof appMetadata[field], "string");
       assert.notEqual(appMetadata[field].trim(), "");
     }
+  });
+
+  it("keeps copyright year metadata usable", () => {
+    assert.equal(appMetadata.copyrightYear.length, 4);
+    assert.equal(Number.isNaN(Number(appMetadata.copyrightYear)), false);
   });
 
   it("keeps support email metadata usable", () => {
