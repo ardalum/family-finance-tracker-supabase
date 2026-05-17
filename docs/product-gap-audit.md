@@ -22,6 +22,7 @@ This audit reviews WalletFlow as of Phase 7 across these workflows:
 - Financial accuracy foundation is strong after Phase 1: statement due-date logic and paid/unpaid handling are centralized and tested.
 - Core monthly workflows exist end-to-end: cards, transactions, budgets, recurring, and dashboard rollups.
 - Insights now includes lightweight visual reporting foundations and initial YTD review sections using existing data.
+- Insights now includes an initial year-over-year comparison layer for same-month and same-period YTD checks.
 - Mobile usability improved in critical areas (especially Monthly Balances and section navigation patterns).
 - Primary navigation is focused and clear: Dashboard, Cards, Budget, Spending, Bills, Insights.
 - Destructive actions are now clearer and server-side protected via Edge Functions.
