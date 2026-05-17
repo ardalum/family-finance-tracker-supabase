@@ -132,6 +132,6 @@ Production smoke testing surfaced UX/navigation defects (account-menu length, br
 
 ## Phase 51 post-fix verification
 
-- Phase 50 UX fixes have been regression-verified in the local pipeline (
-  pm run verify).
-- Manual deployed-app retest tracking is recorded in docs/post-fix-production-smoke-test-results.md.
+- Phase 50 UX fixes have been regression-verified in the local pipeline (`npm run verify`).
+- Manual deployed-app retest tracking is recorded in
+  `docs/post-fix-production-smoke-test-results.md`.

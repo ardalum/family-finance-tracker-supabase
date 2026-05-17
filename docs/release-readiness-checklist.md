@@ -219,3 +219,8 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Dark/light mode behavior checked if theme switching is enabled in environment.
 - [ ] Main nav remains exactly: Dashboard, Cards, Budget, Spending, Bills, Insights.
 - [ ] Finance totals behavior remains unchanged from expected baselines.
+
+## 13) Post-Fix Verification Evidence
+
+- [ ] `docs/post-fix-production-smoke-test-results.md` is updated with deployed-app pass/fail evidence for Phase 50 regression checks.
+- [ ] `docs/production-deployment-smoke-test.md` and `docs/post-fix-production-smoke-test-results.md` do not contradict each other.
