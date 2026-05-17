@@ -1,5 +1,5 @@
-import { LifeBuoy, Mail, ShieldCheck, Wrench } from "lucide-react";
-import { appMetadata } from "../../../app/appMetadata.js";
+import { LifeBuoy, ShieldCheck, Wrench } from "lucide-react";
+import ContactCard from "../../../components/layout/ContactCard.jsx";
 import InfoCard from "../../../components/layout/InfoCard.jsx";
 import PageHero from "../../../components/layout/PageHero.jsx";
 import { supportDetailCards, supportGuidanceCards } from "../helpSupportData.js";
@@ -36,15 +36,7 @@ export default function HelpSupport() {
         ))}
       </div>
 
-      <InfoCard icon={Mail} title="Contact">
-        <p className="mt-3 text-sm text-text-muted">For feedback or support:</p>
-        <a
-          className="mt-1 inline-flex text-sm font-semibold text-brand-primary transition hover:text-brand-accent"
-          href={`mailto:${appMetadata.supportEmail}`}
-        >
-          {appMetadata.supportEmail}
-        </a>
-      </InfoCard>
+      <ContactCard />
     </section>
   );
 }
