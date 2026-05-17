@@ -2,7 +2,7 @@ import { LifeBuoy, ShieldCheck, Wrench } from "lucide-react";
 import ContactCard from "../../../components/layout/ContactCard.jsx";
 import InfoCard from "../../../components/layout/InfoCard.jsx";
 import PageHero from "../../../components/layout/PageHero.jsx";
-import { supportDetailCards, supportGuidanceCards } from "../helpSupportData.js";
+import { helpSupportHero, supportDetailCards, supportGuidanceCards } from "../helpSupportData.js";
 
 const supportIconMap = {
   "shield-check": ShieldCheck,
@@ -14,8 +14,8 @@ export default function HelpSupport() {
     <section className="grid gap-6">
       <PageHero
         icon={LifeBuoy}
-        title="Help / Support"
-        description="Use this page for basic troubleshooting notes, safe testing reminders, and contact information for WalletFlow."
+        title={helpSupportHero.title}
+        description={helpSupportHero.description}
       />
 
       <div className="grid gap-6 lg:grid-cols-3">

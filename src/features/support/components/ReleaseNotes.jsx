@@ -1,19 +1,15 @@
 import { ClipboardList, Sparkles } from "lucide-react";
-import { appMetadata } from "../../../app/appMetadata.js";
 import CheckList from "../../../components/layout/CheckList.jsx";
 import PageHero from "../../../components/layout/PageHero.jsx";
 import Card from "../../../components/ui/Card.jsx";
-import { releaseNotes } from "../releaseNotesData.js";
+import { releaseNotes, releaseNotesHero } from "../releaseNotesData.js";
 
 export default function ReleaseNotes() {
+  const { eyebrow, title, description } = releaseNotesHero;
+
   return (
     <section className="grid gap-6">
-      <PageHero
-        icon={Sparkles}
-        eyebrow={`WalletFlow v${appMetadata.version}`}
-        title="Release Notes"
-        description="Review recent WalletFlow changes, cleanup passes, and user-facing improvements."
-      />
+      <PageHero icon={Sparkles} eyebrow={eyebrow} title={title} description={description} />
 
       <div className="grid gap-6">
         {releaseNotes.map((release) => (
