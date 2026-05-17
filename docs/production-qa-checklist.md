@@ -176,13 +176,17 @@ Use this checklist before each production release.
 
 - [ ] Financial Position opens from Dashboard quick action.
 - [ ] Financial Position opens from Account menu Tools.
+- [ ] Financial Position mobile layout opens cleanly at small widths (no horizontal scrolling).
 - [ ] Financial Position month selector updates summaries.
 - [ ] Summary cards show income, savings, liquid cash, total debt, net worth, and estimated leftover.
+- [ ] Summary cards remain readable on mobile (labels and values are legible).
 - [ ] Needs update advisories appear when month data is missing.
+- [ ] Needs update advisories are easy to scan on mobile.
 - [ ] Empty-state guidance appears when all summarized inputs are missing for selected month.
 - [ ] Net-worth partial-data advisory appears when only account or only liability snapshots exist.
 - [ ] Loading and error states are clear and non-alarming when data is still available elsewhere.
 - [ ] Hub links open Income, Savings, Accounts, Liabilities, Net Worth, and Insights.
+- [ ] Hub action buttons are easy to tap on mobile.
 - [ ] Hub does not change Spending, Budget, Cards, Bills, Income, Savings, Accounts, Liabilities, or Net Worth calculations.
 
 ## Backup / Restore

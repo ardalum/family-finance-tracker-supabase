@@ -38,6 +38,17 @@ Scope: Design-only plan for a future Financial Position hub (no implementation i
 - Separate Dashboard quick actions for those five detailed workspaces are intentionally removed.
 - Detailed pages remain accessible through Financial Position links and Account menu Tools.
 
+## Phase 44 Status Update
+
+- Financial Position mobile polish is now applied.
+- Mobile updates are layout-only and preserve existing calculations/data behavior:
+  - tighter mobile spacing
+  - improved summary-card readability on small screens
+  - clearer "Needs update" scan pattern
+  - full-width action buttons on small screens for easier tap targets
+  - clean mobile stacking for detailed section cards
+- Desktop layout intent remains unchanged except minor responsive class tuning.
+
 ## 1. Problem Statement
 
 WalletFlow now includes Income, Savings, Accounts, Liabilities, and Net Worth as separate secondary tools. Each tool works on its own, but the overall household financial-position workflow is scattered across multiple entry points.
