@@ -126,11 +126,15 @@ Use this checklist before each production release.
 - [ ] Delete liability balance snapshot works with confirmation wording.
 - [ ] Month switching filters liability snapshots correctly.
 - [ ] Total debt updates correctly for selected month.
+- [ ] Latest balance per liability account updates after snapshot changes.
 - [ ] Liability snapshots do not change Spending totals.
 - [ ] Liability snapshots do not change Income totals.
 - [ ] Liability snapshots do not change Savings totals.
 - [ ] Liability snapshots do not change Budget totals.
 - [ ] Liability snapshots do not change Dashboard cash-flow estimated leftover.
+- [ ] Credit-card double-counting helper copy is visible and understandable.
+- [ ] Linked credit card behavior is clear (informational only; no auto-filled balances).
+- [ ] Inactive liability accounts are excluded from active snapshot account options.
 
 ## Backup / Restore
 

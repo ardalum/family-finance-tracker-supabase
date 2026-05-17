@@ -18,6 +18,7 @@ Scope: Design-only planning for account balance snapshots and net worth (no impl
   - net-worth Insights reporting
 - Liability/debt snapshot design is now documented separately in `docs/liability-debt-snapshots-design.md` (Phase 32).
 - Liability/debt snapshots are now partially implemented as manual account + snapshot workflows in Phase 33.
+- Liability/debt snapshot hardening/QA is completed in Phase 34; debt tracking remains manual-only and separate from card payment workflow calculations.
 
 ## 1. Problem Statement
 

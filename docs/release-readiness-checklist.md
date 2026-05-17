@@ -103,6 +103,9 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Add/edit/delete liability balance snapshot works.
 - [ ] Selected month filters liability snapshots correctly.
 - [ ] Total debt summary updates from liability snapshots.
+- [ ] Latest balance per liability account updates from liability snapshots.
+- [ ] Credit-card double-counting guidance copy is visible on Liabilities page.
+- [ ] Linked credit card behavior is explicit (informational only, no auto-filled balances).
 - [ ] Liability snapshots do not change Spending, Budget, Income, Savings, or cash-flow leftover totals.
 
 ## 8) Backup and Export Verification
