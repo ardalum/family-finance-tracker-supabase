@@ -1,8 +1,19 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { releaseNotes } from "./releaseNotesData.js";
+import { releaseNotes, releaseNotesHero } from "./releaseNotesData.js";
 
 describe("release notes data", () => {
+  it("keeps release notes hero data populated", () => {
+    assert.equal(typeof releaseNotesHero.eyebrow, "string");
+    assert.notEqual(releaseNotesHero.eyebrow.trim(), "");
+
+    assert.equal(typeof releaseNotesHero.title, "string");
+    assert.notEqual(releaseNotesHero.title.trim(), "");
+
+    assert.equal(typeof releaseNotesHero.description, "string");
+    assert.notEqual(releaseNotesHero.description.trim(), "");
+  });
+
   it("keeps at least one release note entry", () => {
     assert.equal(Array.isArray(releaseNotes), true);
     assert.equal(releaseNotes.length > 0, true);
