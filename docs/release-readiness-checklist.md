@@ -75,6 +75,14 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Monthly income total updates for selected month.
 - [ ] Income does not change Spending or Budget totals.
 
+## 7c) Dashboard Cash-Flow Verification
+
+- [ ] Dashboard cash-flow summary renders for selected month.
+- [ ] Cash-flow status label is clear (`Positive`, `Negative`, or `Missing income`).
+- [ ] Missing-income guidance appears when selected month has no income entries.
+- [ ] Estimated leftover uses income, spending, recurring remaining, and savings contribution totals.
+- [ ] Cash-flow actions route to Income, Savings, Spending, and Bills workspaces.
+
 ## 8) Backup and Export Verification
 
 - [ ] Supabase JSON export works.
@@ -113,6 +121,7 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - Real-data readiness is currently limited by missing native income/savings/cash-flow tracking; releases before that feature is implemented should not claim full household cash-flow completeness.
 - Income export is included in Supabase JSON/Excel output, but income merge-import behavior is not yet a complete dedicated workflow with income-specific conflict handling.
 - Savings export is included in Supabase JSON/Excel output, but savings merge-import behavior is not yet a complete dedicated workflow with savings-specific conflict handling.
+- Dashboard cash-flow MVP estimated leftover intentionally excludes unpaid card balance carry until card-payment cash modeling is explicitly added.
 
 ## What Not To Test On Real Data
 

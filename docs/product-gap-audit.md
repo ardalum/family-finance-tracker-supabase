@@ -111,3 +111,9 @@ This audit reviews WalletFlow as of Phase 7 across these workflows:
 - Savings tracking is now **partially addressed** via manual Savings Goals + Savings Contributions (no bank sync/imports).
 - Savings progress tracking is available via goal progress cards, but cash-flow summaries and emergency-fund specific guidance remain open scope.
 - Income + savings import automation, net cash-flow summary cards, and forecasting remain product gaps.
+
+## Phase 27 Status Update
+
+- Dashboard cash-flow summary is now **partially addressed** with a compact monthly card for income, spending, savings contributions, recurring remaining, and estimated leftover.
+- Current cash-flow MVP intentionally excludes unpaid card balance carry from the leftover formula until card payment cash modeling is explicitly defined.
+- Remaining gaps: emergency-fund specific workflow, fuller cash-balance modeling, and forecasting.
