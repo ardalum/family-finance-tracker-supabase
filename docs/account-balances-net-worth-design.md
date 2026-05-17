@@ -20,6 +20,18 @@ Scope: Design-only planning for account balance snapshots and net worth (no impl
 - Liability/debt snapshots are now partially implemented as manual account + snapshot workflows in Phase 33.
 - Liability/debt snapshot hardening/QA is completed in Phase 34; debt tracking remains manual-only and separate from card payment workflow calculations.
 
+## Phase 35 Status Update
+
+- Net Worth Summary MVP is now implemented as a secondary workspace using existing snapshot data:
+  - assets from latest selected-month cash account snapshots
+  - liabilities from latest selected-month liability snapshots
+  - net worth computed as `assets - liabilities`
+- No new schema was added for Phase 35.
+- Net worth remains calculation-only from existing tables and does not change spending, budget, income, savings, cards, bills, or dashboard cash-flow totals.
+- Still missing after Phase 35:
+  - net worth trends/charts
+  - expanded asset classes (home, retirement, investments)
+
 ## 1. Problem Statement
 
 WalletFlow now covers transactions, budgets, recurring bills, cards, insights, income, savings goals, and a Dashboard cash-flow summary. It is still incomplete as a full household finance tracker because it does not capture real account balance snapshots or net worth over time.

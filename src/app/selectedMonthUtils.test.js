@@ -14,6 +14,7 @@ const expectedSelectedMonthKeys = [
   "savings",
   "accounts",
   "liabilities",
+  "netWorth",
 ];
 
 describe("selected month utilities", () => {
@@ -33,6 +34,7 @@ describe("selected month utilities", () => {
       savings: "2026-05",
       accounts: "2026-05",
       liabilities: "2026-05",
+      netWorth: "2026-05",
     });
   });
 

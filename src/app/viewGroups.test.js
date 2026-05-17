@@ -26,6 +26,7 @@ describe("view groups", () => {
     assert.deepEqual(secondaryViewIds, [
       "accounts",
       "liabilities",
+      "net-worth",
       "income",
       "savings",
       "backup",

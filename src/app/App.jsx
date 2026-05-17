@@ -66,6 +66,9 @@ function FinanceTrackerApp() {
   const [selectedLiabilitiesMonth, setSelectedLiabilitiesMonth] = useState(
     initialSelectedMonths.liabilities,
   );
+  const [selectedNetWorthMonth, setSelectedNetWorthMonth] = useState(
+    initialSelectedMonths.netWorth,
+  );
   useEffect(() => {
     let isCurrent = true;
 
@@ -521,6 +524,7 @@ function FinanceTrackerApp() {
     selectedInsightsMonth,
     selectedAccountsMonth,
     selectedLiabilitiesMonth,
+    selectedNetWorthMonth,
     selectedIncomeMonth,
     selectedSavingsMonth,
     insightsLoading,
@@ -553,6 +557,7 @@ function FinanceTrackerApp() {
     setSelectedInsightsMonth,
     setSelectedAccountsMonth,
     setSelectedLiabilitiesMonth,
+    setSelectedNetWorthMonth,
     setSelectedIncomeMonth,
     setSelectedSavingsMonth,
     toggleMonthlyCloseManualCheck,

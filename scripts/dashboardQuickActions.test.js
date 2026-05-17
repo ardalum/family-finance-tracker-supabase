@@ -38,4 +38,12 @@ describe("dashboard quick actions", () => {
     assert.equal(source.includes('view: "liabilities"'), true);
     assert.equal(source.includes('target: "monthly-liability-snapshots"'), true);
   });
+
+  it("includes Net worth quick action target", () => {
+    const source = read("src/features/dashboard/components/Dashboard.jsx");
+
+    assert.equal(source.includes('label: "Net worth"'), true);
+    assert.equal(source.includes('view: "net-worth"'), true);
+    assert.equal(source.includes('target: "monthly-net-worth"'), true);
+  });
 });

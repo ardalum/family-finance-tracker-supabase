@@ -144,3 +144,11 @@ This audit reviews WalletFlow as of Phase 7 across these workflows:
   - net worth summary layer
   - net worth and debt trend reporting
   - broader asset/liability scope beyond current manual cash/debt snapshots
+
+## Phase 35 Status Update
+
+- Net worth summary is now **partially addressed** with a manual snapshot-based MVP (`assets - liabilities`) using existing cash account and liability snapshots.
+- Remaining product gaps for this pillar:
+  - net worth trends and historical reporting
+  - broader asset coverage (home/retirement/investments)
+  - deeper debt analytics and automation
