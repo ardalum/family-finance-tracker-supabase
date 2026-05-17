@@ -230,3 +230,14 @@ Future recommendation:
   - dashboard quick-action density should be monitored
   - account-menu tool sprawl may need later consolidation
   - hub should stay secondary until adoption data supports any nav promotion
+
+## Phase 43 Note
+
+- Dashboard quick actions are now consolidated around Financial Position to reduce quick-action density.
+- Dashboard keeps a compact action set focused on routine updates:
+  - Update card balances
+  - Add transactions
+  - Open recurring bills
+  - Review budget
+  - Financial Position
+- Income/Savings/Accounts/Liabilities/Net Worth remain available as detailed pages via Financial Position and Account menu Tools.

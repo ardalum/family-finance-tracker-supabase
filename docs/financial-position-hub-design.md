@@ -26,6 +26,18 @@ Scope: Design-only plan for a future Financial Position hub (no implementation i
 - Additional clarification is now included for partial net-worth readiness when only one snapshot side (assets or liabilities) is present.
 - Hub remains intentionally non-blocking and advisory-focused.
 
+## Phase 43 Status Update
+
+- Dashboard quick actions are now consolidated to keep Dashboard compact and action-focused.
+- Financial Position is now the single Dashboard quick-action entry point for:
+  - Income
+  - Savings
+  - Accounts
+  - Liabilities / Debt
+  - Net Worth
+- Separate Dashboard quick actions for those five detailed workspaces are intentionally removed.
+- Detailed pages remain accessible through Financial Position links and Account menu Tools.
+
 ## 1. Problem Statement
 
 WalletFlow now includes Income, Savings, Accounts, Liabilities, and Net Worth as separate secondary tools. Each tool works on its own, but the overall household financial-position workflow is scattered across multiple entry points.
