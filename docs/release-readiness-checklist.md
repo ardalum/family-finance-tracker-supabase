@@ -168,6 +168,7 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Update `docs/production-smoke-test-results.md` with date, environment, pass/fail, and follow-up issues.
 - [ ] Capture and store required smoke-test screenshots.
 - [ ] Update `docs/bug-backlog.md` statuses for any discovered issues.
+- [ ] Complete post-expansion UX spot-check from `docs/product-ux-audit-after-finance-expansion.md` (Dashboard action density, secondary-tool discoverability, Insights scanability, Monthly Close clarity).
 
 ## Known Limitations
 

@@ -152,3 +152,13 @@ This audit reviews WalletFlow as of Phase 7 across these workflows:
   - net worth trends and historical reporting
   - broader asset coverage (home/retirement/investments)
   - deeper debt analytics and automation
+
+## Phase 39 Status Update
+
+- A full post-expansion UX audit is now documented in `docs/product-ux-audit-after-finance-expansion.md`.
+- Primary risk has shifted from missing core modules to UX architecture pressure as scope expands.
+- Current risk focus:
+  - secondary-tool discoverability for Income/Savings/Accounts/Liabilities/Net Worth
+  - Dashboard quick-action density and long-scroll fatigue
+  - Insights section length and reporting scanability
+  - terminology drift across Cards/Bills/Accounts/Liabilities/Net Worth labels

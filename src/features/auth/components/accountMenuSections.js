@@ -73,7 +73,7 @@ export const accountMenuSections = [
       },
       {
         icon: CreditCard,
-        label: "Debts",
+        label: "Liabilities / Debt",
         description: "Manual debt accounts and liability balance snapshots.",
         view: "liabilities",
       },
