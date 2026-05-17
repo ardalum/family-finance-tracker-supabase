@@ -24,6 +24,7 @@ import { useLocalAppData } from "./useLocalAppData.js";
 import { useBudgets } from "../features/budgets/useBudgets.js";
 import { useCreditCards } from "../features/creditCards/useCreditCards.js";
 import { useDashboardData } from "../features/dashboard/useDashboardData.js";
+import { useMonthlyCloseReview } from "../features/dashboard/useMonthlyCloseReview.js";
 import { useMonthlyBalances } from "../features/creditCards/useMonthlyBalances.js";
 import { useHouseholds } from "../features/households/HouseholdProvider.jsx";
 import { useHouseholdProfiles } from "../features/households/useHouseholdProfiles.js";
@@ -141,6 +142,19 @@ function FinanceTrackerApp() {
     activeHouseholdId,
     initialSelectedMonth: initialSelectedMonths.insights,
     supabaseCreditCards,
+  });
+
+  const {
+    review: monthlyCloseReview,
+    loading: monthlyCloseReviewLoading,
+    saving: monthlyCloseReviewSaving,
+    error: monthlyCloseReviewError,
+    toggleManualCheck: toggleMonthlyCloseManualCheck,
+    markReviewed: markMonthlyCloseReviewed,
+    reopenReview: reopenMonthlyCloseReview,
+  } = useMonthlyCloseReview({
+    activeHouseholdId,
+    selectedMonth: selectedDashboardMonth,
   });
 
   const {
@@ -382,6 +396,10 @@ function FinanceTrackerApp() {
     selectedDashboardMonth,
     dashboardLoading,
     dashboardError,
+    monthlyCloseReview,
+    monthlyCloseReviewLoading,
+    monthlyCloseReviewSaving,
+    monthlyCloseReviewError,
     selectedInsightsMonth,
     insightsLoading,
     insightsError,
@@ -391,6 +409,9 @@ function FinanceTrackerApp() {
     setSelectedSpendingMonth,
     setSelectedRecurringMonth,
     setSelectedInsightsMonth,
+    toggleMonthlyCloseManualCheck,
+    markMonthlyCloseReviewed,
+    reopenMonthlyCloseReview,
     createSupabaseCreditCard,
     updateSupabaseCreditCard,
     deleteSupabaseCreditCard,

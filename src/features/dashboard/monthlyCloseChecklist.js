@@ -1,9 +1,10 @@
-export function getMonthlyCloseChecklist(data, monthKey) {
+export function getMonthlyCloseChecklist(data, monthKey, review = null) {
   const activeCards = data.cards ?? [];
   const cardRows = data.cardRows ?? [];
   const recurringRows = data.recurringRows ?? [];
   const budgetRows = data.budgetRows ?? [];
   const transactions = data.transactions ?? [];
+  const manualChecks = review?.manualChecks ?? {};
 
   const cardsWithBalanceEntryCount = cardRows.filter((row) => row.balance > 0 || row.paid).length;
   const cardsWithBalanceEntryComplete = cardsWithBalanceEntryCount >= activeCards.length;
@@ -17,6 +18,8 @@ export function getMonthlyCloseChecklist(data, monthKey) {
   ).length;
   const hasTransactionData = transactions.length > 0;
   const hasInsightData = hasTransactionData || budgetRows.length > 0;
+  const insightsReviewed = Boolean(manualChecks.reviewInsights);
+  const backupExportChecked = Boolean(manualChecks.exportBackup);
 
   const items = [
     {
@@ -87,24 +90,33 @@ export function getMonthlyCloseChecklist(data, monthKey) {
     {
       id: "review-insights",
       title: "Review insights",
-      status: hasInsightData ? "complete" : "needs-review",
-      description: hasInsightData
-        ? "Insights has data ready for month-end review."
-        : "Add budget or transaction data before reviewing insights.",
+      status: insightsReviewed ? "complete" : "needs-review",
+      description: !hasInsightData
+        ? "Add budget or transaction data before reviewing insights."
+        : insightsReviewed
+          ? "Insights review confirmed for this month."
+          : "Open insights and confirm review for this month.",
       view: "insights",
       target: "",
       countsTowardCompletion: true,
-      isComplete: hasInsightData,
+      isComplete: hasInsightData && insightsReviewed,
+      isManual: true,
+      manualCheckId: "reviewInsights",
+      disabledReason: hasInsightData ? "" : "Insights data is not ready yet.",
     },
     {
       id: "export-backup",
       title: "Export backup reminder",
-      status: "recommended",
-      description: "Export a backup after month-end checks are complete.",
+      status: backupExportChecked ? "complete" : "recommended",
+      description: backupExportChecked
+        ? "Backup export confirmed for this month."
+        : "Export a backup after month-end checks are complete.",
       view: "backup",
       target: "",
       countsTowardCompletion: false,
-      isComplete: false,
+      isComplete: backupExportChecked,
+      isManual: true,
+      manualCheckId: "exportBackup",
     },
   ];
 
@@ -115,5 +127,8 @@ export function getMonthlyCloseChecklist(data, monthKey) {
     items,
     completedCount: completedRequiredItems.length,
     totalCount: requiredItems.length,
+    canMarkReviewed: completedRequiredItems.length === requiredItems.length,
+    isReviewed: review?.status === "reviewed",
+    reviewedAt: review?.reviewedAt ?? null,
   };
 }
