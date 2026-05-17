@@ -186,7 +186,10 @@ describe("app view props", () => {
     assert.equal(props.spendingProps.onCreateTransaction, input.createSupabaseTransaction);
     assert.equal(props.spendingProps.onUpdateTransaction, input.updateSupabaseTransaction);
     assert.equal(props.spendingProps.onDeleteTransaction, input.deleteSupabaseTransaction);
-    assert.equal(props.spendingProps.onImportLocalTransactions, input.importLocalSpendingToSupabase);
+    assert.equal(
+      props.spendingProps.onImportLocalTransactions,
+      input.importLocalSpendingToSupabase,
+    );
   });
 
   it("maps recurring props", () => {
@@ -210,9 +213,18 @@ describe("app view props", () => {
   it("maps recurring mutation and status callbacks", () => {
     const props = createAppViewProps(input);
 
-    assert.equal(props.recurringProps.onCreateRecurringPayment, input.createSupabaseRecurringPayment);
-    assert.equal(props.recurringProps.onUpdateRecurringPayment, input.updateSupabaseRecurringPayment);
-    assert.equal(props.recurringProps.onDeleteRecurringPayment, input.deleteSupabaseRecurringPayment);
+    assert.equal(
+      props.recurringProps.onCreateRecurringPayment,
+      input.createSupabaseRecurringPayment,
+    );
+    assert.equal(
+      props.recurringProps.onUpdateRecurringPayment,
+      input.updateSupabaseRecurringPayment,
+    );
+    assert.equal(
+      props.recurringProps.onDeleteRecurringPayment,
+      input.deleteSupabaseRecurringPayment,
+    );
     assert.equal(props.recurringProps.onMarkRecurringPaid, input.markSupabaseRecurringPaid);
     assert.equal(props.recurringProps.onMarkRecurringUnpaid, input.markSupabaseRecurringUnpaid);
     assert.equal(props.recurringProps.onSkipRecurringPayment, input.skipSupabaseRecurringPayment);
