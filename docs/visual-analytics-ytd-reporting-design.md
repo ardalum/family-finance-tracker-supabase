@@ -316,3 +316,8 @@ Implementation should be considered done when:
 ## Cross-Phase IA Note
 
 For page-level organization and Dashboard/Insights/Cash Flow responsibility boundaries, see the Phase 19 reporting IA plan in `docs/reporting-information-architecture.md`.
+
+## Phase 21 Status Note
+
+- YTD Review MVP has started in Insights using existing transaction/budget data (no chart library, no schema changes).
+- Implemented scope includes YTD summary cards and YTD month/category/merchant breakdown sections.

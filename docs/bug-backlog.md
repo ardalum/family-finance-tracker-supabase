@@ -44,3 +44,4 @@ Last updated: 2026-05-17 (Phase 16 real-data readiness review)
 
 - Missing income/savings/cash-flow tracking is a **product capability gap**, not a defect in existing calculations.
 - Planned handling: Phase 17 design complete in `docs/income-savings-cash-flow-design.md`, with implementation phases tracked separately (Phase 18+).
+- Visual analytics/historical reporting gap is partially addressed by Insights chart MVP and YTD Review MVP; previous-year comparison and broader historical workflows remain open product scope.
