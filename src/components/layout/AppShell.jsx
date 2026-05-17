@@ -54,10 +54,7 @@ export default function AppShell({
               <span className="font-semibold text-brand-primary">{appMetadata.name}</span> ©{" "}
               {appMetadata.copyrightYear} {appMetadata.creatorName}.
             </p>
-            <p className="max-w-2xl leading-5">
-              Personal finance tracking only. Verify balances, payments, and due dates with the
-              original provider.
-            </p>
+            <p className="max-w-2xl leading-5">{appMetadata.trackingDisclaimer}</p>
           </div>
           <nav
             className="flex flex-wrap gap-2 md:max-w-md md:justify-end"
