@@ -39,3 +39,8 @@ Last updated: 2026-05-17 (Phase 16 real-data readiness review)
   - GitHub Pages production smoke evidence with screenshots (`medium`)
   - Reset household finance data production-style execution record with test data (`medium`)
   - Cross-device iOS/Android evidence capture (`low`)
+
+## Product Gap Notes (Not Bugs)
+
+- Missing income/savings/cash-flow tracking is a **product capability gap**, not a defect in existing calculations.
+- Planned handling: Phase 17 design complete in `docs/income-savings-cash-flow-design.md`, with implementation phases tracked separately (Phase 18+).
