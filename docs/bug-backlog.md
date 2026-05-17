@@ -1,6 +1,6 @@
 # Bug Backlog
 
-Last updated: 2026-05-17 (Phase 14 review)
+Last updated: 2026-05-17 (Phase 16 real-data readiness review)
 
 ## Triage Legend
 
@@ -31,3 +31,11 @@ Last updated: 2026-05-17 (Phase 14 review)
 
 - Reviewed medium-priority backlog scope and applied safe documentation/release-note fixes only.
 - Kept production-only/manual validation items deferred because they require deployed-environment execution evidence.
+
+## Release Blockers
+
+- No code-level `critical` or `high` release blockers remain open in the backlog.
+- Remaining deferred items are manual validation/documentation tasks:
+  - GitHub Pages production smoke evidence with screenshots (`medium`)
+  - Reset household finance data production-style execution record with test data (`medium`)
+  - Cross-device iOS/Android evidence capture (`low`)
