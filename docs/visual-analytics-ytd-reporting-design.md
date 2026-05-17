@@ -312,3 +312,7 @@ Implementation should be considered done when:
 - Mobile layout is readable.
 - Empty states are helpful.
 - No schema changes are required for first chart MVP.
+
+## Cross-Phase IA Note
+
+For page-level organization and Dashboard/Insights/Cash Flow responsibility boundaries, see the Phase 19 reporting IA plan in `docs/reporting-information-architecture.md`.

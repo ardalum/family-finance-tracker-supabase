@@ -327,3 +327,11 @@ When implementation is completed in later phases, "done" should mean:
 - Monthly Close Checklist can include income/savings/cash-flow confirmation items.
 - Existing spending/budget/card calculations remain unchanged.
 - No bank-sync dependency is required for core usefulness.
+
+## Cross-Phase Reporting Note
+
+Future income/savings datasets should be structured to support later visual reporting in Insights, including income trend charts, savings contribution trend charts, and monthly cash-flow surplus/deficit charts (see Phase 18 design: `docs/visual-analytics-ytd-reporting-design.md`).
+
+## Cash Flow Navigation Readiness Note
+
+`Cash Flow` should become a dedicated page and main navigation item only after income/savings MVP functionality is real and usable (not a placeholder shell).

@@ -35,6 +35,7 @@ This audit reviews WalletFlow as of Phase 7 across these workflows:
 - Insight-to-action handoff is weak: Insights are read-only with no guided next steps.
 - Some settings remain intentionally deferred (honest now, but still a product gap).
 - Backup import is merge-focused and safe, but lacks guided post-import verification checklist in-product.
+- Reporting and cash-flow feature expansion currently lacks finalized page-level IA guardrails; without structure, Dashboard/Insights can become cluttered or overlapping.
 
 ## Remaining Dead-End UI
 
@@ -56,6 +57,8 @@ This audit reviews WalletFlow as of Phase 7 across these workflows:
 - Planned-vs-actual bill forecasting view for upcoming month cash pressure.
 - Better uncategorized/categorization triage queue (if uncategorized traffic grows).
 - Cross-month carryover helpers for budgets and recurring exceptions.
+- Visual analytics and historical reporting (YTD summaries, previous-year comparisons, and trend views for spending/budgets/bills).
+- Reporting IA/UX architecture enforcement so Dashboard, Insights, and future Cash Flow remain focused as scope grows.
 
 ## Must-Have vs Nice-To-Have
 
@@ -65,6 +68,7 @@ This audit reviews WalletFlow as of Phase 7 across these workflows:
 - Month reviewed state with clear reopen path.
 - Checklist-aware reminders on Dashboard (for incomplete month close items).
 - Income, savings, and monthly cash-flow tracking (manual-entry MVP) so households can track inflows, transfers to savings, and surplus/deficit status.
+- YTD performance reporting, previous-year comparison, and visual Insights analytics so households can evaluate progress over time.
 
 ### Nice-To-Have (Later)
 
