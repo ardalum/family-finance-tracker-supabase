@@ -50,4 +50,5 @@ Last updated: 2026-05-17 (Phase 16 real-data readiness review)
 - Income MVP is implemented and hardened for manual tracking; this is not a bug in existing totals.
 - Savings MVP is implemented for manual goal + contribution tracking; this is not a bug in existing totals.
 - Dashboard cash-flow summary MVP is implemented; current limitation is that estimated leftover excludes unpaid card balance in MVP until card payment cash-flow modeling is defined.
+- Account balance snapshots and net worth tracking remain a product capability gap (design documented, implementation pending), not a bug in existing totals.
 - Remaining income/savings-related product gaps: dedicated import/merge conflict workflows, emergency-fund specific guidance, and deeper cash-flow modeling.

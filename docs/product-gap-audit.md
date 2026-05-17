@@ -117,3 +117,9 @@ This audit reviews WalletFlow as of Phase 7 across these workflows:
 - Dashboard cash-flow summary is now **partially addressed** with a compact monthly card for income, spending, savings contributions, recurring remaining, and estimated leftover.
 - Current cash-flow MVP intentionally excludes unpaid card balance carry from the leftover formula until card payment cash modeling is explicitly defined.
 - Remaining gaps: emergency-fund specific workflow, fuller cash-balance modeling, and forecasting.
+
+## Phase 29 Status Update
+
+- Account balance snapshots and net worth tracking are now explicitly documented as a remaining product gap in `docs/account-balances-net-worth-design.md`.
+- WalletFlow still lacks manual account/liability snapshot workflows for true household position tracking (assets vs liabilities).
+- Net worth and liquid-cash trends remain open scope pending snapshot data model + MVP implementation.
