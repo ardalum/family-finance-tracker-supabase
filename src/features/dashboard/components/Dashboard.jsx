@@ -65,7 +65,7 @@ const quickActions = [
   },
   {
     label: "Open recurring bills",
-    description: "Go straight to this month’s bills.",
+    description: "Go straight to this month's bills.",
     view: "recurring",
     target: "this-month",
     icon: Repeat,
