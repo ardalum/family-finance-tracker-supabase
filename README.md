@@ -8,6 +8,7 @@ A Vite + React personal finance tracker backed by Supabase. The app supports Sup
 - `docs/frontend-architecture-plan.md` tracks the frontend architecture cleanup plan.
 - `docs/auth-session-qa.md` contains the authentication and session QA checklist.
 - `docs/production-qa-checklist.md` contains the release QA checklist and smoke test workflow.
+- `docs/release-readiness-checklist.md` contains the final pre-release checklist for deployment, migrations, auth redirects, and destructive-flow safety.
 
 ## Install
 
@@ -120,6 +121,23 @@ npm.cmd run preview
 
 Run the SQL migrations in `supabase/migrations` against the target Supabase project before using the app in production.
 
+Recommended deploy path:
+
+```powershell
+npx supabase login
+npx supabase link --project-ref your-project-ref
+npx supabase db push
+```
+
+`015_monthly_close_reviews.sql` creates `monthly_close_reviews` for persisted monthly close review state.
+
+If migration history mismatch appears (for example after duplicate migration-number history), do not reset production data. Instead:
+
+1. Run `npx supabase migration list`.
+2. Compare local migration files vs remote history.
+3. Use Supabase migration repair commands carefully to mark the correct versions.
+4. Re-run `npx supabase db push`.
+
 Required database features include:
 
 - Supabase Auth
@@ -184,7 +202,23 @@ Only import backup files you trust. The current importer validates the backup st
 
 Test destructive flows (account deletion, household finance deletion, and risky imports) only with test accounts and test data.
 
-## Deploy To Vercel
+## Deploy To GitHub Pages (Current)
+
+This repository is configured to deploy `dist` to GitHub Pages from `main` through `.github/workflows/deploy.yml`.
+
+Required GitHub repository secrets:
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+
+Release flow:
+
+1. Push to `main`.
+2. Confirm `Deploy WalletFlow to GitHub Pages` succeeds in GitHub Actions.
+3. Confirm the workflow `Verify` step passed (`npm run verify`).
+4. Open the deployed GitHub Pages site and complete smoke checks from `docs/production-qa-checklist.md`.
+
+## Deploy To Vercel (Optional)
 
 1. Push the repository to GitHub.
 2. Create a new Vercel project and import the repository.
