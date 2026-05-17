@@ -1,5 +1,6 @@
 import { LifeBuoy, Mail, ShieldCheck, Wrench } from "lucide-react";
 import { appMetadata } from "../../../app/appMetadata.js";
+import PageHero from "../../../components/layout/PageHero.jsx";
 import Card from "../../../components/ui/Card.jsx";
 
 const supportItems = [
@@ -23,22 +24,11 @@ const supportItems = [
 export default function HelpSupport() {
   return (
     <section className="grid gap-6">
-      <Card className="p-6">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-brand-primary text-white shadow-sm">
-            <LifeBuoy size={26} strokeWidth={2.2} aria-hidden="true" />
-          </div>
-          <div className="max-w-3xl">
-            <h2 className="text-3xl font-semibold tracking-normal text-text-main">
-              Help / Support
-            </h2>
-            <p className="mt-4 text-sm leading-6 text-text-muted">
-              Use this page for basic troubleshooting notes, safe testing reminders, and contact
-              information for WalletFlow.
-            </p>
-          </div>
-        </div>
-      </Card>
+      <PageHero
+        icon={LifeBuoy}
+        title="Help / Support"
+        description="Use this page for basic troubleshooting notes, safe testing reminders, and contact information for WalletFlow."
+      />
 
       <div className="grid gap-6 lg:grid-cols-3">
         {supportItems.map((item) => (
