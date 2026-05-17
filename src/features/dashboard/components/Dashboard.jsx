@@ -38,7 +38,7 @@ const dashboardSections = [
   },
   {
     id: "all-sections",
-    label: "All Sections",
+    label: "Full View",
     description: "Show attention items and recent activity together.",
     icon: BarChart3,
   },

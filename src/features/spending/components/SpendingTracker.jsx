@@ -118,8 +118,7 @@ export default function SpendingTracker({
               {formatMonthLabel(selectedMonth)}
             </h2>
             <p className="mt-1 text-sm text-[#6B7280]">
-              Search, filter, and manage card spending, refunds, payments, transfers, and
-              recurring-linked transactions.
+              Track spending, refunds, payments, and recurring-linked transactions for this month.
             </p>
             {loading ? (
               <p className="mt-2 text-sm text-[#6B7280]">Loading transactions...</p>
