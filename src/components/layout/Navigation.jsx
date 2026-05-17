@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NAVIGATE_EVENT } from "../../lib/navigationTargets.js";
 import { navItems } from "./navigationItems.js";
+import { shouldHandleNavigationView } from "./navigationEventUtils.js";
 
 export default function Navigation({ activeView, onChange }) {
   const [hoveredId, setHoveredId] = useState("");
@@ -8,7 +9,7 @@ export default function Navigation({ activeView, onChange }) {
   useEffect(() => {
     function handleNavigate(event) {
       const view = event.detail?.view;
-      if (!navItems.some((item) => item.id === view)) return;
+      if (!shouldHandleNavigationView(view)) return;
       onChange(view);
     }
 
