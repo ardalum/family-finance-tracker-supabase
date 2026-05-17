@@ -51,6 +51,14 @@ export default function MonthlyCloseChecklist({
           Auto-detected checks update from live app data. Manual checks are saved for this household
           and month.
         </p>
+        <p className="mt-1 text-xs text-text-muted">
+          Monthly close helps confirm spending, bills, income, savings, cash flow, balances, debts,
+          and net worth before marking the month reviewed.
+        </p>
+        <p className="mt-1 text-xs text-text-muted">
+          Balance snapshots are separate from transactions. Debt snapshots are separate from credit
+          card payment tracking. Missing balance/debt data does not block closing the month.
+        </p>
         {checklist.reviewedAt ? (
           <p className="mt-1 text-xs font-medium text-text-muted">
             Reviewed at {new Date(checklist.reviewedAt).toLocaleString()}

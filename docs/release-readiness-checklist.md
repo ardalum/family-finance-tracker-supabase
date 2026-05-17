@@ -64,6 +64,9 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Dashboard Monthly Close Checklist renders for selected month.
 - [ ] Auto-detected checks reflect current month data.
 - [ ] Manual checks persist by household and month.
+- [ ] Monthly Close includes optional review items for account balances, debt snapshots, net worth summary, and net worth trends.
+- [ ] Balance/debt/net-worth review items route to Accounts, Liabilities, Net Worth, and Insights.
+- [ ] Missing balance or debt snapshot data does not block month close completion.
 - [ ] `Mark month as reviewed` is blocked until required checks are complete.
 - [ ] `Reopen month as in progress` works.
 - [ ] Switching months loads the correct persisted review state.

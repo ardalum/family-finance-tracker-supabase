@@ -122,6 +122,38 @@ describe("monthly close checklist", () => {
     assert.equal(cashFlowItem.status, "recommended");
   });
 
+  it("includes account, debt, and net worth review items with expected navigation", () => {
+    const checklist = getMonthlyCloseChecklist(createDashboardData(), "2099-05");
+
+    const accountItem = getItem(checklist, "review-account-balance-snapshots");
+    const debtItem = getItem(checklist, "review-debt-balance-snapshots");
+    const netWorthItem = getItem(checklist, "review-net-worth-summary");
+    const trendsItem = getItem(checklist, "review-net-worth-trends");
+
+    assert.equal(accountItem.view, "accounts");
+    assert.equal(accountItem.target, "monthly-account-snapshots");
+    assert.equal(accountItem.countsTowardCompletion, false);
+    assert.equal(accountItem.isManual, true);
+    assert.equal(accountItem.manualCheckId, "reviewAccountBalances");
+
+    assert.equal(debtItem.view, "liabilities");
+    assert.equal(debtItem.target, "monthly-liability-snapshots");
+    assert.equal(debtItem.countsTowardCompletion, false);
+    assert.equal(debtItem.isManual, true);
+    assert.equal(debtItem.manualCheckId, "reviewDebtBalances");
+
+    assert.equal(netWorthItem.view, "net-worth");
+    assert.equal(netWorthItem.target, "monthly-net-worth");
+    assert.equal(netWorthItem.countsTowardCompletion, false);
+    assert.equal(netWorthItem.isManual, true);
+    assert.equal(netWorthItem.manualCheckId, "reviewNetWorthSummary");
+
+    assert.equal(trendsItem.view, "insights");
+    assert.equal(trendsItem.countsTowardCompletion, false);
+    assert.equal(trendsItem.isManual, true);
+    assert.equal(trendsItem.manualCheckId, "reviewNetWorthTrends");
+  });
+
   it("requires manual insights confirmation even when insight data exists", () => {
     const checklist = getMonthlyCloseChecklist(
       createDashboardData({
@@ -142,6 +174,43 @@ describe("monthly close checklist", () => {
 
     assert.equal(getItem(checklist, "export-backup").status, "complete");
     assert.equal(getItem(checklist, "export-backup").countsTowardCompletion, false);
+  });
+
+  it("marks new monthly-close manual review items as complete from persisted checks", () => {
+    const checklist = getMonthlyCloseChecklist(createDashboardData(), "2099-05", {
+      manualChecks: {
+        reviewAccountBalances: true,
+        reviewDebtBalances: true,
+        reviewNetWorthSummary: true,
+        reviewNetWorthTrends: true,
+      },
+    });
+
+    assert.equal(getItem(checklist, "review-account-balance-snapshots").status, "complete");
+    assert.equal(getItem(checklist, "review-debt-balance-snapshots").status, "complete");
+    assert.equal(getItem(checklist, "review-net-worth-summary").status, "complete");
+    assert.equal(getItem(checklist, "review-net-worth-trends").status, "complete");
+  });
+
+  it("missing balance/debt data does not block month review completion", () => {
+    const checklist = getMonthlyCloseChecklist(
+      createDashboardData({
+        cards: [],
+        cardRows: [],
+        recurringRows: [],
+        transactions: [{ id: "tx1" }],
+        budgetRows: [{ category: "Food", remaining: 10, percentUsed: 20 }],
+      }),
+      "2099-05",
+      {
+        manualChecks: { reviewInsights: true },
+      },
+    );
+
+    assert.equal(getItem(checklist, "review-account-balance-snapshots").status, "recommended");
+    assert.equal(getItem(checklist, "review-debt-balance-snapshots").status, "recommended");
+    assert.equal(getItem(checklist, "review-net-worth-summary").status, "recommended");
+    assert.equal(checklist.canMarkReviewed, true);
   });
 
   it("reflects reviewed status from persisted review row", () => {

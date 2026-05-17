@@ -23,6 +23,9 @@ Use this checklist before each production release.
 - [ ] Cash-flow limitation copy is clear: unpaid card balances are excluded from MVP leftover.
 - [ ] Cash-flow action buttons route to Income, Savings, Spending, and Bills workspaces.
 - [ ] Estimated leftover updates when income/savings/spending/recurring values change.
+- [ ] Monthly Close checklist includes optional review prompts for account balances, debt snapshots, net worth summary, and net worth trends.
+- [ ] New Monthly Close review prompts do not block `Mark month as reviewed`.
+- [ ] Monthly Close prompt navigation opens Accounts, Liabilities, Net Worth, and Insights correctly.
 
 ## Cards
 
