@@ -1,6 +1,7 @@
 import { CheckCircle2, Mail, ShieldAlert } from "lucide-react";
 import { appMetadata } from "../../../app/appMetadata.js";
 import { AppBrandMark, AppBrandName } from "../../../components/branding/index.js";
+import PageHero from "../../../components/layout/PageHero.jsx";
 import Card from "../../../components/ui/Card.jsx";
 
 const trackingItems = [
@@ -14,22 +15,20 @@ const trackingItems = [
 export default function AboutWalletFlow() {
   return (
     <section className="grid gap-6">
-      <Card className="p-6">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-          <AppBrandMark variant="lg" />
-          <div className="max-w-3xl">
-            <h2 className="text-3xl font-semibold tracking-normal text-text-main">
-              <AppBrandName />
-            </h2>
-            <p className="mt-2 text-base font-medium text-text-soft">{appMetadata.tagline}</p>
-            <p className="mt-4 text-sm leading-6 text-text-muted">
+      <PageHero
+        iconSlot={<AppBrandMark variant="lg" />}
+        title={<AppBrandName />}
+        description={
+          <>
+            <span className="block text-base font-medium text-text-soft">{appMetadata.tagline}</span>
+            <span className="mt-4 block">
               WalletFlow is a practical household finance tracker designed to help users organize
               credit cards, monthly budgets, transactions, and recurring payments in one clean
               dashboard.
-            </p>
-          </div>
-        </div>
-      </Card>
+            </span>
+          </>
+        }
+      />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="p-5">
