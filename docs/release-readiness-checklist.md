@@ -141,6 +141,11 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Excel export works.
 - [ ] Import preview + merge flow works with trusted test backup files.
 - [ ] Team confirms backups contain sensitive finance data and are stored privately.
+- [ ] Supabase JSON export includes `monthlyCloseReviews`.
+- [ ] Excel export includes `Monthly Close Reviews`.
+- [ ] Supabase JSON export includes all persisted finance sections used by cards, budgets, spending, recurring, monthly close, income, savings, accounts, and liabilities.
+- [ ] Supabase merge-import preview/counts include all persisted finance sections listed above.
+- [ ] Computed outputs (Dashboard cash-flow summary, Net Worth summary/trends, Financial Position summary, Insights computed outputs) are not treated as standalone persisted backup sections.
 - [ ] Supabase JSON export includes `savingsGoals` and `savingsContributions`.
 - [ ] Excel export includes `Savings Goals` and `Savings Contributions`.
 - [ ] Supabase JSON export includes `cashAccounts` and `accountBalanceSnapshots`.

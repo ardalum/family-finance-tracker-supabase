@@ -195,6 +195,10 @@ Use this checklist before each production release.
 - [ ] Import backup works with trusted files only.
 - [ ] No obvious duplicate records after import.
 - [ ] Team confirms backups contain sensitive finance data and are stored privately.
+- [ ] Supabase JSON export includes `monthlyCloseReviews`.
+- [ ] Excel export includes `Monthly Close Reviews` sheet.
+- [ ] Supabase merge preview/import summary shows counts for monthly close, income, savings, cash accounts, and liabilities sections.
+- [ ] Supabase merge import keeps computed-only outputs out of persisted restore payloads.
 - [ ] Supabase JSON export includes `incomeSources` and `incomeEntries`.
 - [ ] Excel export includes `Income Sources` and `Income Entries` sheets.
 - [ ] Supabase JSON export includes `savingsGoals` and `savingsContributions`.

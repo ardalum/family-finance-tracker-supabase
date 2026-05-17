@@ -4,8 +4,8 @@ import { deleteHouseholdFinanceDataSecurely } from "./secureDeletionService.js";
 
 const BACKUP_APP_NAME = "Credit Card Tracker";
 const SUPPORTED_SCHEMA_VERSION = 1;
-const SUPABASE_BACKUP_VERSION = 7;
-const SUPPORTED_SUPABASE_BACKUP_VERSIONS = [1, 2, 3, 4, 5, 6, 7];
+const SUPABASE_BACKUP_VERSION = 8;
+const SUPPORTED_SUPABASE_BACKUP_VERSIONS = [1, 2, 3, 4, 5, 6, 7, 8];
 const EXPECTED_SUPABASE_SECTIONS = [
   "household",
   "householdProfiles",
@@ -17,6 +17,7 @@ const EXPECTED_SUPABASE_SECTIONS = [
   "transactionSplits",
   "recurringPayments",
   "recurringPaymentInstances",
+  "monthlyCloseReviews",
   "incomeSources",
   "incomeEntries",
   "savingsGoals",
@@ -58,6 +59,7 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
       transactionSplitsResult,
       recurringPaymentsResult,
       recurringInstancesResult,
+      monthlyCloseReviewsResult,
       incomeSourcesResult,
       incomeEntriesResult,
       savingsGoalsResult,
@@ -120,6 +122,11 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
         .eq("household_id", householdId)
         .order("month_key", { ascending: true }),
       client
+        .from("monthly_close_reviews")
+        .select("*")
+        .eq("household_id", householdId)
+        .order("month_key", { ascending: true }),
+      client
         .from("income_sources")
         .select("*")
         .eq("household_id", householdId)
@@ -176,6 +183,7 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
       transactionSplitsResult,
       recurringPaymentsResult,
       recurringInstancesResult,
+      monthlyCloseReviewsResult,
       incomeSourcesResult,
       incomeEntriesResult,
       savingsGoalsResult,
@@ -202,6 +210,7 @@ export async function exportSupabaseBackup(householdId, activeHousehold) {
       transactionSplits: transactionSplitsResult?.data ?? [],
       recurringPayments: recurringPaymentsResult?.data ?? [],
       recurringPaymentInstances: recurringInstancesResult?.data ?? [],
+      monthlyCloseReviews: monthlyCloseReviewsResult?.data ?? [],
       incomeSources: incomeSourcesResult?.data ?? [],
       incomeEntries: incomeEntriesResult?.data ?? [],
       savingsGoals: savingsGoalsResult?.data ?? [],
@@ -392,6 +401,22 @@ export async function exportSupabaseExcel(householdId, activeHousehold) {
         "Paid Date": instance.paid_date ?? "",
         "Transaction ID": instance.transaction_id ?? "",
         ID: instance.id,
+      })),
+    );
+
+    appendSheet(
+      workbook,
+      "Monthly Close Reviews",
+      data.monthlyCloseReviews.map((review) => ({
+        Month: review.month_key,
+        Status: review.status ?? "in_progress",
+        "Manual Checks JSON": JSON.stringify(review.manual_checks ?? {}),
+        Notes: review.notes ?? "",
+        "Reviewed At": review.reviewed_at ?? "",
+        "Reviewed By": review.reviewed_by ?? "",
+        "Created At": formatDateTime(review.created_at),
+        "Updated At": formatDateTime(review.updated_at),
+        ID: review.id,
       })),
     );
 
@@ -607,6 +632,7 @@ async function loadHouseholdExportData(householdId, activeHousehold) {
     transactionSplitsResult,
     recurringPaymentsResult,
     recurringInstancesResult,
+    monthlyCloseReviewsResult,
     incomeSourcesResult,
     incomeEntriesResult,
     savingsGoalsResult,
@@ -669,6 +695,11 @@ async function loadHouseholdExportData(householdId, activeHousehold) {
       .eq("household_id", householdId)
       .order("month_key", { ascending: true }),
     client
+      .from("monthly_close_reviews")
+      .select("*")
+      .eq("household_id", householdId)
+      .order("month_key", { ascending: true }),
+    client
       .from("income_sources")
       .select("*, household_profiles (display_name)")
       .eq("household_id", householdId)
@@ -725,6 +756,7 @@ async function loadHouseholdExportData(householdId, activeHousehold) {
     transactionSplitsResult,
     recurringPaymentsResult,
     recurringInstancesResult,
+    monthlyCloseReviewsResult,
     incomeSourcesResult,
     incomeEntriesResult,
     savingsGoalsResult,
@@ -748,6 +780,7 @@ async function loadHouseholdExportData(householdId, activeHousehold) {
     transactionSplits: transactionSplitsResult?.data ?? [],
     recurringPayments: recurringPaymentsResult?.data ?? [],
     recurringPaymentInstances: recurringInstancesResult?.data ?? [],
+    monthlyCloseReviews: monthlyCloseReviewsResult?.data ?? [],
     incomeSources: incomeSourcesResult?.data ?? [],
     incomeEntries: incomeEntriesResult?.data ?? [],
     savingsGoals: savingsGoalsResult?.data ?? [],
@@ -1324,6 +1357,411 @@ export async function importSupabaseBackupMerge(householdId, backup) {
       counts.recurringPaymentInstances.imported += 1;
     }
 
+    const monthlyCloseReviewRows = [...(context.monthlyCloseReviews ?? [])];
+    for (const review of normalizedBackup.monthlyCloseReviews ?? []) {
+      const existing = monthlyCloseReviewRows.find((row) => row.month_key === review.month_key);
+      if (existing) {
+        counts.monthlyCloseReviews.skipped += 1;
+        continue;
+      }
+
+      const { data, error } = await client
+        .from("monthly_close_reviews")
+        .upsert(
+          {
+            household_id: householdId,
+            month_key: review.month_key,
+            status: review.status ?? "in_progress",
+            manual_checks: review.manual_checks ?? {},
+            notes: review.notes ?? "",
+            reviewed_at: review.reviewed_at ?? null,
+            reviewed_by: review.reviewed_by ?? null,
+          },
+          { onConflict: "household_id,month_key" },
+        )
+        .select("*")
+        .single();
+
+      if (error) throw error;
+      monthlyCloseReviewRows.push(data);
+      counts.monthlyCloseReviews.imported += 1;
+    }
+
+    const incomeSourceRows = [...(context.incomeSources ?? [])];
+    for (const source of normalizedBackup.incomeSources ?? []) {
+      const existing = findIncomeSourceMatch(source, incomeSourceRows);
+      if (existing) {
+        maps.incomeSources.set(source.id, existing.id);
+        counts.incomeSources.skipped += 1;
+        continue;
+      }
+
+      const importedLocalId = source.imported_local_id ?? source.id;
+
+      let existingIncomeSource = null;
+      if (importedLocalId) {
+        const { data: importedMatch, error: importedMatchError } = await client
+          .from("income_sources")
+          .select("*")
+          .eq("household_id", householdId)
+          .eq("imported_local_id", importedLocalId)
+          .maybeSingle();
+        if (importedMatchError) throw importedMatchError;
+        existingIncomeSource = importedMatch;
+      }
+
+      if (!existingIncomeSource) {
+        const { data: naturalMatch, error: naturalMatchError } = await client
+          .from("income_sources")
+          .select("*")
+          .eq("household_id", householdId)
+          .eq("name", source.name)
+          .maybeSingle();
+        if (naturalMatchError) throw naturalMatchError;
+        existingIncomeSource = naturalMatch;
+      }
+
+      if (existingIncomeSource) {
+        incomeSourceRows.push(existingIncomeSource);
+        maps.incomeSources.set(source.id, existingIncomeSource.id);
+        counts.incomeSources.skipped += 1;
+        continue;
+      }
+
+      const { data, error } = await client
+        .from("income_sources")
+        .insert({
+          household_id: householdId,
+          name: source.name,
+          source_type: source.source_type,
+          owner_profile_id: getMappedId(maps.householdProfiles, source.owner_profile_id),
+          expected_amount: Number(source.expected_amount || 0),
+          frequency: source.frequency,
+          is_active: source.is_active ?? true,
+          notes: source.notes ?? "",
+          imported_local_id: importedLocalId,
+        })
+        .select("*")
+        .single();
+
+      if (error) throw error;
+      incomeSourceRows.push(data);
+      maps.incomeSources.set(source.id, data.id);
+      counts.incomeSources.imported += 1;
+    }
+
+    const incomeEntryRows = [...(context.incomeEntries ?? [])];
+    for (const entry of normalizedBackup.incomeEntries ?? []) {
+      const mappedIncomeSourceId = getMappedId(maps.incomeSources, entry.income_source_id);
+      if (!mappedIncomeSourceId) {
+        counts.incomeEntries.skipped += 1;
+        continue;
+      }
+
+      const mappedOwnerProfileId = getMappedId(maps.householdProfiles, entry.owner_profile_id);
+      const mappedEntry = {
+        ...entry,
+        income_source_id: mappedIncomeSourceId,
+        owner_profile_id: mappedOwnerProfileId,
+      };
+      const existing = findIncomeEntryMatch(mappedEntry, incomeEntryRows);
+      if (existing) {
+        counts.incomeEntries.skipped += 1;
+        continue;
+      }
+
+      const { data, error } = await client
+        .from("income_entries")
+        .insert({
+          household_id: householdId,
+          income_source_id: mappedIncomeSourceId,
+          owner_profile_id: mappedOwnerProfileId,
+          entry_date: entry.entry_date,
+          month_key: entry.month_key,
+          amount: Number(entry.amount || 0),
+          entry_type: entry.entry_type,
+          notes: entry.notes ?? "",
+          imported_local_id: entry.imported_local_id ?? entry.id,
+        })
+        .select("*")
+        .single();
+
+      if (error) throw error;
+      incomeEntryRows.push(data);
+      counts.incomeEntries.imported += 1;
+    }
+
+    const savingsGoalRows = [...(context.savingsGoals ?? [])];
+    for (const goal of normalizedBackup.savingsGoals ?? []) {
+      const existing = findSavingsGoalMatch(goal, savingsGoalRows);
+      if (existing) {
+        maps.savingsGoals.set(goal.id, existing.id);
+        counts.savingsGoals.skipped += 1;
+        continue;
+      }
+
+      const importedLocalId = goal.imported_local_id ?? goal.id;
+
+      let existingSavingsGoal = null;
+      if (importedLocalId) {
+        const { data: importedMatch, error: importedMatchError } = await client
+          .from("savings_goals")
+          .select("*")
+          .eq("household_id", householdId)
+          .eq("imported_local_id", importedLocalId)
+          .maybeSingle();
+        if (importedMatchError) throw importedMatchError;
+        existingSavingsGoal = importedMatch;
+      }
+
+      if (!existingSavingsGoal) {
+        const { data: naturalMatch, error: naturalMatchError } = await client
+          .from("savings_goals")
+          .select("*")
+          .eq("household_id", householdId)
+          .eq("name", goal.name)
+          .maybeSingle();
+        if (naturalMatchError) throw naturalMatchError;
+        existingSavingsGoal = naturalMatch;
+      }
+
+      if (existingSavingsGoal) {
+        savingsGoalRows.push(existingSavingsGoal);
+        maps.savingsGoals.set(goal.id, existingSavingsGoal.id);
+        counts.savingsGoals.skipped += 1;
+        continue;
+      }
+
+      const { data, error } = await client
+        .from("savings_goals")
+        .insert({
+          household_id: householdId,
+          name: goal.name,
+          goal_type: goal.goal_type,
+          target_amount: Number(goal.target_amount || 0),
+          starting_amount: Number(goal.starting_amount || 0),
+          target_date: goal.target_date ?? null,
+          owner_profile_id: getMappedId(maps.householdProfiles, goal.owner_profile_id),
+          is_active: goal.is_active ?? true,
+          notes: goal.notes ?? "",
+          imported_local_id: importedLocalId,
+        })
+        .select("*")
+        .single();
+
+      if (error) throw error;
+      savingsGoalRows.push(data);
+      maps.savingsGoals.set(goal.id, data.id);
+      counts.savingsGoals.imported += 1;
+    }
+
+    const savingsContributionRows = [...(context.savingsContributions ?? [])];
+    for (const contribution of normalizedBackup.savingsContributions ?? []) {
+      const mappedSavingsGoalId = getMappedId(maps.savingsGoals, contribution.savings_goal_id);
+      if (!mappedSavingsGoalId) {
+        counts.savingsContributions.skipped += 1;
+        continue;
+      }
+
+      const mappedOwnerProfileId = getMappedId(
+        maps.householdProfiles,
+        contribution.owner_profile_id,
+      );
+      const mappedContribution = {
+        ...contribution,
+        savings_goal_id: mappedSavingsGoalId,
+        owner_profile_id: mappedOwnerProfileId,
+      };
+      const existing = findSavingsContributionMatch(mappedContribution, savingsContributionRows);
+      if (existing) {
+        counts.savingsContributions.skipped += 1;
+        continue;
+      }
+
+      const { data, error } = await client
+        .from("savings_contributions")
+        .insert({
+          household_id: householdId,
+          savings_goal_id: mappedSavingsGoalId,
+          owner_profile_id: mappedOwnerProfileId,
+          contribution_date: contribution.contribution_date,
+          month_key: contribution.month_key,
+          amount: Number(contribution.amount || 0),
+          contribution_type: contribution.contribution_type,
+          notes: contribution.notes ?? "",
+          imported_local_id: contribution.imported_local_id ?? contribution.id,
+        })
+        .select("*")
+        .single();
+
+      if (error) throw error;
+      savingsContributionRows.push(data);
+      counts.savingsContributions.imported += 1;
+    }
+
+    const cashAccountRows = [...(context.cashAccounts ?? [])];
+    for (const account of normalizedBackup.cashAccounts ?? []) {
+      const mappedOwnerProfileId = getMappedId(maps.householdProfiles, account.owner_profile_id);
+      const mappedAccount = { ...account, owner_profile_id: mappedOwnerProfileId };
+      const existing = findCashAccountMatch(mappedAccount, cashAccountRows);
+      if (existing) {
+        maps.cashAccounts.set(account.id, existing.id);
+        counts.cashAccounts.skipped += 1;
+        continue;
+      }
+
+      const importedLocalId = account.imported_local_id ?? account.id;
+      const { data, error } = await client
+        .from("cash_accounts")
+        .insert({
+          household_id: householdId,
+          name: account.name,
+          account_type: account.account_type,
+          owner_profile_id: mappedOwnerProfileId,
+          institution_name: account.institution_name ?? "",
+          is_active: account.is_active ?? true,
+          notes: account.notes ?? "",
+          imported_local_id: importedLocalId,
+        })
+        .select("*")
+        .single();
+
+      if (error) throw error;
+      cashAccountRows.push(data);
+      maps.cashAccounts.set(account.id, data.id);
+      counts.cashAccounts.imported += 1;
+    }
+
+    const accountBalanceSnapshotRows = [...(context.accountBalanceSnapshots ?? [])];
+    for (const snapshot of normalizedBackup.accountBalanceSnapshots ?? []) {
+      const mappedCashAccountId = getMappedId(maps.cashAccounts, snapshot.cash_account_id);
+      if (!mappedCashAccountId) {
+        counts.accountBalanceSnapshots.skipped += 1;
+        continue;
+      }
+
+      const mappedOwnerProfileId = getMappedId(maps.householdProfiles, snapshot.owner_profile_id);
+      const mappedSnapshot = {
+        ...snapshot,
+        cash_account_id: mappedCashAccountId,
+        owner_profile_id: mappedOwnerProfileId,
+      };
+      const existing = findAccountBalanceSnapshotMatch(mappedSnapshot, accountBalanceSnapshotRows);
+      if (existing) {
+        counts.accountBalanceSnapshots.skipped += 1;
+        continue;
+      }
+
+      const { data, error } = await client
+        .from("account_balance_snapshots")
+        .insert({
+          household_id: householdId,
+          cash_account_id: mappedCashAccountId,
+          owner_profile_id: mappedOwnerProfileId,
+          snapshot_date: snapshot.snapshot_date,
+          month_key: snapshot.month_key,
+          balance_amount: Number(snapshot.balance_amount),
+          notes: snapshot.notes ?? "",
+          imported_local_id: snapshot.imported_local_id ?? snapshot.id,
+        })
+        .select("*")
+        .single();
+
+      if (error) throw error;
+      accountBalanceSnapshotRows.push(data);
+      counts.accountBalanceSnapshots.imported += 1;
+    }
+
+    const liabilityAccountRows = [...(context.liabilityAccounts ?? [])];
+    for (const account of normalizedBackup.liabilityAccounts ?? []) {
+      const mappedOwnerProfileId = getMappedId(maps.householdProfiles, account.owner_profile_id);
+      const mappedLinkedCardId = getMappedId(maps.creditCards, account.linked_credit_card_id);
+      const mappedAccount = {
+        ...account,
+        owner_profile_id: mappedOwnerProfileId,
+        linked_credit_card_id: mappedLinkedCardId,
+      };
+      const existing = findLiabilityAccountMatch(mappedAccount, liabilityAccountRows);
+      if (existing) {
+        maps.liabilityAccounts.set(account.id, existing.id);
+        counts.liabilityAccounts.skipped += 1;
+        continue;
+      }
+
+      const { data, error } = await client
+        .from("liability_accounts")
+        .insert({
+          household_id: householdId,
+          name: account.name,
+          liability_type: account.liability_type,
+          owner_profile_id: mappedOwnerProfileId,
+          linked_credit_card_id: mappedLinkedCardId,
+          institution_name: account.institution_name ?? "",
+          interest_rate:
+            account.interest_rate === null || account.interest_rate === undefined
+              ? null
+              : Number(account.interest_rate),
+          minimum_payment: Number(account.minimum_payment || 0),
+          due_day: account.due_day ?? null,
+          is_active: account.is_active ?? true,
+          notes: account.notes ?? "",
+          imported_local_id: account.imported_local_id ?? account.id,
+        })
+        .select("*")
+        .single();
+
+      if (error) throw error;
+      liabilityAccountRows.push(data);
+      maps.liabilityAccounts.set(account.id, data.id);
+      counts.liabilityAccounts.imported += 1;
+    }
+
+    const liabilityBalanceSnapshotRows = [...(context.liabilityBalanceSnapshots ?? [])];
+    for (const snapshot of normalizedBackup.liabilityBalanceSnapshots ?? []) {
+      const mappedLiabilityAccountId = getMappedId(
+        maps.liabilityAccounts,
+        snapshot.liability_account_id,
+      );
+      if (!mappedLiabilityAccountId) {
+        counts.liabilityBalanceSnapshots.skipped += 1;
+        continue;
+      }
+
+      const mappedOwnerProfileId = getMappedId(maps.householdProfiles, snapshot.owner_profile_id);
+      const mappedSnapshot = {
+        ...snapshot,
+        liability_account_id: mappedLiabilityAccountId,
+        owner_profile_id: mappedOwnerProfileId,
+      };
+      const existing = findLiabilityBalanceSnapshotMatch(
+        mappedSnapshot,
+        liabilityBalanceSnapshotRows,
+      );
+      if (existing) {
+        counts.liabilityBalanceSnapshots.skipped += 1;
+        continue;
+      }
+
+      const { data, error } = await client
+        .from("liability_balance_snapshots")
+        .insert({
+          household_id: householdId,
+          liability_account_id: mappedLiabilityAccountId,
+          owner_profile_id: mappedOwnerProfileId,
+          snapshot_date: snapshot.snapshot_date,
+          month_key: snapshot.month_key,
+          balance_amount: Number(snapshot.balance_amount),
+          notes: snapshot.notes ?? "",
+          imported_local_id: snapshot.imported_local_id ?? snapshot.id,
+        })
+        .select("*")
+        .single();
+
+      if (error) throw error;
+      liabilityBalanceSnapshotRows.push(data);
+      counts.liabilityBalanceSnapshots.imported += 1;
+    }
+
     return {
       ok: true,
       message: "Supabase backup imported successfully.",
@@ -1404,7 +1842,20 @@ function validateSupabaseBackup(backup) {
   const normalizedBackup = {
     ...backup,
     householdProfiles: Array.isArray(backup.householdProfiles) ? backup.householdProfiles : [],
+    monthlyCardBalances: Array.isArray(backup.monthlyCardBalances)
+      ? backup.monthlyCardBalances
+      : [],
     cardStatements: Array.isArray(backup.cardStatements) ? backup.cardStatements : [],
+    budgetCategories: Array.isArray(backup.budgetCategories) ? backup.budgetCategories : [],
+    transactions: Array.isArray(backup.transactions) ? backup.transactions : [],
+    transactionSplits: Array.isArray(backup.transactionSplits) ? backup.transactionSplits : [],
+    recurringPayments: Array.isArray(backup.recurringPayments) ? backup.recurringPayments : [],
+    recurringPaymentInstances: Array.isArray(backup.recurringPaymentInstances)
+      ? backup.recurringPaymentInstances
+      : [],
+    monthlyCloseReviews: Array.isArray(backup.monthlyCloseReviews)
+      ? backup.monthlyCloseReviews
+      : [],
     incomeSources: Array.isArray(backup.incomeSources) ? backup.incomeSources : [],
     incomeEntries: Array.isArray(backup.incomeEntries) ? backup.incomeEntries : [],
     savingsGoals: Array.isArray(backup.savingsGoals) ? backup.savingsGoals : [],
@@ -1421,16 +1872,19 @@ function validateSupabaseBackup(backup) {
       : [],
   };
 
-  const missingSection = EXPECTED_SUPABASE_SECTIONS.find(
-    (section) => !(section in normalizedBackup),
-  );
+  const requiredSections =
+    Number(normalizedBackup.version) >= 8
+      ? EXPECTED_SUPABASE_SECTIONS
+      : EXPECTED_SUPABASE_SECTIONS.filter((section) => section !== "monthlyCloseReviews");
+
+  const missingSection = requiredSections.find((section) => !(section in normalizedBackup));
   if (missingSection) {
     return invalid(`Supabase backup is missing ${missingSection}.`);
   }
 
-  const invalidArraySection = EXPECTED_SUPABASE_SECTIONS.filter(
-    (section) => section !== "household",
-  ).find((section) => !Array.isArray(normalizedBackup[section]));
+  const invalidArraySection = requiredSections
+    .filter((section) => section !== "household")
+    .find((section) => !Array.isArray(normalizedBackup[section]));
   if (invalidArraySection) {
     return invalid(`Supabase backup ${invalidArraySection} must be an array.`);
   }
@@ -1461,6 +1915,10 @@ function validateSupabaseBackup(backup) {
     return invalid("Supabase backup contains an invalid monthly balance record.");
   }
 
+  if (!normalizedBackup.cardStatements.every(isValidSupabaseCardStatement)) {
+    return invalid("Supabase backup contains an invalid card statement record.");
+  }
+
   if (!normalizedBackup.budgetCategories.every(isValidSupabaseBudgetCategory)) {
     return invalid("Supabase backup contains an invalid budget category record.");
   }
@@ -1479,6 +1937,26 @@ function validateSupabaseBackup(backup) {
 
   if (!normalizedBackup.recurringPaymentInstances.every(isValidSupabaseRecurringInstance)) {
     return invalid("Supabase backup contains an invalid recurring payment instance record.");
+  }
+
+  if (!normalizedBackup.monthlyCloseReviews.every(isValidSupabaseMonthlyCloseReview)) {
+    return invalid("Supabase backup contains an invalid monthly close review record.");
+  }
+
+  if (!normalizedBackup.incomeSources.every(isValidSupabaseIncomeSource)) {
+    return invalid("Supabase backup contains an invalid income source record.");
+  }
+
+  if (!normalizedBackup.incomeEntries.every(isValidSupabaseIncomeEntry)) {
+    return invalid("Supabase backup contains an invalid income entry record.");
+  }
+
+  if (!normalizedBackup.savingsGoals.every(isValidSupabaseSavingsGoal)) {
+    return invalid("Supabase backup contains an invalid savings goal record.");
+  }
+
+  if (!normalizedBackup.savingsContributions.every(isValidSupabaseSavingsContribution)) {
+    return invalid("Supabase backup contains an invalid savings contribution record.");
   }
 
   if (!normalizedBackup.cashAccounts.every(isValidSupabaseCashAccount)) {
@@ -1504,6 +1982,8 @@ function validateSupabaseBackup(backup) {
     normalizedBackup.transactions.map((transaction) => transaction.id),
   );
   const recurringIds = new Set(normalizedBackup.recurringPayments.map((payment) => payment.id));
+  const incomeSourceIds = new Set(normalizedBackup.incomeSources.map((source) => source.id));
+  const savingsGoalIds = new Set(normalizedBackup.savingsGoals.map((goal) => goal.id));
   const cashAccountIds = new Set(normalizedBackup.cashAccounts.map((account) => account.id));
   const liabilityAccountIds = new Set(
     normalizedBackup.liabilityAccounts.map((account) => account.id),
@@ -1559,6 +2039,53 @@ function validateSupabaseBackup(backup) {
     )
   ) {
     return invalid("Supabase backup has recurring instances with invalid related records.");
+  }
+
+  if (
+    !normalizedBackup.monthlyCloseReviews.every(
+      (review) =>
+        review.household_id === normalizedBackup.household.id &&
+        isValidMonthKey(review.month_key) &&
+        ["in_progress", "reviewed"].includes(review.status ?? "in_progress"),
+    )
+  ) {
+    return invalid("Supabase backup has monthly close reviews with invalid household or status.");
+  }
+
+  if (
+    !normalizedBackup.incomeSources.every((source) =>
+      nullableSetHas(profileIds, source.owner_profile_id),
+    )
+  ) {
+    return invalid("Supabase backup has income sources that reference missing household profiles.");
+  }
+
+  if (
+    !normalizedBackup.incomeEntries.every(
+      (entry) =>
+        incomeSourceIds.has(entry.income_source_id) &&
+        nullableSetHas(profileIds, entry.owner_profile_id),
+    )
+  ) {
+    return invalid("Supabase backup has income entries with invalid related records.");
+  }
+
+  if (
+    !normalizedBackup.savingsGoals.every((goal) =>
+      nullableSetHas(profileIds, goal.owner_profile_id),
+    )
+  ) {
+    return invalid("Supabase backup has savings goals that reference missing household profiles.");
+  }
+
+  if (
+    !normalizedBackup.savingsContributions.every(
+      (contribution) =>
+        savingsGoalIds.has(contribution.savings_goal_id) &&
+        nullableSetHas(profileIds, contribution.owner_profile_id),
+    )
+  ) {
+    return invalid("Supabase backup has savings contributions with invalid related records.");
   }
 
   if (
@@ -1620,15 +2147,34 @@ async function loadSupabaseImportContext(householdId) {
     transactionSplitsResult,
     recurringPaymentsResult,
     recurringInstancesResult,
+    monthlyCloseReviewsResult,
+    incomeSourcesResult,
+    incomeEntriesResult,
+    savingsGoalsResult,
+    savingsContributionsResult,
+    cashAccountsResult,
+    accountBalanceSnapshotsResult,
+    liabilityAccountsResult,
+    liabilityBalanceSnapshotsResult,
   ] = await Promise.all([
     client.from("household_profiles").select("*").eq("household_id", householdId),
     client.from("credit_cards").select("*").eq("household_id", householdId),
     client.from("monthly_card_balances").select("*").eq("household_id", householdId),
+    client.from("card_statements").select("*").eq("household_id", householdId),
     client.from("budget_categories").select("*").eq("household_id", householdId),
     client.from("transactions").select("*").eq("household_id", householdId),
     client.from("transaction_splits").select("*").eq("household_id", householdId),
     client.from("recurring_payments").select("*").eq("household_id", householdId),
     client.from("recurring_payment_instances").select("*").eq("household_id", householdId),
+    client.from("monthly_close_reviews").select("*").eq("household_id", householdId),
+    client.from("income_sources").select("*").eq("household_id", householdId),
+    client.from("income_entries").select("*").eq("household_id", householdId),
+    client.from("savings_goals").select("*").eq("household_id", householdId),
+    client.from("savings_contributions").select("*").eq("household_id", householdId),
+    client.from("cash_accounts").select("*").eq("household_id", householdId),
+    client.from("account_balance_snapshots").select("*").eq("household_id", householdId),
+    client.from("liability_accounts").select("*").eq("household_id", householdId),
+    client.from("liability_balance_snapshots").select("*").eq("household_id", householdId),
   ]);
 
   const error = [
@@ -1641,6 +2187,15 @@ async function loadSupabaseImportContext(householdId) {
     transactionSplitsResult,
     recurringPaymentsResult,
     recurringInstancesResult,
+    monthlyCloseReviewsResult,
+    incomeSourcesResult,
+    incomeEntriesResult,
+    savingsGoalsResult,
+    savingsContributionsResult,
+    cashAccountsResult,
+    accountBalanceSnapshotsResult,
+    liabilityAccountsResult,
+    liabilityBalanceSnapshotsResult,
   ].find((result) => result?.error)?.error;
 
   if (error) throw error;
@@ -1655,6 +2210,15 @@ async function loadSupabaseImportContext(householdId) {
     transactionSplits: transactionSplitsResult?.data ?? [],
     recurringPayments: recurringPaymentsResult?.data ?? [],
     recurringPaymentInstances: recurringInstancesResult?.data ?? [],
+    monthlyCloseReviews: monthlyCloseReviewsResult?.data ?? [],
+    incomeSources: incomeSourcesResult?.data ?? [],
+    incomeEntries: incomeEntriesResult?.data ?? [],
+    savingsGoals: savingsGoalsResult?.data ?? [],
+    savingsContributions: savingsContributionsResult?.data ?? [],
+    cashAccounts: cashAccountsResult?.data ?? [],
+    accountBalanceSnapshots: accountBalanceSnapshotsResult?.data ?? [],
+    liabilityAccounts: liabilityAccountsResult?.data ?? [],
+    liabilityBalanceSnapshots: liabilityBalanceSnapshotsResult?.data ?? [],
   };
 }
 
@@ -1666,6 +2230,15 @@ function buildSupabaseImportPreview(backup, context) {
   const categoryRows = [...context.budgetCategories];
   const recurringRows = [...context.recurringPayments];
   const transactionRows = [...context.transactions];
+  const monthlyCloseReviewRows = [...(context.monthlyCloseReviews ?? [])];
+  const incomeSourceRows = [...(context.incomeSources ?? [])];
+  const incomeEntryRows = [...(context.incomeEntries ?? [])];
+  const savingsGoalRows = [...(context.savingsGoals ?? [])];
+  const savingsContributionRows = [...(context.savingsContributions ?? [])];
+  const cashAccountRows = [...(context.cashAccounts ?? [])];
+  const accountBalanceSnapshotRows = [...(context.accountBalanceSnapshots ?? [])];
+  const liabilityAccountRows = [...(context.liabilityAccounts ?? [])];
+  const liabilityBalanceSnapshotRows = [...(context.liabilityBalanceSnapshots ?? [])];
 
   backup.householdProfiles.forEach((profile) => {
     const existing = findHouseholdProfileMatch(profile, profileRows);
@@ -1717,6 +2290,145 @@ function buildSupabaseImportPreview(backup, context) {
       recurringRows.push({ ...recurringPayment, id: previewId });
       counts.recurringPayments.imported += 1;
     }
+  });
+
+  backup.monthlyCloseReviews.forEach((review) => {
+    const existing = monthlyCloseReviewRows.find((row) => row.month_key === review.month_key);
+    if (existing) {
+      counts.monthlyCloseReviews.skipped += 1;
+      return;
+    }
+
+    monthlyCloseReviewRows.push(review);
+    counts.monthlyCloseReviews.imported += 1;
+  });
+
+  backup.incomeSources.forEach((source) => {
+    const existing = findIncomeSourceMatch(source, incomeSourceRows);
+    if (existing) {
+      maps.incomeSources.set(source.id, existing.id);
+      counts.incomeSources.skipped += 1;
+      return;
+    }
+
+    const previewId = `new:${source.id}`;
+    maps.incomeSources.set(source.id, previewId);
+    incomeSourceRows.push({ ...source, id: previewId });
+    counts.incomeSources.imported += 1;
+  });
+
+  backup.incomeEntries.forEach((entry) => {
+    const mappedEntry = {
+      ...entry,
+      income_source_id: getMappedId(maps.incomeSources, entry.income_source_id),
+      owner_profile_id: getMappedId(maps.householdProfiles, entry.owner_profile_id),
+    };
+    const existing = findIncomeEntryMatch(mappedEntry, incomeEntryRows);
+    if (!mappedEntry.income_source_id || existing) {
+      counts.incomeEntries.skipped += 1;
+      return;
+    }
+
+    incomeEntryRows.push(mappedEntry);
+    counts.incomeEntries.imported += 1;
+  });
+
+  backup.savingsGoals.forEach((goal) => {
+    const existing = findSavingsGoalMatch(goal, savingsGoalRows);
+    if (existing) {
+      maps.savingsGoals.set(goal.id, existing.id);
+      counts.savingsGoals.skipped += 1;
+      return;
+    }
+
+    const previewId = `new:${goal.id}`;
+    maps.savingsGoals.set(goal.id, previewId);
+    savingsGoalRows.push({ ...goal, id: previewId });
+    counts.savingsGoals.imported += 1;
+  });
+
+  backup.savingsContributions.forEach((contribution) => {
+    const mappedContribution = {
+      ...contribution,
+      savings_goal_id: getMappedId(maps.savingsGoals, contribution.savings_goal_id),
+      owner_profile_id: getMappedId(maps.householdProfiles, contribution.owner_profile_id),
+    };
+    const existing = findSavingsContributionMatch(mappedContribution, savingsContributionRows);
+    if (!mappedContribution.savings_goal_id || existing) {
+      counts.savingsContributions.skipped += 1;
+      return;
+    }
+
+    savingsContributionRows.push(mappedContribution);
+    counts.savingsContributions.imported += 1;
+  });
+
+  backup.cashAccounts.forEach((account) => {
+    const existing = findCashAccountMatch(account, cashAccountRows);
+    if (existing) {
+      maps.cashAccounts.set(account.id, existing.id);
+      counts.cashAccounts.skipped += 1;
+      return;
+    }
+
+    const previewId = `new:${account.id}`;
+    maps.cashAccounts.set(account.id, previewId);
+    cashAccountRows.push({ ...account, id: previewId });
+    counts.cashAccounts.imported += 1;
+  });
+
+  backup.accountBalanceSnapshots.forEach((snapshot) => {
+    const mappedSnapshot = {
+      ...snapshot,
+      cash_account_id: getMappedId(maps.cashAccounts, snapshot.cash_account_id),
+      owner_profile_id: getMappedId(maps.householdProfiles, snapshot.owner_profile_id),
+    };
+    const existing = findAccountBalanceSnapshotMatch(mappedSnapshot, accountBalanceSnapshotRows);
+    if (!mappedSnapshot.cash_account_id || existing) {
+      counts.accountBalanceSnapshots.skipped += 1;
+      return;
+    }
+
+    accountBalanceSnapshotRows.push(mappedSnapshot);
+    counts.accountBalanceSnapshots.imported += 1;
+  });
+
+  backup.liabilityAccounts.forEach((account) => {
+    const mappedAccount = {
+      ...account,
+      linked_credit_card_id: getMappedId(maps.creditCards, account.linked_credit_card_id),
+      owner_profile_id: getMappedId(maps.householdProfiles, account.owner_profile_id),
+    };
+    const existing = findLiabilityAccountMatch(mappedAccount, liabilityAccountRows);
+    if (existing) {
+      maps.liabilityAccounts.set(account.id, existing.id);
+      counts.liabilityAccounts.skipped += 1;
+      return;
+    }
+
+    const previewId = `new:${account.id}`;
+    maps.liabilityAccounts.set(account.id, previewId);
+    liabilityAccountRows.push({ ...mappedAccount, id: previewId });
+    counts.liabilityAccounts.imported += 1;
+  });
+
+  backup.liabilityBalanceSnapshots.forEach((snapshot) => {
+    const mappedSnapshot = {
+      ...snapshot,
+      liability_account_id: getMappedId(maps.liabilityAccounts, snapshot.liability_account_id),
+      owner_profile_id: getMappedId(maps.householdProfiles, snapshot.owner_profile_id),
+    };
+    const existing = findLiabilityBalanceSnapshotMatch(
+      mappedSnapshot,
+      liabilityBalanceSnapshotRows,
+    );
+    if (!mappedSnapshot.liability_account_id || existing) {
+      counts.liabilityBalanceSnapshots.skipped += 1;
+      return;
+    }
+
+    liabilityBalanceSnapshotRows.push(mappedSnapshot);
+    counts.liabilityBalanceSnapshots.imported += 1;
   });
 
   backup.transactions.forEach((transaction) => {
@@ -1804,6 +2516,10 @@ function createImportMaps() {
     budgetCategories: new Map(),
     transactions: new Map(),
     recurringPayments: new Map(),
+    incomeSources: new Map(),
+    savingsGoals: new Map(),
+    cashAccounts: new Map(),
+    liabilityAccounts: new Map(),
   };
 }
 
@@ -1818,6 +2534,15 @@ function createImportCounts() {
     transactionSplits: { imported: 0, skipped: 0 },
     recurringPayments: { imported: 0, skipped: 0 },
     recurringPaymentInstances: { imported: 0, skipped: 0 },
+    monthlyCloseReviews: { imported: 0, skipped: 0 },
+    incomeSources: { imported: 0, skipped: 0 },
+    incomeEntries: { imported: 0, skipped: 0 },
+    savingsGoals: { imported: 0, skipped: 0 },
+    savingsContributions: { imported: 0, skipped: 0 },
+    cashAccounts: { imported: 0, skipped: 0 },
+    accountBalanceSnapshots: { imported: 0, skipped: 0 },
+    liabilityAccounts: { imported: 0, skipped: 0 },
+    liabilityBalanceSnapshots: { imported: 0, skipped: 0 },
   };
 }
 
@@ -1863,6 +2588,110 @@ function findRecurringPaymentMatch(recurringPayment, rows) {
         String(row.due_day),
         moneyKey(row.estimated_amount),
         normalizeText(row.payment_method),
+      ].join("|") === target,
+  );
+}
+
+function findIncomeSourceMatch(source, rows) {
+  const target = [normalizeText(source.name), normalizeText(source.source_type)].join("|");
+  return rows.find(
+    (row) => [normalizeText(row.name), normalizeText(row.source_type)].join("|") === target,
+  );
+}
+
+function findIncomeEntryMatch(entry, rows) {
+  const target = [
+    normalizeText(entry.income_source_id),
+    normalizeText(entry.entry_date),
+    normalizeText(entry.month_key),
+    moneyKey(entry.amount),
+    normalizeText(entry.entry_type),
+  ].join("|");
+  return rows.find(
+    (row) =>
+      [
+        normalizeText(row.income_source_id),
+        normalizeText(row.entry_date),
+        normalizeText(row.month_key),
+        moneyKey(row.amount),
+        normalizeText(row.entry_type),
+      ].join("|") === target,
+  );
+}
+
+function findSavingsGoalMatch(goal, rows) {
+  const target = [normalizeText(goal.name), normalizeText(goal.goal_type)].join("|");
+  return rows.find(
+    (row) => [normalizeText(row.name), normalizeText(row.goal_type)].join("|") === target,
+  );
+}
+
+function findSavingsContributionMatch(contribution, rows) {
+  const target = [
+    normalizeText(contribution.savings_goal_id),
+    normalizeText(contribution.contribution_date),
+    normalizeText(contribution.month_key),
+    moneyKey(contribution.amount),
+    normalizeText(contribution.contribution_type),
+  ].join("|");
+  return rows.find(
+    (row) =>
+      [
+        normalizeText(row.savings_goal_id),
+        normalizeText(row.contribution_date),
+        normalizeText(row.month_key),
+        moneyKey(row.amount),
+        normalizeText(row.contribution_type),
+      ].join("|") === target,
+  );
+}
+
+function findCashAccountMatch(account, rows) {
+  const target = [normalizeText(account.name), normalizeText(account.account_type)].join("|");
+  return rows.find(
+    (row) => [normalizeText(row.name), normalizeText(row.account_type)].join("|") === target,
+  );
+}
+
+function findAccountBalanceSnapshotMatch(snapshot, rows) {
+  const target = [
+    normalizeText(snapshot.cash_account_id),
+    normalizeText(snapshot.snapshot_date),
+    normalizeText(snapshot.month_key),
+    moneyKey(snapshot.balance_amount),
+  ].join("|");
+  return rows.find(
+    (row) =>
+      [
+        normalizeText(row.cash_account_id),
+        normalizeText(row.snapshot_date),
+        normalizeText(row.month_key),
+        moneyKey(row.balance_amount),
+      ].join("|") === target,
+  );
+}
+
+function findLiabilityAccountMatch(account, rows) {
+  const target = [normalizeText(account.name), normalizeText(account.liability_type)].join("|");
+  return rows.find(
+    (row) => [normalizeText(row.name), normalizeText(row.liability_type)].join("|") === target,
+  );
+}
+
+function findLiabilityBalanceSnapshotMatch(snapshot, rows) {
+  const target = [
+    normalizeText(snapshot.liability_account_id),
+    normalizeText(snapshot.snapshot_date),
+    normalizeText(snapshot.month_key),
+    moneyKey(snapshot.balance_amount),
+  ].join("|");
+  return rows.find(
+    (row) =>
+      [
+        normalizeText(row.liability_account_id),
+        normalizeText(row.snapshot_date),
+        normalizeText(row.month_key),
+        moneyKey(row.balance_amount),
       ].join("|") === target,
   );
 }
@@ -2012,6 +2841,22 @@ function isValidSupabaseMonthlyBalance(balance) {
   );
 }
 
+function isValidSupabaseCardStatement(statement) {
+  return (
+    statement &&
+    typeof statement === "object" &&
+    isValidUuidLike(statement.id) &&
+    isValidUuidLike(statement.credit_card_id) &&
+    isValidMonthKey(statement.month_key) &&
+    isNonNegativeNumber(statement.statement_balance) &&
+    isNonNegativeNumber(statement.minimum_payment) &&
+    isNonNegativeNumber(statement.paid_amount) &&
+    typeof statement.autopay_enabled === "boolean" &&
+    typeof statement.confirmation_number === "string" &&
+    typeof statement.status === "string"
+  );
+}
+
 function isValidSupabaseBudgetCategory(category) {
   return (
     category &&
@@ -2088,6 +2933,83 @@ function isValidSupabaseRecurringInstance(instance) {
     (instance.paid_date === null ||
       instance.paid_date === undefined ||
       typeof instance.paid_date === "string")
+  );
+}
+
+function isValidSupabaseMonthlyCloseReview(review) {
+  return (
+    review &&
+    typeof review === "object" &&
+    isValidUuidLike(review.id) &&
+    isValidUuidLike(review.household_id) &&
+    isValidMonthKey(review.month_key) &&
+    ["in_progress", "reviewed"].includes(review.status ?? "in_progress") &&
+    (review.manual_checks === null ||
+      review.manual_checks === undefined ||
+      (typeof review.manual_checks === "object" && !Array.isArray(review.manual_checks))) &&
+    typeof (review.notes ?? "") === "string"
+  );
+}
+
+function isValidSupabaseIncomeSource(source) {
+  return (
+    source &&
+    typeof source === "object" &&
+    isValidUuidLike(source.id) &&
+    typeof source.name === "string" &&
+    source.name.trim().length > 0 &&
+    typeof source.source_type === "string" &&
+    isNullableUuidLike(source.owner_profile_id) &&
+    isNonNegativeNumber(source.expected_amount) &&
+    typeof source.frequency === "string" &&
+    typeof source.is_active === "boolean" &&
+    typeof source.notes === "string"
+  );
+}
+
+function isValidSupabaseIncomeEntry(entry) {
+  return (
+    entry &&
+    typeof entry === "object" &&
+    isValidUuidLike(entry.id) &&
+    isValidUuidLike(entry.income_source_id) &&
+    isNullableUuidLike(entry.owner_profile_id) &&
+    isValidDateKey(entry.entry_date) &&
+    isValidMonthKey(entry.month_key) &&
+    Number.isFinite(Number(entry.amount)) &&
+    typeof entry.entry_type === "string" &&
+    typeof entry.notes === "string"
+  );
+}
+
+function isValidSupabaseSavingsGoal(goal) {
+  return (
+    goal &&
+    typeof goal === "object" &&
+    isValidUuidLike(goal.id) &&
+    typeof goal.name === "string" &&
+    goal.name.trim().length > 0 &&
+    typeof goal.goal_type === "string" &&
+    isNonNegativeNumber(goal.target_amount) &&
+    Number.isFinite(Number(goal.starting_amount)) &&
+    isNullableUuidLike(goal.owner_profile_id) &&
+    typeof goal.is_active === "boolean" &&
+    typeof goal.notes === "string"
+  );
+}
+
+function isValidSupabaseSavingsContribution(contribution) {
+  return (
+    contribution &&
+    typeof contribution === "object" &&
+    isValidUuidLike(contribution.id) &&
+    isValidUuidLike(contribution.savings_goal_id) &&
+    isNullableUuidLike(contribution.owner_profile_id) &&
+    isValidDateKey(contribution.contribution_date) &&
+    isValidMonthKey(contribution.month_key) &&
+    Number.isFinite(Number(contribution.amount)) &&
+    typeof contribution.contribution_type === "string" &&
+    typeof contribution.notes === "string"
   );
 }
 
