@@ -1,17 +1,46 @@
-import { UserCircle } from "lucide-react";
+import { LogOut, UserCircle } from "lucide-react";
+import { useState } from "react";
+import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
+import { dispatchNavigation } from "../../../lib/navigationTargets.js";
 import { useHouseholds } from "../../households/HouseholdProvider.jsx";
 import { formatAuthEventLabel, getAccountIdentity } from "../authAccountDisplayUtils.js";
-import { ACCOUNT_SECURITY_ACTIONS } from "../accountSecurityActions.js";
 import { useAuth } from "../AuthProvider.jsx";
+import { signOut, signOutEverywhere } from "../authService.js";
 import { getSessionSummary } from "../authSessionUtils.js";
 
 export default function AccountSettings() {
-  const { session, user, authEvent } = useAuth();
+  const { session, user, authEvent, setError } = useAuth();
   const { activeHousehold, activeMembership } = useHouseholds();
+  const [signingOutMode, setSigningOutMode] = useState("");
   const identity = getAccountIdentity(user, activeMembership, activeHousehold);
   const sessionSummary = getSessionSummary(session, authEvent);
   const authEventLabel = formatAuthEventLabel(authEvent);
+  const isSigningOut = Boolean(signingOutMode);
+
+  async function handleSignOutCurrentDevice() {
+    setSigningOutMode("current");
+    setError("");
+
+    try {
+      await signOut();
+    } catch (error) {
+      setError(error?.message || "Could not sign out.");
+      setSigningOutMode("");
+    }
+  }
+
+  async function handleSignOutEverywhere() {
+    setSigningOutMode("everywhere");
+    setError("");
+
+    try {
+      await signOutEverywhere();
+    } catch (error) {
+      setError(error?.message || "Could not sign out from all devices.");
+      setSigningOutMode("");
+    }
+  }
 
   return (
     <section className="grid gap-6">
@@ -40,6 +69,12 @@ export default function AccountSettings() {
           <p className="text-sm font-medium text-text-muted">Session</p>
           <h3 className="mt-1 text-lg font-semibold text-text-main">{sessionSummary.label}</h3>
           <p className="mt-2 text-sm text-text-muted">{sessionSummary.description}</p>
+          <p className="mt-4 text-sm text-text-muted">
+            Active household:{" "}
+            <span className="font-semibold text-text-main">
+              {activeHousehold?.name || "No active household"}
+            </span>
+          </p>
           {authEventLabel ? (
             <p className="mt-4 rounded-xl bg-app-background px-3 py-2 text-xs font-semibold text-text-muted">
               Latest auth event: {authEventLabel}
@@ -50,34 +85,46 @@ export default function AccountSettings() {
         <Card>
           <div className="border-b border-app-border p-5">
             <p className="text-sm font-medium text-text-muted">Security controls</p>
-            <h3 className="mt-1 text-lg font-semibold text-text-main">Planned account actions</h3>
+            <h3 className="mt-1 text-lg font-semibold text-text-main">Sign-out controls</h3>
             <p className="mt-2 text-sm text-text-muted">
-              This page is the safe home for future account security actions. The controls below are
-              placeholders until the underlying auth flows are added.
+              Use these controls to end your current session or sign out from all devices.
             </p>
           </div>
-          <div className="divide-y divide-app-border">
-            {ACCOUNT_SECURITY_ACTIONS.map((action) => {
-              const Icon = action.icon;
-              return (
-                <div key={action.id} className="flex items-start gap-3 p-5">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-app-background text-text-muted">
-                    <Icon size={18} aria-hidden="true" />
-                  </div>
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-sm font-semibold text-text-main">{action.title}</p>
-                      {action.status ? (
-                        <span className="rounded-full border border-app-border bg-app-background px-2 py-0.5 text-[0.68rem] font-semibold uppercase tracking-wide text-text-muted">
-                          {action.status}
-                        </span>
-                      ) : null}
-                    </div>
-                    <p className="mt-1 text-sm text-text-muted">{action.description}</p>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="grid gap-3 p-5">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleSignOutCurrentDevice}
+              disabled={isSigningOut}
+            >
+              <LogOut size={16} aria-hidden="true" />
+              {signingOutMode === "current" ? "Signing out..." : "Sign out current device"}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleSignOutEverywhere}
+              disabled={isSigningOut}
+            >
+              <LogOut size={16} aria-hidden="true" />
+              {signingOutMode === "everywhere"
+                ? "Signing out everywhere..."
+                : "Sign out from all devices"}
+            </Button>
+            <div className="rounded-xl border border-app-border bg-app-background p-3">
+              <p className="text-sm font-semibold text-text-main">Need account deletion?</p>
+              <p className="mt-1 text-sm text-text-muted">
+                Open Backup & Restore for account deletion and household finance reset actions.
+              </p>
+              <Button
+                type="button"
+                variant="ghost"
+                className="mt-2"
+                onClick={() => dispatchNavigation("backup")}
+              >
+                Go to Backup & Restore
+              </Button>
+            </div>
           </div>
         </Card>
       </section>

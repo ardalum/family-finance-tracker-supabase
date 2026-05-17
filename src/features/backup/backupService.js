@@ -1,5 +1,6 @@
 import { readAppData, resetAppData, writeAppData } from "../../lib/storage/appStorage.js";
 import { supabase } from "../../lib/supabase/client.js";
+import { deleteHouseholdFinanceDataSecurely } from "./secureDeletionService.js";
 
 const BACKUP_APP_NAME = "Credit Card Tracker";
 const SUPPORTED_SCHEMA_VERSION = 1;
@@ -10,6 +11,7 @@ const EXPECTED_SUPABASE_SECTIONS = [
   "householdProfiles",
   "creditCards",
   "monthlyCardBalances",
+  "cardStatements",
   "budgetCategories",
   "transactions",
   "transactionSplits",
@@ -336,52 +338,8 @@ export async function exportSupabaseExcel(householdId, activeHousehold) {
   }
 }
 
-export async function deleteActiveHouseholdFinanceData(householdId) {
-  if (!householdId) {
-    return {
-      ok: false,
-      message: "Choose an active household before deleting data.",
-    };
-  }
-
-  try {
-    const client = requireSupabase();
-    const deleteOrder = [
-      "recurring_payment_instances",
-      "transaction_splits",
-      "transactions",
-      "monthly_card_balances",
-      "recurring_payments",
-      "credit_cards",
-      "budget_categories",
-      "household_profiles",
-    ];
-
-    for (const table of deleteOrder) {
-      const { error } = await client.from(table).delete().eq("household_id", householdId);
-      if (error) throw error;
-    }
-
-    const { error: householdError } = await client
-      .from("households")
-      .update({
-        setup_complete: false,
-        setup_completed_at: null,
-      })
-      .eq("id", householdId);
-
-    if (householdError) throw householdError;
-
-    return {
-      ok: true,
-      message: "Household finance data deleted. You have been signed out.",
-    };
-  } catch (error) {
-    return {
-      ok: false,
-      message: error.message || "Could not delete household data.",
-    };
-  }
+export async function resetSupabaseHouseholdFinanceData(householdId, confirmation) {
+  return deleteHouseholdFinanceDataSecurely(householdId, confirmation);
 }
 
 export async function deleteSupabaseAccount(householdId, confirmation) {

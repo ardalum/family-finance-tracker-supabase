@@ -12,6 +12,7 @@ import AppSettings from "../features/settings/components/AppSettings.jsx";
 import HelpSupport from "../features/support/components/HelpSupport.jsx";
 import ReleaseNotes from "../features/support/components/ReleaseNotes.jsx";
 import SpendingTracker from "../features/spending/components/SpendingTracker.jsx";
+import AccountSettings from "../features/auth/components/AccountSettings.jsx";
 
 export default function AppViewRenderer({
   activeView,
@@ -37,6 +38,7 @@ export default function AppViewRenderer({
         <HouseholdSettings {...householdSettingsProps} />
       ) : null}
       {activeView === "app-settings" ? <AppSettings /> : null}
+      {activeView === "account-settings" ? <AccountSettings /> : null}
       {activeView === "about" ? <AboutWalletFlow /> : null}
       {activeView === "privacy-policy" ? <PrivacyPolicy /> : null}
       {activeView === "terms-of-use" ? <TermsOfUse /> : null}

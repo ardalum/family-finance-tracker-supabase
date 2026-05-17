@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
-import Select from "../../../components/ui/Select.jsx";
 import {
   currencies,
   defaultAppSettings,
@@ -51,6 +50,9 @@ export default function AppSettings() {
               These settings stay in this browser. They do not change household data, backups,
               cards, budgets, transactions, or recurring payments.
             </p>
+            <p className="mt-2 text-sm text-text-muted">
+              These display preferences apply when pages refresh or re-render.
+            </p>
             {saved ? (
               <p className="mt-2 text-sm font-semibold text-status-successDark">Saved</p>
             ) : null}
@@ -76,56 +78,19 @@ export default function AppSettings() {
         </SettingsSection>
 
         <SettingsSection
-          title="Date & Month Settings"
-          description="Choose date and default month preferences."
+          title="Planned preferences"
+          description="These settings are not active yet in WalletFlow."
         >
-          <Select
-            label="Default selected month"
-            value={settings.defaultMonthBehavior}
-            onChange={(event) => updateSetting("defaultMonthBehavior", event.target.value)}
-          >
-            <option value="current">Current month</option>
-            <option value="last-selected">Last selected month</option>
-          </Select>
-          <Select
-            label="Date format"
-            value={settings.dateFormat}
-            onChange={(event) => updateSetting("dateFormat", event.target.value)}
-          >
-            <option value="MM/DD/YYYY">MM/DD/YYYY</option>
-            <option value="YYYY-MM-DD">YYYY-MM-DD</option>
-          </Select>
-        </SettingsSection>
-
-        <SettingsSection
-          title="Display Settings"
-          description="Adjust how dense tables and alerts feel."
-        >
-          <Select
-            label="Table density"
-            value={settings.tableDensity}
-            onChange={(event) => updateSetting("tableDensity", event.target.value)}
-          >
-            <option value="comfortable">Comfortable</option>
-            <option value="compact">Compact</option>
-          </Select>
-          <ToggleRow
-            label="Show zero-balance warning"
-            description="Keep zero-balance cards visually called out."
-            checked={settings.showZeroBalanceWarning}
-            onChange={(checked) => updateSetting("showZeroBalanceWarning", checked)}
-          />
-        </SettingsSection>
-
-        <SettingsSection title="Theme" description="WalletFlow currently uses a clean light theme.">
-          <div className="rounded-2xl border border-app-border bg-app-background p-4">
-            <p className="text-sm font-semibold text-text-main">Light mode</p>
-            <p className="mt-1 text-sm text-text-muted">Current mode</p>
-          </div>
-          <div className="rounded-2xl border border-app-border bg-app-muted p-4">
-            <p className="text-sm font-semibold text-text-soft">Dark mode</p>
-            <p className="mt-1 text-sm text-text-muted">Coming soon</p>
-          </div>
+          <ul className="list-disc space-y-2 pl-5 text-sm text-text-muted">
+            <li>Date format</li>
+            <li>Table density</li>
+            <li>Default selected month behavior</li>
+            <li>Show zero-balance warning</li>
+            <li>Dark mode</li>
+          </ul>
+          <p className="text-sm text-text-muted">
+            These are listed for roadmap transparency only and are not currently configurable.
+          </p>
         </SettingsSection>
       </div>
     </section>

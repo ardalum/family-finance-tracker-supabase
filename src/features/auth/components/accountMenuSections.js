@@ -17,7 +17,7 @@ export const accountMenuSections = [
       {
         icon: UserCircle,
         label: "Account Settings",
-        description: "Profile identity, session details, and planned security controls.",
+        description: "Profile identity, session details, and sign-out controls.",
         view: AUTH_VIEW_TARGETS.accountSettings,
       },
       {

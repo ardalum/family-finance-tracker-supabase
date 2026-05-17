@@ -4,6 +4,7 @@ export const secondaryViewIds = [
   "backup",
   "household-settings",
   "app-settings",
+  "account-settings",
   "about",
   "privacy-policy",
   "terms-of-use",
