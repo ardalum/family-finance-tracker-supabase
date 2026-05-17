@@ -62,6 +62,8 @@ test("flags missing income, savings, account snapshots, and liability snapshots"
   assert.equal(result.needsUpdate.accounts, true);
   assert.equal(result.needsUpdate.liabilities, true);
   assert.equal(result.needsUpdate.netWorth, true);
+  assert.equal(result.needsUpdate.netWorthIncomplete, false);
+  assert.equal(result.hasAnySummaryData, false);
 });
 
 test("does not flag advisories when selected month data exists", () => {
@@ -87,4 +89,32 @@ test("does not flag advisories when selected month data exists", () => {
   assert.equal(result.needsUpdate.accounts, false);
   assert.equal(result.needsUpdate.liabilities, false);
   assert.equal(result.needsUpdate.netWorth, false);
+  assert.equal(result.needsUpdate.netWorthIncomplete, false);
+  assert.equal(result.hasAnySummaryData, true);
+});
+
+test("income-only month keeps balance advisories and marks net-worth incomplete", () => {
+  const result = summarizeFinancialPositionForMonth({
+    selectedMonth: monthKey,
+    transactions: [],
+    recurringPayments: [],
+    recurringStatusByMonth: {},
+    incomeEntries: [{ monthKey, amount: 500 }],
+    savingsContributions: [],
+    cashAccounts: [{ supabaseId: "acc-1", name: "Checking", accountType: "checking" }],
+    accountBalanceSnapshots: [
+      { cashAccountId: "acc-1", monthKey, snapshotDate: "2026-05-10", balanceAmount: 1000 },
+    ],
+    liabilityAccounts: [],
+    liabilityBalanceSnapshots: [],
+  });
+
+  assert.equal(result.incomeTotal, 500);
+  assert.equal(result.needsUpdate.income, false);
+  assert.equal(result.needsUpdate.savings, true);
+  assert.equal(result.needsUpdate.accounts, false);
+  assert.equal(result.needsUpdate.liabilities, true);
+  assert.equal(result.needsUpdate.netWorth, false);
+  assert.equal(result.needsUpdate.netWorthIncomplete, true);
+  assert.equal(result.hasAnySummaryData, true);
 });

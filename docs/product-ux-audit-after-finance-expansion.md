@@ -222,3 +222,11 @@ Future recommendation:
 
 - Financial Position hub MVP is now implemented as a secondary page and discoverable from Dashboard quick actions and Account menu Tools.
 - Main nav remains unchanged; Dashboard and Insights responsibilities remain intentionally separate.
+
+## Phase 42 Note
+
+- Financial Position hub UX hardening is now in place for clearer missing-data, loading, and error communication.
+- Remaining IA concerns are unchanged:
+  - dashboard quick-action density should be monitored
+  - account-menu tool sprawl may need later consolidation
+  - hub should stay secondary until adoption data supports any nav promotion

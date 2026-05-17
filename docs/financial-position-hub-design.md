@@ -17,6 +17,15 @@ Scope: Design-only plan for a future Financial Position hub (no implementation i
   - no new schema or stored hub dataset (all values are composed from existing sources)
   - hub remains secondary (not main nav) until adoption is validated
 
+## Phase 42 Status Update
+
+- Financial Position hub hardening is now complete for MVP readiness:
+  - clearer loading/error/empty states
+  - clearer missing-data advisory behavior
+  - explicit copy reinforcing that the hub summarizes existing data only
+- Additional clarification is now included for partial net-worth readiness when only one snapshot side (assets or liabilities) is present.
+- Hub remains intentionally non-blocking and advisory-focused.
+
 ## 1. Problem Statement
 
 WalletFlow now includes Income, Savings, Accounts, Liabilities, and Net Worth as separate secondary tools. Each tool works on its own, but the overall household financial-position workflow is scattered across multiple entry points.

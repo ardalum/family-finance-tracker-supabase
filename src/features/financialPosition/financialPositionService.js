@@ -79,6 +79,12 @@ export function summarizeFinancialPositionForMonth({
     (snapshot) => snapshot.monthKey === selectedMonth,
   );
   const hasNetWorthSnapshotData = hasAccountSnapshotsForMonth || hasLiabilitySnapshotsForMonth;
+  const hasCompleteNetWorthInputs = hasAccountSnapshotsForMonth && hasLiabilitySnapshotsForMonth;
+  const hasAnySummaryData =
+    hasIncomeForMonth ||
+    hasSavingsForMonth ||
+    hasAccountSnapshotsForMonth ||
+    hasLiabilitySnapshotsForMonth;
 
   return {
     incomeTotal,
@@ -93,6 +99,8 @@ export function summarizeFinancialPositionForMonth({
       accounts: !hasAccountSnapshotsForMonth,
       liabilities: !hasLiabilitySnapshotsForMonth,
       netWorth: !hasNetWorthSnapshotData,
+      netWorthIncomplete: hasNetWorthSnapshotData && !hasCompleteNetWorthInputs,
     },
+    hasAnySummaryData,
   };
 }
