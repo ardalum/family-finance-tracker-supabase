@@ -85,6 +85,13 @@ npm run clean
 
 The clean command removes `dist`, `coverage`, and the Vite dependency cache.
 
+Before production deployment, complete:
+
+- `npm run verify`
+- `docs/production-qa-checklist.md`
+
+For destructive actions (account deletion, household finance deletion, backup import), use test accounts and test data only.
+
 For documentation-only changes, local app testing is not usually needed. GitHub Actions checks are enough unless the documentation change includes commands that should be manually verified.
 
 ## Pull request routine

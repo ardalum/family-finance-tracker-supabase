@@ -20,6 +20,12 @@ describe("statement cycle utils", () => {
     assert.equal(cycle.paymentDueDate, "2099-06-10");
   });
 
+  it("falls back to calculated payment due date when stored due date is missing", () => {
+    const card = { dueDay: 15, statementClosingDay: 30 };
+    const cycle = getStatementCycleDates("2099-05", card, {});
+    assert.equal(cycle.paymentDueDate, "2099-06-15");
+  });
+
   it("calculates days until due from payment due date", () => {
     const card = { dueDay: 15 };
     const days = getStatementDaysUntilDue(

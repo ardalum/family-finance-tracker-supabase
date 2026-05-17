@@ -20,4 +20,31 @@ describe("delete household finance data order", () => {
       assert.equal(source.includes(`"${table}"`), true);
     }
   });
+
+  it("keeps the full expected delete order and confirmation phrase", () => {
+    const source = readFileSync(
+      "supabase/functions/delete-household-finance-data/index.ts",
+      "utf8",
+    );
+    const expectedOrder = [
+      "activity_log",
+      "recurring_payment_instances",
+      "transaction_splits",
+      "transactions",
+      "card_statements",
+      "monthly_card_balances",
+      "monthly_category_budgets",
+      "categories",
+      "recurring_payments",
+      "credit_cards",
+      "budget_categories",
+      "household_profiles",
+    ];
+
+    for (const table of expectedOrder) {
+      assert.equal(source.includes(`"${table}"`), true);
+    }
+
+    assert.equal(source.includes("DELETE FINANCE DATA"), true);
+  });
 });

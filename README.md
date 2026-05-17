@@ -7,6 +7,7 @@ A Vite + React personal finance tracker backed by Supabase. The app supports Sup
 - `docs/local-workflow.md` covers Node version, install commands, local checks, pull request routine, and project checks.
 - `docs/frontend-architecture-plan.md` tracks the frontend architecture cleanup plan.
 - `docs/auth-session-qa.md` contains the authentication and session QA checklist.
+- `docs/production-qa-checklist.md` contains the release QA checklist and smoke test workflow.
 
 ## Install
 
@@ -156,6 +157,8 @@ npx supabase functions deploy delete-account
 npx supabase functions deploy delete-household-finance-data
 ```
 
+If either function changes, redeploy that function before production smoke testing.
+
 The Edge Functions need these server-side environment variables/secrets:
 
 ```text
@@ -178,6 +181,8 @@ Keep `SUPABASE_SERVICE_ROLE_KEY` only in Supabase Edge Function secrets. Do not 
 Supabase JSON backups and Excel exports contain household finance data such as card names, last four digits, balances, transactions, notes, budgets, recurring payments, and household profile labels. Store exported files privately.
 
 Only import backup files you trust. The current importer validates the backup structure and merges records, but exported finance data is still sensitive.
+
+Test destructive flows (account deletion, household finance deletion, and risky imports) only with test accounts and test data.
 
 ## Deploy To Vercel
 
@@ -214,11 +219,13 @@ After deployment, update Supabase Auth URL settings:
 - [ ] No service role key is present in frontend code or frontend env vars.
 - [ ] `delete-account` Edge Function is deployed.
 - [ ] `delete-household-finance-data` Edge Function is deployed.
+- [ ] If Edge Function code changed, each changed function has been redeployed.
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` is configured only as an Edge Function secret.
 - [ ] `ALLOWED_ORIGINS` is configured for Edge Functions.
 - [ ] Supabase Auth production site URL and redirect URLs are configured.
 - [ ] Email confirmation and password reset settings are configured in Supabase.
 - [ ] Test signup, first-time setup, export, import, household finance deletion, and account deletion in a non-production test account.
+- [ ] `docs/production-qa-checklist.md` has been completed for this release.
 - [ ] Confirm `.env.local` is not committed.
 
 ## Legacy LocalStorage Tools

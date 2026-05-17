@@ -178,5 +178,15 @@ describe("spending service", () => {
         splits: [{ amount: 50 }, { amount: 50 }],
       }),
     );
+
+    assert.throws(
+      () =>
+        validateSplitReplacementInput({
+          splitMode: true,
+          amount: 100.01,
+          splits: [{ amount: 50 }, { amount: 50 }],
+        }),
+      /must equal the transaction amount/i,
+    );
   });
 });
