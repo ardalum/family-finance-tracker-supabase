@@ -1,6 +1,6 @@
 ﻿# Bug Backlog
 
-Last updated: 2026-05-17 (Phase 58 calendar month-grid and mobile polish)
+Last updated: 2026-05-18 (Phase 59 calendar hardening and event-accuracy QA)
 
 ## Triage Legend
 
@@ -32,6 +32,8 @@ Last updated: 2026-05-17 (Phase 58 calendar month-grid and mobile polish)
 
 ## Fixed (recent notable)
 
+- Calendar month-close marker now uses month-end date and selected-day/filter behavior is hardened for event-focused review (`fixed`, Phase 59)
+- Calendar event pipeline now de-duplicates duplicate event IDs defensively and keeps day overflow/mobile-indicator counts deterministic (`fixed`, Phase 59)
 - Calendar upgraded from agenda-only list to true month-grid default view with responsive selected-day panel (`fixed`, Phase 58)
 - Encoding/replacement-character cleanup across UI/docs (`fixed`, Phase 55)
 - Monthly-balance no-balance action reduced to compact inline controls (`fixed`, Phase 55)

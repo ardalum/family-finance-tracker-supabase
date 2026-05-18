@@ -10,6 +10,8 @@ import {
   buildCalendarEventsForMonth,
   buildCalendarMonthGrid,
   getCalendarEmptyState,
+  getCalendarDayMobileIndicatorCount,
+  getCalendarDayOverflowCount,
   getInitialSelectedCalendarDate,
   getSelectedDateEvents,
 } from "../calendarService.js";
@@ -89,6 +91,13 @@ export default function Calendar({
       setSelectedDate(normalized);
     }
   }, [selectedMonth, filteredEvents, selectedDate]);
+
+  useEffect(() => {
+    const hasSelectedDateEvent = filteredEvents.some((event) => event.date === selectedDate);
+    if (!hasSelectedDateEvent && filteredEvents.length > 0) {
+      setSelectedDate(getInitialSelectedCalendarDate(selectedMonth, filteredEvents));
+    }
+  }, [activeFilter, filteredEvents, selectedDate, selectedMonth]);
 
   const monthGrid = useMemo(
     () => buildCalendarMonthGrid(selectedMonth, filteredEvents),
@@ -208,15 +217,19 @@ export default function Calendar({
               {monthGrid.days.map((day) => {
                 const isSelected = day.date === selectedDate;
                 const cellEvents = getSelectedDateEvents(filteredEvents, day.date);
+                const overflowCount = getCalendarDayOverflowCount(day.eventCount, 2);
+                const mobileIndicatorCount = getCalendarDayMobileIndicatorCount(day.eventCount, 3);
                 return (
                   <button
                     key={day.date}
                     type="button"
-                    className={`min-h-16 rounded-lg border p-1.5 text-left transition sm:min-h-20 sm:p-2 ${
+                    className={`min-h-16 overflow-hidden rounded-lg border p-1.5 text-left transition sm:min-h-20 sm:p-2 ${
                       day.inSelectedMonth
                         ? "border-app-border bg-app-background"
                         : "border-app-border/60 bg-app-muted/50 text-text-muted"
-                    } ${isSelected ? "ring-2 ring-brand-primary/40" : ""}`}
+                    } ${isSelected ? "ring-2 ring-brand-primary/70" : ""} ${
+                      day.isToday ? "border-status-infoDark/60" : ""
+                    }`}
                     onClick={() => setSelectedDate(day.date)}
                   >
                     <div className="flex items-center justify-between">
@@ -245,16 +258,14 @@ export default function Calendar({
                             {event.title}
                           </span>
                         ))}
-                        {day.eventCount > 2 ? (
-                          <span className="text-[10px] text-text-muted">
-                            +{day.eventCount - 2} more
-                          </span>
+                        {overflowCount > 0 ? (
+                          <span className="text-[10px] text-text-muted">+{overflowCount} more</span>
                         ) : null}
                       </div>
                     ) : null}
                     {day.inSelectedMonth && day.eventCount > 0 ? (
                       <div className="mt-1 flex gap-1 sm:hidden">
-                        {Array.from({ length: Math.min(day.eventCount, 3) }).map((_, index) => (
+                        {Array.from({ length: mobileIndicatorCount }).map((_, index) => (
                           <span
                             key={`${day.date}-dot-${index}`}
                             className="h-1.5 w-1.5 rounded-full bg-text-muted"
@@ -274,7 +285,9 @@ export default function Calendar({
               {Number(selectedDate.slice(8, 10))}
             </h3>
             {selectedDateEvents.length === 0 ? (
-              <p className="mt-3 text-sm text-text-muted">No events for this day.</p>
+              <p className="mt-3 rounded-lg border border-dashed border-app-border p-3 text-sm text-text-muted">
+                No events for this day.
+              </p>
             ) : (
               <div className="mt-3 grid gap-3">
                 {selectedDateEvents.map((event) => (

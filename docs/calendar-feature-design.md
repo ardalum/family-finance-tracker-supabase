@@ -1,12 +1,13 @@
 # Calendar Feature Design
 
-Last updated: 2026-05-17 (Phase 58 month-grid and responsive mobile layout)
+Last updated: 2026-05-18 (Phase 59 hardening and event-accuracy QA)
 
 ## Implementation status
 
 - Phase 56: design and source audit completed.
 - Phase 57: MVP started and implemented as a secondary `calendar` view using existing data only (no schema changes, no calendar persistence table).
 - Phase 58: real month-grid calendar implemented as default view with responsive mobile layout and selected-day agenda panel.
+- Phase 59: calendar hardening completed for event-accuracy QA, month-end close-date marker, duplicate-event ID safety, and selected-day/filter behavior polish.
 - Calendar now includes:
   - month grid (Sun-Sat columns, aligned leading/trailing days)
   - event indicators/counts in day cells
@@ -17,6 +18,7 @@ Last updated: 2026-05-17 (Phase 58 month-grid and responsive mobile layout)
   - no external calendar sync/export
   - no custom calendar events
   - no recurring-income prediction engine
+  - no custom persisted calendar records (events remain derived from existing WalletFlow data)
 
 ## 1) Problem statement
 
@@ -275,5 +277,5 @@ No new database table for MVP. Compose events from existing data with a normaliz
 
 - **Phase 57**: Calendar MVP from existing data (secondary view, agenda/list) - completed
 - **Phase 58**: Calendar hardening + mobile polish - completed
-- **Phase 59**: Calendar dashboard integration and entry-point tuning
+- **Phase 59**: Calendar event-accuracy QA and hardening - completed
 - **Phase 60**: Reminders/export integration design

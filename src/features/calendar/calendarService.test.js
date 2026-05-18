@@ -9,6 +9,8 @@ import {
   buildMonthlyCloseEvents,
   buildRecurringBillEvents,
   getCalendarGridDays,
+  getCalendarDayMobileIndicatorCount,
+  getCalendarDayOverflowCount,
   getEventCountsByDate,
   getEventsForDate,
   getInitialSelectedCalendarDate,
@@ -46,6 +48,32 @@ describe("calendar service", () => {
     assert.equal(events.length, 1);
     assert.equal(events[0].source, "card-due");
     assert.equal(events[0].targetView, "credit-cards");
+    assert.equal(events[0].date, "2026-06-10");
+    assert.equal(events[0].amount, 120);
+    assert.equal(events[0].status, "upcoming");
+  });
+
+  it("marks card due events paid/past due/not-checked accurately", () => {
+    const events = buildCardDueEvents({
+      creditCards: [
+        { ...CARD, id: "card_paid", name: "Paid Card" },
+        { ...CARD, id: "card_past_due", name: "Past Due Card" },
+        { ...CARD, id: "card_not_checked", name: "Not Checked Card" },
+      ],
+      monthlyBalances: {
+        card_paid: { balance: 120, paid: true, paidAmount: 120 },
+        card_past_due: { balance: 90, paid: false, paymentDueDate: "2026-05-05" },
+      },
+      selectedMonth: "2026-05",
+      today: new Date("2026-05-20T00:00:00"),
+    });
+
+    assert.equal(events.find((event) => event.sourceId === "card_paid")?.status, "paid");
+    assert.equal(events.find((event) => event.sourceId === "card_past_due")?.status, "past due");
+    assert.equal(
+      events.find((event) => event.sourceId === "card_not_checked")?.status,
+      "not checked",
+    );
   });
 
   it("builds statement close events", () => {
@@ -59,6 +87,18 @@ describe("calendar service", () => {
     assert.equal(events.length, 1);
     assert.equal(events[0].source, "card-statement");
     assert.equal(events[0].targetView, "credit-cards");
+    assert.equal(events[0].date, "2026-05-02");
+    assert.equal(events[0].status, "not yet");
+  });
+
+  it("marks statement close as generated after close date", () => {
+    const events = buildCardStatementEvents({
+      creditCards: [CARD],
+      monthlyBalances: {},
+      selectedMonth: "2026-05",
+      today: new Date("2026-05-03T00:00:00"),
+    });
+    assert.equal(events[0].status, "generated");
   });
 
   it("builds recurring bill events with recurring target view", () => {
@@ -82,6 +122,33 @@ describe("calendar service", () => {
     assert.equal(events.length, 1);
     assert.equal(events[0].source, "recurring-bill");
     assert.equal(events[0].targetView, "recurring");
+    assert.equal(events[0].date, "2026-05-05");
+    assert.equal(events[0].amount, 1000);
+  });
+
+  it("uses actual recurring amount for variable bill when available", () => {
+    const events = buildRecurringBillEvents({
+      recurringPayments: [
+        {
+          id: "rec_var",
+          name: "Electric",
+          dueDay: 12,
+          estimatedAmount: 90,
+          billType: "variable",
+          startMonth: "2026-01",
+          active: true,
+        },
+      ],
+      recurringStatusByMonth: {
+        "2026-05": {
+          rec_var: { status: "paid", actualAmount: 140 },
+        },
+      },
+      selectedMonth: "2026-05",
+      today: new Date("2026-05-20T00:00:00"),
+    });
+    assert.equal(events[0].amount, 140);
+    assert.equal(events[0].status, "paid");
   });
 
   it("builds income events with income target view", () => {
@@ -103,6 +170,9 @@ describe("calendar service", () => {
     assert.equal(events.length, 1);
     assert.equal(events[0].source, "income");
     assert.equal(events[0].targetView, "income");
+    assert.equal(events[0].date, "2026-05-15");
+    assert.equal(events[0].amount, 1500);
+    assert.equal(events[0].title, "Employer");
   });
 
   it("builds monthly close event", () => {
@@ -115,6 +185,21 @@ describe("calendar service", () => {
     assert.equal(events[0].source, "month-close");
     assert.equal(events[0].status, "reviewed");
     assert.equal(events[0].targetView, "dashboard");
+    assert.equal(events[0].date, "2026-05-31");
+  });
+
+  it("keeps month close in progress/not reviewed when applicable", () => {
+    const inProgress = buildMonthlyCloseEvents({
+      selectedMonth: "2026-02",
+      monthlyCloseReview: { monthKey: "2026-02", status: "in_progress" },
+    });
+    const notReviewed = buildMonthlyCloseEvents({
+      selectedMonth: "2026-02",
+      monthlyCloseReview: { monthKey: "2026-01", status: "reviewed" },
+    });
+    assert.equal(inProgress[0].status, "in progress");
+    assert.equal(inProgress[0].date, "2026-02-28");
+    assert.equal(notReviewed[0].status, "not reviewed");
   });
 
   it("groups events by date", () => {
@@ -244,6 +329,33 @@ describe("calendar service", () => {
     assert.equal(counts["2026-05-11"], 1);
   });
 
+  it("deduplicates events with duplicate IDs", () => {
+    const result = buildCalendarEventsForMonth({
+      selectedMonth: "2026-05",
+      incomeEntries: [
+        {
+          id: "income_dup",
+          incomeSourceId: "source_1",
+          monthKey: "2026-05",
+          entryDate: "2026-05-15",
+          amount: 100,
+          entryType: "other",
+        },
+        {
+          id: "income_dup",
+          incomeSourceId: "source_1",
+          monthKey: "2026-05",
+          entryDate: "2026-05-15",
+          amount: 100,
+          entryType: "other",
+        },
+      ],
+      incomeSources: [{ id: "source_1", name: "Income Source" }],
+    });
+    const ids = result.events.map((event) => event.id);
+    assert.equal(ids.length, new Set(ids).size);
+  });
+
   it("returns initial selected date from month events and falls back to day one", () => {
     const withEvents = getInitialSelectedCalendarDate("2026-05", [
       {
@@ -279,5 +391,12 @@ describe("calendar service", () => {
     assert.equal(day.eventCount, 3);
     assert.equal(day.inSelectedMonth, true);
     assert.equal(day.isToday, true);
+  });
+
+  it("returns accurate overflow and mobile indicator counts", () => {
+    assert.equal(getCalendarDayOverflowCount(5, 2), 3);
+    assert.equal(getCalendarDayOverflowCount(2, 2), 0);
+    assert.equal(getCalendarDayMobileIndicatorCount(5, 3), 3);
+    assert.equal(getCalendarDayMobileIndicatorCount(2, 3), 2);
   });
 });

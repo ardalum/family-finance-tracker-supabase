@@ -71,10 +71,11 @@ export function buildCalendarEventsForMonth({
     ...incomeEvents,
     ...monthCloseEvents,
   ]);
+  const uniqueEvents = dedupeCalendarEventsById(allEvents);
 
   return {
-    events: allEvents,
-    groupedEvents: groupCalendarEventsByDate(allEvents),
+    events: uniqueEvents,
+    groupedEvents: groupCalendarEventsByDate(uniqueEvents),
   };
 }
 
@@ -199,7 +200,7 @@ export function buildIncomeEvents({ incomeEntries = [], incomeSources = [], sele
 
 export function buildMonthlyCloseEvents({ monthlyCloseReview, selectedMonth } = {}) {
   const monthKey = selectedMonth || getCurrentMonthKey();
-  const closeDate = `${monthKey}-28`;
+  const closeDate = getMonthEndIsoDate(monthKey);
   const matchesSelectedMonth = monthlyCloseReview?.monthKey === monthKey;
   const status = matchesSelectedMonth
     ? monthlyCloseReview?.status === "reviewed"
@@ -360,6 +361,18 @@ export function summarizeCalendarGridDay(date, monthKey, eventCountsByDate = {},
   };
 }
 
+export function getCalendarDayOverflowCount(eventCount = 0, visibleCount = 2) {
+  const normalizedEventCount = Number(eventCount) || 0;
+  const normalizedVisibleCount = Math.max(Number(visibleCount) || 0, 0);
+  return Math.max(normalizedEventCount - normalizedVisibleCount, 0);
+}
+
+export function getCalendarDayMobileIndicatorCount(eventCount = 0, maxIndicators = 3) {
+  const normalizedEventCount = Number(eventCount) || 0;
+  const normalizedMaxIndicators = Math.max(Number(maxIndicators) || 0, 0);
+  return Math.min(normalizedEventCount, normalizedMaxIndicators);
+}
+
 function severityWeight(severity) {
   const map = { danger: 1, warning: 2, info: 3, success: 4, muted: 5 };
   return map[severity] ?? 6;
@@ -394,4 +407,27 @@ function chunkArray(items = [], chunkSize = 1) {
     chunks.push(items.slice(index, index + chunkSize));
   }
   return chunks;
+}
+
+function getMonthEndIsoDate(monthKey) {
+  const [year, month] = String(monthKey || "")
+    .split("-")
+    .map(Number);
+  if (!Number.isFinite(year) || !Number.isFinite(month)) {
+    const fallbackMonth = getCurrentMonthKey();
+    return getMonthEndIsoDate(fallbackMonth);
+  }
+  const lastDay = new Date(year, month, 0).getDate();
+  return `${year}-${String(month).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
+}
+
+function dedupeCalendarEventsById(events = []) {
+  const seen = new Set();
+  const deduped = [];
+  for (const event of events) {
+    if (!event?.id || seen.has(event.id)) continue;
+    seen.add(event.id);
+    deduped.push(event);
+  }
+  return deduped;
 }
