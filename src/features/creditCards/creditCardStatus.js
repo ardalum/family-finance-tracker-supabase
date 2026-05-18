@@ -1,4 +1,4 @@
-import { getStatementDaysUntilDue } from "./statementCycleUtils.js";
+﻿import { getStatementDaysUntilDue } from "./statementCycleUtils.js";
 import { isStatementPaid } from "./statementPaymentUtils.js";
 
 export function getRowStatus(card, monthKey, entry) {
@@ -23,7 +23,7 @@ export function getRowStatus(card, monthKey, entry) {
 
   if (checkedNoBalance) {
     return {
-      label: "Checked � No balance",
+      label: "Checked - No balance",
       rowClass: "bg-white",
       badgeClass: "bg-status-successBg text-status-successDark ring-status-successBg",
       balanceClass: "text-text-main",

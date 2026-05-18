@@ -1,4 +1,4 @@
-# Production QA checklist
+﻿# Production QA checklist
 
 Use this checklist before each production release.
 
@@ -39,7 +39,7 @@ Use this checklist before each production release.
 - [ ] Monthly balances desktop table works.
 - [ ] Monthly balances mobile cards work.
 - [ ] Paid checkbox updates correctly.
-- [ ] Mark checked, no balance works.
+- [ ] Mark no balance action works.
 - [ ] Statement details save correctly.
 - [ ] Autopay fields save correctly.
 - [ ] Minimum payment and paid amount fields save correctly.
@@ -273,8 +273,8 @@ Use this checklist before each production release.
 ## Monthly Balance Check-State Safety
 
 - [ ] No monthly-balance entry renders Not checked.
-- [ ] Entering and then clearing balance does not leave false Checked � No balance.
-- [ ] Explicit Mark checked, no balance action renders Checked � No balance.
+- [ ] Entering and then clearing balance does not leave false Checked - No balance.
+- [ ] Explicit Mark no balance action renders Checked - No balance.
 
 ## Amount Input Typing UX
 

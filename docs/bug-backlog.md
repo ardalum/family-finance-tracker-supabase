@@ -1,6 +1,6 @@
-# Bug Backlog
+﻿# Bug Backlog
 
-Last updated: 2026-05-17 (Phase 54 monthly-balance checked/no-balance fix)
+Last updated: 2026-05-17 (Phase 55 encoding cleanup and no-balance action polish)
 
 ## Triage Legend
 
@@ -32,9 +32,11 @@ Last updated: 2026-05-17 (Phase 54 monthly-balance checked/no-balance fix)
 
 ## Fixed (recent notable)
 
+- Encoding/replacement-character cleanup across UI/docs (`fixed`, Phase 55)
+- Monthly-balance no-balance action reduced to compact inline controls (`fixed`, Phase 55)
 - Account menu Tools length reduced to compact entries (`fixed`, Phase 50)
 - Browser back/forward support added for app views via hash-backed navigation (`fixed`, Phase 50)
-- Monthly-balance false `Checked � No balance` state after clearing balance fixed (`fixed`, Phase 54 follow-up)
+- Monthly-balance false `Checked - No balance` state after clearing balance fixed (`fixed`, Phase 54 follow-up)
 - Numeric amount overwrite friction with default `0` reduced via focus-select behavior (`fixed`, Phase 50)
 - Restore/import validation hardening gaps for JSON shape safety (`fixed`, Phase 47)
 - Backup/export full-finance section coverage omissions (`fixed`, Phase 46)
@@ -61,7 +63,8 @@ Last updated: 2026-05-17 (Phase 54 monthly-balance checked/no-balance fix)
 - GitHub Pages environment secret drift (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) remains a deployment risk and requires release-by-release smoke verification.
 - Supabase migration drift between environments remains a deployment risk and requires pre-release migration list checks.
 
-## Phase 51/54 note
+## Phase 51/54/55 note
 
 - Phase 50 monthly-balance bug was re-opened by production follow-up and closed in Phase 54 after corrected regression coverage.
+- Phase 55 closed remaining no-balance action polish and encoding cleanup blockers.
 - Deployed-app confirmation remains pending until manual smoke evidence is captured in docs/post-fix-production-smoke-test-results.md.

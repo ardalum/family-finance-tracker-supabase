@@ -1,4 +1,4 @@
-# Production UX Bug Audit (Phases 50 and 54)
+﻿# Production UX Bug Audit (Phases 50, 54, and 55)
 
 Date: 2026-05-17  
 Project: WalletFlow / Family Finance Tracker  
@@ -13,7 +13,7 @@ Source: production smoke-test findings + targeted code audit
 ### High
 
 - Account menu Tools section was too long and overloaded with many detailed finance entries.
-- Monthly card balance status could show `Checked � No balance` after clearing/deleting balance input without explicit user intent.
+- Monthly card balance status could show `Checked - No balance` after clearing/deleting balance input without explicit user intent.
 - Numeric amount inputs with default `0` often required manual clearing before typing.
 
 ### Medium
@@ -64,12 +64,12 @@ Source: production smoke-test findings + targeted code audit
 - Monthly-balance status logic now separates implicit zero from explicit no-payment-needed:
   - `no entry` => `Not checked`
   - `balance <= 0 && paid false` => `Not checked`
-  - `balance <= 0 && paid true` => `Checked � No balance` (explicit marker)
+  - `balance <= 0 && paid true` => `Checked - No balance` (explicit marker)
 - Loader behavior no longer auto-promotes zero-balance unpaid rows into paid/checked state.
 - Upsert behavior now deletes/reset rows for zero/unpaid entries instead of persisting implicit checked state.
 - Clearing/resetting monthly balance now reliably returns status to `Not checked`.
-- Added explicit reset action for cards marked `Checked � No balance`.
-- Corrected label encoding to `Checked � No balance`.
+- Added explicit reset action for cards marked `Checked - No balance`.
+- Corrected label encoding to `Checked - No balance`.
 
 ### Deferred
 
@@ -86,13 +86,21 @@ Source: production smoke-test findings + targeted code audit
 6. In Monthly Balances:
    - no entry shows `Not checked`
    - enter positive balance then clear it and confirm returns to `Not checked`
-   - click `Mark checked, no balance` and confirm `Checked � No balance`
+   - click `Mark no balance` and confirm `Checked - No balance`
    - use reset action and confirm status returns to `Not checked`
 7. Focus numeric amount inputs containing `0` and confirm direct typing overwrites value without manual delete.
 8. Confirm no critical console errors during the above flows.
 
-## Phase 51/54 verification note
+## Phase 55 follow-up note
+
+- Phase 55 fixed remaining release blockers after Phase 54:
+  - no-balance row actions were reduced to compact inline controls.
+  - remaining mojibake/replacement-character text issues were corrected across UI/docs.
+  - encoding cleanliness regression test was added.
+
+## Phase 51/54/55 verification note
 
 - Phase 50 monthly-balance fix was re-opened after follow-up evidence.
 - Phase 54 applies the corrected service + status + reset behavior with targeted regression tests.
+- Phase 55 applies final UI/copy polish and encoding cleanup before release tagging.
 - Deployed-app manual pass/fail logging is tracked in `docs/post-fix-production-smoke-test-results.md`.

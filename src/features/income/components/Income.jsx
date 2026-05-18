@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+﻿import { useMemo, useState } from "react";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import EmptyState from "../../../components/ui/EmptyState.jsx";
@@ -380,7 +380,7 @@ export default function Income({
                   >
                     <p className="text-sm font-semibold text-text-main">{source.name}</p>
                     <p className="text-xs text-text-muted">
-                      {source.sourceType} � {source.frequency} �{" "}
+                      {source.sourceType} - {source.frequency} -{" "}
                       {source.isActive ? "Active" : "Inactive"}
                     </p>
                     <p className="mt-1 text-sm text-text-soft">
@@ -455,10 +455,10 @@ export default function Income({
                 >
                   <div>
                     <p className="text-sm font-semibold text-text-main">
-                      {formatCurrency(entry.amount)} � {entry.entryType}
+                      {formatCurrency(entry.amount)} - {entry.entryType}
                     </p>
                     <p className="text-xs text-text-muted">
-                      {entry.entryDate} � {sourceName}
+                      {entry.entryDate} - {sourceName}
                     </p>
                     {entry.notes ? (
                       <p className="mt-1 text-xs text-text-soft">{entry.notes}</p>

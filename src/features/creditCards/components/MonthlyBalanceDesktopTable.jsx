@@ -1,6 +1,5 @@
 import { Pencil } from "lucide-react";
 import LinkedCardName from "../../../components/shared/LinkedCardName.jsx";
-import Button from "../../../components/ui/Button.jsx";
 
 export default function MonthlyBalanceDesktopTable({
   rows,
@@ -88,26 +87,24 @@ export default function MonthlyBalanceDesktopTable({
                       />
                     </div>
                     {status.isNotChecked ? (
-                      <Button
+                      <button
                         type="button"
-                        variant="secondary"
-                        className="w-fit min-h-8 px-3 py-1 text-xs"
+                        className="w-fit text-xs font-medium text-brand-primary underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-brand-primary/20 disabled:cursor-not-allowed disabled:opacity-60"
                         onClick={() => onCheckedNoBalance(card.id)}
                         disabled={saving}
                       >
-                        Mark checked, no balance
-                      </Button>
+                        Mark no balance
+                      </button>
                     ) : null}
                     {status.isCheckedNoBalance ? (
-                      <Button
+                      <button
                         type="button"
-                        variant="ghost"
-                        className="w-fit min-h-8 px-3 py-1 text-xs"
+                        className="w-fit text-xs font-medium text-text-muted underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-brand-primary/20 disabled:cursor-not-allowed disabled:opacity-60"
                         onClick={() => onResetNoBalance(card.id)}
                         disabled={saving}
                       >
                         Reset to not checked
-                      </Button>
+                      </button>
                     ) : null}
                   </div>
                 </td>

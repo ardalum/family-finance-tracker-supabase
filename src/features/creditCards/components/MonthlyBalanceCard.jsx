@@ -91,18 +91,18 @@ export default function MonthlyBalanceCard({
           <Button
             type="button"
             variant="secondary"
-            className="w-fit min-h-8 px-3 py-1 text-xs"
+            className="w-fit min-h-8 px-2.5 py-1 text-xs"
             onClick={() => onCheckedNoBalance(card.id)}
             disabled={saving}
           >
-            Mark checked, no balance
+            Mark no balance
           </Button>
         ) : null}
         {status.isCheckedNoBalance ? (
           <Button
             type="button"
             variant="ghost"
-            className="w-fit min-h-8 px-3 py-1 text-xs"
+            className="w-fit min-h-8 px-2.5 py-1 text-xs"
             onClick={() => onResetNoBalance(card.id)}
             disabled={saving}
           >

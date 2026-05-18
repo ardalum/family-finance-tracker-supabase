@@ -1,4 +1,4 @@
-# Post-Fix Production Smoke Test Results (Phase 51)
+﻿# Post-Fix Production Smoke Test Results (Phase 51)
 
 ## 1) Test date
 
@@ -27,7 +27,7 @@
 | ----------------------------------------------- | ---------------- | ---------------------------------------------------------------- |
 | Account menu compact Tools entries              | PASS (code/test) | `accountMenuSections` updated + tests passing                    |
 | Browser back/forward hash navigation            | PASS (code/test) | `activeViewStorage` hash behavior tests passing                  |
-| Monthly-balance false `Checked � No balance`    | PASS (code/test) | `creditCardStatus` logic + tests passing                         |
+| Monthly-balance false `Checked - No balance`    | PASS (code/test) | `creditCardStatus` logic + tests passing                         |
 | Numeric input direct typing over default values | PASS (code/test) | shared `Input` focus-select + monthly balance input focus-select |
 | Deployed manual retest of above                 | PENDING          | requires hosted-app interactive pass                             |
 
@@ -73,9 +73,14 @@
 
 ## Phase 54 follow-up note
 
-- Production follow-up identified the monthly-balance `Checked � No balance` bug was not fully resolved in Phase 50.
-- Phase 54 adds a corrected loader/save/status fix so `Checked � No balance` appears only after explicit user action.
+- Production follow-up identified the monthly-balance `Checked - No balance` bug was not fully resolved in Phase 50.
+- Phase 54 adds a corrected loader/save/status fix so `Checked - No balance` appears only after explicit user action.
 - Deployed-app retest must include the Phase 54 checklist before final release sign-off.
+
+## Phase 55 follow-up note
+
+- Phase 55 fixed remaining UI/encoding blockers after Phase 54.
+- Deployed-app retest is required again before release tagging to confirm compact no-balance actions and no visible replacement characters.
 
 ## Manual deployed-app checklist status (Phase 51)
 
@@ -89,7 +94,7 @@
 | Direct hash URL opens correct view                                 | PENDING manual |
 | Invalid hash fails safely                                          | PENDING manual |
 | Card no-entry state is `Not checked`                               | PENDING manual |
-| Clearing card balance does not falsely show `Checked � No balance` | PENDING manual |
+| Clearing card balance does not falsely show `Checked - No balance` | PENDING manual |
 | Explicit no-payment-needed action works                            | PENDING manual |
 | Amount inputs allow direct typing over default values              | PENDING manual |
 | Cards workflow works                                               | PENDING manual |

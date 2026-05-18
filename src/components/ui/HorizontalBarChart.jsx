@@ -40,7 +40,7 @@ export default function HorizontalBarChart({
             </div>
             <p className="text-xs text-text-muted">
               {valueLabel}: {row.formattedValue ?? formatCurrency(value)}
-              {row.helperText ? ` � ${row.helperText}` : ""}
+              {row.helperText ? ` - ${row.helperText}` : ""}
             </p>
           </div>
         );

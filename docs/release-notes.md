@@ -1,4 +1,4 @@
-# Release Notes
+﻿# Release Notes
 
 ## Release Candidate - 2026-05-17 (Phases 48-52)
 
@@ -26,7 +26,7 @@
   - Financial Position
   - Backup & Restore
   - App Settings
-- Monthly card balance status no longer falsely shows `Checked � No balance` after clearing an entry.
+- Monthly card balance status no longer falsely shows `Checked - No balance` after clearing an entry.
 - Numeric amount inputs now support direct typing over default values via focus-select behavior.
 
 ### QA and Release Readiness
