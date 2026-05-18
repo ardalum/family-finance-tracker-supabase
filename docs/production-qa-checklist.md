@@ -134,6 +134,7 @@ Use this checklist before each production release.
 - [ ] Account snapshots do not change Income totals.
 - [ ] Account snapshots do not change Savings totals.
 - [ ] Account snapshots do not change Budget totals.
+- [ ] Cash account type labels display professional casing such as `Checking`, `Savings`, and `Cash`.
 
 ## Liabilities
 
@@ -158,6 +159,8 @@ Use this checklist before each production release.
 - [ ] When no liability data exists for selected month, `Confirm no liabilities` is available.
 - [ ] Confirmed no-liabilities state is shown and can be reset via `Reset liability review`.
 - [ ] False missing-liability warning is suppressed in Insights after confirmation.
+- [ ] False missing-liability wording is suppressed in Monthly Close, Net Worth, and Financial Position after confirmation.
+- [ ] Liability type labels display professional casing such as `Credit Card`, `Auto Loan`, and `Mortgage`.
 - [ ] If liability snapshots are later added for the month, snapshot-based liability behavior takes priority over no-liability confirmation messaging.
 
 ## Net Worth
@@ -169,6 +172,7 @@ Use this checklist before each production release.
 - [ ] Total liabilities reflects selected-month latest liability snapshots.
 - [ ] Net worth equals assets minus liabilities.
 - [ ] Empty state appears when account/debt snapshots are missing.
+- [ ] Confirmed no-liability months show confirmation-aware copy instead of continuing to warn about missing liability snapshots.
 - [ ] Assets-only and liabilities-only empty-state guidance is clear.
 - [ ] Credit-card debt appears only when entered as liability snapshots.
 - [ ] Savings goals are not counted unless represented by account snapshots.
@@ -204,6 +208,7 @@ Use this checklist before each production release.
 - [ ] Summary cards show income, savings, liquid cash, total debt, net worth, and estimated leftover.
 - [ ] Summary cards remain readable on mobile (labels and values are legible).
 - [ ] Needs update advisories appear when month data is missing.
+- [ ] No-liability confirmed months show confirmation-aware guidance instead of missing-liability warnings.
 - [ ] Needs update advisories are easy to scan on mobile.
 - [ ] Empty-state guidance appears when all summarized inputs are missing for selected month.
 - [ ] Net-worth partial-data advisory appears when only account or only liability snapshots exist.

@@ -1,6 +1,6 @@
 # Product Gap Audit
 
-Last updated: 2026-05-18 (Phase 71 liabilities/labels/insights stabilization)
+Last updated: 2026-05-18 (Phase 72 liability confirmation/label polish)
 
 ## Scope
 
@@ -39,8 +39,8 @@ Implemented (current release scope):
 - Data-entry friction gap: partially addressed in Phase 68 with global Quick Add transaction MVP; broader multi-entity quick entry and richer repeat-entry acceleration remain open.
 - Insights visualization gap: partially addressed in Phase 69 with varied chart types and actionable cards; deeper predictive guidance and automated recommendations remain open.
 - Privacy/trust polish gap: addressed for release scope in Phase 70 with clearer privacy/data handling copy, explicit backup/restore warnings, and stronger destructive-action wording. Additional visual/security UX depth remains future scope.
-- Liabilities review clarity gap: addressed in Phase 71 with month-level "No liabilities confirmed" prompt/status behavior and false-warning suppression coverage.
-- Display-label professionalism gap: addressed in Phase 71 by expanding enum/internal value humanization coverage without changing stored values.
+- Liabilities review clarity gap: addressed in Phases 71-72 with month-level "No liabilities confirmed" prompt/status behavior and false-warning suppression across Liabilities, Net Worth, Financial Position, Monthly Close, and Insights copy.
+- Display-label professionalism gap: addressed in Phases 71-72 by centralizing enum/internal value humanization coverage for cash account and liability types without changing stored values.
 - Insights composition readability gap: addressed in Phase 71 with overflow-safe layout plus conditional scrolling so normal category counts do not force unnecessary internal scroll.
 
 ## Release Blockers vs Product Gaps

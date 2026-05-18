@@ -61,6 +61,7 @@ export default function FinancialPosition({
   accountBalanceSnapshots = [],
   liabilityAccounts = [],
   liabilityBalanceSnapshots = [],
+  liabilityReviewConfirmed = false,
 }) {
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const summary = useMemo(
@@ -97,17 +98,21 @@ export default function FinancialPosition({
     if (summary.needsUpdate.savings) items.push("No savings contributions for this month yet.");
     if (summary.needsUpdate.accounts)
       items.push("No account balance snapshots for this month yet.");
-    if (summary.needsUpdate.liabilities) items.push("No liability snapshots for this month yet.");
+    if (summary.needsUpdate.liabilities && liabilityReviewConfirmed) {
+      items.push("No liabilities confirmed for this month.");
+    } else if (summary.needsUpdate.liabilities) {
+      items.push("No liability snapshots for this month yet.");
+    }
     if (summary.needsUpdate.netWorth) {
       items.push("Net worth review appears once account or liability snapshots are added.");
     }
-    if (summary.needsUpdate.netWorthIncomplete) {
+    if (summary.needsUpdate.netWorthIncomplete && !liabilityReviewConfirmed) {
       items.push(
         "Net worth is partially computed until both account and liability snapshots exist.",
       );
     }
     return items;
-  }, [summary.needsUpdate]);
+  }, [liabilityReviewConfirmed, summary.needsUpdate]);
 
   return (
     <section className="grid gap-4 sm:gap-6">
@@ -150,8 +155,9 @@ export default function FinancialPosition({
 
       {!loading && !error && !summary.hasAnySummaryData ? (
         <EmptyState>
-          No financial-position data found for this month yet. Add income, savings, account
-          snapshots, or liability snapshots to start your summary.
+          {liabilityReviewConfirmed
+            ? "No financial-position data found for this month yet. Add income, savings, or account snapshots to start your summary. No liabilities are confirmed for this month."
+            : "No financial-position data found for this month yet. Add income, savings, account snapshots, or liability snapshots to start your summary."}
         </EmptyState>
       ) : null}
 

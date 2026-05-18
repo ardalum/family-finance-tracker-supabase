@@ -196,6 +196,16 @@ function FinanceTrackerApp() {
     selectedMonth: selectedInsightsMonth,
   });
 
+  const { review: financialPositionMonthlyCloseReview } = useMonthlyCloseReview({
+    activeHouseholdId,
+    selectedMonth: selectedFinancialPositionMonth,
+  });
+
+  const { review: netWorthMonthlyCloseReview } = useMonthlyCloseReview({
+    activeHouseholdId,
+    selectedMonth: selectedNetWorthMonth,
+  });
+
   const {
     spendingTransactions,
     selectedSpendingMonth,
@@ -547,6 +557,12 @@ function FinanceTrackerApp() {
     liabilitiesMonthlyCloseSaving,
     insightsLiabilityReviewConfirmed: Boolean(
       insightsMonthlyCloseReview?.manualChecks?.reviewDebtBalances,
+    ),
+    financialPositionLiabilityReviewConfirmed: Boolean(
+      financialPositionMonthlyCloseReview?.manualChecks?.reviewDebtBalances,
+    ),
+    netWorthLiabilityReviewConfirmed: Boolean(
+      netWorthMonthlyCloseReview?.manualChecks?.reviewDebtBalances,
     ),
     selectedInsightsMonth,
     selectedCalendarMonth,

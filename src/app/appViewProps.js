@@ -48,6 +48,8 @@ export function createAppViewProps({
   liabilitiesMonthlyCloseReview,
   liabilitiesMonthlyCloseSaving,
   insightsLiabilityReviewConfirmed,
+  financialPositionLiabilityReviewConfirmed,
+  netWorthLiabilityReviewConfirmed,
   selectedInsightsMonth,
   selectedCalendarMonth,
   selectedFinancialPositionMonth,
@@ -269,6 +271,7 @@ export function createAppViewProps({
       accountBalanceSnapshots,
       liabilityAccounts,
       liabilityBalanceSnapshots,
+      liabilityReviewConfirmed: financialPositionLiabilityReviewConfirmed,
     },
     accountsProps: {
       cashAccounts,
@@ -320,6 +323,7 @@ export function createAppViewProps({
       loading: accountsLoading || liabilitiesLoading,
       error: accountsError || liabilitiesError,
       onMonthChange: setSelectedNetWorthMonth,
+      liabilityReviewConfirmed: netWorthLiabilityReviewConfirmed,
     },
     incomeProps: {
       incomeSources,

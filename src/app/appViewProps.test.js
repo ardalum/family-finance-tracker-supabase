@@ -126,6 +126,17 @@ describe("app view props", () => {
     assert.equal(props.insightsProps.liabilityReviewConfirmed, true);
   });
 
+  it("maps financial position and net worth liability-review confirmation flags", () => {
+    const props = createAppViewProps({
+      ...input,
+      financialPositionLiabilityReviewConfirmed: true,
+      netWorthLiabilityReviewConfirmed: true,
+    });
+
+    assert.equal(props.financialPositionProps.liabilityReviewConfirmed, true);
+    assert.equal(props.netWorthProps.liabilityReviewConfirmed, true);
+  });
+
   it("maps financial position props", () => {
     const props = createAppViewProps({
       ...input,
@@ -159,6 +170,7 @@ describe("app view props", () => {
     assert.equal(props.financialPositionProps.recurringPayments.length, 1);
     assert.equal(props.financialPositionProps.incomeEntries.length, 1);
     assert.equal(props.financialPositionProps.savingsContributions.length, 1);
+    assert.equal(props.financialPositionProps.liabilityReviewConfirmed, undefined);
   });
 
   it("maps calendar props", () => {
@@ -324,6 +336,7 @@ describe("app view props", () => {
     assert.equal(props.netWorthProps.loading, true);
     assert.equal(props.netWorthProps.error, "liability error");
     assert.equal(props.netWorthProps.onMonthChange, input.setSelectedNetWorthMonth);
+    assert.equal(props.netWorthProps.liabilityReviewConfirmed, undefined);
   });
 
   it("maps liabilities no-liability confirmation controls", () => {
