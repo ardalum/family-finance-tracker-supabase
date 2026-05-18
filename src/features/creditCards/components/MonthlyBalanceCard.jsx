@@ -9,6 +9,7 @@ export default function MonthlyBalanceCard({
   onEditCard,
   onBalanceChange,
   onCheckedNoBalance,
+  onResetNoBalance,
   onPaidChange,
 }) {
   const { card, displayEntry, status, closingDateText, dueDateText, statementGenerated } = row;
@@ -95,6 +96,17 @@ export default function MonthlyBalanceCard({
             disabled={saving}
           >
             Mark checked, no balance
+          </Button>
+        ) : null}
+        {status.isCheckedNoBalance ? (
+          <Button
+            type="button"
+            variant="ghost"
+            className="w-fit min-h-8 px-3 py-1 text-xs"
+            onClick={() => onResetNoBalance(card.id)}
+            disabled={saving}
+          >
+            Reset to not checked
           </Button>
         ) : null}
       </div>

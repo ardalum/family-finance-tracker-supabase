@@ -71,6 +71,12 @@
 - **Conditional Go**: automated quality gates are green and Phase 50 fixes are verified by code/tests.
 - Final release sign-off requires completing the manual deployed-app checklist and recording pass/fail evidence.
 
+## Phase 54 follow-up note
+
+- Production follow-up identified the monthly-balance `Checked � No balance` bug was not fully resolved in Phase 50.
+- Phase 54 adds a corrected loader/save/status fix so `Checked � No balance` appears only after explicit user action.
+- Deployed-app retest must include the Phase 54 checklist before final release sign-off.
+
 ## Manual deployed-app checklist status (Phase 51)
 
 | Check                                                              | Status         |

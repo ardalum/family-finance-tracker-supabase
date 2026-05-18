@@ -106,6 +106,10 @@ export default function MonthlyBalanceTable({
     onBalanceChange(selectedMonth, cardId, { ...currentEntry, balance: 0, paid: true });
   }
 
+  function handleResetNoBalance(cardId) {
+    onBalanceChange(selectedMonth, cardId, null);
+  }
+
   function resetControls() {
     setSortMode("default");
     setFilters(defaultFilters);
@@ -148,6 +152,7 @@ export default function MonthlyBalanceTable({
             onEditCard={onEditCard}
             onBalanceChange={handleBalanceChange}
             onCheckedNoBalance={handleCheckedNoBalance}
+            onResetNoBalance={handleResetNoBalance}
             onPaidChange={handlePaidChange}
           />
           <MonthlyBalanceDesktopTable
@@ -157,6 +162,7 @@ export default function MonthlyBalanceTable({
             onEditCard={onEditCard}
             onBalanceChange={handleBalanceChange}
             onCheckedNoBalance={handleCheckedNoBalance}
+            onResetNoBalance={handleResetNoBalance}
             onPaidChange={handlePaidChange}
           />
         </>
