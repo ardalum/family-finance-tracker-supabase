@@ -1,6 +1,6 @@
 ﻿# Bug Backlog
 
-Last updated: 2026-05-18 (Phase 72 liability confirmation/label polish)
+Last updated: 2026-05-18 (Phase 73 correction: debt modal/month/carry-forward)
 
 ## Triage Legend
 
@@ -33,6 +33,11 @@ Last updated: 2026-05-18 (Phase 72 liability confirmation/label polish)
 
 ## Fixed (recent notable)
 
+- Liability/debt delete flows now use app modal confirmation instead of native browser confirm, including auto-synced card debt reappearance guidance (`fixed`, Phase 73 correction)
+- Net Worth and Financial Position now carry forward latest prior active liability snapshots until superseded, zeroed, paid through synced card debt cleanup, or closed (`fixed`, Phase 73 correction)
+- Month selector defaults were verified through the shared fresh-load month initializer so all month-scoped views start on the current month (`fixed`, Phase 73 correction)
+- Past-due unpaid credit card statements now auto-sync into Liabilities/Debt as linked credit-card debt without adding schema or tables (`fixed`, Phase 73)
+- Auto-synced card debt updates partial-payment remaining balances, removes stale paid/zero auto snapshots, and avoids duplicate linked accounts/snapshots (`fixed`, Phase 73)
 - No-liability confirmation now carries through related Net Worth and Financial Position missing-data copy so reviewed no-liability months do not keep sounding broken (`fixed`, Phase 72)
 - Professional enum display labels remain centralized for cash account and liability types, with explicit coverage for common account/debt values and unknown fallback humanization (`fixed`, Phase 72)
 - Liability no-review UX clarified with month-level no-liability confirmation prompt/status and warning suppression behavior (`fixed`, Phase 71)
@@ -75,7 +80,7 @@ Last updated: 2026-05-18 (Phase 72 liability confirmation/label polish)
 ## Deferred Enhancements
 
 - Full overwrite restore mode with explicit conflict controls.
-- Deeper automated reconciliation between liabilities and card statement debt.
+- Deeper two-way reconciliation controls between user-managed liabilities and card statement debt.
 - Broader long-horizon analytics and forecasting overlays.
 
 ## Release Blocker Summary

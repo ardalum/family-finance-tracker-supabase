@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import AppProviders from "./AppProviders.jsx";
 import { AppSetupLoadingScreen } from "./AppStatusMessages.jsx";
 import AppFirstTimeSetupScreen from "./AppFirstTimeSetupScreen.jsx";
@@ -33,6 +33,7 @@ import { useInsightsData } from "../features/insights/useInsightsData.js";
 import { useIncomeData } from "../features/income/useIncomeData.js";
 import { useAccountsData } from "../features/accounts/useAccountsData.js";
 import { useLiabilitiesData } from "../features/liabilities/useLiabilitiesData.js";
+import { syncPastDueCreditCardDebt } from "../features/liabilities/creditCardDebtAutoSync.js";
 import { useSavingsData } from "../features/savings/useSavingsData.js";
 import { useRecurringCategories } from "../features/recurring/useRecurringCategories.js";
 import { useRecurringPayments } from "../features/recurring/useRecurringPayments.js";
@@ -77,6 +78,7 @@ function FinanceTrackerApp() {
     initialSelectedMonths.netWorth,
   );
   const [quickAddOpen, setQuickAddOpen] = useState(false);
+  const creditCardDebtSyncInFlight = useRef(false);
   useEffect(() => {
     let isCurrent = true;
 
@@ -506,6 +508,62 @@ function FinanceTrackerApp() {
     () => getAlerts(getDashboardData(dashboardAppData, selectedDashboardMonth)),
     [dashboardAppData, selectedDashboardMonth],
   );
+
+  useEffect(() => {
+    if (
+      !activeHouseholdId ||
+      creditCardsLoading ||
+      monthlyBalancesLoading ||
+      monthlyBalancesSaving ||
+      liabilitiesLoading ||
+      liabilitiesSaving ||
+      creditCardDebtSyncInFlight.current
+    ) {
+      return;
+    }
+
+    let isCurrent = true;
+    creditCardDebtSyncInFlight.current = true;
+
+    async function syncCardDebt() {
+      try {
+        const result = await syncPastDueCreditCardDebt({
+          householdId: activeHouseholdId,
+          creditCards: supabaseCreditCards,
+          monthlyBalances: supabaseMonthlyBalances,
+          liabilityAccounts,
+          liabilityBalanceSnapshots,
+        });
+
+        if (isCurrent && result.changed) {
+          await loadLiabilitiesData();
+        }
+      } catch (error) {
+        console.error("Could not auto-sync past-due credit card debt.", error);
+      } finally {
+        creditCardDebtSyncInFlight.current = false;
+      }
+    }
+
+    syncCardDebt();
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [
+    activeHouseholdId,
+    creditCardsLoading,
+    liabilityAccounts,
+    liabilityBalanceSnapshots,
+    liabilitiesLoading,
+    loadLiabilitiesData,
+    monthlyBalancesLoading,
+    monthlyBalancesSaving,
+    liabilitiesSaving,
+    supabaseCreditCards,
+    supabaseMonthlyBalances,
+  ]);
+
   const appViewProps = createAppViewProps({
     appData,
     dashboardAppData,

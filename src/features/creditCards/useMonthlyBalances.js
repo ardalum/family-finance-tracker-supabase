@@ -61,6 +61,14 @@ export function useMonthlyBalances({
             balance: normalizedBalance,
             paid: Boolean(entry.paid),
             checkedNoBalance: normalizedBalance <= 0 && Boolean(entry.paid),
+            paidAmount: Number(entry.paidAmount ?? (entry.paid ? normalizedBalance : 0)) || 0,
+            paymentDueDate: entry.paymentDueDate ?? null,
+            statementCloseDate: entry.statementCloseDate ?? null,
+            minimumPayment: Number(entry.minimumPayment ?? 0) || 0,
+            paidDate: entry.paidDate ?? null,
+            autopayEnabled: Boolean(entry.autopayEnabled),
+            autopayDate: entry.autopayDate ?? null,
+            confirmationNumber: entry.confirmationNumber ?? "",
             updatedAt: new Date().toISOString(),
           };
         }

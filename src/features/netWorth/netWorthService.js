@@ -39,6 +39,31 @@ export function getLatestSnapshotsForMonth(snapshots = [], monthKey = "", accoun
   return latestByAccount;
 }
 
+export function getLatestSnapshotsOnOrBeforeMonth(snapshots = [], monthKey = "", accountKey = "") {
+  if (!Array.isArray(snapshots) || !monthKey || !accountKey) return new Map();
+
+  const latestByAccount = new Map();
+  snapshots.forEach((snapshot) => {
+    if (!snapshot?.monthKey || snapshot.monthKey > monthKey) return;
+    const accountId = getSnapshotAccountId(snapshot, accountKey);
+    if (!accountId) return;
+
+    const existing = latestByAccount.get(accountId);
+    if (
+      !existing ||
+      snapshot.monthKey > existing.monthKey ||
+      (snapshot.monthKey === existing.monthKey &&
+        (getSnapshotDate(snapshot) > getSnapshotDate(existing) ||
+          (getSnapshotDate(snapshot) === getSnapshotDate(existing) &&
+            String(snapshot.createdAt ?? "") > String(existing.createdAt ?? ""))))
+    ) {
+      latestByAccount.set(accountId, snapshot);
+    }
+  });
+
+  return latestByAccount;
+}
+
 export function summarizeAssetsForMonth(
   cashAccounts = [],
   accountBalanceSnapshots = [],
@@ -74,22 +99,28 @@ export function summarizeLiabilitiesForMonth(
   liabilityBalanceSnapshots = [],
   monthKey = "",
 ) {
-  const latestByAccount = getLatestSnapshotsForMonth(
+  const latestByAccount = getLatestSnapshotsOnOrBeforeMonth(
     liabilityBalanceSnapshots,
     monthKey,
     "liabilityAccountId",
   );
 
   const rows = (Array.isArray(liabilityAccounts) ? liabilityAccounts : [])
+    .filter((account) => account?.isActive !== false)
     .map((account) => {
       const accountId = getAccountId(account);
       const snapshot = latestByAccount.get(accountId) ?? null;
+      const carriedForward = Boolean(
+        snapshot?.monthKey && monthKey && snapshot.monthKey !== monthKey,
+      );
       return {
         accountId,
         name: account?.name || "Unnamed liability",
         type: account?.liabilityType || "other",
         balanceAmount: snapshot ? Math.max(0, toNumber(snapshot.balanceAmount)) : 0,
         snapshotDate: snapshot?.snapshotDate || "",
+        sourceMonthKey: snapshot?.monthKey || "",
+        carriedForward,
         linkedCreditCardId: account?.linkedCreditCardId || null,
       };
     })

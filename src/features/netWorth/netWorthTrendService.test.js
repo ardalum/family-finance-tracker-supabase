@@ -62,6 +62,29 @@ test("multiple months with missing month handling", () => {
   assert.equal(rows[1].netWorth, null);
 });
 
+test("liability carry-forward prevents fake net worth improvement in missing liability months", () => {
+  const rows = summarizeNetWorthByMonth({
+    monthKeys: ["2026-04", "2026-05"],
+    cashAccounts,
+    accountBalanceSnapshots: [
+      { cashAccountId: "a1", monthKey: "2026-05", snapshotDate: "2026-05-02", balanceAmount: 5000 },
+    ],
+    liabilityAccounts,
+    liabilityBalanceSnapshots: [
+      {
+        liabilityAccountId: "l1",
+        monthKey: "2026-04",
+        snapshotDate: "2026-04-15",
+        balanceAmount: 1500,
+      },
+    ],
+  });
+
+  assert.equal(rows[1].totalAssets, 5000);
+  assert.equal(rows[1].totalLiabilities, 1500);
+  assert.equal(rows[1].netWorth, 3500);
+});
+
 test("assets only", () => {
   const rows = summarizeNetWorthByMonth({
     monthKeys: ["2026-05"],

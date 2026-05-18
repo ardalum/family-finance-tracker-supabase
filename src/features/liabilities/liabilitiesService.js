@@ -102,20 +102,52 @@ export function getLatestLiabilitySnapshotByAccount(snapshots = [], monthKey = "
   return latestByAccount;
 }
 
-export function summarizeLiabilitiesForMonth(accounts = [], snapshots = [], monthKey = "") {
-  const latestByAccount = getLatestLiabilitySnapshotByAccount(snapshots, monthKey);
+export function getLatestLiabilitySnapshotOnOrBeforeMonthByAccount(snapshots = [], monthKey = "") {
+  if (!monthKey) return getLatestLiabilitySnapshotByAccount(snapshots);
 
-  return accounts.map((account) => {
-    const accountId = account.supabaseId ?? account.id;
-    const latestSnapshot = latestByAccount.get(accountId) ?? null;
-    return {
-      account,
-      latestSnapshot,
-      latestBalanceAmount: latestSnapshot
-        ? normalizeNonNegativeAmount(latestSnapshot.balanceAmount)
-        : 0,
-    };
+  const latestByAccount = new Map();
+  (Array.isArray(snapshots) ? snapshots : []).forEach((snapshot) => {
+    if (!snapshot?.monthKey || snapshot.monthKey > monthKey) return;
+    const accountId = snapshot.liabilityAccountId;
+    if (!accountId) return;
+
+    const existing = latestByAccount.get(accountId);
+    if (
+      !existing ||
+      snapshot.monthKey > existing.monthKey ||
+      (snapshot.monthKey === existing.monthKey &&
+        (snapshot.snapshotDate > existing.snapshotDate ||
+          (snapshot.snapshotDate === existing.snapshotDate &&
+            String(snapshot.createdAt || "") > String(existing.createdAt || ""))))
+    ) {
+      latestByAccount.set(accountId, snapshot);
+    }
   });
+
+  return latestByAccount;
+}
+
+export function summarizeLiabilitiesForMonth(accounts = [], snapshots = [], monthKey = "") {
+  const latestByAccount = getLatestLiabilitySnapshotOnOrBeforeMonthByAccount(snapshots, monthKey);
+
+  return (Array.isArray(accounts) ? accounts : [])
+    .filter((account) => account?.isActive !== false)
+    .map((account) => {
+      const accountId = account.supabaseId ?? account.id;
+      const latestSnapshot = latestByAccount.get(accountId) ?? null;
+      const carriedForward = Boolean(
+        latestSnapshot?.monthKey && monthKey && latestSnapshot.monthKey !== monthKey,
+      );
+      return {
+        account,
+        latestSnapshot,
+        carriedForward,
+        sourceMonthKey: carriedForward ? latestSnapshot.monthKey : monthKey,
+        latestBalanceAmount: latestSnapshot
+          ? normalizeNonNegativeAmount(latestSnapshot.balanceAmount)
+          : 0,
+      };
+    });
 }
 
 export function calculateLiabilityBalanceTotal(accounts = [], snapshots = [], monthKey = "") {

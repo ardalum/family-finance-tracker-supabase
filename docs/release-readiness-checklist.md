@@ -9,6 +9,7 @@ Use this checklist before each production release.
 - [ ] Local branch only contains intended release changes.
 - [ ] No secrets are committed (`.env.local`, service keys, or private exports).
 - [ ] Phase 64 UX/IA audit findings are triaged and signed off (`docs/full-product-ux-ia-audit.md`) before declaring final RC readiness.
+- [ ] Fresh app load initializes every month-scoped view to the current real-world month.
 
 ## 2) GitHub Actions
 
@@ -113,9 +114,17 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Latest balance per liability account updates from liability snapshots.
 - [ ] Credit-card double-counting guidance copy is visible on Liabilities page.
 - [ ] Linked credit card behavior is explicit (informational only, no auto-filled balances).
+- [ ] Past-due unpaid card statements auto-sync into Liabilities/Debt as linked credit-card debt.
+- [ ] Partial card payments sync only the remaining unpaid statement amount.
+- [ ] Marking a past-due card statement paid removes the auto-synced liability snapshot without deleting user-created snapshots.
 - [ ] Liability snapshots do not change Spending, Budget, Income, Savings, or cash-flow leftover totals.
+- [ ] Deleting liability accounts/snapshots uses app modal confirmation, not native browser confirm.
+- [ ] Auto-synced card debt delete copy explains it may reappear if the linked card remains past due and unpaid.
 - [ ] `Confirm no liabilities` appears when no liability snapshots exist for the selected month.
 - [ ] `No liabilities confirmed` appears after confirmation and can be reset.
+- [ ] Real auto-synced card debt appears even if no-liability review was previously confirmed.
+- [ ] Auto-synced card debt does not duplicate liability accounts or snapshots for repeated sync runs.
+- [ ] User-created liability snapshots for a linked card/month are not deleted by auto-sync.
 - [ ] Account and liability type labels use professional display casing without changing stored values.
 
 ## 7f) Net Worth Summary Verification
@@ -128,6 +137,10 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Net worth equals assets minus liabilities.
 - [ ] Empty state guidance appears when snapshot data is missing.
 - [ ] If no liabilities are confirmed for the selected month, Net Worth does not continue warning that liability snapshots are missing.
+- [ ] Prior active liability snapshots carry forward into current Net Worth until superseded, zeroed, paid/removed through card sync, or closed.
+- [ ] Current-month liability snapshots override carried-forward liability values.
+- [ ] Explicit zero liability snapshots stop carry-forward.
+- [ ] Paying debt is treated as net-worth neutral when account/cash snapshots are also updated.
 - [ ] Assets-only and liabilities-only guidance is clear.
 - [ ] Credit-card debt appears only when entered as liability snapshots.
 - [ ] Savings goals are not included unless represented by account balance snapshots.

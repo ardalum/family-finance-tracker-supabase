@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { SELECTED_MONTH_KEYS, createInitialSelectedMonths } from "./selectedMonthUtils.js";
+import { getCurrentMonthKey } from "../lib/dates.js";
 
 const expectedSelectedMonthKeys = [
   "balance",
@@ -40,6 +41,14 @@ describe("selected month utilities", () => {
       liabilities: "2026-05",
       netWorth: "2026-05",
     });
+  });
+
+  it("defaults every month selector to the current real-world month on fresh app load", () => {
+    const selectedMonths = createInitialSelectedMonths();
+
+    for (const key of SELECTED_MONTH_KEYS) {
+      assert.equal(selectedMonths[key], getCurrentMonthKey());
+    }
   });
 
   it("creates an object with exactly the selected month keys", () => {
