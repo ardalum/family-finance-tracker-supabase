@@ -14,15 +14,15 @@ describe("dashboard quick actions", () => {
     assert.equal(source.includes('label: "Add transactions"'), true);
     assert.equal(source.includes('label: "Open recurring bills"'), true);
     assert.equal(source.includes('label: "Review budget"'), true);
-    assert.equal(source.includes('label: "Financial Position"'), true);
+    assert.equal(source.includes('label: "Tools"'), true);
     assert.equal(source.includes('label: "Calendar"'), true);
   });
 
-  it("includes Financial Position quick action target", () => {
+  it("includes Tools quick action target", () => {
     const source = read("src/features/dashboard/components/Dashboard.jsx");
 
-    assert.equal(source.includes('view: "financial-position"'), true);
-    assert.equal(source.includes('target: "monthly-financial-position"'), true);
+    assert.equal(source.includes('view: "tools"'), true);
+    assert.equal(source.includes('target: "tools-home"'), true);
   });
 
   it("removes separate income/savings/accounts/liabilities/net-worth quick actions", () => {

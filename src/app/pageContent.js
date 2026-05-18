@@ -23,6 +23,10 @@ export const pageContent = {
     title: "Insights",
     description: "Review spending trends, budget performance, and payment patterns.",
   },
+  tools: {
+    title: "Tools",
+    description: "Access planning, reporting, account, and maintenance tools outside the main nav.",
+  },
   calendar: {
     title: "Calendar",
     description: "Review upcoming card, bill, income, and month-close dates.",

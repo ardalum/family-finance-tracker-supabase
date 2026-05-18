@@ -39,6 +39,8 @@
   - upcoming obligations (recurring + unpaid cards)
   - savings shown separately
   - planned cash cushion labeled as a planning estimate
+- Navigation was simplified with a dedicated Tools workspace for secondary workflows, while keeping main nav unchanged.
+- Account menu was cleaned up to focus on account, household, privacy/data, and support (daily planning tools moved out of account menu).
 
 ### QA and Release Readiness
 

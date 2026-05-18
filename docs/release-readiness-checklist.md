@@ -241,6 +241,7 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] No visible replacement/mojibake characters appear in core UI text (for example replacement-character or mojibake artifacts).
 - [ ] Phase 54 monthly-balance regression retest passes: zero/unpaid is `Not checked`, explicit no-balance is `Checked - No balance`, and clearing/reset returns to `Not checked`.
 - [ ] UX/IA release blocker triage from Phase 64 is complete, with pre-RC vs post-RC scope decisions documented (including confirmation that Phase 65 dashboard semantics changes are accepted).
+- [ ] Phase 66 navigation/account-menu updates are verified: Tools secondary surface works, account menu is account/trust focused, and main nav remains unchanged.
 
 ## 13) Post-Fix Verification Evidence
 

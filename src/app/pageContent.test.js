@@ -27,6 +27,14 @@ describe("page content config", () => {
     );
   });
 
+  it("contains tools page content", () => {
+    assert.equal(pageContent.tools.title, "Tools");
+    assert.equal(
+      pageContent.tools.description,
+      "Access planning, reporting, account, and maintenance tools outside the main nav.",
+    );
+  });
+
   it("contains page content for every main finance view", () => {
     for (const viewId of primaryFinanceViewIds) {
       const content = pageContent[viewId];

@@ -151,13 +151,14 @@ Option review:
 - Option B: Taxonomy-driven nav (`Track/Plan/Pay/Reports/More`) is promising but higher migration and learning cost.
 - Option C: Sidebar + mobile bottom nav requires larger structural redesign and should follow IA agreement.
 
-Recommended direction: **Option A**
+Recommended direction: **Option A** (implemented in Phase 66)
 
 - Why:
   - Lowest risk to existing mental model.
   - Preserves current primary nav names.
   - Removes overloaded account menu role.
   - Enables staged migration of tools out of account menu without major UI breakage.
+  - Phase 66 status: main nav remains unchanged; dedicated `Tools` secondary surface added; account menu now focuses on account/household/privacy/support actions.
 
 ## 6) Account menu audit
 

@@ -8,7 +8,7 @@ describe("account menu sections", () => {
   it("keeps account menu sections in the expected order", () => {
     assert.deepEqual(
       accountMenuSections.map((section) => section.title),
-      ["Account", "Household", "Tools", "Info"],
+      ["Account", "Household", "Privacy & Data", "Support"],
     );
   });
 
@@ -16,9 +16,9 @@ describe("account menu sections", () => {
     assert.deepEqual(
       accountMenuSections.map((section) => section.items.map((item) => item.label)),
       [
-        ["Account Settings", "Data & Privacy"],
+        ["Account Settings"],
         ["Household Settings"],
-        ["Financial Position", "Calendar", "Backup & Restore", "App Settings"],
+        ["Data & Privacy", "Backup & Restore"],
         ["Help / Support", "Release Notes", "About WalletFlow"],
       ],
     );
@@ -28,27 +28,26 @@ describe("account menu sections", () => {
     assert.deepEqual(
       accountMenuSections.map((section) => section.items.map((item) => item.view)),
       [
-        ["account-settings", "privacy-policy"],
+        ["account-settings"],
         ["household-settings"],
-        ["financial-position", "calendar", "backup", "app-settings"],
+        ["privacy-policy", "backup"],
         ["help-support", "release-notes", "about"],
       ],
     );
   });
 
-  it("keeps tools focused on compact hub-level entries", () => {
-    const toolsSection = accountMenuSections.find((section) => section.title === "Tools");
-    const toolLabels = toolsSection?.items.map((item) => item.label) ?? [];
+  it("does not keep daily planning tools in account menu", () => {
+    const menuLabels = accountMenuSections.flatMap((section) =>
+      section.items.map((item) => item.label),
+    );
 
-    assert.equal(toolLabels.includes("Financial Position"), true);
-    assert.equal(toolLabels.includes("Backup & Restore"), true);
-    assert.equal(toolLabels.includes("App Settings"), true);
-    assert.equal(toolLabels.includes("Calendar"), true);
-    assert.equal(toolLabels.includes("Income"), false);
-    assert.equal(toolLabels.includes("Savings"), false);
-    assert.equal(toolLabels.includes("Accounts"), false);
-    assert.equal(toolLabels.includes("Net Worth"), false);
-    assert.equal(toolLabels.includes("Liabilities / Debt"), false);
+    assert.equal(menuLabels.includes("Financial Position"), false);
+    assert.equal(menuLabels.includes("Calendar"), false);
+    assert.equal(menuLabels.includes("Income"), false);
+    assert.equal(menuLabels.includes("Savings"), false);
+    assert.equal(menuLabels.includes("Accounts"), false);
+    assert.equal(menuLabels.includes("Net Worth"), false);
+    assert.equal(menuLabels.includes("Liabilities / Debt"), false);
   });
 
   it("keeps account menu item targets aligned with known app or auth views", () => {
