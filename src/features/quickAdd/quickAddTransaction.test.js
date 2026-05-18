@@ -97,6 +97,23 @@ test("getQuickAddValidationError enforces required amount and card", () => {
   assert.equal(invalidCard, "Select a valid card.");
 });
 
+test("getQuickAddValidationError enforces required category", () => {
+  const missingCategory = getQuickAddValidationError(
+    {
+      date: "2026-05-18",
+      amount: "15.00",
+      merchant: "Store",
+      transactionType: "expense",
+      paymentMethod: "Cash",
+      cardId: "",
+      categoryId: "",
+    },
+    { cards: [{ id: "card-1" }] },
+  );
+
+  assert.equal(missingCategory, "Category is required.");
+});
+
 test("buildQuickAddPayload normalizes values for existing spending create path", () => {
   const payload = buildQuickAddPayload({
     date: "2026-05-18",

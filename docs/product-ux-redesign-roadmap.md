@@ -62,9 +62,9 @@ Status: implemented in Phase 66 (2026-05-18)
   - account menu is compact and trust-oriented
   - daily tools remain discoverable without menu clutter
 
-## Phase 67: Frictionless data entry / Quick Add MVP
+## Phase 68: Frictionless data entry / Quick Add MVP
 
-Status: implemented as MVP in Phase 67 (2026-05-18)
+Status: implemented as MVP in Phase 68 (2026-05-18)
 
 - Goal:
   - Reduce taps/clicks for frequent entries, especially transactions.
@@ -92,7 +92,7 @@ Status: implemented as MVP in Phase 67 (2026-05-18)
   - mobile tap targets and keyboard flow remain strong
   - no regressions in existing entry workflows
 
-## Phase 68: Insights visual analytics redesign with standard charts
+## Phase 69: Insights visual analytics redesign with standard charts
 
 - Goal:
   - Improve scanability and actionable reporting through standard finance visual patterns.
@@ -118,7 +118,7 @@ Status: implemented as MVP in Phase 67 (2026-05-18)
   - users can identify next actions from insights cards
   - all existing insights math remains consistent
 
-## Phase 69: Privacy and trust polish
+## Phase 70: Privacy and trust polish
 
 - Goal:
   - Increase user confidence via clearer data/privacy and account safety experiences.
@@ -144,7 +144,7 @@ Status: implemented as MVP in Phase 67 (2026-05-18)
   - users can find export/delete/privacy controls quickly
   - no routing/regression issues
 
-## Phase 70: Final release candidate retest
+## Phase 71: Final release candidate retest
 
 - Goal:
   - Validate the post-redesign experience and declare RC readiness.
