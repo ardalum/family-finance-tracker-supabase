@@ -40,7 +40,12 @@
 - Many position/reporting flows are manual-entry MVPs (no bank sync/import automation).
 - Restore remains merge-safe (add/skip) rather than destructive overwrite mode.
 - Final release sign-off still requires deployed manual smoke execution and evidence capture.
+- Calendar is not part of this release; it is tracked as a planned follow-up feature (see `docs/calendar-feature-design.md`).
 
 ### Release Handoff
 
-- Phase 53 release-tag/deployment handoff guide: docs/release-tag-deployment-handoff.md`r
+- Phase 53 release-tag/deployment handoff guide: `docs/release-tag-deployment-handoff.md`
+
+### Planned improvements (not in this release)
+
+- Calendar MVP (agenda/list + month selector) composed from existing cards/bills/income/month-close data sources.

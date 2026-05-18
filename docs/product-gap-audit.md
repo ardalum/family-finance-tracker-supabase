@@ -1,6 +1,6 @@
 # Product Gap Audit
 
-Last updated: 2026-05-17 (Phase 52 release candidate cleanup pass)
+Last updated: 2026-05-17 (Phase 56 calendar design and event-source audit)
 
 ## Scope
 
@@ -32,6 +32,7 @@ Implemented (current release scope):
 - no broader non-cash asset coverage (investments, retirement, property)
 - no predictive forecasting workflow for upcoming monthly cash pressure
 - limited guided recommendations in Insights (mostly descriptive analytics)
+- no unified Calendar workspace for date-driven finance events (planned; see `docs/calendar-feature-design.md`)
 
 ## Release Blockers vs Product Gaps
 
@@ -48,6 +49,7 @@ Product gaps (deferred roadmap):
 - richer historical drill-down and forecasting across Dashboard/Insights
 - stronger post-import in-app guided verification checklist
 - optional IA evolution if Financial Position eventually moves to grouped main-nav model
+- Calendar MVP from existing event sources (cards, bills, income, month close), followed by hardening/mobile polish
 
 ## Notes
 
