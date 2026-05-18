@@ -8,6 +8,7 @@ Use this checklist before each production release.
 - [ ] `npm run dev` is used for any UI behavior check needed in this release.
 - [ ] Local branch only contains intended release changes.
 - [ ] No secrets are committed (`.env.local`, service keys, or private exports).
+- [ ] Phase 64 UX/IA audit findings are triaged and signed off (`docs/full-product-ux-ia-audit.md`) before declaring final RC readiness.
 
 ## 2) GitHub Actions
 
@@ -237,6 +238,7 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Finance totals behavior remains unchanged from expected baselines.
 - [ ] No visible replacement/mojibake characters appear in core UI text (for example replacement-character or mojibake artifacts).
 - [ ] Phase 54 monthly-balance regression retest passes: zero/unpaid is `Not checked`, explicit no-balance is `Checked - No balance`, and clearing/reset returns to `Not checked`.
+- [ ] UX/IA release blocker triage from Phase 64 is complete, with pre-RC vs post-RC scope decisions documented.
 
 ## 13) Post-Fix Verification Evidence
 
