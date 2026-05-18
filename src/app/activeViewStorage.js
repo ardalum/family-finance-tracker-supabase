@@ -14,6 +14,7 @@ const VIEW_HASH_ALIAS_BY_VIEW = {
   spending: "spending",
   recurring: "recurring",
   insights: "insights",
+  calendar: "calendar",
   "financial-position": "financial-position",
   income: "income",
   savings: "savings",

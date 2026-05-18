@@ -23,9 +23,10 @@ Use this checklist before each production release.
 - [ ] Cash-flow limitation copy is clear: unpaid card balances are excluded from MVP leftover.
 - [ ] Cash-flow action buttons route to Income, Savings, Spending, and Bills workspaces.
 - [ ] Estimated leftover updates when income/savings/spending/recurring values change.
-- [ ] Dashboard quick actions are compact and limited to: Update card balances, Add transactions, Open recurring bills, Review budget, and Financial Position.
+- [ ] Dashboard quick actions are compact and limited to: Update card balances, Add transactions, Open recurring bills, Review budget, Financial Position, and Calendar.
 - [ ] Dashboard does not show separate quick actions for Income, Savings, Accounts, Liabilities/Debt, or Net Worth.
 - [ ] Financial Position quick action opens the Financial Position hub.
+- [ ] Calendar quick action opens the Calendar workspace.
 - [ ] Monthly Close checklist includes optional review prompts for account balances, debt snapshots, net worth summary, and net worth trends.
 - [ ] New Monthly Close review prompts do not block `Mark month as reviewed`.
 - [ ] Monthly Close prompt navigation opens Accounts, Liabilities, Net Worth, and Insights correctly.
@@ -189,6 +190,20 @@ Use this checklist before each production release.
 - [ ] Hub action buttons are easy to tap on mobile.
 - [ ] Hub does not change Spending, Budget, Cards, Bills, Income, Savings, Accounts, Liabilities, or Net Worth calculations.
 
+## Calendar
+
+- [ ] Calendar opens from Dashboard quick action.
+- [ ] Calendar opens from Account menu Tools.
+- [ ] Month selector updates the event list.
+- [ ] Empty-state guidance appears when no event sources exist for selected month.
+- [ ] Card payment due events appear and route to Cards.
+- [ ] Card statement close events appear and route to Cards.
+- [ ] Recurring bill events appear and route to Bills.
+- [ ] Income entry events appear and route to Income.
+- [ ] Month-close marker event appears and routes to Dashboard.
+- [ ] Events are grouped by date and sorted consistently.
+- [ ] Calendar does not create or mutate financial records by itself.
+
 ## Backup / Restore
 
 - [ ] Export backup works.
@@ -267,7 +282,7 @@ Use this checklist before each production release.
 
 ## Account Menu UX
 
-- [ ] Account menu Tools section remains compact (Financial Position, Backup & Restore, App Settings).
+- [ ] Account menu Tools section remains compact (Financial Position, Calendar, Backup & Restore, App Settings).
 - [ ] Detailed finance pages remain reachable from Financial Position links.
 
 ## Monthly Balance Check-State Safety

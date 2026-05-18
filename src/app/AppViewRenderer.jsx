@@ -2,6 +2,7 @@ import AboutWalletFlow from "../features/about/components/AboutWalletFlow.jsx";
 import BackupRestore from "../features/backup/components/BackupRestore.jsx";
 import BudgetTracker from "../features/budgets/components/BudgetTracker.jsx";
 import CreditCardTracker from "../features/creditCards/components/CreditCardTracker.jsx";
+import Calendar from "../features/calendar/components/Calendar.jsx";
 import Dashboard from "../features/dashboard/components/Dashboard.jsx";
 import HouseholdSettings from "../features/households/components/HouseholdSettings.jsx";
 import Insights from "../features/insights/components/Insights.jsx";
@@ -28,6 +29,7 @@ export default function AppViewRenderer({
   spendingProps,
   recurringProps,
   insightsProps,
+  calendarProps,
   financialPositionProps,
   accountsProps,
   liabilitiesProps,
@@ -45,6 +47,7 @@ export default function AppViewRenderer({
       {activeView === "spending" ? <SpendingTracker {...spendingProps} /> : null}
       {activeView === "recurring" ? <RecurringPayments {...recurringProps} /> : null}
       {activeView === "insights" ? <Insights {...insightsProps} /> : null}
+      {activeView === "calendar" ? <Calendar {...calendarProps} /> : null}
       {activeView === "financial-position" ? (
         <FinancialPosition {...financialPositionProps} />
       ) : null}

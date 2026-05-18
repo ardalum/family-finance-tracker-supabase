@@ -6,6 +6,7 @@ export const SELECTED_MONTH_KEYS = [
   "spending",
   "dashboard",
   "insights",
+  "calendar",
   "financialPosition",
   "recurring",
   "income",

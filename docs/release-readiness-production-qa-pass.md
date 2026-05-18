@@ -9,7 +9,7 @@ Scope: Final release-readiness review after backup/export coverage and restore/i
 This pass covers WalletFlow production readiness for current implemented scope:
 
 - main-nav workflows (Dashboard, Cards, Budget, Spending, Bills, Insights)
-- secondary finance workflows (Income, Savings, Accounts, Liabilities, Net Worth, Financial Position)
+- secondary finance workflows (Calendar, Income, Savings, Accounts, Liabilities, Net Worth, Financial Position)
 - monthly close operations
 - backup/export and restore validation behavior
 - account/settings/support/legal pages
@@ -33,6 +33,7 @@ Included in this release candidate:
 - manual liabilities/debt + snapshots
 - net worth summary and trends based on snapshots
 - financial position hub (secondary view)
+- calendar agenda/list MVP (secondary view from existing data)
 - backup/export (Supabase JSON + Excel)
 - restore/import validation hardening (merge-safe behavior)
 
@@ -52,7 +53,7 @@ Not in scope for this release:
 Validated via automated checks (`npm run verify`) and focused static QA audit:
 
 - navigation integrity for primary/secondary views
-- Dashboard quick action compact set + Financial Position target
+- Dashboard quick action compact set + Financial Position/Calendar targets
 - account menu target integrity and ordering
 - page-content coverage for all grouped views
 - backup/export expected section coverage and uniqueness

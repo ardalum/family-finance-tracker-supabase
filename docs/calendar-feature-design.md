@@ -1,6 +1,18 @@
 # Calendar Feature Design
 
-Last updated: 2026-05-17 (Phase 56 design + event-source audit)
+Last updated: 2026-05-17 (Phase 57 Calendar MVP implementation)
+
+## Implementation status
+
+- Phase 56: design and source audit completed.
+- Phase 57: MVP started and implemented as a secondary `calendar` view using existing data only (no schema changes, no calendar persistence table).
+- Current MVP is agenda/list oriented with month selector, grouped date events, and source-target links.
+- Known MVP limits:
+  - no month grid yet
+  - no reminders/notifications
+  - no external calendar sync/export
+  - no custom calendar events
+  - no recurring-income prediction engine
 
 ## 1) Problem statement
 
@@ -262,7 +274,7 @@ No new database table for MVP. Compose events from existing data with a normaliz
 
 ## 11) Implementation plan
 
-- **Phase 57**: Calendar MVP from existing data (secondary view, agenda/list)
+- **Phase 57**: Calendar MVP from existing data (secondary view, agenda/list) - completed
 - **Phase 58**: Calendar hardening + mobile polish
 - **Phase 59**: Calendar dashboard integration and entry-point tuning
 - **Phase 60**: Reminders/export integration design

@@ -1,6 +1,6 @@
 ﻿# Bug Backlog
 
-Last updated: 2026-05-17 (Phase 56 calendar design and event-source audit)
+Last updated: 2026-05-17 (Phase 57 Calendar MVP)
 
 ## Triage Legend
 
@@ -46,7 +46,7 @@ Last updated: 2026-05-17 (Phase 56 calendar design and event-source audit)
 - Future navigation promotion decision for Financial Position remains backlog scope (see `docs/financial-position-navigation-decision.md`).
 - Larger IA redesign for secondary tools remains future scope beyond compact menu cleanup.
 - Merge-import intentionally remains non-destructive (add/skip) rather than overwrite restore.
-- Calendar feature is planned as a future secondary-view workflow (design/audit completed in Phase 56; see `docs/calendar-feature-design.md`).
+- Calendar follow-on work remains UX/product backlog: month-grid, reminders, custom events, and external sync/export (MVP secondary view is now shipped; see `docs/calendar-feature-design.md`).
 
 ## Deferred Enhancements
 
