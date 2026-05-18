@@ -34,7 +34,7 @@ Implemented (current release scope):
 - no recurring income prediction engine for future payday projection in Calendar
 - limited guided recommendations in Insights (mostly descriptive analytics)
 - Calendar MVP is implemented as a secondary FullCalendar month-grid plus agenda view using existing data; remaining gaps are reminders, external sync/export, and custom events (see `docs/calendar-feature-design.md`)
-- Dashboard cash-flow semantics gap: current summary label/model can blur budget spending vs actual cash movement timing (especially card-first usage patterns).
+- Dashboard cash-flow semantics gap: addressed in Phase 65 with Financial Pulse summary wording and separated budget/cash/obligation groups.
 - Navigation IA gap: primary workflows, tools, and account/privacy controls are not yet organized into one clear mental model.
 - Data-entry friction gap: no global Quick Add and limited acceleration for repeated monthly entry tasks.
 - Insights visualization gap: reporting breadth is good, but chart variety and action-oriented guidance are below expected finance UX standards.

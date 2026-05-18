@@ -1,7 +1,7 @@
 # Full Product UX / IA Audit
 
 Date: 2026-05-18  
-Scope: WalletFlow Phase 64 product UX and information architecture audit (no implementation changes)
+Scope: WalletFlow Phase 64 product UX and information architecture audit (updated with Phase 65 status)
 
 ## 1) Executive summary
 
@@ -21,7 +21,7 @@ Scope: WalletFlow Phase 64 product UX and information architecture audit (no imp
 
 ### What is release-blocking
 
-- Cash-flow semantics and copy are materially misleading for users who rely on credit cards for spending.
+- Cash-flow semantics and copy were materially misleading for users who rely on credit cards for spending (addressed in Phase 65 with Financial Pulse summary framing).
 - Product navigation model is not yet cohesive enough for confidence at release-candidate positioning.
 - RC readiness should be blocked until UX/IA findings are triaged and execution priority is agreed.
 
@@ -88,6 +88,7 @@ Cash-flow issue summary:
 - Current formula in code: `Income - spending - recurring remaining - savings`.
 - This treats all spending as immediate cash outflow even when transaction type is card expense.
 - Card-payment obligations are explicitly excluded from the metric, creating a conceptual mismatch.
+- Phase 65 status: replaced with grouped `Financial Pulse` summary that separates cash position, budget usage, obligations, savings, and planned cushion language.
 
 Recommended Dashboard decomposition:
 
@@ -259,7 +260,6 @@ Recommendations:
 
 ### Release blockers
 
-- Dashboard cash-flow semantics/copy mismatch with real card-vs-cash behavior.
 - Missing agreed IA direction for where daily tools live (account menu vs app-level tools).
 
 ### High priority before RC

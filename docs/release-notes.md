@@ -33,6 +33,12 @@
   - App Settings
 - Monthly card balance status no longer falsely shows `Checked - No balance` after clearing an entry.
 - Numeric amount inputs now support direct typing over default values via focus-select behavior.
+- Dashboard summary was reframed from cash-flow leftover wording to a clearer Financial Pulse model:
+  - cash position from account snapshots
+  - spending/budget usage
+  - upcoming obligations (recurring + unpaid cards)
+  - savings shown separately
+  - planned cash cushion labeled as a planning estimate
 
 ### QA and Release Readiness
 

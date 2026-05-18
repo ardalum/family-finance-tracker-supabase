@@ -81,15 +81,17 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Monthly income total updates for selected month.
 - [ ] Income does not change Spending or Budget totals.
 
-## 7c) Dashboard Cash-Flow Verification
+## 7c) Dashboard Financial Pulse Verification
 
-- [ ] Dashboard cash-flow summary renders for selected month.
-- [ ] Cash-flow status label is clear (`Positive`, `Negative`, or `Missing income`).
-- [ ] Missing-income guidance appears when selected month has no income entries.
-- [ ] Estimated leftover uses income, spending, recurring remaining, and savings contribution totals.
-- [ ] Cash-flow formula helper text is visible and understandable.
-- [ ] Cash-flow limitation note confirms unpaid card balances are excluded in MVP leftover.
-- [ ] Cash-flow actions route to Income, Savings, Spending, and Bills workspaces.
+- [ ] Dashboard Financial Pulse summary renders for selected month.
+- [ ] Cash position uses account snapshot data when available.
+- [ ] Missing cash snapshot state shows helpful guidance.
+- [ ] Spending this month is presented as spending/budget usage (not immediate cash outflow).
+- [ ] Total budget and budget remaining are clearly separated from cash position.
+- [ ] Upcoming obligations include recurring remaining and unpaid card payment obligations.
+- [ ] Savings is shown separately and is not labeled as spending.
+- [ ] Planned cash cushion is framed as a planning estimate, not actual bank balance.
+- [ ] Financial Pulse actions route to Income, Savings, Spending, and Bills workspaces.
 
 ## 7d) Accounts Snapshot Verification
 
@@ -238,7 +240,7 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Finance totals behavior remains unchanged from expected baselines.
 - [ ] No visible replacement/mojibake characters appear in core UI text (for example replacement-character or mojibake artifacts).
 - [ ] Phase 54 monthly-balance regression retest passes: zero/unpaid is `Not checked`, explicit no-balance is `Checked - No balance`, and clearing/reset returns to `Not checked`.
-- [ ] UX/IA release blocker triage from Phase 64 is complete, with pre-RC vs post-RC scope decisions documented.
+- [ ] UX/IA release blocker triage from Phase 64 is complete, with pre-RC vs post-RC scope decisions documented (including confirmation that Phase 65 dashboard semantics changes are accepted).
 
 ## 13) Post-Fix Verification Evidence
 
