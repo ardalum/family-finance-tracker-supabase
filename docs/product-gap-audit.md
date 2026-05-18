@@ -37,7 +37,7 @@ Implemented (current release scope):
 - Dashboard cash-flow semantics gap: addressed in Phase 65 with Financial Pulse summary wording and separated budget/cash/obligation groups.
 - Navigation IA gap: improved in Phase 66 with a dedicated Tools surface and account-menu trust focus; deeper IA evolution remains deferred.
 - Data-entry friction gap: partially addressed in Phase 68 with global Quick Add transaction MVP; broader multi-entity quick entry and richer repeat-entry acceleration remain open.
-- Insights visualization gap: reporting breadth is good, but chart variety and action-oriented guidance are below expected finance UX standards.
+- Insights visualization gap: partially addressed in Phase 69 with varied chart types and actionable cards; deeper predictive guidance and automated recommendations remain open.
 - Privacy/trust polish gap: trust signals and data/privacy controls need tighter, standard account/settings organization and copy tone.
 
 ## Release Blockers vs Product Gaps

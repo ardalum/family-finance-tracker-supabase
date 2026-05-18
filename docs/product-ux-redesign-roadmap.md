@@ -94,6 +94,8 @@ Status: implemented as MVP in Phase 68 (2026-05-18)
 
 ## Phase 69: Insights visual analytics redesign with standard charts
 
+Status: implemented in Phase 69 (2026-05-18)
+
 - Goal:
   - Improve scanability and actionable reporting through standard finance visual patterns.
 - Scope:

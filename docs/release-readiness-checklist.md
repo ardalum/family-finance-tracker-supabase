@@ -185,6 +185,17 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Save error state surfaces a clear message without crashing.
 - [ ] Recent merchant shortcuts render when transactions exist and prefill relevant fields safely.
 
+## 10c) Insights Visual Analytics Verification
+
+- [ ] Insights summary cards render with month totals and risk context.
+- [ ] Actionable insight cards render with clear explanations and recommended next actions.
+- [ ] Spending composition donut/pie chart renders or shows helpful empty state.
+- [ ] Monthly spending trend chart renders for available YTD months or shows helpful empty state.
+- [ ] Budget vs actual comparison chart renders with status context.
+- [ ] Merchant concentration section renders with share and transaction-count context.
+- [ ] Net worth trend line renders when snapshot data exists and shows safe empty state when missing.
+- [ ] Insights sections remain readable on mobile widths without horizontal scrolling.
+
 ## 11) Production Smoke Workflow
 
 - [ ] Execute `docs/production-qa-checklist.md`.

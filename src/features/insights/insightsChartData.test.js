@@ -2,9 +2,12 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  getActionableInsightCards,
   calculateSharePercent,
   getBudgetInsights,
+  getBudgetVsActualRows,
   getBudgetUsageStatus,
+  getMonthlyTrendRows,
   getTopCategories,
   getTopMerchants,
   getTransactionTypeMixRows,
@@ -85,4 +88,48 @@ test("getBudgetInsights groups rows by status", () => {
   assert.equal(insights.over.length, 1);
   assert.equal(insights.near.length, 1);
   assert.equal(insights.safe.length, 2);
+});
+
+test("getMonthlyTrendRows maps ytd monthly rows safely", () => {
+  const rows = getMonthlyTrendRows([
+    { monthKey: "2026-01", label: "Jan 2026", value: 100 },
+    { monthKey: "2026-02", label: "Feb 2026", value: 150 },
+  ]);
+
+  assert.deepEqual(rows, [
+    { id: "2026-01", label: "Jan 2026", value: 100 },
+    { id: "2026-02", label: "Feb 2026", value: 150 },
+  ]);
+});
+
+test("getBudgetVsActualRows builds top budget comparison rows", () => {
+  const rows = getBudgetVsActualRows([
+    { category: "Food", spent: 120, budget: 200, status: "safe" },
+    { category: "Rent", spent: 1000, budget: 1000, status: "near" },
+  ]);
+
+  assert.equal(rows[0].label, "Rent");
+  assert.equal(rows[1].label, "Food");
+  assert.equal(rows[1].budget, 200);
+});
+
+test("getActionableInsightCards returns data-driven recommendations", () => {
+  const cards = getActionableInsightCards({
+    summary: { spendingTotal: 500 },
+    budgetInsights: { over: [{ category: "Food" }], near: [{ category: "Gas" }] },
+    merchantRows: [{ label: "Store A", value: 200 }],
+    categoryRows: [{ label: "Food", formattedValue: "$200.00" }],
+    ytdData: {
+      hasData: true,
+      highestSpendingMonth: { label: "Feb 2026", formattedValue: "$900.00" },
+    },
+    netWorthTrendStatus: "down",
+    hasNetWorthData: true,
+    hasLiabilitySnapshots: false,
+  });
+
+  assert.ok(cards.length > 0);
+  assert.ok(cards.some((card) => card.id === "over-budget"));
+  assert.ok(cards.some((card) => card.id === "merchant-concentration"));
+  assert.ok(cards.some((card) => card.id === "net-worth-trend"));
 });
