@@ -1,14 +1,18 @@
 # Calendar Feature Design
 
-Last updated: 2026-05-17 (Phase 57 Calendar MVP implementation)
+Last updated: 2026-05-17 (Phase 58 month-grid and responsive mobile layout)
 
 ## Implementation status
 
 - Phase 56: design and source audit completed.
 - Phase 57: MVP started and implemented as a secondary `calendar` view using existing data only (no schema changes, no calendar persistence table).
-- Current MVP is agenda/list oriented with month selector, grouped date events, and source-target links.
-- Known MVP limits:
-  - no month grid yet
+- Phase 58: real month-grid calendar implemented as default view with responsive mobile layout and selected-day agenda panel.
+- Calendar now includes:
+  - month grid (Sun-Sat columns, aligned leading/trailing days)
+  - event indicators/counts in day cells
+  - selected day detail panel
+  - Calendar/Agenda toggle (Calendar default)
+- Remaining limits:
   - no reminders/notifications
   - no external calendar sync/export
   - no custom calendar events
@@ -194,16 +198,11 @@ Options reviewed:
 - Week list
 - Compact upcoming list
 
-Recommendation:
+Current implementation:
 
-- Start MVP with **agenda/list view + month selector**
-- Defer month-grid view
-
-Reason:
-
-- lower implementation risk
-- better mobile usability
-- easier to compose from existing event sources
+- Calendar month-grid is now the default primary view.
+- Agenda list remains available as a secondary toggle.
+- Mobile uses compact 7-column grid plus selected-day agenda below.
 
 ## 6) Navigation recommendation
 
@@ -275,6 +274,6 @@ No new database table for MVP. Compose events from existing data with a normaliz
 ## 11) Implementation plan
 
 - **Phase 57**: Calendar MVP from existing data (secondary view, agenda/list) - completed
-- **Phase 58**: Calendar hardening + mobile polish
+- **Phase 58**: Calendar hardening + mobile polish - completed
 - **Phase 59**: Calendar dashboard integration and entry-point tuning
 - **Phase 60**: Reminders/export integration design

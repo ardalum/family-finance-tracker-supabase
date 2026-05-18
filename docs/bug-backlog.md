@@ -1,6 +1,6 @@
 ﻿# Bug Backlog
 
-Last updated: 2026-05-17 (Phase 57 Calendar MVP)
+Last updated: 2026-05-17 (Phase 58 calendar month-grid and mobile polish)
 
 ## Triage Legend
 
@@ -32,6 +32,7 @@ Last updated: 2026-05-17 (Phase 57 Calendar MVP)
 
 ## Fixed (recent notable)
 
+- Calendar upgraded from agenda-only list to true month-grid default view with responsive selected-day panel (`fixed`, Phase 58)
 - Encoding/replacement-character cleanup across UI/docs (`fixed`, Phase 55)
 - Monthly-balance no-balance action reduced to compact inline controls (`fixed`, Phase 55)
 - Account menu Tools length reduced to compact entries (`fixed`, Phase 50)
@@ -46,7 +47,7 @@ Last updated: 2026-05-17 (Phase 57 Calendar MVP)
 - Future navigation promotion decision for Financial Position remains backlog scope (see `docs/financial-position-navigation-decision.md`).
 - Larger IA redesign for secondary tools remains future scope beyond compact menu cleanup.
 - Merge-import intentionally remains non-destructive (add/skip) rather than overwrite restore.
-- Calendar follow-on work remains UX/product backlog: month-grid, reminders, custom events, and external sync/export (MVP secondary view is now shipped; see `docs/calendar-feature-design.md`).
+- Calendar follow-on work remains UX/product backlog: reminders, custom events, and external sync/export (month-grid secondary view is shipped; see `docs/calendar-feature-design.md`).
 
 ## Deferred Enhancements
 

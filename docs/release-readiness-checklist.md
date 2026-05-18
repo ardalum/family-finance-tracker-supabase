@@ -187,13 +187,17 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Verify Financial Position remains a secondary view for this release and is not promoted into top-level main nav.
 - [ ] Verify Calendar secondary view opens from Dashboard quick action and Account menu Tools.
 - [ ] Verify Calendar month selector, empty state, and source-target links (Cards/Bills/Income/Dashboard) are working.
+- [ ] Verify Calendar defaults to month-grid view with Sun-Sat columns and aligned leading/trailing days.
+- [ ] Verify Calendar selected-day panel updates when dates are clicked/tapped.
+- [ ] Verify Calendar agenda toggle remains available for grouped list review.
+- [ ] Verify Calendar mobile behavior: no horizontal scrolling and tappable day cells.
 
 ## Known Limitations
 
 - Manual production smoke and real-device mobile checks are still required release-by-release.
 - Destructive-action validation must remain isolated to test accounts/households.
 - Migration history mismatches require careful repair workflow, not production reset.
-- Calendar MVP is included as a secondary view; month-grid/reminders/custom events/sync remain out of scope.
+- Calendar secondary view includes month grid + agenda toggle; reminders/custom events/sync remain out of scope.
 - Real-data readiness is currently limited by missing native income/savings/cash-flow tracking; releases before that feature is implemented should not claim full household cash-flow completeness.
 - Income export is included in Supabase JSON/Excel output, but income merge-import behavior is not yet a complete dedicated workflow with income-specific conflict handling.
 - Savings export is included in Supabase JSON/Excel output, but savings merge-import behavior is not yet a complete dedicated workflow with savings-specific conflict handling.

@@ -195,6 +195,12 @@ Use this checklist before each production release.
 - [ ] Calendar opens from Dashboard quick action.
 - [ ] Calendar opens from Account menu Tools.
 - [ ] Month selector updates the event list.
+- [ ] Calendar month grid appears first by default.
+- [ ] Calendar grid renders Sun-Sat columns.
+- [ ] Calendar grid aligns selected-month days with leading/trailing muted days.
+- [ ] Calendar grid date cells show event indicators/counts when events exist.
+- [ ] Clicking/tapping a date updates selected-day event details.
+- [ ] Selected-day panel shows "No events for this day." when empty.
 - [ ] Empty-state guidance appears when no event sources exist for selected month.
 - [ ] Card payment due events appear and route to Cards.
 - [ ] Card statement close events appear and route to Cards.
@@ -202,6 +208,8 @@ Use this checklist before each production release.
 - [ ] Income entry events appear and route to Income.
 - [ ] Month-close marker event appears and routes to Dashboard.
 - [ ] Events are grouped by date and sorted consistently.
+- [ ] Agenda toggle still works and shows grouped monthly list view.
+- [ ] Mobile calendar has no horizontal scrolling and day cells remain tappable.
 - [ ] Calendar does not create or mutate financial records by itself.
 
 ## Backup / Restore
@@ -270,7 +278,7 @@ Use this checklist before each production release.
 
 ## Mobile Overflow Guard
 
-- [ ] No obvious horizontal scrolling on Dashboard, Cards, Spending, Bills, Insights, and Financial Position at common mobile widths.
+- [ ] No obvious horizontal scrolling on Dashboard, Cards, Spending, Bills, Insights, Financial Position, and Calendar at common mobile widths.
 
 ## Browser History Navigation
 
