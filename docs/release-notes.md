@@ -7,6 +7,7 @@
 - Dashboard quick actions were consolidated to a compact set focused on regular monthly updates.
 - Calendar now includes a real month-grid view as the default secondary workspace, with Agenda list available as a secondary toggle.
 - Calendar hardening pass improved event-accuracy QA behavior (month-end close marker, duplicate-event safety, and selected-day/filter polish).
+- Calendar is discoverable from both Dashboard quick actions and the compact account-menu Tools section.
 - Financial Position hub is implemented as the main secondary entry point for income, savings, cash accounts, liabilities, and net worth review.
 - Income tracking is available with manual income sources and income entries.
 - Savings tracking is available with manual goals and contributions.

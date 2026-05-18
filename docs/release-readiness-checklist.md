@@ -194,6 +194,9 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Verify Calendar event dates/statuses are accurate for card due dates, statement closes, recurring bills, income entries, and month-close marker.
 - [ ] Verify Calendar selected day remains clear versus today highlight and updates safely after filter changes.
 - [ ] Verify Calendar +N more day-cell overflow count and mobile event indicators are accurate.
+- [ ] Verify Dashboard Calendar quick action remains discoverable without clutter.
+- [ ] Verify Account menu Tools remains compact and includes Calendar.
+- [ ] Execute and attach results from `docs/calendar-release-readiness-retest.md`.
 
 ## Known Limitations
 

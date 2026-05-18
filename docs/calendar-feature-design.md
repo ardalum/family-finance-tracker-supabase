@@ -1,6 +1,6 @@
 # Calendar Feature Design
 
-Last updated: 2026-05-18 (Phase 59 hardening and event-accuracy QA)
+Last updated: 2026-05-18 (Phase 60 discoverability integration and release-readiness retest)
 
 ## Implementation status
 
@@ -8,6 +8,7 @@ Last updated: 2026-05-18 (Phase 59 hardening and event-accuracy QA)
 - Phase 57: MVP started and implemented as a secondary `calendar` view using existing data only (no schema changes, no calendar persistence table).
 - Phase 58: real month-grid calendar implemented as default view with responsive mobile layout and selected-day agenda panel.
 - Phase 59: calendar hardening completed for event-accuracy QA, month-end close-date marker, duplicate-event ID safety, and selected-day/filter behavior polish.
+- Phase 60: discoverability integration confirmed (Dashboard quick action + Account menu Tools) and release-readiness retest documentation added.
 - Calendar now includes:
   - month grid (Sun-Sat columns, aligned leading/trailing days)
   - event indicators/counts in day cells
@@ -205,6 +206,7 @@ Current implementation:
 - Calendar month-grid is now the default primary view.
 - Agenda list remains available as a secondary toggle.
 - Mobile uses compact 7-column grid plus selected-day agenda below.
+- Discoverability entry points are now finalized through Dashboard Quick actions and Account menu Tools.
 
 ## 6) Navigation recommendation
 
@@ -278,4 +280,5 @@ No new database table for MVP. Compose events from existing data with a normaliz
 - **Phase 57**: Calendar MVP from existing data (secondary view, agenda/list) - completed
 - **Phase 58**: Calendar hardening + mobile polish - completed
 - **Phase 59**: Calendar event-accuracy QA and hardening - completed
-- **Phase 60**: Reminders/export integration design
+- **Phase 60**: Calendar dashboard/account-menu discoverability and release-readiness retest - completed
+- **Phase 61**: Reminders/export integration design

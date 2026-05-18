@@ -23,6 +23,7 @@ Rationale:
 
 - Main navigation workflows: Dashboard, Cards, Budget, Spending, Bills, Insights.
 - Secondary workflows: Financial Position, Income, Savings, Accounts, Liabilities, Net Worth.
+- Calendar secondary workflow with month-grid default, agenda toggle, and source-linked event actions.
 - Monthly Close review/reopen workflow.
 - Backup/export coverage for full persisted finance sections.
 - Restore/import validation hardening (merge-safe behavior).
@@ -116,7 +117,10 @@ Security note: never expose `SUPABASE_SERVICE_ROLE_KEY` in frontend env vars or 
 - [ ] Auth/session flow works.
 - [ ] Main nav remains: Dashboard, Cards, Budget, Spending, Bills, Insights.
 - [ ] Dashboard quick actions work; Financial Position opens.
+- [ ] Dashboard quick actions work; Financial Position and Calendar open correctly.
 - [ ] Cards/Budget/Spending/Bills/Insights workflows open and function.
+- [ ] Account menu Tools remains compact and includes Calendar.
+- [ ] Calendar opens from Dashboard and Account menu, defaulting to month-grid view.
 - [ ] Financial Position links to Income/Savings/Accounts/Liabilities/Net Worth/Insights.
 - [ ] Monthly Close review/reopen works.
 - [ ] Backup export works (JSON + Excel).

@@ -194,6 +194,8 @@ Use this checklist before each production release.
 
 - [ ] Calendar opens from Dashboard quick action.
 - [ ] Calendar opens from Account menu Tools.
+- [ ] Dashboard Calendar quick action remains compact/visible and uses the expected helper description.
+- [ ] Account menu Tools remains compact with Financial Position, Calendar, Backup & Restore, and App Settings.
 - [ ] Month selector updates the event list.
 - [ ] Calendar month grid appears first by default.
 - [ ] Calendar grid renders Sun-Sat columns.

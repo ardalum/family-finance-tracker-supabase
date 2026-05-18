@@ -38,6 +38,17 @@ describe("navigation targets", () => {
     global.window = originalWindow;
   });
 
+  it("supports calendar navigation target storage and consume", () => {
+    const storage = createSessionStorage();
+    const originalWindow = global.window;
+    global.window = { sessionStorage: storage };
+
+    setNavigationTarget("calendar", "monthly-calendar");
+    assert.equal(consumeNavigationTarget("calendar"), "monthly-calendar");
+
+    global.window = originalWindow;
+  });
+
   it("returns empty when stored target is for another view", () => {
     const storage = createSessionStorage();
     const originalWindow = global.window;

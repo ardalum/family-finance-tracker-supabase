@@ -40,5 +40,9 @@ describe("dashboard quick actions", () => {
 
     assert.equal(source.includes('view: "calendar"'), true);
     assert.equal(source.includes('target: "monthly-calendar"'), true);
+    assert.equal(
+      source.includes('description: "Review upcoming card, bill, income, and close dates."'),
+      true,
+    );
   });
 });

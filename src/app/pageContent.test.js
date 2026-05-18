@@ -12,6 +12,11 @@ describe("page content config", () => {
     assert.equal(pageContent.recurring.title, "Recurring Payments");
     assert.equal(pageContent.insights.title, "Insights");
     assert.equal(pageContent["financial-position"].title, "Financial Position");
+    assert.equal(pageContent.calendar.title, "Calendar");
+    assert.equal(
+      pageContent.calendar.description,
+      "Review upcoming card, bill, income, and month-close dates.",
+    );
   });
 
   it("contains titles and descriptions for legal views", () => {
