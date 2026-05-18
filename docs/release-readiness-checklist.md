@@ -68,6 +68,7 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Monthly Close includes optional review items for account balances, debt snapshots, net worth summary, and net worth trends.
 - [ ] Balance/debt/net-worth review items route to Accounts, Liabilities, Net Worth, and Insights.
 - [ ] Missing balance or debt snapshot data does not block month close completion.
+- [ ] Confirming no liabilities for a month suppresses false missing-liability warnings for that reviewed month.
 - [ ] `Mark month as reviewed` is blocked until required checks are complete.
 - [ ] `Reopen month as in progress` works.
 - [ ] Switching months loads the correct persisted review state.
@@ -113,6 +114,9 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Credit-card double-counting guidance copy is visible on Liabilities page.
 - [ ] Linked credit card behavior is explicit (informational only, no auto-filled balances).
 - [ ] Liability snapshots do not change Spending, Budget, Income, Savings, or cash-flow leftover totals.
+- [ ] `Confirm no liabilities` appears when no liability snapshots exist for the selected month.
+- [ ] `No liabilities confirmed` appears after confirmation and can be reset.
+- [ ] Account and liability type labels use professional display casing without changing stored values.
 
 ## 7f) Net Worth Summary Verification
 
@@ -123,6 +127,7 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Total liabilities uses selected-month liability snapshots.
 - [ ] Net worth equals assets minus liabilities.
 - [ ] Empty state guidance appears when snapshot data is missing.
+- [ ] If no liabilities are confirmed for the selected month, Net Worth does not continue warning that liability snapshots are missing.
 - [ ] Assets-only and liabilities-only guidance is clear.
 - [ ] Credit-card debt appears only when entered as liability snapshots.
 - [ ] Savings goals are not included unless represented by account balance snapshots.
@@ -222,7 +227,7 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Complete post-expansion UX spot-check from `docs/product-ux-audit-after-finance-expansion.md` (Dashboard action density, secondary-tool discoverability, Insights scanability, Monthly Close clarity).
 - [ ] Verify Financial Position secondary hub opens from Dashboard quick action and Tools workspace.
 - [ ] Verify Financial Position links route to Income, Savings, Accounts, Liabilities, Net Worth, and Insights.
-- [ ] Verify Financial Position hardening states: all-data-missing empty state, partial net-worth advisory, and loading/error copy.
+- [ ] Verify Financial Position hardening states: all-data-missing empty state, partial net-worth advisory, no-liability confirmed advisory, and loading/error copy.
 - [ ] Verify Dashboard quick actions are consolidated to the compact set (Update card balances, Add transactions, Open recurring bills, Review budget, Financial Position, Calendar).
 - [ ] Verify Financial Position is the Dashboard hub entry point for income/savings/accounts/debts/net-worth workflows.
 - [ ] Verify Financial Position mobile layout at small widths: no horizontal scrolling, readable summary cards, and easy-to-tap action buttons.

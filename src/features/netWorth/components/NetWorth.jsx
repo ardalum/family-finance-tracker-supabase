@@ -20,6 +20,7 @@ export default function NetWorth({
   onMonthChange,
   loading = false,
   error = "",
+  liabilityReviewConfirmed = false,
 }) {
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const summary = useMemo(
@@ -114,7 +115,11 @@ export default function NetWorth({
       </Card>
 
       {!summary.hasAnySnapshots ? (
-        <EmptyState>{summary.emptyMessage}</EmptyState>
+        <EmptyState>
+          {liabilityReviewConfirmed
+            ? "No asset snapshots for this month yet. No liabilities are confirmed for this month."
+            : summary.emptyMessage}
+        </EmptyState>
       ) : (
         <div className="grid gap-6 xl:grid-cols-2">
           <Card className="p-5">
@@ -145,7 +150,11 @@ export default function NetWorth({
             <h3 className="text-base font-semibold text-text-main">Liability snapshots</h3>
             <div className="mt-4 grid gap-2">
               {summary.liabilityRows.length === 0 ? (
-                <EmptyState>No liability snapshots for this month.</EmptyState>
+                <EmptyState>
+                  {liabilityReviewConfirmed
+                    ? "No liabilities confirmed for this month."
+                    : "No liability snapshots for this month."}
+                </EmptyState>
               ) : (
                 summary.liabilityRows.map((row) => (
                   <div

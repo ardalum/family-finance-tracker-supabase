@@ -542,7 +542,9 @@ export default function Liabilities({
         <div className="mt-4 grid gap-2">
           {monthSnapshots.length === 0 ? (
             <EmptyState>
-              No debt snapshots for this month yet. Add one above to track liability balances.
+              {noLiabilitiesConfirmed
+                ? "No liabilities are confirmed for this month. Add a snapshot only if that changes."
+                : "No debt snapshots for this month yet. Add one above to track liability balances."}
             </EmptyState>
           ) : (
             monthSnapshots.map((snapshot) => {
@@ -602,8 +604,9 @@ export default function Liabilities({
 
       {liabilityAccounts.length === 0 && liabilityBalanceSnapshots.length === 0 && !loading ? (
         <EmptyState>
-          Manual debt tracking is now available. Add liability accounts and monthly snapshots to
-          track debt context without changing spending or cash-flow totals.
+          {noLiabilitiesConfirmed
+            ? "No liabilities are confirmed for this month. You can add debt accounts later if that changes."
+            : "Manual debt tracking is now available. Add liability accounts and monthly snapshots to track debt context without changing spending or cash-flow totals."}
         </EmptyState>
       ) : null}
     </section>

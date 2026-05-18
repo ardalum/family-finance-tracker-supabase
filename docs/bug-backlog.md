@@ -1,6 +1,6 @@
 ﻿# Bug Backlog
 
-Last updated: 2026-05-18 (Phase 71 liabilities/labels/insights stabilization)
+Last updated: 2026-05-18 (Phase 72 liability confirmation/label polish)
 
 ## Triage Legend
 
@@ -33,6 +33,8 @@ Last updated: 2026-05-18 (Phase 71 liabilities/labels/insights stabilization)
 
 ## Fixed (recent notable)
 
+- No-liability confirmation now carries through related Net Worth and Financial Position missing-data copy so reviewed no-liability months do not keep sounding broken (`fixed`, Phase 72)
+- Professional enum display labels remain centralized for cash account and liability types, with explicit coverage for common account/debt values and unknown fallback humanization (`fixed`, Phase 72)
 - Liability no-review UX clarified with month-level no-liability confirmation prompt/status and warning suppression behavior (`fixed`, Phase 71)
 - Enum display-label polish expanded so internal values are consistently humanized in user-facing account/liability contexts (`fixed`, Phase 71)
 - Insights Spending Composition list now avoids unnecessary internal scrolling for normal category counts while keeping safe overflow behavior for dense lists (`fixed`, Phase 71)

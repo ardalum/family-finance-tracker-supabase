@@ -25,4 +25,13 @@ describe("financial position ui", () => {
     assert.equal(source.includes("Review net worth"), true);
     assert.equal(source.includes("View trends"), true);
   });
+
+  it("uses no-liability confirmation instead of a missing-liability warning when reviewed", () => {
+    const source = read("src/features/financialPosition/components/FinancialPosition.jsx");
+
+    assert.equal(source.includes("liabilityReviewConfirmed"), true);
+    assert.equal(source.includes("No liabilities confirmed for this month."), true);
+    assert.equal(source.includes("summary.needsUpdate.netWorthIncomplete"), true);
+    assert.equal(source.includes("!liabilityReviewConfirmed"), true);
+  });
 });

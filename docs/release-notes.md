@@ -50,6 +50,8 @@
 - Liabilities now include month-level `Confirm no liabilities` / `Reset liability review` controls to suppress false missing-liability warnings when appropriate.
 - Account/liability/net-worth enum labels now render with professional display casing (for example `checking` -> `Checking`) without changing stored values.
 - Insights Spending Composition layout was hardened to avoid card overflow and now surfaces percentage context in composition details.
+- No-liability confirmation now carries into Net Worth and Financial Position copy so reviewed no-liability months no longer continue to sound incomplete.
+- Cash account and liability type labels received final release-polish coverage for professional casing while preserving stored enum values.
 
 ### QA and Release Readiness
 

@@ -23,3 +23,16 @@ test("net worth ui copy keeps inclusion and exclusion guidance", () => {
     true,
   );
 });
+
+test("net worth ui honors no-liability confirmation copy", () => {
+  const source = readFileSync("src/features/netWorth/components/NetWorth.jsx", "utf8");
+
+  assert.equal(source.includes("liabilityReviewConfirmed"), true);
+  assert.equal(source.includes("No liabilities confirmed for this month."), true);
+  assert.equal(
+    source.includes(
+      "No asset snapshots for this month yet. No liabilities are confirmed for this month.",
+    ),
+    true,
+  );
+});

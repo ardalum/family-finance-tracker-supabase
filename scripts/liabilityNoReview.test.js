@@ -18,6 +18,11 @@ test("liabilities page includes no-liability confirmation controls", () => {
   assert.ok(liabilitiesSource.includes("Confirm no liabilities"));
   assert.ok(liabilitiesSource.includes("No liabilities confirmed"));
   assert.ok(liabilitiesSource.includes("Reset liability review"));
+  assert.ok(
+    liabilitiesSource.includes(
+      "No liabilities are confirmed for this month. Add a snapshot only if that changes.",
+    ),
+  );
 });
 
 test("monthly close checklist supports no-liability confirmed copy", () => {
