@@ -1,6 +1,6 @@
 # Product Gap Audit
 
-Last updated: 2026-05-17 (Phase 57 Calendar MVP)
+Last updated: 2026-05-18 (Phase 62 FullCalendar polish)
 
 ## Scope
 
@@ -32,7 +32,7 @@ Implemented (current release scope):
 - no broader non-cash asset coverage (investments, retirement, property)
 - no predictive forecasting workflow for upcoming monthly cash pressure
 - limited guided recommendations in Insights (mostly descriptive analytics)
-- Calendar MVP is now implemented as a secondary agenda/list view from existing data; remaining gaps are month-grid view, reminders, external sync/export, and custom events (see `docs/calendar-feature-design.md`)
+- Calendar MVP is implemented as a secondary FullCalendar month-grid plus agenda view using existing data; remaining gaps are reminders, external sync/export, and custom events (see `docs/calendar-feature-design.md`)
 
 ## Release Blockers vs Product Gaps
 
@@ -49,7 +49,7 @@ Product gaps (deferred roadmap):
 - richer historical drill-down and forecasting across Dashboard/Insights
 - stronger post-import in-app guided verification checklist
 - optional IA evolution if Financial Position eventually moves to grouped main-nav model
-- Calendar hardening/mobile polish and follow-on enhancements after MVP
+- Calendar follow-on enhancements after FullCalendar polish (reminders/custom events/sync/export)
 
 ## Notes
 

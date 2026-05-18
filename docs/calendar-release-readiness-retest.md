@@ -71,3 +71,4 @@ Scope: WalletFlow Phase 61 FullCalendar migration retest
 ## 8) Go/no-go recommendation
 
 - Recommendation: **Go** if `npm run verify` passes and manual browser/device smoke checks pass without critical regressions.
+- Phase 62 blocker-focused retest details: `docs/fullcalendar-release-blocker-retest.md`

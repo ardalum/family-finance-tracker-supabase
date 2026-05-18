@@ -196,6 +196,7 @@ Use this checklist before each production release.
 - [ ] Calendar opens from Account menu Tools.
 - [ ] FullCalendar month grid appears first by default.
 - [ ] FullCalendar Prev/Today/Next controls work and remain usable.
+- [ ] FullCalendar remains readable at 360px and 390px mobile widths.
 - [ ] Month selector updates the event list.
 - [ ] Calendar month selector and FullCalendar month view stay synchronized.
 - [ ] Calendar date cells show compact events with overflow handling.
@@ -216,6 +217,7 @@ Use this checklist before each production release.
 - [ ] Agenda toggle still works and shows grouped monthly list view.
 - [ ] Mobile calendar has no horizontal scrolling and day cells remain tappable.
 - [ ] FullCalendar controls do not overflow at mobile widths.
+- [ ] Mobile compact event rendering remains readable (labels or compact dots/counts).
 - [ ] Calendar does not create or mutate financial records by itself.
 
 ## Backup / Restore

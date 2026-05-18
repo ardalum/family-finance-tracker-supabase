@@ -430,6 +430,34 @@ describe("calendar service", () => {
     assert.equal(mapped[0].extendedProps.source, "income");
   });
 
+  it("keeps fullcalendar event IDs unique when source events are deduped", () => {
+    const result = buildCalendarEventsForMonth({
+      selectedMonth: "2026-05",
+      incomeEntries: [
+        {
+          id: "income_dup",
+          incomeSourceId: "source_1",
+          monthKey: "2026-05",
+          entryDate: "2026-05-15",
+          amount: 100,
+          entryType: "other",
+        },
+        {
+          id: "income_dup",
+          incomeSourceId: "source_1",
+          monthKey: "2026-05",
+          entryDate: "2026-05-15",
+          amount: 100,
+          entryType: "other",
+        },
+      ],
+      incomeSources: [{ id: "source_1", name: "Income Source" }],
+    });
+    const mapped = mapCalendarEventsToFullCalendarEvents(result.events);
+    const ids = mapped.map((event) => event.id);
+    assert.equal(ids.length, new Set(ids).size);
+  });
+
   it("skips invalid dates when mapping to fullcalendar events", () => {
     const mapped = mapCalendarEventsToFullCalendarEvents([
       { id: "good", date: "2026-05-01", title: "Good" },

@@ -26,6 +26,11 @@ select {
   max-width: 100%;
 }
 
+.walletflow-calendar .fc-scrollgrid {
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
 .walletflow-calendar .fc-daygrid-day-number {
   font-size: 0.75rem;
   font-weight: 600;
@@ -38,6 +43,21 @@ select {
   font-size: 0.7rem;
   line-height: 1.2;
   padding: 0.1rem 0.3rem;
+  overflow: hidden;
+}
+
+.walletflow-calendar .wf-calendar-event-label {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.walletflow-calendar .wf-calendar-mobile-dot {
+  display: inline-block;
+  font-size: 0.75rem;
+  line-height: 1;
+  font-weight: 700;
 }
 
 .walletflow-calendar .fc .fc-more-link {
@@ -80,5 +100,25 @@ select {
 
   .walletflow-calendar .fc-daygrid-event {
     font-size: 0.65rem;
+    padding: 0.05rem 0.2rem;
+  }
+
+  .walletflow-calendar .fc .fc-daygrid-day-events {
+    margin-top: 0.1rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .walletflow-calendar .fc .fc-daygrid-day-frame {
+    min-height: 3.6rem;
+  }
+
+  .walletflow-calendar .fc .fc-daygrid-day-number {
+    font-size: 0.7rem;
+  }
+
+  .walletflow-calendar .fc-daygrid-event {
+    min-height: 0.85rem;
+    padding: 0.02rem 0.12rem;
   }
 }

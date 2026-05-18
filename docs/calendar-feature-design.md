@@ -1,6 +1,6 @@
 # Calendar Feature Design
 
-Last updated: 2026-05-18 (Phase 61 FullCalendar migration)
+Last updated: 2026-05-18 (Phase 62 FullCalendar mobile polish and release-blocker retest)
 
 ## Implementation status
 
@@ -10,9 +10,11 @@ Last updated: 2026-05-18 (Phase 61 FullCalendar migration)
 - Phase 59: calendar hardening completed for event-accuracy QA, month-end close-date marker, duplicate-event ID safety, and selected-day/filter behavior polish.
 - Phase 60: discoverability integration validated from Dashboard quick actions and Account menu Tools.
 - Phase 61: custom month-grid replaced by FullCalendar dayGrid month view while preserving existing WalletFlow event generation and selected-day agenda behavior.
+- Phase 62: FullCalendar desktop/mobile polish completed with release-blocker retest checklist.
 - Calendar now includes:
   - FullCalendar month grid (dayGridMonth)
   - compact day cell events with overflow handling via FullCalendar dayMaxEvents
+  - compact mobile event rendering at small widths
   - selected day detail panel
   - Calendar/Agenda toggle (Calendar default)
 - Remaining limits:
@@ -282,4 +284,5 @@ No new database table for MVP. Compose events from existing data with a normaliz
 - **Phase 59**: Calendar event-accuracy QA and hardening - completed
 - **Phase 60**: Calendar dashboard/account-menu discoverability and release-readiness retest - completed
 - **Phase 61**: FullCalendar month-grid migration - completed
-- **Phase 62**: Reminders/export integration design
+- **Phase 62**: FullCalendar mobile polish and release-blocker retest - completed
+- **Phase 63**: Reminders/export integration design

@@ -46,6 +46,9 @@ export default function Calendar({
   const fullCalendarRef = useRef(null);
   const [activeFilter, setActiveFilter] = useState("all");
   const [activeView, setActiveView] = useState("calendar");
+  const [isCompactMobile, setIsCompactMobile] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth <= 420 : false,
+  );
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const { events, groupedEvents } = useMemo(
     () =>
@@ -133,10 +136,19 @@ export default function Calendar({
     const api = fullCalendarRef.current?.getApi();
     if (!api) return;
     const targetDate = `${selectedMonth}-01`;
-    if (api.getDate().toISOString().slice(0, 7) !== selectedMonth) {
+    if (formatDateToIsoLocal(api.getDate()).slice(0, 7) !== selectedMonth) {
       api.gotoDate(targetDate);
     }
   }, [selectedMonth]);
+
+  useEffect(() => {
+    function handleResize() {
+      setIsCompactMobile(window.innerWidth <= 420);
+    }
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <section className="grid gap-4 sm:gap-6">
@@ -170,7 +182,7 @@ export default function Calendar({
         </div>
       </Card>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <SummaryCard label="Total events" value={counts.total} />
         <SummaryCard label="Due/past due" value={counts.dueNow} />
         <SummaryCard label="Income events" value={counts.income} />
@@ -221,24 +233,24 @@ export default function Calendar({
               <h3 className="text-sm font-semibold uppercase tracking-normal text-text-muted">
                 Month calendar
               </h3>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center justify-end gap-2">
                 <button
                   type="button"
-                  className="rounded-lg border border-app-border px-2 py-1 text-xs font-semibold text-text-main transition hover:bg-app-muted"
+                  className="min-h-9 rounded-lg border border-app-border px-2.5 py-1.5 text-xs font-semibold text-text-main transition hover:bg-app-muted"
                   onClick={() => fullCalendarRef.current?.getApi().prev()}
                 >
                   Prev
                 </button>
                 <button
                   type="button"
-                  className="rounded-lg border border-app-border px-2 py-1 text-xs font-semibold text-text-main transition hover:bg-app-muted"
+                  className="min-h-9 rounded-lg border border-app-border px-2.5 py-1.5 text-xs font-semibold text-text-main transition hover:bg-app-muted"
                   onClick={() => fullCalendarRef.current?.getApi().today()}
                 >
                   Today
                 </button>
                 <button
                   type="button"
-                  className="rounded-lg border border-app-border px-2 py-1 text-xs font-semibold text-text-main transition hover:bg-app-muted"
+                  className="min-h-9 rounded-lg border border-app-border px-2.5 py-1.5 text-xs font-semibold text-text-main transition hover:bg-app-muted"
                   onClick={() => fullCalendarRef.current?.getApi().next()}
                 >
                   Next
@@ -256,7 +268,9 @@ export default function Calendar({
                 fixedWeekCount={false}
                 dayMaxEvents={2}
                 displayEventTime={false}
+                eventDisplay="block"
                 events={fullCalendarEvents}
+                eventContent={(info) => renderFullCalendarEventContent(info, isCompactMobile)}
                 dateClick={(info) => {
                   const nextSelectedDate = getSelectedDateFromCalendarDateClick(info.dateStr);
                   if (nextSelectedDate) setSelectedDate(nextSelectedDate);
@@ -404,6 +418,18 @@ function formatDateToIsoLocal(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
     date.getDate(),
   ).padStart(2, "0")}`;
+}
+
+function renderFullCalendarEventContent(info, isCompactMobile) {
+  const title = info?.event?.title || "";
+  if (isCompactMobile) {
+    return (
+      <span className="wf-calendar-mobile-dot" aria-label={title} title={title}>
+        •
+      </span>
+    );
+  }
+  return <span className="wf-calendar-event-label">{title}</span>;
 }
 
 Calendar.defaultProps = {

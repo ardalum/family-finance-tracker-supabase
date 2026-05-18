@@ -22,6 +22,8 @@ describe("calendar ui behavior", () => {
     assert.equal(source.includes('initialView="dayGridMonth"'), true);
     assert.equal(source.includes("dayMaxEvents={2}"), true);
     assert.equal(source.includes("displayEventTime={false}"), true);
+    assert.equal(source.includes("eventContent={(info) => renderFullCalendarEventContent"), true);
+    assert.equal(source.includes("isCompactMobile"), true);
     assert.equal(source.includes("Selected day"), true);
   });
 });

@@ -1,6 +1,6 @@
 ﻿# Bug Backlog
 
-Last updated: 2026-05-18 (Phase 61 FullCalendar migration)
+Last updated: 2026-05-18 (Phase 62 FullCalendar mobile polish)
 
 ## Triage Legend
 
@@ -32,6 +32,7 @@ Last updated: 2026-05-18 (Phase 61 FullCalendar migration)
 
 ## Fixed (recent notable)
 
+- FullCalendar mobile polish improved small-width readability and reduced event-cell clutter (`fixed`, Phase 62)
 - Calendar month-grid migrated to FullCalendar dayGrid with selected-day agenda behavior preserved (`fixed`, Phase 61)
 - Calendar month-close marker now uses month-end date and selected-day/filter behavior is hardened for event-focused review (`fixed`, Phase 59)
 - Calendar event pipeline now de-duplicates duplicate event IDs defensively and keeps day overflow/mobile-indicator counts deterministic (`fixed`, Phase 59)
