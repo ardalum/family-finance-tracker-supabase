@@ -207,9 +207,15 @@ Use this checklist before each production release.
 - [ ] Recurring bill events appear and route to Bills.
 - [ ] Income entry events appear and route to Income.
 - [ ] Month-close marker event appears and routes to Dashboard.
+- [ ] Card due/paid/past-due/not-checked statuses are accurate for selected month context.
+- [ ] Statement-close generated/not-yet status is accurate and does not duplicate due-date events.
+- [ ] Recurring bill status/amount display is accurate (variable actual amount when available, fixed estimated fallback otherwise).
+- [ ] Income events use actual entry dates only (no predicted payday events in MVP).
+- [ ] Month-close marker uses month-end date and reviewed/in-progress/not-reviewed status is accurate.
 - [ ] Events are grouped by date and sorted consistently.
 - [ ] Agenda toggle still works and shows grouped monthly list view.
 - [ ] Mobile calendar has no horizontal scrolling and day cells remain tappable.
+- [ ] Calendar +N more overflow labels and mobile event indicators are accurate.
 - [ ] Calendar does not create or mutate financial records by itself.
 
 ## Backup / Restore

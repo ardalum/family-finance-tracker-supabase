@@ -191,6 +191,9 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Verify Calendar selected-day panel updates when dates are clicked/tapped.
 - [ ] Verify Calendar agenda toggle remains available for grouped list review.
 - [ ] Verify Calendar mobile behavior: no horizontal scrolling and tappable day cells.
+- [ ] Verify Calendar event dates/statuses are accurate for card due dates, statement closes, recurring bills, income entries, and month-close marker.
+- [ ] Verify Calendar selected day remains clear versus today highlight and updates safely after filter changes.
+- [ ] Verify Calendar +N more day-cell overflow count and mobile event indicators are accurate.
 
 ## Known Limitations
 
