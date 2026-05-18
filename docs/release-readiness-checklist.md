@@ -177,6 +177,15 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 
 ## 10) Mobile Layout Checklist
 
+- [ ] App shell uses true sidebar on desktop/tablet and a hamburger-triggered drawer on mobile.
+- [ ] Sidebar supports collapse/expand and keeps accessible icon labels in collapsed mode.
+- [ ] Drawer opens/closes cleanly and closes after selecting a navigation item.
+- [ ] Sidebar/drawer groups are visible and clear: Main, Planning, Money Setup, System.
+- [ ] Sidebar/drawer groups are collapsible with clear chevron state and `aria-expanded` behavior.
+- [ ] Main group is expanded by default; Planning/Money Setup/System are collapsed by default unless active view is inside.
+- [ ] Active-view group auto-expands (for example Income -> Money Setup, Calendar -> Planning, Backup -> System).
+- [ ] Money Setup workflows (Income, Savings, Accounts, Liabilities) are directly reachable from sidebar/drawer.
+- [ ] Quick Add remains reachable from desktop and mobile shell.
 - [ ] Cards > Monthly Balances is usable without horizontal table dependence on mobile.
 - [ ] Spending filters and transaction actions are usable on mobile.
 - [ ] Recurring workspace sections are usable on mobile.
@@ -233,6 +242,10 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Execute `docs/fullcalendar-release-blocker-retest.md` and capture outcomes.
 - [ ] Confirm FullCalendar dependency set remains non-premium only (`core`, `react`, `daygrid`, `interaction`).
 - [ ] Confirm stale PR #338 is not merged (close/ignore as obsolete after FullCalendar migration).
+- [ ] Verify Liabilities page supports `Confirm no liabilities` and `Reset liability review` when no month data exists.
+- [ ] Verify missing-liability warning is suppressed after no-liabilities confirmation for the same month.
+- [ ] Verify account/liability display labels are professionally formatted (for example `checking` -> `Checking`, `student_loan` -> `Student Loan`).
+- [ ] Verify Insights Spending Composition stays within card bounds and includes percent context in chart/list content.
 
 ## Known Limitations
 

@@ -1,85 +1,112 @@
-import { useEffect, useState } from "react";
+import { ChevronDown, ChevronRight } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import FeatureIcon from "../ui/FeatureIcon.jsx";
 import { NAVIGATE_EVENT } from "../../lib/navigationTargets.js";
-import { navItems } from "./navigationItems.js";
+import {
+  createInitialExpandedGroupState,
+  getSectionIdByView,
+  groupedNavigationSections,
+  navItems,
+} from "./navigationItems.js";
 import { shouldHandleNavigationView } from "./navigationEventUtils.js";
 
-export default function Navigation({ activeView, onChange }) {
-  const [hoveredId, setHoveredId] = useState("");
+export default function Navigation({
+  activeView,
+  onChange,
+  collapsed = false,
+  onItemSelected,
+  ariaLabel = "Primary navigation",
+}) {
+  const [expandedGroups, setExpandedGroups] = useState(() =>
+    createInitialExpandedGroupState(activeView),
+  );
+
+  const activeSectionId = useMemo(() => getSectionIdByView(activeView), [activeView]);
+
+  useEffect(() => {
+    if (!activeSectionId) return;
+    setExpandedGroups((previous) =>
+      previous[activeSectionId] ? previous : { ...previous, [activeSectionId]: true },
+    );
+  }, [activeSectionId]);
 
   useEffect(() => {
     function handleNavigate(event) {
       const view = event.detail?.view;
       if (!shouldHandleNavigationView(view)) return;
       onChange(view);
+      onItemSelected?.();
     }
 
     window.addEventListener(NAVIGATE_EVENT, handleNavigate);
     return () => window.removeEventListener(NAVIGATE_EVENT, handleNavigate);
-  }, [onChange]);
+  }, [onChange, onItemSelected]);
 
   return (
-    <nav className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap" aria-label="Primary navigation">
-      {navItems.map((item) => {
-        const isActive = activeView === item.id;
-        const isHovered = hoveredId === item.id;
-        const tabStyle = getTabStyle({ isActive, isHovered });
-
-        return (
-          <button
-            key={item.id}
-            type="button"
-            className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold shadow-none transition disabled:cursor-not-allowed sm:w-auto sm:justify-start sm:px-3.5"
-            style={tabStyle}
-            onClick={() => onChange(item.id)}
-            onMouseEnter={() => setHoveredId(item.id)}
-            onMouseLeave={() => setHoveredId("")}
-            onFocus={() => setHoveredId(item.id)}
-            onBlur={() => setHoveredId("")}
-            aria-current={isActive ? "page" : undefined}
-            aria-label={`Go to ${item.label}`}
-            title={item.label}
+    <nav className="grid gap-3" aria-label={ariaLabel}>
+      {groupedNavigationSections.map((section) => (
+        <div key={section.id} className="grid gap-1.5 rounded-lg border border-app-border/70 p-1.5">
+          {!collapsed ? (
+            <button
+              type="button"
+              className="inline-flex min-h-8 w-full items-center justify-between gap-2 rounded-md px-2 py-1 text-left text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-text-muted transition hover:bg-app-background"
+              onClick={() =>
+                setExpandedGroups((previous) => ({
+                  ...previous,
+                  [section.id]: !previous[section.id],
+                }))
+              }
+              aria-expanded={expandedGroups[section.id] ? "true" : "false"}
+              aria-controls={`navigation-group-${section.id}`}
+            >
+              <span>{section.label}</span>
+              {expandedGroups[section.id] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+            </button>
+          ) : (
+            <p className="px-1.5 text-[0.62rem] font-semibold uppercase tracking-[0.08em] text-text-subtle">
+              {section.label.slice(0, 1)}
+            </p>
+          )}
+          <div
+            id={`navigation-group-${section.id}`}
+            className={`grid gap-1 ${collapsed || expandedGroups[section.id] ? "" : "hidden"}`}
           >
-            <FeatureIcon
-              icon={item.icon}
-              variant={item.iconVariant}
-              mode="plain"
-              size={16}
-              active={isActive}
-              iconClassName={isHovered && !isActive ? "text-text-main" : ""}
-            />
-            <span className="sm:hidden">{item.shortLabel}</span>
-            <span className="hidden sm:inline">{item.label}</span>
-          </button>
-        );
-      })}
+            {section.items.map((item) => {
+              const isActive = activeView === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={`group inline-flex min-h-9 w-full items-center rounded-lg px-2 py-1.5 text-sm font-medium transition ${
+                    isActive
+                      ? "bg-gray-900 text-white shadow-sm"
+                      : "text-text-main hover:bg-app-background"
+                  } ${collapsed ? "justify-center" : "justify-start gap-2"}`}
+                  onClick={() => {
+                    onChange(item.id);
+                    onItemSelected?.();
+                  }}
+                  aria-current={isActive ? "page" : undefined}
+                  aria-label={`Go to ${item.label}`}
+                  title={item.label}
+                >
+                  <FeatureIcon
+                    icon={item.icon}
+                    variant={item.iconVariant}
+                    mode="plain"
+                    size={16}
+                    active={isActive}
+                    iconClassName={!isActive ? "group-hover:text-text-main" : ""}
+                  />
+                  {!collapsed ? <span className="truncate">{item.label}</span> : null}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
     </nav>
   );
 }
 
-export { navItems };
-
-function getTabStyle({ isActive, isHovered }) {
-  if (isActive) {
-    return {
-      backgroundColor: "#1F2937",
-      borderColor: "#1F2937",
-      color: "#FFFFFF",
-      boxShadow: "0 1px 2px rgb(17 24 39 / 0.12)",
-    };
-  }
-
-  if (isHovered) {
-    return {
-      backgroundColor: "#F3F4F6",
-      borderColor: "#D1D5DB",
-      color: "#111827",
-    };
-  }
-
-  return {
-    backgroundColor: "#FFFFFF",
-    borderColor: "#E5E7EB",
-    color: "#111827",
-  };
-}
+export { navItems, groupedNavigationSections };

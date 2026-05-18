@@ -133,3 +133,22 @@ test("getActionableInsightCards returns data-driven recommendations", () => {
   assert.ok(cards.some((card) => card.id === "merchant-concentration"));
   assert.ok(cards.some((card) => card.id === "net-worth-trend"));
 });
+
+test("getActionableInsightCards suppresses missing-liability warning when no-liability review is confirmed", () => {
+  const cards = getActionableInsightCards({
+    summary: { spendingTotal: 200 },
+    budgetInsights: { over: [], near: [] },
+    merchantRows: [],
+    categoryRows: [],
+    ytdData: null,
+    netWorthTrendStatus: "insufficient-data",
+    hasNetWorthData: false,
+    hasLiabilitySnapshots: false,
+    liabilityReviewConfirmed: true,
+  });
+
+  assert.equal(
+    cards.some((card) => card.id === "missing-liabilities"),
+    false,
+  );
+});

@@ -45,6 +45,9 @@ export function createAppViewProps({
   monthlyCloseReviewLoading,
   monthlyCloseReviewSaving,
   monthlyCloseReviewError,
+  liabilitiesMonthlyCloseReview,
+  liabilitiesMonthlyCloseSaving,
+  insightsLiabilityReviewConfirmed,
   selectedInsightsMonth,
   selectedCalendarMonth,
   selectedFinancialPositionMonth,
@@ -89,6 +92,8 @@ export function createAppViewProps({
   setSelectedIncomeMonth,
   setSelectedSavingsMonth,
   toggleMonthlyCloseManualCheck,
+  toggleLiabilitiesMonthlyCloseManualCheck,
+  setNoLiabilitiesConfirmed,
   markMonthlyCloseReviewed,
   reopenMonthlyCloseReview,
   createSupabaseCreditCard,
@@ -237,6 +242,7 @@ export function createAppViewProps({
       onMonthChange: setSelectedInsightsMonth,
       loading: insightsLoading,
       error: insightsError,
+      liabilityReviewConfirmed: insightsLiabilityReviewConfirmed,
     },
     calendarProps: {
       selectedMonth: selectedCalendarMonth,
@@ -296,6 +302,14 @@ export function createAppViewProps({
       onCreateLiabilityBalanceSnapshot: createSupabaseLiabilityBalanceSnapshot,
       onUpdateLiabilityBalanceSnapshot: updateSupabaseLiabilityBalanceSnapshot,
       onDeleteLiabilityBalanceSnapshot: deleteSupabaseLiabilityBalanceSnapshot,
+      noLiabilitiesConfirmed: Boolean(
+        liabilitiesMonthlyCloseReview?.manualChecks?.reviewDebtBalances,
+      ),
+      noLiabilitiesSaving: liabilitiesMonthlyCloseSaving,
+      onSetNoLiabilitiesConfirmed:
+        setNoLiabilitiesConfirmed ??
+        ((confirmed) =>
+          toggleLiabilitiesMonthlyCloseManualCheck?.("reviewDebtBalances", Boolean(confirmed))),
     },
     netWorthProps: {
       cashAccounts,

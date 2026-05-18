@@ -1,6 +1,6 @@
 # Product Gap Audit
 
-Last updated: 2026-05-18 (Phase 70 privacy/trust polish)
+Last updated: 2026-05-18 (Phase 70 UX stabilization)
 
 ## Scope
 
@@ -35,10 +35,13 @@ Implemented (current release scope):
 - limited guided recommendations in Insights (mostly descriptive analytics)
 - Calendar MVP is implemented as a secondary FullCalendar month-grid plus agenda view using existing data; remaining gaps are reminders, external sync/export, and custom events (see `docs/calendar-feature-design.md`)
 - Dashboard cash-flow semantics gap: addressed in Phase 65 with Financial Pulse summary wording and separated budget/cash/obligation groups.
-- Navigation IA gap: improved in Phase 66 with a dedicated Tools surface and account-menu trust focus; deeper IA evolution remains deferred.
+- Navigation IA gap: addressed for release scope in Phase 70 with true sidebar/drawer navigation and grouped direct access to Money Setup workflows.
 - Data-entry friction gap: partially addressed in Phase 68 with global Quick Add transaction MVP; broader multi-entity quick entry and richer repeat-entry acceleration remain open.
 - Insights visualization gap: partially addressed in Phase 69 with varied chart types and actionable cards; deeper predictive guidance and automated recommendations remain open.
-- Privacy/trust polish gap: partially addressed in Phase 70 with clearer privacy/data handling copy, explicit backup/restore warnings, and stronger destructive-action wording. Additional visual/security UX depth remains future scope.
+- Privacy/trust polish gap: addressed for release scope in Phase 70 with clearer privacy/data handling copy, explicit backup/restore warnings, and stronger destructive-action wording. Additional visual/security UX depth remains future scope.
+- Liabilities review clarity gap: addressed in Phase 70 with month-level "No liabilities confirmed" state and false-warning suppression.
+- Display-label professionalism gap: addressed in Phase 70 by formatting enum/internal values into user-friendly labels without changing stored values.
+- Insights composition readability gap: addressed in Phase 70 with overflow-safe layout and percent context.
 
 ## Release Blockers vs Product Gaps
 

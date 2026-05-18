@@ -40,6 +40,12 @@
 - Quick Add transaction MVP now provides a global, faster amount-first modal flow with recent-merchant shortcuts and existing spending-save logic reuse.
 - Insights visual analytics were redesigned with varied Recharts-based visuals (donut composition, monthly trend, budget-vs-actual comparison, and net-worth trend) plus actionable insight cards.
 - Privacy/trust surfaces were polished with clearer Data & Privacy guidance, stronger Backup/Restore import safety warnings, explicit destructive-action wording, and improved Security & session clarity in Account Settings.
+- App shell now uses true sidebar navigation on desktop/tablet and a hamburger drawer on mobile, with grouped Main/Planning/Money Setup/System sections.
+- Money Setup workflows (Income, Savings, Accounts, Liabilities) are now directly reachable from sidebar/drawer without relying on Dashboard Tools.
+- Sidebar groups are now collapsible to reduce clutter, with Main expanded by default and automatic expansion for the active view's group.
+- Liabilities now include month-level `Confirm no liabilities` / `Reset liability review` controls to suppress false missing-liability warnings when appropriate.
+- Account/liability/net-worth enum labels now render with professional display casing (for example `checking` -> `Checking`) without changing stored values.
+- Insights Spending Composition layout was hardened to avoid card overflow and now surfaces percentage context in composition details.
 
 ### QA and Release Readiness
 

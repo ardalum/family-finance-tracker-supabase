@@ -183,6 +183,20 @@ function FinanceTrackerApp() {
   });
 
   const {
+    review: liabilitiesMonthlyCloseReview,
+    saving: liabilitiesMonthlyCloseSaving,
+    toggleManualCheck: toggleLiabilitiesMonthlyCloseManualCheck,
+  } = useMonthlyCloseReview({
+    activeHouseholdId,
+    selectedMonth: selectedLiabilitiesMonth,
+  });
+
+  const { review: insightsMonthlyCloseReview } = useMonthlyCloseReview({
+    activeHouseholdId,
+    selectedMonth: selectedInsightsMonth,
+  });
+
+  const {
     spendingTransactions,
     selectedSpendingMonth,
     setSelectedSpendingMonth,
@@ -529,6 +543,11 @@ function FinanceTrackerApp() {
     monthlyCloseReviewLoading,
     monthlyCloseReviewSaving,
     monthlyCloseReviewError,
+    liabilitiesMonthlyCloseReview,
+    liabilitiesMonthlyCloseSaving,
+    insightsLiabilityReviewConfirmed: Boolean(
+      insightsMonthlyCloseReview?.manualChecks?.reviewDebtBalances,
+    ),
     selectedInsightsMonth,
     selectedCalendarMonth,
     selectedFinancialPositionMonth,
@@ -573,6 +592,8 @@ function FinanceTrackerApp() {
     setSelectedIncomeMonth,
     setSelectedSavingsMonth,
     toggleMonthlyCloseManualCheck,
+    toggleLiabilitiesMonthlyCloseManualCheck,
+    setNoLiabilitiesConfirmed,
     markMonthlyCloseReviewed,
     reopenMonthlyCloseReview,
     createSupabaseCreditCard,
@@ -635,6 +656,10 @@ function FinanceTrackerApp() {
   function closeQuickAdd() {
     if (spendingSaving) return;
     setQuickAddOpen(false);
+  }
+
+  async function setNoLiabilitiesConfirmed(confirmed) {
+    await toggleLiabilitiesMonthlyCloseManualCheck("reviewDebtBalances", Boolean(confirmed));
   }
 
   if (setupCheckLoading) {

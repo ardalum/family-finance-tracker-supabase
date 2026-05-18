@@ -60,6 +60,7 @@ export default function Insights({
   onMonthChange,
   loading = false,
   error = "",
+  liabilityReviewConfirmed = false,
 }) {
   const [netWorthRangeMonths, setNetWorthRangeMonths] = useState("6");
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
@@ -165,6 +166,7 @@ export default function Insights({
         netWorthTrendStatus,
         hasNetWorthData: hasAnyNetWorthSnapshots,
         hasLiabilitySnapshots: hasAnyLiabilitySnapshots,
+        liabilityReviewConfirmed,
       }),
     [
       budgetInsights,
@@ -174,6 +176,7 @@ export default function Insights({
       hasAnyNetWorthSnapshots,
       merchantRows,
       netWorthTrendStatus,
+      liabilityReviewConfirmed,
       ytdData,
     ],
   );
@@ -220,7 +223,7 @@ export default function Insights({
       />
 
       <section className="grid gap-6 xl:grid-cols-2">
-        <Card>
+        <Card className="overflow-hidden">
           <SectionHeader
             title="Actionable Insights"
             description="Rule-based recommendations from this month and YTD trend context."
@@ -237,20 +240,15 @@ export default function Insights({
             title="Spending Composition"
             description="Category composition with a ranked list for fast pattern recognition."
           />
-          <div className="grid gap-4 p-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+          <div className="grid gap-4 p-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
             <DonutChart
               data={categoryRows.map((row) => ({ label: row.label, value: row.value }))}
               valueLabel="Category spend"
+              showLegend={false}
+              showPercentInTooltip
               emptyMessage="No category spending for this month."
             />
-            <HorizontalBarChart
-              title="Category ranking"
-              description="Spending by category ranked highest to lowest"
-              items={categoryRows}
-              valueLabel="Net spending"
-              emptyMessage="No category ranking yet."
-              maxItems={6}
-            />
+            <CategoryCompositionList rows={categoryRows} />
           </div>
         </Card>
       </section>
@@ -661,6 +659,40 @@ function ActionableInsightCard({ card }) {
           Open {card.targetView}
         </button>
       ) : null}
+    </div>
+  );
+}
+
+function CategoryCompositionList({ rows }) {
+  if (!rows.length) {
+    return <p className="text-sm text-text-muted">No category ranking yet.</p>;
+  }
+
+  const cappedRows = rows.slice(0, 8);
+  const total = cappedRows.reduce((sum, row) => sum + Number(row.value || 0), 0);
+
+  return (
+    <div className="grid min-h-0 gap-2">
+      <p className="text-sm font-semibold text-text-main">Category ranking</p>
+      <div className="grid max-h-72 gap-2 overflow-y-auto pr-1">
+        {cappedRows.map((row, index) => {
+          const percent = calculateSharePercent(row.value, total);
+          return (
+            <div
+              key={row.id}
+              className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2 rounded-xl border border-app-border bg-app-background px-3 py-2"
+            >
+              <p className="min-w-0 truncate text-sm font-medium text-text-main" title={row.label}>
+                {index + 1}. {row.label}
+              </p>
+              <div className="text-right">
+                <p className="text-sm font-semibold text-text-main">{row.formattedValue}</p>
+                <p className="text-xs text-text-muted">{percent.toFixed(1)}%</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

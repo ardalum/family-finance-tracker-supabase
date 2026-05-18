@@ -1,6 +1,6 @@
 ﻿# Bug Backlog
 
-Last updated: 2026-05-18 (Phase 70 privacy/trust polish)
+Last updated: 2026-05-18 (Phase 70 sidebar correction pass)
 
 ## Triage Legend
 
@@ -33,6 +33,12 @@ Last updated: 2026-05-18 (Phase 70 privacy/trust polish)
 
 ## Fixed (recent notable)
 
+- Sidebar UX clutter issue corrected with collapsible navigation groups (Main default open; Planning/Money Setup/System default collapsed with active-group auto-expand) (`fixed`, Phase 70 correction pass)
+- True desktop sidebar + mobile drawer navigation shipped with grouped Main/Planning/Money Setup/System sections (`fixed`, Phase 70)
+- Money Setup discoverability gap closed via direct sidebar/drawer navigation entries for Income/Savings/Accounts/Liabilities (`fixed`, Phase 70)
+- Liabilities now support month-level "No liabilities confirmed" review state to prevent false missing-liability warnings (`fixed`, Phase 70)
+- Account/liability/net-worth enum labels now use professional display casing without changing stored enum values (`fixed`, Phase 70)
+- Insights Spending Composition overflow/fit issues fixed and percentage context added (`fixed`, Phase 70)
 - FullCalendar mobile polish improved small-width readability and reduced event-cell clutter (`fixed`, Phase 62)
 - Calendar month-grid migrated to FullCalendar dayGrid with selected-day agenda behavior preserved (`fixed`, Phase 61)
 - Calendar month-close marker now uses month-end date and selected-day/filter behavior is hardened for event-focused review (`fixed`, Phase 59)
@@ -55,10 +61,10 @@ Last updated: 2026-05-18 (Phase 70 privacy/trust polish)
 - Calendar follow-on work remains UX/product backlog: reminders, custom events, and external sync/export (month-grid secondary view is shipped; see `docs/calendar-feature-design.md`).
 - Calendar month-grid implementation and mobile polish are completed on main via FullCalendar; remaining items are enhancements only, not RC blockers.
 - Dashboard cash-flow semantics gap: resolved in Phase 65 by replacing leftover-style cash-flow wording with grouped Financial Pulse summary semantics (cash position, budget usage, obligations, savings, planned cushion).
-- Navigation IA gap: partially resolved in Phase 66 with dedicated Tools surface and account-menu cleanup; broader IA evolution remains future scope.
+- Navigation IA gap: resolved for release-blocking scope in Phase 70 with true sidebar/drawer grouped navigation and direct Money Setup reachability.
 - Data-entry friction gap: partially resolved in Phase 68 with global Quick Add transaction MVP; follow-on enhancements include duplicate-last flow and expansion to income/bills/savings/accounts/liabilities quick entry.
 - Insights visualization gap: partially resolved in Phase 69 with multi-chart Insights redesign and actionable cards; follow-on enhancements remain for predictive guidance depth.
-- Privacy/trust polish gap: partially resolved in Phase 70 with trust-copy cleanup across Account Settings, Privacy, Help/Support, and Backup/Restore destructive-action guidance.
+- Privacy/trust polish gap: addressed for release scope in Phase 70; follow-on refinements remain optional post-RC.
 
 ## Deferred Enhancements
 

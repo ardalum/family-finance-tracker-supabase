@@ -31,6 +31,19 @@ Use this checklist before each production release.
 - [ ] New Monthly Close review prompts do not block `Mark month as reviewed`.
 - [ ] Monthly Close prompt navigation opens Accounts, Liabilities, Net Worth, and Insights correctly.
 
+## App Shell Navigation
+
+- [ ] Desktop shows a true left sidebar (not top-nav-only) and content reflows beside it.
+- [ ] Sidebar collapse/expand control works and keeps icon-only entries accessible.
+- [ ] Mobile shows a hamburger button that opens a drawer.
+- [ ] Drawer contains grouped sections: Main, Planning, Money Setup, System.
+- [ ] Group headers are expandable/collapsible with clear chevrons and accessible expanded state.
+- [ ] Main is expanded by default; Planning/Money Setup/System are collapsed by default unless active.
+- [ ] Active route auto-expands its group.
+- [ ] Money Setup entries (Income, Savings, Accounts, Liabilities) are directly reachable in sidebar/drawer.
+- [ ] Selecting a drawer navigation item closes the drawer.
+- [ ] Quick Add is reachable from both desktop and mobile shell surfaces.
+
 ## Cards
 
 - [ ] Add credit card works.
@@ -142,6 +155,9 @@ Use this checklist before each production release.
 - [ ] Credit-card double-counting helper copy is visible and understandable.
 - [ ] Linked credit card behavior is clear (informational only; no auto-filled balances).
 - [ ] Inactive liability accounts are excluded from active snapshot account options.
+- [ ] When no liability data exists for selected month, `Confirm no liabilities` is available.
+- [ ] Confirmed no-liabilities state is shown and can be reset via `Reset liability review`.
+- [ ] False missing-liability warning is suppressed in Insights after confirmation.
 
 ## Net Worth
 
@@ -172,6 +188,9 @@ Use this checklist before each production release.
 - [ ] Assets-only and liabilities-only scenarios render clearly.
 - [ ] Net worth trend values use snapshot data only.
 - [ ] Net worth trends do not change Spending, Income, Savings, Budget, or cash-flow totals.
+- [ ] Spending Composition chart/list remain inside the card at desktop and mobile widths.
+- [ ] Spending Composition list shows amount and percentage context.
+- [ ] Spending Composition handles large category lists without horizontal overflow.
 
 ## Financial Position Hub
 
@@ -296,6 +315,7 @@ Use this checklist before each production release.
 ## Mobile Overflow Guard
 
 - [ ] No obvious horizontal scrolling on Dashboard, Cards, Spending, Bills, Insights, Financial Position, and Calendar at common mobile widths.
+- [ ] No horizontal scrolling in the app shell when mobile drawer is open or closed.
 
 ## Browser History Navigation
 

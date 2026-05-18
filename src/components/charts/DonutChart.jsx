@@ -16,6 +16,8 @@ export default function DonutChart({
   data = [],
   emptyMessage = "No chart data available.",
   valueLabel = "Amount",
+  showLegend = true,
+  showPercentInTooltip = false,
 }) {
   if (!data.length) {
     return <p className="text-sm text-text-muted">{emptyMessage}</p>;
@@ -32,6 +34,8 @@ export default function DonutChart({
   if (!normalized.length) {
     return <p className="text-sm text-text-muted">{emptyMessage}</p>;
   }
+
+  const total = normalized.reduce((sum, row) => sum + Number(row.value || 0), 0);
 
   return (
     <div className="h-72 w-full">
@@ -52,14 +56,23 @@ export default function DonutChart({
             ))}
           </Pie>
           <Tooltip
-            formatter={(value) => [formatCurrency(Number(value || 0)), valueLabel]}
+            formatter={(value) => {
+              const numericValue = Number(value || 0);
+              const percent = total > 0 ? (numericValue / total) * 100 : 0;
+              const valueText = showPercentInTooltip
+                ? `${formatCurrency(numericValue)} (${percent.toFixed(1)}%)`
+                : formatCurrency(numericValue);
+              return [valueText, valueLabel];
+            }}
             contentStyle={{ borderRadius: 10, borderColor: "#E5E7EB" }}
           />
-          <Legend
-            verticalAlign="bottom"
-            height={46}
-            wrapperStyle={{ fontSize: "12px", color: "#6B7280" }}
-          />
+          {showLegend ? (
+            <Legend
+              verticalAlign="bottom"
+              height={46}
+              wrapperStyle={{ fontSize: "12px", color: "#6B7280" }}
+            />
+          ) : null}
         </PieChart>
       </ResponsiveContainer>
     </div>
