@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { getRowStatus } from "./creditCardStatus.js";
@@ -20,7 +20,8 @@ describe("credit card status", () => {
   it("marks explicit paid zero-balance entries as checked with no balance", () => {
     const status = getRowStatus(card, "2099-05", { balance: 0, paid: true });
 
-    assert.equal(status.label, "Checked � No balance");
+    assert.equal(status.label, "Checked - No balance");
+    assert.equal(status.label.includes(String.fromCharCode(65533)), false);
     assert.equal(status.isNotChecked, false);
     assert.equal(status.isCheckedNoBalance, true);
     assert.equal(status.isNoBalance, true);
