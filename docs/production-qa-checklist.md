@@ -158,6 +158,7 @@ Use this checklist before each production release.
 - [ ] When no liability data exists for selected month, `Confirm no liabilities` is available.
 - [ ] Confirmed no-liabilities state is shown and can be reset via `Reset liability review`.
 - [ ] False missing-liability warning is suppressed in Insights after confirmation.
+- [ ] If liability snapshots are later added for the month, snapshot-based liability behavior takes priority over no-liability confirmation messaging.
 
 ## Net Worth
 
@@ -191,6 +192,8 @@ Use this checklist before each production release.
 - [ ] Spending Composition chart/list remain inside the card at desktop and mobile widths.
 - [ ] Spending Composition list shows amount and percentage context.
 - [ ] Spending Composition handles large category lists without horizontal overflow.
+- [ ] Spending Composition does not force unnecessary internal vertical scrolling when category count is small/normal.
+- [ ] Spending Composition centers donut chart with ranking below and balanced two-column layout on desktop, single-column on mobile.
 
 ## Financial Position Hub
 

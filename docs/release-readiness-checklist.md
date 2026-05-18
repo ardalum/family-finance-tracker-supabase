@@ -244,8 +244,11 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Confirm stale PR #338 is not merged (close/ignore as obsolete after FullCalendar migration).
 - [ ] Verify Liabilities page supports `Confirm no liabilities` and `Reset liability review` when no month data exists.
 - [ ] Verify missing-liability warning is suppressed after no-liabilities confirmation for the same month.
+- [ ] Verify real liability snapshot data takes priority over no-liability confirmation messaging/warnings when liability data exists for the month.
 - [ ] Verify account/liability display labels are professionally formatted (for example `checking` -> `Checking`, `student_loan` -> `Student Loan`).
 - [ ] Verify Insights Spending Composition stays within card bounds and includes percent context in chart/list content.
+- [ ] Verify Insights Spending Composition only uses internal scroll when category volume is high (no unnecessary scroll for normal category counts).
+- [ ] Verify Insights Spending Composition donut is centered with category ranking below and balanced two-column desktop layout.
 
 ## Known Limitations
 

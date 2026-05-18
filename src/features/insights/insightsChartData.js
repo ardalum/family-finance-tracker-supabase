@@ -236,3 +236,21 @@ export function getActionableInsightCards({
 
   return cards.slice(0, 6);
 }
+
+export function splitCompositionRowsIntoColumns(rows = [], columnCount = 2) {
+  const safeRows = Array.isArray(rows) ? rows : [];
+  const safeColumnCount = Number(columnCount) > 1 ? Number(columnCount) : 1;
+  if (safeRows.length === 0) {
+    return Array.from({ length: safeColumnCount }, () => []);
+  }
+
+  const firstColumnSize = Math.ceil(safeRows.length / safeColumnCount);
+  const columns = [];
+  for (let index = 0; index < safeColumnCount; index += 1) {
+    const start = index * firstColumnSize;
+    const end = start + firstColumnSize;
+    columns.push(safeRows.slice(start, end));
+  }
+
+  return columns;
+}

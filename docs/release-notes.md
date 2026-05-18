@@ -43,6 +43,10 @@
 - App shell now uses true sidebar navigation on desktop/tablet and a hamburger drawer on mobile, with grouped Main/Planning/Money Setup/System sections.
 - Money Setup workflows (Income, Savings, Accounts, Liabilities) are now directly reachable from sidebar/drawer without relying on Dashboard Tools.
 - Sidebar groups are now collapsible to reduce clutter, with Main expanded by default and automatic expansion for the active view's group.
+- Liabilities no-review UX was stabilized with clear month-level confirmation messaging and suppression of false missing-liability warnings.
+- Account/liability enum labels received additional professional display-label hardening without changing stored values.
+- Insights Spending Composition now avoids unnecessary internal scrolling for normal category counts while preserving safe overflow handling for dense category sets.
+- Insights Spending Composition layout now centers the donut chart with category ranking below, using balanced two-column ranking on desktop and single-column stacking on mobile.
 - Liabilities now include month-level `Confirm no liabilities` / `Reset liability review` controls to suppress false missing-liability warnings when appropriate.
 - Account/liability/net-worth enum labels now render with professional display casing (for example `checking` -> `Checking`) without changing stored values.
 - Insights Spending Composition layout was hardened to avoid card overflow and now surfaces percentage context in composition details.

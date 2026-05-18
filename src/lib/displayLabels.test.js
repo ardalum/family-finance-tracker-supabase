@@ -15,6 +15,7 @@ describe("display label formatters", () => {
   it("formats liability labels professionally", () => {
     assert.equal(formatLiabilityTypeLabel("credit_card"), "Credit Card");
     assert.equal(formatLiabilityTypeLabel("student_loan"), "Student Loan");
+    assert.equal(formatLiabilityTypeLabel("liability_account"), "Liability Account");
   });
 
   it("keeps fallback title-casing for unknown enum values", () => {

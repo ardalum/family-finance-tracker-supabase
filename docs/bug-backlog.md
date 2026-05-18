@@ -1,6 +1,6 @@
 ﻿# Bug Backlog
 
-Last updated: 2026-05-18 (Phase 70 sidebar correction pass)
+Last updated: 2026-05-18 (Phase 71 liabilities/labels/insights stabilization)
 
 ## Triage Legend
 
@@ -33,6 +33,10 @@ Last updated: 2026-05-18 (Phase 70 sidebar correction pass)
 
 ## Fixed (recent notable)
 
+- Liability no-review UX clarified with month-level no-liability confirmation prompt/status and warning suppression behavior (`fixed`, Phase 71)
+- Enum display-label polish expanded so internal values are consistently humanized in user-facing account/liability contexts (`fixed`, Phase 71)
+- Insights Spending Composition list now avoids unnecessary internal scrolling for normal category counts while keeping safe overflow behavior for dense lists (`fixed`, Phase 71)
+- Insights Spending Composition layout now centers donut with below-the-chart ranking and balanced desktop columns to reduce wasted card space (`fixed`, correction pass)
 - Sidebar UX clutter issue corrected with collapsible navigation groups (Main default open; Planning/Money Setup/System default collapsed with active-group auto-expand) (`fixed`, Phase 70 correction pass)
 - True desktop sidebar + mobile drawer navigation shipped with grouped Main/Planning/Money Setup/System sections (`fixed`, Phase 70)
 - Money Setup discoverability gap closed via direct sidebar/drawer navigation entries for Income/Savings/Accounts/Liabilities (`fixed`, Phase 70)

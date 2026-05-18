@@ -19,6 +19,7 @@ import {
   getBudgetVsActualRows,
   getBudgetInsights,
   getMonthlyTrendRows,
+  splitCompositionRowsIntoColumns,
   getTopCategories,
   getTopMerchants,
   getTransactionTypeMixRows,
@@ -144,8 +145,12 @@ export default function Insights({
     return [...netWorthMonthsWithData].sort((a, b) => a.netWorth - b.netWorth)[0];
   }, [netWorthMonthsWithData]);
   const hasAnyNetWorthSnapshots = netWorthByMonth.some((row) => row.hasData);
-  const hasAnyLiabilitySnapshots = netWorthByMonth.some(
-    (row) => row.hasData && Number(row.totalLiabilities) > 0,
+  const hasAnyLiabilitySnapshots = useMemo(
+    () =>
+      (appData.liabilityBalanceSnapshots ?? []).some(
+        (snapshot) => snapshot?.monthKey === selectedMonth,
+      ),
+    [appData.liabilityBalanceSnapshots, selectedMonth],
   );
   const monthlyTrendRows = useMemo(
     () => getMonthlyTrendRows(ytdData.ytdSpendingByMonth ?? []),
@@ -240,14 +245,16 @@ export default function Insights({
             title="Spending Composition"
             description="Category composition with a ranked list for fast pattern recognition."
           />
-          <div className="grid gap-4 p-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
-            <DonutChart
-              data={categoryRows.map((row) => ({ label: row.label, value: row.value }))}
-              valueLabel="Category spend"
-              showLegend={false}
-              showPercentInTooltip
-              emptyMessage="No category spending for this month."
-            />
+          <div className="grid gap-5 p-5">
+            <div className="mx-auto w-full max-w-xl">
+              <DonutChart
+                data={categoryRows.map((row) => ({ label: row.label, value: row.value }))}
+                valueLabel="Category spend"
+                showLegend={false}
+                showPercentInTooltip
+                emptyMessage="No category spending for this month."
+              />
+            </div>
             <CategoryCompositionList rows={categoryRows} />
           </div>
         </Card>
@@ -668,30 +675,67 @@ function CategoryCompositionList({ rows }) {
     return <p className="text-sm text-text-muted">No category ranking yet.</p>;
   }
 
-  const cappedRows = rows.slice(0, 8);
-  const total = cappedRows.reduce((sum, row) => sum + Number(row.value || 0), 0);
+  const visibleLimit = 10;
+  const rowsForDisplay = rows.slice(0, visibleLimit);
+  const hiddenCount = Math.max(0, rows.length - rowsForDisplay.length);
+  const total = rows.reduce((sum, row) => sum + Number(row.value || 0), 0);
+  const needsScroll = rows.length > 10;
+  const [leftColumnRows, rightColumnRows] = splitCompositionRowsIntoColumns(rowsForDisplay, 2);
 
   return (
     <div className="grid min-h-0 gap-2">
       <p className="text-sm font-semibold text-text-main">Category ranking</p>
-      <div className="grid max-h-72 gap-2 overflow-y-auto pr-1">
-        {cappedRows.map((row, index) => {
-          const percent = calculateSharePercent(row.value, total);
-          return (
-            <div
-              key={row.id}
-              className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2 rounded-xl border border-app-border bg-app-background px-3 py-2"
-            >
-              <p className="min-w-0 truncate text-sm font-medium text-text-main" title={row.label}>
-                {index + 1}. {row.label}
-              </p>
-              <div className="text-right">
-                <p className="text-sm font-semibold text-text-main">{row.formattedValue}</p>
-                <p className="text-xs text-text-muted">{percent.toFixed(1)}%</p>
-              </div>
-            </div>
-          );
-        })}
+      <div className={`${needsScroll ? "max-h-96 overflow-y-auto pr-1" : ""}`}>
+        <div className="grid gap-2 md:grid-cols-2">
+          <div className="grid gap-2">
+            {leftColumnRows.map((row, index) => {
+              const percent = calculateSharePercent(row.value, total);
+              return (
+                <CompositionRankRow
+                  key={row.id}
+                  rank={index + 1}
+                  label={row.label}
+                  formattedValue={row.formattedValue}
+                  percent={percent}
+                />
+              );
+            })}
+          </div>
+          <div className="grid gap-2">
+            {rightColumnRows.map((row, index) => {
+              const percent = calculateSharePercent(row.value, total);
+              return (
+                <CompositionRankRow
+                  key={row.id}
+                  rank={leftColumnRows.length + index + 1}
+                  label={row.label}
+                  formattedValue={row.formattedValue}
+                  percent={percent}
+                />
+              );
+            })}
+          </div>
+        </div>
+      </div>
+      {hiddenCount > 0 ? (
+        <p className="text-xs text-text-muted">
+          Showing top {rowsForDisplay.length} categories. {hiddenCount} more categories are
+          available.
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function CompositionRankRow({ rank, label, formattedValue, percent }) {
+  return (
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2 rounded-xl border border-app-border bg-app-background px-3 py-2.5">
+      <p className="min-w-0 truncate text-sm font-medium text-text-main" title={label}>
+        {rank}. {label}
+      </p>
+      <div className="text-right">
+        <p className="text-sm font-semibold text-text-main">{formattedValue}</p>
+        <p className="text-xs text-text-muted">{percent.toFixed(1)}%</p>
       </div>
     </div>
   );

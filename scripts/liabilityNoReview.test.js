@@ -9,6 +9,12 @@ const liabilitiesSource = readFileSync(
 const checklistSource = readFileSync("src/features/dashboard/monthlyCloseChecklist.js", "utf8");
 
 test("liabilities page includes no-liability confirmation controls", () => {
+  assert.ok(liabilitiesSource.includes("No liabilities this month?"));
+  assert.ok(
+    liabilitiesSource.includes(
+      "Confirming no liabilities suppresses false missing-liability warnings for this month.",
+    ),
+  );
   assert.ok(liabilitiesSource.includes("Confirm no liabilities"));
   assert.ok(liabilitiesSource.includes("No liabilities confirmed"));
   assert.ok(liabilitiesSource.includes("Reset liability review"));

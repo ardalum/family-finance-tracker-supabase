@@ -8,6 +8,7 @@ const CASH_ACCOUNT_TYPE_LABELS = {
 };
 
 const LIABILITY_TYPE_LABELS = {
+  liability_account: "Liability Account",
   credit_card: "Credit Card",
   auto_loan: "Auto Loan",
   student_loan: "Student Loan",
