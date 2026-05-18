@@ -7,6 +7,7 @@ Use this checklist before each production release.
 - [ ] Use a test household and test account where destructive actions can be safely validated.
 - [ ] Keep recent backups private and accessible before QA starts.
 - [ ] Confirm environment variables are set for the deployment target.
+- [ ] After hard refresh, every month selector opens on the current real-world month until the user manually changes it.
 
 ## Dashboard
 
@@ -55,6 +56,9 @@ Use this checklist before each production release.
 - [ ] Paid checkbox updates correctly.
 - [ ] Mark no balance action works.
 - [ ] Statement details save correctly.
+- [ ] Past-due unpaid statement balances auto-sync into Liabilities/Debt as linked credit-card debt.
+- [ ] Partial card payments sync only the remaining unpaid statement amount.
+- [ ] Marking a past-due statement paid removes the auto-synced liability snapshot without deleting user-created snapshots.
 - [ ] Autopay fields save correctly.
 - [ ] Minimum payment and paid amount fields save correctly.
 
@@ -144,7 +148,11 @@ Use this checklist before each production release.
 - [ ] Delete liability account works with confirmation wording.
 - [ ] Add liability balance snapshot works.
 - [ ] Edit liability balance snapshot works.
-- [ ] Delete liability balance snapshot works with confirmation wording.
+- [ ] Delete liability account opens an app modal confirmation, not native browser confirm.
+- [ ] Delete liability balance snapshot opens an app modal confirmation, not native browser confirm.
+- [ ] Canceling the delete modal does not delete the debt record.
+- [ ] Confirming the delete modal deletes the selected debt record.
+- [ ] Auto-synced card debt delete warning explains it may reappear if the card remains past due and unpaid.
 - [ ] Month switching filters liability snapshots correctly.
 - [ ] Total debt updates correctly for selected month.
 - [ ] Latest balance per liability account updates after snapshot changes.
@@ -155,6 +163,9 @@ Use this checklist before each production release.
 - [ ] Liability snapshots do not change Dashboard cash-flow estimated leftover.
 - [ ] Credit-card double-counting helper copy is visible and understandable.
 - [ ] Linked credit card behavior is clear (informational only; no auto-filled balances).
+- [ ] Past-due unpaid credit card statements are automatically reflected as card debt.
+- [ ] Auto-synced card debt does not create duplicate liability accounts or duplicate auto-synced snapshots.
+- [ ] User-created liability snapshots for a linked card/month are not deleted by auto-sync.
 - [ ] Inactive liability accounts are excluded from active snapshot account options.
 - [ ] When no liability data exists for selected month, `Confirm no liabilities` is available.
 - [ ] Confirmed no-liabilities state is shown and can be reset via `Reset liability review`.
@@ -162,6 +173,7 @@ Use this checklist before each production release.
 - [ ] False missing-liability wording is suppressed in Monthly Close, Net Worth, and Financial Position after confirmation.
 - [ ] Liability type labels display professional casing such as `Credit Card`, `Auto Loan`, and `Mortgage`.
 - [ ] If liability snapshots are later added for the month, snapshot-based liability behavior takes priority over no-liability confirmation messaging.
+- [ ] Real auto-synced card debt takes priority over a previously confirmed no-liability review state.
 
 ## Net Worth
 
@@ -170,6 +182,10 @@ Use this checklist before each production release.
 - [ ] Month-selection helper copy is clear (selected month uses latest snapshots recorded in that month).
 - [ ] Total assets reflects selected-month latest cash account snapshots.
 - [ ] Total liabilities reflects selected-month latest liability snapshots.
+- [ ] Prior active liability snapshots carry forward when the selected month has no newer liability snapshot.
+- [ ] Current-month liability snapshots override carried-forward values.
+- [ ] Explicit zero liability snapshots stop carry-forward.
+- [ ] Inactive/closed liabilities do not incorrectly carry forward.
 - [ ] Net worth equals assets minus liabilities.
 - [ ] Empty state appears when account/debt snapshots are missing.
 - [ ] Confirmed no-liability months show confirmation-aware copy instead of continuing to warn about missing liability snapshots.
@@ -182,6 +198,7 @@ Use this checklist before each production release.
 - [ ] Net worth view does not change Savings totals.
 - [ ] Net worth view does not change Budget totals.
 - [ ] Net worth view does not change Dashboard cash-flow estimated leftover.
+- [ ] Debt payment helper copy reminds the user to update account snapshots after paying debt where shown.
 
 ## Net Worth Trends (Insights)
 
@@ -192,6 +209,7 @@ Use this checklist before each production release.
 - [ ] Missing months are shown as no data.
 - [ ] Assets-only and liabilities-only scenarios render clearly.
 - [ ] Net worth trend values use snapshot data only.
+- [ ] Net worth trend does not show fake improvement when current-month liability snapshots are missing but prior active debt exists.
 - [ ] Net worth trends do not change Spending, Income, Savings, Budget, or cash-flow totals.
 - [ ] Spending Composition chart/list remain inside the card at desktop and mobile widths.
 - [ ] Spending Composition list shows amount and percentage context.

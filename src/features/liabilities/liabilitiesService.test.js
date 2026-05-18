@@ -5,6 +5,7 @@ import {
   buildLiabilityAccountOptions,
   calculateLiabilityBalanceTotal,
   getActiveLiabilityAccounts,
+  getLatestLiabilitySnapshotOnOrBeforeMonthByAccount,
   getLatestLiabilitySnapshotByAccount,
   getLiabilitySnapshotsForMonth,
   normalizeLiabilityAccountForm,
@@ -87,6 +88,76 @@ test("calculateLiabilityBalanceTotal sums latest account balances", () => {
   ];
 
   assert.equal(calculateLiabilityBalanceTotal(accounts, snapshots, "2026-06"), 500);
+});
+
+test("calculateLiabilityBalanceTotal carries forward latest prior liability snapshot", () => {
+  const accounts = [{ id: "l1", isActive: true }];
+  const snapshots = [
+    {
+      liabilityAccountId: "l1",
+      monthKey: "2026-05",
+      snapshotDate: "2026-05-20",
+      balanceAmount: 1500,
+    },
+  ];
+
+  assert.equal(calculateLiabilityBalanceTotal(accounts, snapshots, "2026-06"), 1500);
+});
+
+test("current-month zero snapshot stops liability carry-forward", () => {
+  const accounts = [{ id: "l1", isActive: true }];
+  const snapshots = [
+    {
+      liabilityAccountId: "l1",
+      monthKey: "2026-05",
+      snapshotDate: "2026-05-20",
+      balanceAmount: 1500,
+    },
+    {
+      liabilityAccountId: "l1",
+      monthKey: "2026-06",
+      snapshotDate: "2026-06-01",
+      balanceAmount: 0,
+    },
+  ];
+
+  assert.equal(calculateLiabilityBalanceTotal(accounts, snapshots, "2026-06"), 0);
+});
+
+test("inactive liability accounts do not carry forward balances", () => {
+  const accounts = [{ id: "l1", isActive: false }];
+  const snapshots = [
+    {
+      liabilityAccountId: "l1",
+      monthKey: "2026-05",
+      snapshotDate: "2026-05-20",
+      balanceAmount: 1500,
+    },
+  ];
+
+  assert.equal(calculateLiabilityBalanceTotal(accounts, snapshots, "2026-06"), 0);
+});
+
+test("getLatestLiabilitySnapshotOnOrBeforeMonthByAccount ignores future snapshots", () => {
+  const latest = getLatestLiabilitySnapshotOnOrBeforeMonthByAccount(
+    [
+      {
+        liabilityAccountId: "l1",
+        monthKey: "2026-05",
+        snapshotDate: "2026-05-20",
+        balanceAmount: 1500,
+      },
+      {
+        liabilityAccountId: "l1",
+        monthKey: "2026-07",
+        snapshotDate: "2026-07-01",
+        balanceAmount: 900,
+      },
+    ],
+    "2026-06",
+  );
+
+  assert.equal(latest.get("l1")?.balanceAmount, 1500);
 });
 
 test("summarizeLiabilitiesByType groups totals by liability type", () => {

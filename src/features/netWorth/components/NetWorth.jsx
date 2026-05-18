@@ -66,6 +66,9 @@ export default function NetWorth({
               Credit card balances are not counted unless entered as liability snapshots.
             </p>
             <p className="mt-1 text-sm text-text-muted">
+              After paying debt, update account snapshots so cash reflects the payment.
+            </p>
+            <p className="mt-1 text-sm text-text-muted">
               Net worth does not change spending, income, savings, budget, or cash-flow totals.
             </p>
             <p className="mt-1 text-sm text-text-muted">
@@ -165,6 +168,11 @@ export default function NetWorth({
                     <p className="text-xs text-text-muted">
                       {formatLiabilityTypeLabel(row.type)} - Snapshot: {row.snapshotDate || "N/A"}
                     </p>
+                    {row.carriedForward ? (
+                      <p className="mt-1 text-xs text-text-muted">
+                        Carried forward from {formatMonthLabel(row.sourceMonthKey)}
+                      </p>
+                    ) : null}
                     <p className="mt-1 text-sm font-semibold text-text-main">
                       {formatCurrency(row.balanceAmount)}
                     </p>

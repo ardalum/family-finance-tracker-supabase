@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import EmptyState from "../../../components/ui/EmptyState.jsx";
@@ -8,6 +8,7 @@ import Select from "../../../components/ui/Select.jsx";
 import { buildMonthOptions, formatDateKey, getCurrentMonthKey } from "../../../lib/dates.js";
 import { formatLiabilityTypeLabel } from "../../../lib/displayLabels.js";
 import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
+import { AUTO_SYNC_SNAPSHOT_NOTE } from "../creditCardDebtAutoSync.js";
 import {
   buildLiabilityAccountOptions,
   calculateLiabilityBalanceTotal,
@@ -75,6 +76,7 @@ export default function Liabilities({
     }),
   );
   const [editingSnapshotId, setEditingSnapshotId] = useState("");
+  const [pendingDelete, setPendingDelete] = useState(null);
 
   const accountNameById = useMemo(
     () =>
@@ -147,20 +149,54 @@ export default function Liabilities({
     resetSnapshotDraft();
   }
 
-  async function handleDeleteAccount(accountId, accountName) {
-    const confirmed = window.confirm(
-      `Delete liability account "${accountName}"? This also permanently deletes all snapshots for this debt account.`,
-    );
-    if (!confirmed) return;
-    await onDeleteLiabilityAccount(accountId);
+  useEffect(() => {
+    if (!pendingDelete) return undefined;
+
+    function handleKeyDown(event) {
+      if (event.key === "Escape" && !isSaving) setPendingDelete(null);
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isSaving, pendingDelete]);
+
+  function requestDeleteAccount(accountId, accountName) {
+    setPendingDelete({
+      type: "account",
+      id: accountId,
+      title: "Delete liability account?",
+      buttonLabel: "Delete liability account",
+      itemName: accountName,
+      description:
+        "This permanently deletes the debt account and all snapshots connected to it. This cannot be undone.",
+    });
   }
 
-  async function handleDeleteSnapshot(snapshotId) {
-    const confirmed = window.confirm(
-      "Delete this liability balance snapshot? This cannot be undone.",
-    );
-    if (!confirmed) return;
-    await onDeleteLiabilityBalanceSnapshot(snapshotId);
+  function requestDeleteSnapshot(snapshot) {
+    const snapshotId = snapshot.supabaseId ?? snapshot.id;
+    const isAutoSynced = String(snapshot.notes || "").includes(AUTO_SYNC_SNAPSHOT_NOTE);
+    setPendingDelete({
+      type: "snapshot",
+      id: snapshotId,
+      title: isAutoSynced ? "Delete synced card debt?" : "Delete debt snapshot?",
+      buttonLabel: isAutoSynced ? "Delete synced card debt" : "Delete debt snapshot",
+      itemName: `${formatCurrency(snapshot.balanceAmount)} - ${snapshot.snapshotDate}`,
+      description: isAutoSynced
+        ? "This removes the auto-synced debt snapshot. It may reappear if the linked card statement remains past due and unpaid."
+        : "This permanently deletes this debt balance snapshot. This cannot be undone.",
+    });
+  }
+
+  async function confirmPendingDelete() {
+    if (!pendingDelete) return;
+
+    if (pendingDelete.type === "account") {
+      await onDeleteLiabilityAccount(pendingDelete.id);
+    } else {
+      await onDeleteLiabilityBalanceSnapshot(pendingDelete.id);
+    }
+
+    setPendingDelete(null);
   }
 
   return (
@@ -184,6 +220,9 @@ export default function Liabilities({
             </p>
             <p className="mt-1 text-sm text-text-muted">
               Linked credit cards are informational only in this MVP and do not auto-fill balances.
+            </p>
+            <p className="mt-1 text-sm text-text-muted">
+              Past-due unpaid credit card statements are automatically reflected as card debt.
             </p>
           </div>
           <Select
@@ -411,7 +450,7 @@ export default function Liabilities({
                         variant="danger"
                         className="min-h-8 px-3 py-1 text-xs"
                         disabled={isSaving}
-                        onClick={() => handleDeleteAccount(accountId, account.name)}
+                        onClick={() => requestDeleteAccount(accountId, account.name)}
                       >
                         Delete
                       </Button>
@@ -505,7 +544,7 @@ export default function Liabilities({
         <h3 className="text-base font-semibold text-text-main">
           Debt snapshots for {formatMonthLabel(selectedMonth)}
         </h3>
-        {monthSnapshots.length === 0 ? (
+        {monthSnapshots.length === 0 && totalDebt <= 0 ? (
           <div className="mt-3 rounded-xl border border-app-border bg-app-background p-3">
             <p className="text-sm font-medium text-text-main">No liabilities this month?</p>
             <p className="mt-1 text-xs text-text-muted">
@@ -542,9 +581,11 @@ export default function Liabilities({
         <div className="mt-4 grid gap-2">
           {monthSnapshots.length === 0 ? (
             <EmptyState>
-              {noLiabilitiesConfirmed
-                ? "No liabilities are confirmed for this month. Add a snapshot only if that changes."
-                : "No debt snapshots for this month yet. Add one above to track liability balances."}
+              {totalDebt > 0
+                ? "No new debt snapshots for this month. Existing debt is carried forward until it is updated, zeroed, or closed."
+                : noLiabilitiesConfirmed
+                  ? "No liabilities are confirmed for this month. Add a snapshot only if that changes."
+                  : "No debt snapshots for this month yet. Add one above to track liability balances."}
             </EmptyState>
           ) : (
             monthSnapshots.map((snapshot) => {
@@ -590,7 +631,7 @@ export default function Liabilities({
                       variant="danger"
                       className="min-h-8 px-3 py-1 text-xs"
                       disabled={isSaving}
-                      onClick={() => handleDeleteSnapshot(snapshotId)}
+                      onClick={() => requestDeleteSnapshot(snapshot)}
                     >
                       Delete
                     </Button>
@@ -608,6 +649,58 @@ export default function Liabilities({
             ? "No liabilities are confirmed for this month. You can add debt accounts later if that changes."
             : "Manual debt tracking is now available. Add liability accounts and monthly snapshots to track debt context without changing spending or cash-flow totals."}
         </EmptyState>
+      ) : null}
+
+      {pendingDelete ? (
+        <div
+          className="fixed inset-0 z-50 flex min-h-screen items-center justify-center bg-gray-950/40 px-4 py-6"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="liability-delete-title"
+        >
+          <div className="w-full max-w-md rounded-2xl border border-app-border bg-app-surface p-5 shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p id="liability-delete-title" className="text-lg font-semibold text-text-main">
+                  {pendingDelete.title}
+                </p>
+                <p className="mt-2 text-sm leading-6 text-text-muted">
+                  {pendingDelete.description}
+                </p>
+              </div>
+              <button
+                type="button"
+                className="rounded-full px-2 py-1 text-sm text-text-muted transition hover:bg-app-muted hover:text-text-main"
+                onClick={() => setPendingDelete(null)}
+                disabled={isSaving}
+                aria-label="Close delete confirmation"
+              >
+                X
+              </button>
+            </div>
+            <div className="mt-4 rounded-xl border border-app-border bg-app-background p-3 text-sm text-text-main">
+              <p className="font-semibold">{pendingDelete.itemName}</p>
+            </div>
+            <div className="mt-5 flex flex-wrap justify-end gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setPendingDelete(null)}
+                disabled={isSaving}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="danger"
+                onClick={confirmPendingDelete}
+                disabled={isSaving}
+              >
+                {isSaving ? "Deleting..." : pendingDelete.buttonLabel}
+              </Button>
+            </div>
+          </div>
+        </div>
       ) : null}
     </section>
   );

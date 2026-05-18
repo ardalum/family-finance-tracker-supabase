@@ -174,6 +174,107 @@ test("selected month filtering applies to assets and liabilities", () => {
   assert.equal(summary.totalLiabilities, 250);
 });
 
+test("current month carries forward latest prior liability snapshot when current snapshot is missing", () => {
+  const summary = summarizeNetWorthForMonth({
+    cashAccounts,
+    accountBalanceSnapshots: [
+      {
+        cashAccountId: "cash-1",
+        monthKey: "2026-05",
+        snapshotDate: "2026-05-01",
+        balanceAmount: 16476.96,
+      },
+    ],
+    liabilityAccounts,
+    liabilityBalanceSnapshots: [
+      {
+        liabilityAccountId: "debt-1",
+        monthKey: "2026-04",
+        snapshotDate: "2026-04-20",
+        balanceAmount: 1500,
+      },
+    ],
+    monthKey: "2026-05",
+  });
+
+  assert.equal(summary.totalAssets, 16476.96);
+  assert.equal(summary.totalLiabilities, 1500);
+  assert.equal(summary.netWorth, 14976.96);
+  assert.equal(summary.liabilityRows[0].carriedForward, true);
+  assert.equal(summary.liabilityRows[0].sourceMonthKey, "2026-04");
+});
+
+test("current-month liability snapshot overrides carried-forward liability snapshot", () => {
+  const summary = summarizeNetWorthForMonth({
+    cashAccounts,
+    accountBalanceSnapshots: [],
+    liabilityAccounts,
+    liabilityBalanceSnapshots: [
+      {
+        liabilityAccountId: "debt-1",
+        monthKey: "2026-04",
+        snapshotDate: "2026-04-20",
+        balanceAmount: 1500,
+      },
+      {
+        liabilityAccountId: "debt-1",
+        monthKey: "2026-05",
+        snapshotDate: "2026-05-05",
+        balanceAmount: 900,
+      },
+    ],
+    monthKey: "2026-05",
+  });
+
+  assert.equal(summary.totalLiabilities, 900);
+  assert.equal(summary.liabilityRows[0].carriedForward, false);
+});
+
+test("explicit zero liability snapshot stops carry-forward", () => {
+  const summary = summarizeNetWorthForMonth({
+    cashAccounts,
+    accountBalanceSnapshots: [],
+    liabilityAccounts,
+    liabilityBalanceSnapshots: [
+      {
+        liabilityAccountId: "debt-1",
+        monthKey: "2026-04",
+        snapshotDate: "2026-04-20",
+        balanceAmount: 1500,
+      },
+      {
+        liabilityAccountId: "debt-1",
+        monthKey: "2026-05",
+        snapshotDate: "2026-05-05",
+        balanceAmount: 0,
+      },
+    ],
+    monthKey: "2026-05",
+  });
+
+  assert.equal(summary.totalLiabilities, 0);
+  assert.equal(summary.liabilityRows.length, 0);
+});
+
+test("inactive liabilities do not carry forward into current net worth", () => {
+  const summary = summarizeNetWorthForMonth({
+    cashAccounts,
+    accountBalanceSnapshots: [],
+    liabilityAccounts: [{ id: "debt-1", name: "Closed Card", isActive: false }],
+    liabilityBalanceSnapshots: [
+      {
+        liabilityAccountId: "debt-1",
+        monthKey: "2026-04",
+        snapshotDate: "2026-04-20",
+        balanceAmount: 1500,
+      },
+    ],
+    monthKey: "2026-05",
+  });
+
+  assert.equal(summary.totalLiabilities, 0);
+});
+
 test("latest snapshot per account is used in selected month", () => {
   const latest = getLatestSnapshotsForMonth(
     [

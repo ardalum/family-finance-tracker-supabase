@@ -52,6 +52,12 @@
 - Insights Spending Composition layout was hardened to avoid card overflow and now surfaces percentage context in composition details.
 - No-liability confirmation now carries into Net Worth and Financial Position copy so reviewed no-liability months no longer continue to sound incomplete.
 - Cash account and liability type labels received final release-polish coverage for professional casing while preserving stored enum values.
+- Past-due unpaid credit card statements now auto-sync into Liabilities/Debt as linked card debt, using remaining unpaid balance for partial payments.
+- Paid or zeroed card statements remove stale auto-synced debt snapshots, while user-created liability snapshots are left untouched.
+- Liabilities/Debt delete flows now use app modal confirmations instead of native browser confirms.
+- Active liability balances now carry forward into Net Worth and Financial Position until superseded, explicitly zeroed, paid through synced card cleanup, or closed.
+- Fresh app loads initialize month-scoped workspaces to the current month; manual month changes remain user-driven.
+- Net Worth guidance now reminds users that paying debt is net-worth neutral when cash/account snapshots are updated too.
 
 ### QA and Release Readiness
 

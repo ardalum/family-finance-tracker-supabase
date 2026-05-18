@@ -1,6 +1,6 @@
 # Product Gap Audit
 
-Last updated: 2026-05-18 (Phase 72 liability confirmation/label polish)
+Last updated: 2026-05-18 (Phase 73 correction: debt modal/month/carry-forward)
 
 ## Scope
 
@@ -41,6 +41,9 @@ Implemented (current release scope):
 - Privacy/trust polish gap: addressed for release scope in Phase 70 with clearer privacy/data handling copy, explicit backup/restore warnings, and stronger destructive-action wording. Additional visual/security UX depth remains future scope.
 - Liabilities review clarity gap: addressed in Phases 71-72 with month-level "No liabilities confirmed" prompt/status behavior and false-warning suppression across Liabilities, Net Worth, Financial Position, Monthly Close, and Insights copy.
 - Display-label professionalism gap: addressed in Phases 71-72 by centralizing enum/internal value humanization coverage for cash account and liability types without changing stored values.
+- Card-debt liability sync gap: addressed in Phase 73 with schema-free auto-sync from past-due unpaid credit card statements into linked Liabilities/Debt snapshots. Paid/zero statements remove stale auto-synced snapshots; partial payments sync remaining unpaid amount; manual user snapshots are left untouched.
+- Liability carry-forward gap: addressed in Phase 73 correction so active liability balances carry forward into Net Worth/Financial Position until a newer snapshot, explicit zero, paid synced card cleanup, or inactive/closed account state stops them.
+- Debt deletion UX gap: addressed in Phase 73 correction by replacing Liabilities native browser confirms with app modal confirmations.
 - Insights composition readability gap: addressed in Phase 71 with overflow-safe layout plus conditional scrolling so normal category counts do not force unnecessary internal scroll.
 
 ## Release Blockers vs Product Gaps
