@@ -77,7 +77,8 @@ export const pageContent = {
   },
   "privacy-policy": {
     title: "Privacy Policy",
-    description: "Review how WalletFlow handles account, household, and finance tracking data.",
+    description:
+      "Review how WalletFlow handles account and household finance data, backups, and deletion guidance.",
   },
   "terms-of-use": {
     title: "Terms of Use",

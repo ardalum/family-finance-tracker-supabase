@@ -1,6 +1,6 @@
 ﻿# Bug Backlog
 
-Last updated: 2026-05-18 (Phase 62 FullCalendar mobile polish)
+Last updated: 2026-05-18 (Phase 70 privacy/trust polish)
 
 ## Triage Legend
 
@@ -58,7 +58,7 @@ Last updated: 2026-05-18 (Phase 62 FullCalendar mobile polish)
 - Navigation IA gap: partially resolved in Phase 66 with dedicated Tools surface and account-menu cleanup; broader IA evolution remains future scope.
 - Data-entry friction gap: partially resolved in Phase 68 with global Quick Add transaction MVP; follow-on enhancements include duplicate-last flow and expansion to income/bills/savings/accounts/liabilities quick entry.
 - Insights visualization gap: partially resolved in Phase 69 with multi-chart Insights redesign and actionable cards; follow-on enhancements remain for predictive guidance depth.
-- Privacy/trust polish gap: account/privacy/data controls need stronger trust-first grouping and copy consistency (tracked in `docs/full-product-ux-ia-audit.md`).
+- Privacy/trust polish gap: partially resolved in Phase 70 with trust-copy cleanup across Account Settings, Privacy, Help/Support, and Backup/Restore destructive-action guidance.
 
 ## Deferred Enhancements
 

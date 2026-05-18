@@ -66,7 +66,7 @@ export default function AccountSettings() {
 
       <section className="grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
         <Card className="p-5">
-          <p className="text-sm font-medium text-text-muted">Session</p>
+          <p className="text-sm font-medium text-text-muted">Security & session</p>
           <h3 className="mt-1 text-lg font-semibold text-text-main">{sessionSummary.label}</h3>
           <p className="mt-2 text-sm text-text-muted">{sessionSummary.description}</p>
           <p className="mt-4 text-sm text-text-muted">

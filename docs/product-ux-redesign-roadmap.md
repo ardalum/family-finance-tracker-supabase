@@ -122,6 +122,8 @@ Status: implemented in Phase 69 (2026-05-18)
 
 ## Phase 70: Privacy and trust polish
 
+Status: implemented in Phase 70 (2026-05-18)
+
 - Goal:
   - Increase user confidence via clearer data/privacy and account safety experiences.
 - Scope:

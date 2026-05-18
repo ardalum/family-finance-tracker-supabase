@@ -74,7 +74,7 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 
 ## 7b) Income Verification
 
-- [ ] Income page opens from Dashboard quick action and Account menu Tools.
+- [ ] Income page opens from Dashboard quick action and Tools workspace.
 - [ ] Add/edit/delete income source works.
 - [ ] Add/edit/delete income entry works.
 - [ ] Month switch filters income entries correctly.
@@ -95,7 +95,7 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 
 ## 7d) Accounts Snapshot Verification
 
-- [ ] Accounts page opens from Dashboard quick action and Account menu Tools.
+- [ ] Accounts page opens from Dashboard quick action and Tools workspace.
 - [ ] Add/edit/delete cash account works.
 - [ ] Add/edit/delete account balance snapshot works.
 - [ ] Selected month filters account snapshots correctly.
@@ -104,7 +104,7 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 
 ## 7e) Liabilities Snapshot Verification
 
-- [ ] Liabilities page opens from Dashboard quick action and Account menu Tools.
+- [ ] Liabilities page opens from Dashboard quick action and Tools workspace.
 - [ ] Add/edit/delete liability account works.
 - [ ] Add/edit/delete liability balance snapshot works.
 - [ ] Selected month filters liability snapshots correctly.
@@ -116,7 +116,7 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 
 ## 7f) Net Worth Summary Verification
 
-- [ ] Net Worth page opens from Dashboard quick action and Account menu Tools.
+- [ ] Net Worth page opens from Dashboard quick action and Tools workspace.
 - [ ] Selected month updates net worth values.
 - [ ] Month-selection behavior is clear (latest snapshots recorded in selected month).
 - [ ] Total assets uses selected-month cash account snapshots.
@@ -167,6 +167,14 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Confirmation phrases are required and validated.
 - [ ] Delete Account and Reset Household Finance Data wording is clearly distinct.
 
+## 9b) Privacy and Trust Verification
+
+- [ ] Account menu remains compact and account-focused (Account Settings, Household Settings, Privacy & Data, Support, sign-out controls).
+- [ ] Account Settings shows readable Security & session information.
+- [ ] Data & Privacy content clearly explains stored data scope, backup/export options, restore caution, and deletion paths.
+- [ ] Backup/Restore import warnings explicitly mention trusted files, JSON validation, and merge behavior.
+- [ ] No unsupported security claims are present in user-facing privacy/trust copy.
+
 ## 10) Mobile Layout Checklist
 
 - [ ] Cards > Monthly Balances is usable without horizontal table dependence on mobile.
@@ -203,14 +211,14 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Capture and store required smoke-test screenshots.
 - [ ] Update `docs/bug-backlog.md` statuses for any discovered issues.
 - [ ] Complete post-expansion UX spot-check from `docs/product-ux-audit-after-finance-expansion.md` (Dashboard action density, secondary-tool discoverability, Insights scanability, Monthly Close clarity).
-- [ ] Verify Financial Position secondary hub opens from Dashboard quick action and Account menu Tools.
+- [ ] Verify Financial Position secondary hub opens from Dashboard quick action and Tools workspace.
 - [ ] Verify Financial Position links route to Income, Savings, Accounts, Liabilities, Net Worth, and Insights.
 - [ ] Verify Financial Position hardening states: all-data-missing empty state, partial net-worth advisory, and loading/error copy.
 - [ ] Verify Dashboard quick actions are consolidated to the compact set (Update card balances, Add transactions, Open recurring bills, Review budget, Financial Position, Calendar).
 - [ ] Verify Financial Position is the Dashboard hub entry point for income/savings/accounts/debts/net-worth workflows.
 - [ ] Verify Financial Position mobile layout at small widths: no horizontal scrolling, readable summary cards, and easy-to-tap action buttons.
 - [ ] Verify Financial Position remains a secondary view for this release and is not promoted into top-level main nav.
-- [ ] Verify Calendar secondary view opens from Dashboard quick action and Account menu Tools.
+- [ ] Verify Calendar secondary view opens from Dashboard quick action and Tools workspace.
 - [ ] Verify Calendar month selector, empty state, and source-target links (Cards/Bills/Income/Dashboard) are working.
 - [ ] Verify Calendar defaults to FullCalendar month-grid view (`dayGridMonth`).
 - [ ] Verify FullCalendar controls (Prev/Today/Next) are usable on desktop and mobile.

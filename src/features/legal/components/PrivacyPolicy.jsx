@@ -15,7 +15,7 @@ const collectedItems = [
   {
     title: "App settings and backup data",
     description:
-      "WalletFlow may store preferences, selected views, legacy local data, and exported backup files created by the user.",
+      "WalletFlow may store preferences, selected views, and legacy local data in the browser. Exported backup files are created and stored by the user.",
   },
 ];
 
@@ -88,7 +88,8 @@ export default function PrivacyPolicy() {
               <p className="mt-3 text-sm leading-6 text-text-muted">
                 WalletFlow uses Supabase for account authentication and household data storage. Some
                 preferences or legacy backup data may also be stored in the browser. Users should
-                protect their login credentials and only use trusted devices.
+                protect their login credentials, use trusted devices, and sign out from shared
+                devices.
               </p>
             </div>
           </div>
@@ -105,8 +106,8 @@ export default function PrivacyPolicy() {
               <h3 className="text-lg font-semibold text-text-main">Backups and exports</h3>
               <p className="mt-3 text-sm leading-6 text-text-muted">
                 Exported backup files can contain sensitive household finance data. Users are
-                responsible for storing exported files securely and deleting old copies when they
-                are no longer needed.
+                responsible for storing exported files securely, deleting old copies when they are
+                no longer needed, and importing only backup files they trust.
               </p>
             </div>
           </div>
@@ -119,9 +120,9 @@ export default function PrivacyPolicy() {
           <div>
             <h3 className="text-lg font-semibold text-text-main">Data deletion</h3>
             <p className="mt-3 text-sm leading-6 text-text-muted">
-              WalletFlow should be treated as a user-managed finance tracker. Users may remove
-              records they no longer want to keep. Full account or household deletion may require
-              manual support until self-service deletion controls are added.
+              WalletFlow supports destructive controls in Backup & Restore for household finance
+              reset and account deletion flows. Deletion is permanent and should only be performed
+              after exporting a fresh private backup.
             </p>
           </div>
         </div>

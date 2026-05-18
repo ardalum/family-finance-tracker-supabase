@@ -1,7 +1,7 @@
 # Full Product UX / IA Audit
 
 Date: 2026-05-18  
-Scope: WalletFlow Phase 64 product UX and information architecture audit (updated with Phase 65 status)
+Scope: WalletFlow Phase 64 product UX and information architecture audit (updated through Phase 70 status)
 
 ## 1) Executive summary
 
@@ -261,6 +261,13 @@ Recommendations:
 - Group export/delete/reset and backup cautions under a consistent Data & Privacy area.
 - Keep restore warnings concise but stronger on irreversible merge consequences.
 - Standardize language tone across account, privacy, and destructive-action screens.
+
+Phase 70 status:
+
+- Addressed: account menu remains compact/account-focused with account/household/privacy/support grouping.
+- Addressed: Account Settings now carries readable Security & session context instead of menu-heavy session emphasis.
+- Addressed: Backup/Restore copy now explicitly warns about trusted files, invalid JSON rejection, merge behavior, and irreversible destructive actions.
+- Addressed: Privacy and support copy now better emphasize sensitive financial-data handling without unsupported security claims.
 
 ## 10) Release recommendation
 
