@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { backupTrustCopy } from "../src/features/backup/backupCopy.js";
 
 const backupPanelPath = new URL(
   "../src/features/backup/components/BackupPanel.jsx",
@@ -14,11 +15,13 @@ test("legacy backup copy does not claim Supabase import is unavailable", () => {
 });
 
 test("cloud import copy explains merge behavior and computed-section handling", () => {
-  assert.ok(
-    source.includes("Merge mode adds missing records and skips records that are already present."),
+  assert.ok(source.includes("backupTrustCopy.importSafetyDescription"));
+  assert.ok(source.includes("backupTrustCopy.importMergeWarning"));
+  assert.match(
+    backupTrustCopy.importMergeWarning,
+    /cash-flow\/Net Worth\/Financial Position\/Insights outputs/i,
   );
-  assert.ok(source.includes("Computed"));
-  assert.ok(source.includes("cash-flow/Net Worth/Financial Position/Insights outputs"));
-  assert.ok(source.includes("not"));
-  assert.ok(source.includes("standalone records"));
+  assert.match(backupTrustCopy.importMergeWarning, /standalone records/i);
+  assert.match(backupTrustCopy.importSafetyReminder, /invalid json/i);
+  assert.match(backupTrustCopy.importSafetyReminder, /trust/i);
 });

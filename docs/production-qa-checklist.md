@@ -77,7 +77,7 @@ Use this checklist before each production release.
 
 ## Income
 
-- [ ] Income page opens from Dashboard quick action and Account menu Tools.
+- [ ] Income page opens from Dashboard quick action and Tools workspace.
 - [ ] Add income source works.
 - [ ] Edit income source works.
 - [ ] Delete income source works with confirmation wording.
@@ -92,7 +92,7 @@ Use this checklist before each production release.
 
 ## Savings
 
-- [ ] Savings page opens from Dashboard quick action and Account menu Tools.
+- [ ] Savings page opens from Dashboard quick action and Tools workspace.
 - [ ] Add savings goal works.
 - [ ] Edit savings goal works.
 - [ ] Delete savings goal works with confirmation wording.
@@ -108,7 +108,7 @@ Use this checklist before each production release.
 
 ## Accounts
 
-- [ ] Accounts page opens from Dashboard quick action and Account menu Tools.
+- [ ] Accounts page opens from Dashboard quick action and Tools workspace.
 - [ ] Add cash account works.
 - [ ] Edit cash account works.
 - [ ] Delete cash account works with confirmation wording.
@@ -124,7 +124,7 @@ Use this checklist before each production release.
 
 ## Liabilities
 
-- [ ] Liabilities page opens from Dashboard quick action and Account menu Tools.
+- [ ] Liabilities page opens from Dashboard quick action and Tools workspace.
 - [ ] Add liability account works.
 - [ ] Edit liability account works.
 - [ ] Delete liability account works with confirmation wording.
@@ -145,7 +145,7 @@ Use this checklist before each production release.
 
 ## Net Worth
 
-- [ ] Net Worth page opens from Dashboard quick action and Account menu Tools.
+- [ ] Net Worth page opens from Dashboard quick action and Tools workspace.
 - [ ] Selected month filter updates net worth summary.
 - [ ] Month-selection helper copy is clear (selected month uses latest snapshots recorded in that month).
 - [ ] Total assets reflects selected-month latest cash account snapshots.
@@ -176,7 +176,7 @@ Use this checklist before each production release.
 ## Financial Position Hub
 
 - [ ] Financial Position opens from Dashboard quick action.
-- [ ] Financial Position opens from Account menu Tools.
+- [ ] Financial Position opens from Tools workspace.
 - [ ] Financial Position mobile layout opens cleanly at small widths (no horizontal scrolling).
 - [ ] Financial Position month selector updates summaries.
 - [ ] Summary cards show income, savings, liquid cash, total debt, net worth, and estimated leftover.
@@ -193,7 +193,7 @@ Use this checklist before each production release.
 ## Calendar
 
 - [ ] Calendar opens from Dashboard quick action.
-- [ ] Calendar opens from Account menu Tools.
+- [ ] Calendar opens from Tools workspace.
 - [ ] FullCalendar month grid appears first by default.
 - [ ] FullCalendar Prev/Today/Next controls work and remain usable.
 - [ ] FullCalendar remains readable at 360px and 390px mobile widths.
@@ -242,6 +242,15 @@ Use this checklist before each production release.
 - [ ] Excel export includes `Cash Accounts` and `Account Balance Snapshots` sheets.
 - [ ] Supabase JSON export includes `liabilityAccounts` and `liabilityBalanceSnapshots`.
 - [ ] Excel export includes `Liability Accounts` and `Liability Balance Snapshots` sheets.
+
+## Privacy / Trust
+
+- [ ] Account menu remains compact and account-focused (no daily planning tools mixed into it).
+- [ ] Account Settings shows Security & session context clearly.
+- [ ] Data & Privacy page explains data scope, backup/export options, restore/import caution, and deletion options.
+- [ ] Backup/Restore warnings mention trusted files, invalid JSON rejection, and merge behavior.
+- [ ] Destructive actions use explicit wording for account deletion vs household-finance reset.
+- [ ] Help/Support safety reminders include backup-before-risky-change guidance.
 
 ## Household / Settings
 
@@ -298,8 +307,8 @@ Use this checklist before each production release.
 
 ## Account Menu UX
 
-- [ ] Account menu Tools section remains compact (Financial Position, Calendar, Backup & Restore, App Settings).
-- [ ] Detailed finance pages remain reachable from Financial Position links.
+- [ ] Account menu remains compact and account/trust focused.
+- [ ] Detailed daily tools remain discoverable from Dashboard quick actions and the Tools workspace.
 
 ## Monthly Balance Check-State Safety
 

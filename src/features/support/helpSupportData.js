@@ -1,7 +1,7 @@
 export const helpSupportHero = {
   title: "Help / Support",
   description:
-    "Use this page for basic troubleshooting notes, safe testing reminders, and contact information for WalletFlow.",
+    "Use this page for troubleshooting notes, privacy-safe testing reminders, and support contact guidance for WalletFlow.",
 };
 
 export const supportGuidanceCards = [
@@ -13,7 +13,7 @@ export const supportGuidanceCards = [
   {
     title: "Run a manual backup",
     description:
-      "Before testing risky changes or imports, export a backup so household data can be restored if needed.",
+      "Before testing risky changes or imports, export a backup and keep it private so household data can be restored if needed.",
   },
   {
     title: "Include the exact screen",

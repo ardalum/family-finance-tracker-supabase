@@ -16,6 +16,7 @@ import {
   resetAllData,
   resetSupabaseHouseholdFinanceData,
 } from "../backupService.js";
+import { backupTrustCopy } from "../backupCopy.js";
 import { getHouseholdFinanceDeletePhrase } from "../secureDeletionService.js";
 
 const summaryLabels = {
@@ -298,13 +299,14 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
           <div className="rounded-md border border-sky-100 bg-white p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <h3 className="text-sm font-semibold text-gray-950">Import Supabase Backup</h3>
+                <h3 className="text-sm font-semibold text-gray-950">
+                  {backupTrustCopy.importSafetyHeading}
+                </h3>
                 <p className="mt-1 max-w-2xl text-sm text-gray-500">
-                  Merge mode adds missing records and skips records that are already present. It
-                  will not delete existing data.
+                  {backupTrustCopy.importSafetyDescription}
                 </p>
                 <p className="mt-2 text-xs text-amber-700">
-                  Recommended: Export a fresh Supabase backup before importing.
+                  {backupTrustCopy.importSafetyReminder}
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -357,9 +359,7 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
                 ) : (
                   <div className="grid gap-3">
                     <div className="rounded-md border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-800">
-                      Merge import adds missing records and skips already-matched records. Computed
-                      summaries (cash-flow/Net Worth/Financial Position/Insights outputs) are not
-                      restored as standalone records.
+                      {backupTrustCopy.importMergeWarning}
                     </div>
                     <label className="flex gap-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
                       <input
@@ -368,10 +368,7 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
                         checked={importAcknowledged}
                         onChange={(event) => setImportAcknowledged(event.target.checked)}
                       />
-                      <span>
-                        I reviewed the preview and understand this will merge the backup into the
-                        current household without deleting existing data.
-                      </span>
+                      <span>{backupTrustCopy.importAcknowledgement}</span>
                     </label>
                     <div className="flex flex-wrap gap-2">
                       <Button
@@ -417,7 +414,7 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
               Danger Zone
             </p>
             <h2 className="mt-1 text-lg font-semibold text-gray-950">
-              Reset Household Finance Data
+              {backupTrustCopy.destructiveResetLabel}
             </h2>
             <p className="mt-1 max-w-3xl text-sm text-gray-600">
               This keeps your login account but permanently deletes the active household's finance
@@ -427,7 +424,7 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
           </div>
 
           <div className="rounded-md border border-red-200 bg-white px-3 py-2 text-sm text-red-700">
-            This action resets household finance data and cannot be undone.
+            {backupTrustCopy.destructiveResetWarning}
           </div>
 
           <div className="flex flex-wrap gap-3">
@@ -469,7 +466,7 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
               }
             >
               <Trash2 size={16} aria-hidden="true" />
-              {isResettingFinanceData ? "Resetting..." : "Reset Household Finance Data"}
+              {isResettingFinanceData ? "Resetting..." : backupTrustCopy.destructiveResetLabel}
             </Button>
           </div>
         </div>
@@ -481,7 +478,9 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
             <p className="text-xs font-semibold uppercase tracking-wide text-red-700">
               Danger Zone
             </p>
-            <h2 className="mt-1 text-lg font-semibold text-gray-950">Delete Account</h2>
+            <h2 className="mt-1 text-lg font-semibold text-gray-950">
+              {backupTrustCopy.destructiveDeleteLabel}
+            </h2>
             <p className="mt-1 max-w-3xl text-sm text-gray-600">
               This permanently deletes your Supabase Auth login and the active household only when
               you are its only active member and owner. Shared households or extra households you
@@ -491,8 +490,8 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
           </div>
 
           <div className="rounded-md border border-red-200 bg-white px-3 py-2 text-sm text-red-700">
-            This action deletes your login account and the private household tied to it. Household
-            reset above does not delete login access.
+            {backupTrustCopy.destructiveDeleteWarning} Household reset above does not delete login
+            access.
           </div>
 
           <div className="grid max-w-sm gap-3">
@@ -509,7 +508,7 @@ export default function BackupPanel({ onDataChange, onSupabaseImportComplete }) 
               disabled={deleteAccountPhrase !== "DELETE" || isDeletingAccount || !activeHouseholdId}
             >
               <Trash2 size={16} aria-hidden="true" />
-              {isDeletingAccount ? "Deleting..." : "Delete Account"}
+              {isDeletingAccount ? "Deleting..." : backupTrustCopy.destructiveDeleteLabel}
             </Button>
           </div>
         </div>

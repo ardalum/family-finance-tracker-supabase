@@ -1,6 +1,6 @@
 # Product Gap Audit
 
-Last updated: 2026-05-18 (Phase 62 FullCalendar polish)
+Last updated: 2026-05-18 (Phase 70 privacy/trust polish)
 
 ## Scope
 
@@ -38,7 +38,7 @@ Implemented (current release scope):
 - Navigation IA gap: improved in Phase 66 with a dedicated Tools surface and account-menu trust focus; deeper IA evolution remains deferred.
 - Data-entry friction gap: partially addressed in Phase 68 with global Quick Add transaction MVP; broader multi-entity quick entry and richer repeat-entry acceleration remain open.
 - Insights visualization gap: partially addressed in Phase 69 with varied chart types and actionable cards; deeper predictive guidance and automated recommendations remain open.
-- Privacy/trust polish gap: trust signals and data/privacy controls need tighter, standard account/settings organization and copy tone.
+- Privacy/trust polish gap: partially addressed in Phase 70 with clearer privacy/data handling copy, explicit backup/restore warnings, and stronger destructive-action wording. Additional visual/security UX depth remains future scope.
 
 ## Release Blockers vs Product Gaps
 

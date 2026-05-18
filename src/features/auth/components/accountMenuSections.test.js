@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
 import { describe, it } from "node:test";
 import { isKnownPageView } from "../../../app/pageContent.js";
 import { isAuthViewTarget } from "../authViewTargets.js";
@@ -84,5 +86,14 @@ describe("account menu sections", () => {
         assert.ok(["function", "object"].includes(typeof item.icon));
       }
     }
+  });
+
+  it("does not show a prominent session-active panel label in account menu copy", () => {
+    const accountMenuSource = fs.readFileSync(
+      path.resolve("src/features/auth/components/AccountMenu.jsx"),
+      "utf8",
+    );
+
+    assert.equal(accountMenuSource.includes("Session active"), false);
   });
 });
