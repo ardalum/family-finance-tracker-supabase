@@ -1,14 +1,21 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  buildCalendarMonthGrid,
   buildCalendarEventsForMonth,
   buildCardDueEvents,
   buildCardStatementEvents,
   buildIncomeEvents,
   buildMonthlyCloseEvents,
   buildRecurringBillEvents,
+  getCalendarGridDays,
+  getEventCountsByDate,
+  getEventsForDate,
+  getInitialSelectedCalendarDate,
+  getSelectedDateEvents,
   getCalendarEventSeverity,
   getCalendarEventStatus,
+  summarizeCalendarGridDay,
   groupCalendarEventsByDate,
   sortCalendarEvents,
 } from "./calendarService.js";
@@ -177,5 +184,100 @@ describe("calendar service", () => {
       getCalendarEventSeverity({ source: "month-close", status: "reviewed" }),
       "success",
     );
+  });
+
+  it("builds month grid with 7 columns and month days", () => {
+    const grid = buildCalendarMonthGrid("2026-05", []);
+    assert.equal(grid.columns.length, 7);
+    assert.equal(grid.days.length % 7, 0);
+    const inMonthDays = grid.days.filter((day) => day.inSelectedMonth);
+    assert.equal(inMonthDays.length, 31);
+  });
+
+  it("builds leap-year February correctly", () => {
+    const grid = buildCalendarMonthGrid("2024-02", []);
+    const inMonthDays = grid.days.filter((day) => day.inSelectedMonth);
+    assert.equal(inMonthDays.length, 29);
+  });
+
+  it("maps events to correct dates and selected-date filtering", () => {
+    const events = [
+      {
+        id: "a",
+        date: "2026-05-10",
+        source: "income",
+        severity: "success",
+        sortOrder: 1,
+        title: "A",
+      },
+      {
+        id: "b",
+        date: "2026-05-10",
+        source: "card-due",
+        severity: "danger",
+        sortOrder: 1,
+        title: "B",
+      },
+      {
+        id: "c",
+        date: "2026-05-11",
+        source: "month-close",
+        severity: "warning",
+        sortOrder: 1,
+        title: "C",
+      },
+    ];
+
+    assert.equal(getEventsForDate(events, "2026-05-10").length, 2);
+    assert.equal(getSelectedDateEvents(events, "2026-05-11").length, 1);
+    assert.equal(getSelectedDateEvents(events, "invalid-date").length, 0);
+  });
+
+  it("counts events per date", () => {
+    const counts = getEventCountsByDate([
+      { id: "a", date: "2026-05-10" },
+      { id: "b", date: "2026-05-10" },
+      { id: "c", date: "2026-05-11" },
+    ]);
+
+    assert.equal(counts["2026-05-10"], 2);
+    assert.equal(counts["2026-05-11"], 1);
+  });
+
+  it("returns initial selected date from month events and falls back to day one", () => {
+    const withEvents = getInitialSelectedCalendarDate("2026-05", [
+      {
+        id: "a",
+        date: "2026-05-08",
+        source: "income",
+        severity: "success",
+        sortOrder: 1,
+        title: "A",
+      },
+    ]);
+    const noEvents = getInitialSelectedCalendarDate("2026-05", []);
+
+    assert.equal(withEvents, "2026-05-08");
+    assert.equal(noEvents, "2026-05-01");
+  });
+
+  it("handles invalid event dates safely in grid helpers", () => {
+    const events = [{ id: "a", date: "bad-date" }];
+    const gridDays = getCalendarGridDays("2026-05", events);
+    assert.ok(gridDays.length >= 35);
+    assert.equal(getEventCountsByDate(events)["bad-date"], undefined);
+  });
+
+  it("summarizes calendar day metadata", () => {
+    const day = summarizeCalendarGridDay(
+      "2026-05-10",
+      "2026-05",
+      { "2026-05-10": 3 },
+      "2026-05-10",
+    );
+    assert.equal(day.dayLabel, "10");
+    assert.equal(day.eventCount, 3);
+    assert.equal(day.inSelectedMonth, true);
+    assert.equal(day.isToday, true);
   });
 });

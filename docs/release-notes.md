@@ -5,7 +5,7 @@
 ### Highlights
 
 - Dashboard quick actions were consolidated to a compact set focused on regular monthly updates.
-- Calendar MVP is now available as a secondary agenda/list view with month selector.
+- Calendar now includes a real month-grid view as the default secondary workspace, with Agenda list available as a secondary toggle.
 - Financial Position hub is implemented as the main secondary entry point for income, savings, cash accounts, liabilities, and net worth review.
 - Income tracking is available with manual income sources and income entries.
 - Savings tracking is available with manual goals and contributions.
@@ -42,7 +42,7 @@
 - Many position/reporting flows are manual-entry MVPs (no bank sync/import automation).
 - Restore remains merge-safe (add/skip) rather than destructive overwrite mode.
 - Final release sign-off still requires deployed manual smoke execution and evidence capture.
-- Calendar MVP uses existing WalletFlow data only and does not add reminders, custom events, or external calendar sync.
+- Calendar uses existing WalletFlow data only and does not add reminders, custom events, or external calendar sync.
 
 ### Release Handoff
 
@@ -50,4 +50,4 @@
 
 ### Planned improvements (not in this release)
 
-- Calendar follow-ons: month-grid view, reminders/notifications, custom events, and external sync/export.
+- Calendar follow-ons: reminders/notifications, custom events, and external sync/export.

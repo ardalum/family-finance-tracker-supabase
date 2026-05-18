@@ -272,6 +272,94 @@ export function getCalendarEmptyState() {
   return "Calendar events will appear when you add cards, recurring bills, income entries, or month-close reviews.";
 }
 
+export function buildCalendarMonthGrid(selectedMonth, events = [], today = new Date()) {
+  const monthKey = normalizeMonthKey(selectedMonth);
+  const [year, month] = monthKey.split("-").map(Number);
+  const firstDayOfMonth = new Date(year, month - 1, 1);
+  const firstWeekday = firstDayOfMonth.getDay();
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const leadingDays = firstWeekday;
+  const trailingDays = (7 - ((leadingDays + daysInMonth) % 7)) % 7;
+  const eventCountsByDate = getEventCountsByDate(events);
+  const todayIso = formatDateToIso(today);
+
+  const gridDays = [];
+  for (let index = 0; index < leadingDays; index += 1) {
+    const date = new Date(year, month - 1, index - leadingDays + 1);
+    gridDays.push(
+      summarizeCalendarGridDay(formatDateToIso(date), monthKey, eventCountsByDate, todayIso),
+    );
+  }
+
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    const iso = `${monthKey}-${String(day).padStart(2, "0")}`;
+    gridDays.push(summarizeCalendarGridDay(iso, monthKey, eventCountsByDate, todayIso));
+  }
+
+  for (let index = 1; index <= trailingDays; index += 1) {
+    const date = new Date(year, month - 1, daysInMonth + index);
+    gridDays.push(
+      summarizeCalendarGridDay(formatDateToIso(date), monthKey, eventCountsByDate, todayIso),
+    );
+  }
+
+  return {
+    monthKey,
+    days: gridDays,
+    weeks: chunkArray(gridDays, 7),
+    columns: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+  };
+}
+
+export function getCalendarGridDays(selectedMonth, events = [], today = new Date()) {
+  return buildCalendarMonthGrid(selectedMonth, events, today).days;
+}
+
+export function getEventsForDate(events = [], date = "") {
+  if (!isValidIsoDate(date)) return [];
+  return events.filter((event) => event?.date === date);
+}
+
+export function getEventCountsByDate(events = []) {
+  return events.reduce((acc, event) => {
+    if (!isValidIsoDate(event?.date)) return acc;
+    acc[event.date] = (acc[event.date] ?? 0) + 1;
+    return acc;
+  }, {});
+}
+
+export function getSelectedDateEvents(events = [], selectedDate = "") {
+  return sortCalendarEvents(getEventsForDate(events, selectedDate));
+}
+
+export function getInitialSelectedCalendarDate(selectedMonth, events = []) {
+  const monthKey = normalizeMonthKey(selectedMonth);
+  const eventsInMonth = sortCalendarEvents(
+    events.filter(
+      (event) => typeof event?.date === "string" && event.date.startsWith(`${monthKey}-`),
+    ),
+  );
+  if (eventsInMonth.length > 0) return eventsInMonth[0].date;
+  return `${monthKey}-01`;
+}
+
+export function formatCalendarDayLabel(date = "") {
+  if (!isValidIsoDate(date)) return "";
+  return String(Number(date.slice(8, 10)));
+}
+
+export function summarizeCalendarGridDay(date, monthKey, eventCountsByDate = {}, todayIso = "") {
+  const inSelectedMonth = date.startsWith(`${monthKey}-`);
+  return {
+    date,
+    dayLabel: formatCalendarDayLabel(date),
+    eventCount: eventCountsByDate[date] ?? 0,
+    hasEvents: (eventCountsByDate[date] ?? 0) > 0,
+    inSelectedMonth,
+    isToday: date === todayIso,
+  };
+}
+
 function severityWeight(severity) {
   const map = { danger: 1, warning: 2, info: 3, success: 4, muted: 5 };
   return map[severity] ?? 6;
@@ -287,4 +375,23 @@ function getIsoDateTime(value) {
 
 function isValidIsoDate(value) {
   return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
+function normalizeMonthKey(value) {
+  if (typeof value === "string" && /^\d{4}-\d{2}$/.test(value)) return value;
+  return getCurrentMonthKey();
+}
+
+function formatDateToIso(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
+    date.getDate(),
+  ).padStart(2, "0")}`;
+}
+
+function chunkArray(items = [], chunkSize = 1) {
+  const chunks = [];
+  for (let index = 0; index < items.length; index += chunkSize) {
+    chunks.push(items.slice(index, index + chunkSize));
+  }
+  return chunks;
 }
