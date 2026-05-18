@@ -187,13 +187,15 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Verify Financial Position remains a secondary view for this release and is not promoted into top-level main nav.
 - [ ] Verify Calendar secondary view opens from Dashboard quick action and Account menu Tools.
 - [ ] Verify Calendar month selector, empty state, and source-target links (Cards/Bills/Income/Dashboard) are working.
-- [ ] Verify Calendar defaults to month-grid view with Sun-Sat columns and aligned leading/trailing days.
+- [ ] Verify Calendar defaults to FullCalendar month-grid view (`dayGridMonth`).
+- [ ] Verify FullCalendar controls (Prev/Today/Next) are usable on desktop and mobile.
 - [ ] Verify Calendar selected-day panel updates when dates are clicked/tapped.
 - [ ] Verify Calendar agenda toggle remains available for grouped list review.
 - [ ] Verify Calendar mobile behavior: no horizontal scrolling and tappable day cells.
 - [ ] Verify Calendar event dates/statuses are accurate for card due dates, statement closes, recurring bills, income entries, and month-close marker.
-- [ ] Verify Calendar selected day remains clear versus today highlight and updates safely after filter changes.
-- [ ] Verify Calendar +N more day-cell overflow count and mobile event indicators are accurate.
+- [ ] Verify Calendar selected day remains clear and updates safely after filter changes/date clicks/event clicks.
+- [ ] Verify FullCalendar event overflow remains readable/compact at small widths.
+- [ ] Execute `docs/calendar-release-readiness-retest.md` and capture outcomes.
 
 ## Known Limitations
 

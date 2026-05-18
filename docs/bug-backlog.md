@@ -1,6 +1,6 @@
 ﻿# Bug Backlog
 
-Last updated: 2026-05-18 (Phase 59 calendar hardening and event-accuracy QA)
+Last updated: 2026-05-18 (Phase 61 FullCalendar migration)
 
 ## Triage Legend
 
@@ -32,6 +32,7 @@ Last updated: 2026-05-18 (Phase 59 calendar hardening and event-accuracy QA)
 
 ## Fixed (recent notable)
 
+- Calendar month-grid migrated to FullCalendar dayGrid with selected-day agenda behavior preserved (`fixed`, Phase 61)
 - Calendar month-close marker now uses month-end date and selected-day/filter behavior is hardened for event-focused review (`fixed`, Phase 59)
 - Calendar event pipeline now de-duplicates duplicate event IDs defensively and keeps day overflow/mobile-indicator counts deterministic (`fixed`, Phase 59)
 - Calendar upgraded from agenda-only list to true month-grid default view with responsive selected-day panel (`fixed`, Phase 58)

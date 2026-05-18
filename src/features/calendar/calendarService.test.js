@@ -17,6 +17,9 @@ import {
   getSelectedDateEvents,
   getCalendarEventSeverity,
   getCalendarEventStatus,
+  getSelectedDateFromCalendarDateClick,
+  getSelectedDateFromFullCalendarEventClick,
+  mapCalendarEventsToFullCalendarEvents,
   summarizeCalendarGridDay,
   groupCalendarEventsByDate,
   sortCalendarEvents,
@@ -398,5 +401,53 @@ describe("calendar service", () => {
     assert.equal(getCalendarDayOverflowCount(2, 2), 0);
     assert.equal(getCalendarDayMobileIndicatorCount(5, 3), 3);
     assert.equal(getCalendarDayMobileIndicatorCount(2, 3), 2);
+  });
+
+  it("maps normalized events to fullcalendar events with extended props", () => {
+    const mapped = mapCalendarEventsToFullCalendarEvents([
+      {
+        id: "evt_1",
+        source: "income",
+        sourceId: "income_1",
+        date: "2026-05-15",
+        title: "Employer",
+        subtitle: "Type: paycheck",
+        amount: 1500,
+        status: "completed",
+        severity: "success",
+        targetView: "income",
+        targetMonth: "2026-05",
+      },
+    ]);
+
+    assert.equal(mapped.length, 1);
+    assert.equal(mapped[0].id, "evt_1");
+    assert.equal(mapped[0].start, "2026-05-15");
+    assert.equal(mapped[0].allDay, true);
+    assert.equal(mapped[0].extendedProps.targetView, "income");
+    assert.equal(mapped[0].extendedProps.targetMonth, "2026-05");
+    assert.equal(mapped[0].extendedProps.status, "completed");
+    assert.equal(mapped[0].extendedProps.source, "income");
+  });
+
+  it("skips invalid dates when mapping to fullcalendar events", () => {
+    const mapped = mapCalendarEventsToFullCalendarEvents([
+      { id: "good", date: "2026-05-01", title: "Good" },
+      { id: "bad", date: "not-a-date", title: "Bad" },
+    ]);
+    assert.deepEqual(
+      mapped.map((event) => event.id),
+      ["good"],
+    );
+  });
+
+  it("normalizes selected date from fullcalendar interactions", () => {
+    assert.equal(getSelectedDateFromCalendarDateClick("2026-05-18"), "2026-05-18");
+    assert.equal(getSelectedDateFromCalendarDateClick("bad-date"), "");
+    assert.equal(
+      getSelectedDateFromFullCalendarEventClick({ startStr: "2026-05-21" }),
+      "2026-05-21",
+    );
+    assert.equal(getSelectedDateFromFullCalendarEventClick({ startStr: "bad-date" }), "");
   });
 });

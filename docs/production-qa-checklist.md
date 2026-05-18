@@ -194,11 +194,11 @@ Use this checklist before each production release.
 
 - [ ] Calendar opens from Dashboard quick action.
 - [ ] Calendar opens from Account menu Tools.
+- [ ] FullCalendar month grid appears first by default.
+- [ ] FullCalendar Prev/Today/Next controls work and remain usable.
 - [ ] Month selector updates the event list.
-- [ ] Calendar month grid appears first by default.
-- [ ] Calendar grid renders Sun-Sat columns.
-- [ ] Calendar grid aligns selected-month days with leading/trailing muted days.
-- [ ] Calendar grid date cells show event indicators/counts when events exist.
+- [ ] Calendar month selector and FullCalendar month view stay synchronized.
+- [ ] Calendar date cells show compact events with overflow handling.
 - [ ] Clicking/tapping a date updates selected-day event details.
 - [ ] Selected-day panel shows "No events for this day." when empty.
 - [ ] Empty-state guidance appears when no event sources exist for selected month.
@@ -215,7 +215,7 @@ Use this checklist before each production release.
 - [ ] Events are grouped by date and sorted consistently.
 - [ ] Agenda toggle still works and shows grouped monthly list view.
 - [ ] Mobile calendar has no horizontal scrolling and day cells remain tappable.
-- [ ] Calendar +N more overflow labels and mobile event indicators are accurate.
+- [ ] FullCalendar controls do not overflow at mobile widths.
 - [ ] Calendar does not create or mutate financial records by itself.
 
 ## Backup / Restore
