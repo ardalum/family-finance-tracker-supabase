@@ -8,6 +8,7 @@ import {
   getBudgetVsActualRows,
   getBudgetUsageStatus,
   getMonthlyTrendRows,
+  splitCompositionRowsIntoColumns,
   getTopCategories,
   getTopMerchants,
   getTransactionTypeMixRows,
@@ -150,5 +151,38 @@ test("getActionableInsightCards suppresses missing-liability warning when no-lia
   assert.equal(
     cards.some((card) => card.id === "missing-liabilities"),
     false,
+  );
+});
+
+test("getActionableInsightCards suppresses missing-liability warning when liability snapshots exist", () => {
+  const cards = getActionableInsightCards({
+    summary: { spendingTotal: 200 },
+    budgetInsights: { over: [], near: [] },
+    merchantRows: [],
+    categoryRows: [],
+    ytdData: null,
+    netWorthTrendStatus: "insufficient-data",
+    hasNetWorthData: false,
+    hasLiabilitySnapshots: true,
+    liabilityReviewConfirmed: false,
+  });
+
+  assert.equal(
+    cards.some((card) => card.id === "missing-liabilities"),
+    false,
+  );
+});
+
+test("splitCompositionRowsIntoColumns returns balanced sequential columns", () => {
+  const rows = Array.from({ length: 8 }, (_, index) => ({ id: `row-${index + 1}` }));
+  const [left, right] = splitCompositionRowsIntoColumns(rows, 2);
+
+  assert.deepEqual(
+    left.map((row) => row.id),
+    ["row-1", "row-2", "row-3", "row-4"],
+  );
+  assert.deepEqual(
+    right.map((row) => row.id),
+    ["row-5", "row-6", "row-7", "row-8"],
   );
 });
