@@ -9,7 +9,8 @@ function read(path) {
 describe("accessibility regressions", () => {
   it("keeps primary navigation semantics", () => {
     const source = read("src/components/layout/Navigation.jsx");
-    assert.equal(source.includes('aria-label="Primary navigation"'), true);
+    assert.equal(source.includes('ariaLabel = "Primary navigation"'), true);
+    assert.equal(source.includes("aria-label={ariaLabel}"), true);
     assert.equal(source.includes("aria-current"), true);
   });
 

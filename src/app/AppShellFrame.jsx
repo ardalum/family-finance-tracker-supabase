@@ -17,6 +17,7 @@ export default function AppShellFrame({
       onViewChange={onViewChange}
       pageTitle={currentPage.title}
       pageDescription={currentPage.description}
+      onQuickAdd={onQuickAdd}
       accountSlot={
         <AppHeaderAccountSlot
           alerts={headerAlerts}

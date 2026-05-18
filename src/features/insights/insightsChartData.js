@@ -133,6 +133,7 @@ export function getActionableInsightCards({
   netWorthTrendStatus = "insufficient-data",
   hasNetWorthData = false,
   hasLiabilitySnapshots = false,
+  liabilityReviewConfirmed = false,
 } = {}) {
   const cards = [];
   const spendingTotal = Number(summary.spendingTotal || 0);
@@ -213,7 +214,7 @@ export function getActionableInsightCards({
     });
   }
 
-  if (!hasLiabilitySnapshots) {
+  if (!hasLiabilitySnapshots && !liabilityReviewConfirmed) {
     cards.push({
       id: "missing-liabilities",
       title: "Liability snapshots are missing",

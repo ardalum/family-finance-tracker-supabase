@@ -4,6 +4,10 @@ import EmptyState from "../../../components/ui/EmptyState.jsx";
 import InlineAlert from "../../../components/ui/InlineAlert.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { buildMonthOptions, getCurrentMonthKey } from "../../../lib/dates.js";
+import {
+  formatCashAccountTypeLabel,
+  formatLiabilityTypeLabel,
+} from "../../../lib/displayLabels.js";
 import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
 import { summarizeNetWorthForMonth } from "../netWorthService.js";
 
@@ -126,7 +130,7 @@ export default function NetWorth({
                   >
                     <p className="text-sm font-semibold text-text-main">{row.name}</p>
                     <p className="text-xs text-text-muted">
-                      {row.type} - Snapshot: {row.snapshotDate || "N/A"}
+                      {formatCashAccountTypeLabel(row.type)} - Snapshot: {row.snapshotDate || "N/A"}
                     </p>
                     <p className="mt-1 text-sm font-semibold text-text-main">
                       {formatCurrency(row.balanceAmount)}
@@ -150,7 +154,7 @@ export default function NetWorth({
                   >
                     <p className="text-sm font-semibold text-text-main">{row.name}</p>
                     <p className="text-xs text-text-muted">
-                      {row.type} - Snapshot: {row.snapshotDate || "N/A"}
+                      {formatLiabilityTypeLabel(row.type)} - Snapshot: {row.snapshotDate || "N/A"}
                     </p>
                     <p className="mt-1 text-sm font-semibold text-text-main">
                       {formatCurrency(row.balanceAmount)}

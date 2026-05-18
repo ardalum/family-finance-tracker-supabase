@@ -6,6 +6,7 @@ import InlineAlert from "../../../components/ui/InlineAlert.jsx";
 import Input from "../../../components/ui/Input.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { buildMonthOptions, formatDateKey, getCurrentMonthKey } from "../../../lib/dates.js";
+import { formatLiabilityTypeLabel } from "../../../lib/displayLabels.js";
 import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
 import {
   buildLiabilityAccountOptions,
@@ -34,6 +35,9 @@ export default function Liabilities({
   onCreateLiabilityBalanceSnapshot,
   onUpdateLiabilityBalanceSnapshot,
   onDeleteLiabilityBalanceSnapshot,
+  noLiabilitiesConfirmed = false,
+  noLiabilitiesSaving = false,
+  onSetNoLiabilitiesConfirmed,
 }) {
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const accountOptions = useMemo(
@@ -210,7 +214,9 @@ export default function Liabilities({
                 key={row.type}
                 className="rounded-xl border border-app-border bg-app-background p-3"
               >
-                <p className="text-xs uppercase tracking-normal text-text-muted">{row.type}</p>
+                <p className="text-xs uppercase tracking-normal text-text-muted">
+                  {formatLiabilityTypeLabel(row.type)}
+                </p>
                 <p className="mt-1 text-sm font-semibold text-text-main">
                   {formatCurrency(row.amount)}
                 </p>
@@ -255,7 +261,7 @@ export default function Liabilities({
             >
               {LIABILITY_TYPES.map((type) => (
                 <option key={type} value={type}>
-                  {type}
+                  {formatLiabilityTypeLabel(type)}
                 </option>
               ))}
             </Select>
@@ -366,7 +372,8 @@ export default function Liabilities({
                   >
                     <p className="text-sm font-semibold text-text-main">{account.name}</p>
                     <p className="text-xs text-text-muted">
-                      {account.liabilityType} - {account.isActive ? "Active" : "Inactive"}
+                      {formatLiabilityTypeLabel(account.liabilityType)} -{" "}
+                      {account.isActive ? "Active" : "Inactive"}
                     </p>
                     <p className="mt-1 text-sm text-text-soft">
                       Latest balance:{" "}
@@ -498,6 +505,40 @@ export default function Liabilities({
         <h3 className="text-base font-semibold text-text-main">
           Debt snapshots for {formatMonthLabel(selectedMonth)}
         </h3>
+        {monthSnapshots.length === 0 ? (
+          <div className="mt-3 rounded-xl border border-app-border bg-app-background p-3">
+            <p className="text-sm font-medium text-text-main">No liabilities this month?</p>
+            <p className="mt-1 text-xs text-text-muted">
+              Confirming no liabilities suppresses false missing-liability warnings for this month.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {!noLiabilitiesConfirmed ? (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={noLiabilitiesSaving}
+                  onClick={() => onSetNoLiabilitiesConfirmed?.(true)}
+                >
+                  {noLiabilitiesSaving ? "Saving..." : "Confirm no liabilities"}
+                </Button>
+              ) : (
+                <>
+                  <span className="inline-flex items-center rounded-full bg-status-successBg px-2 py-1 text-xs font-semibold text-status-successDark">
+                    No liabilities confirmed
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    disabled={noLiabilitiesSaving}
+                    onClick={() => onSetNoLiabilitiesConfirmed?.(false)}
+                  >
+                    {noLiabilitiesSaving ? "Saving..." : "Reset liability review"}
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+        ) : null}
         <div className="mt-4 grid gap-2">
           {monthSnapshots.length === 0 ? (
             <EmptyState>

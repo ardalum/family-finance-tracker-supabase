@@ -192,6 +192,16 @@ describe("monthly close checklist", () => {
     assert.equal(getItem(checklist, "review-net-worth-trends").status, "complete");
   });
 
+  it("shows no-liabilities confirmed copy when debt review is confirmed without snapshots", () => {
+    const checklist = getMonthlyCloseChecklist(createDashboardData(), "2099-05", {
+      manualChecks: { reviewDebtBalances: true },
+    });
+
+    const debtItem = getItem(checklist, "review-debt-balance-snapshots");
+    assert.equal(debtItem.status, "complete");
+    assert.equal(debtItem.description, "No liabilities confirmed for this month.");
+  });
+
   it("missing balance/debt data does not block month review completion", () => {
     const checklist = getMonthlyCloseChecklist(
       createDashboardData({

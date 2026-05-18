@@ -117,6 +117,15 @@ describe("app view props", () => {
     assert.equal(props.insightsProps.error, input.insightsError);
   });
 
+  it("maps insights liability-review confirmation flag", () => {
+    const props = createAppViewProps({
+      ...input,
+      insightsLiabilityReviewConfirmed: true,
+    });
+
+    assert.equal(props.insightsProps.liabilityReviewConfirmed, true);
+  });
+
   it("maps financial position props", () => {
     const props = createAppViewProps({
       ...input,
@@ -315,6 +324,23 @@ describe("app view props", () => {
     assert.equal(props.netWorthProps.loading, true);
     assert.equal(props.netWorthProps.error, "liability error");
     assert.equal(props.netWorthProps.onMonthChange, input.setSelectedNetWorthMonth);
+  });
+
+  it("maps liabilities no-liability confirmation controls", () => {
+    const setNoLiabilitiesConfirmed = callback;
+    const props = createAppViewProps({
+      ...input,
+      selectedLiabilitiesMonth: "liability-month",
+      setSelectedLiabilitiesMonth: callback,
+      liabilitiesMonthlyCloseReview: { manualChecks: { reviewDebtBalances: true } },
+      liabilitiesMonthlyCloseSaving: true,
+      setNoLiabilitiesConfirmed,
+    });
+
+    assert.equal(props.liabilitiesProps.selectedMonth, "liability-month");
+    assert.equal(props.liabilitiesProps.noLiabilitiesConfirmed, true);
+    assert.equal(props.liabilitiesProps.noLiabilitiesSaving, true);
+    assert.equal(props.liabilitiesProps.onSetNoLiabilitiesConfirmed, setNoLiabilitiesConfirmed);
   });
 
   it("maps household settings props", () => {

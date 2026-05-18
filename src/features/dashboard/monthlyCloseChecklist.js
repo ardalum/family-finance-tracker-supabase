@@ -156,7 +156,9 @@ export function getMonthlyCloseChecklist(data, monthKey, review = null) {
         ? debtsReviewed
           ? "Debt snapshot review confirmed for this month."
           : "Review this month's debt snapshots. Debt snapshots are separate from credit card payment tracking."
-        : "No debt snapshots found for this month.",
+        : debtsReviewed
+          ? "No liabilities confirmed for this month."
+          : "No debt snapshots found for this month.",
       view: "liabilities",
       target: "monthly-liability-snapshots",
       countsTowardCompletion: false,

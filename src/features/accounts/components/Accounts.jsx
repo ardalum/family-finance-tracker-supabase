@@ -6,6 +6,7 @@ import InlineAlert from "../../../components/ui/InlineAlert.jsx";
 import Input from "../../../components/ui/Input.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { buildMonthOptions, formatDateKey, getCurrentMonthKey } from "../../../lib/dates.js";
+import { formatCashAccountTypeLabel } from "../../../lib/displayLabels.js";
 import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
 import {
   buildCashAccountOptions,
@@ -209,7 +210,7 @@ export default function Accounts({
             >
               {CASH_ACCOUNT_TYPES.map((type) => (
                 <option key={type} value={type}>
-                  {type}
+                  {formatCashAccountTypeLabel(type)}
                 </option>
               ))}
             </Select>
@@ -271,7 +272,8 @@ export default function Accounts({
                   >
                     <p className="text-sm font-semibold text-text-main">{account.name}</p>
                     <p className="text-xs text-text-muted">
-                      {account.accountType} - {account.isActive ? "Active" : "Inactive"}
+                      {formatCashAccountTypeLabel(account.accountType)} -{" "}
+                      {account.isActive ? "Active" : "Inactive"}
                     </p>
                     <p className="mt-1 text-sm text-text-soft">
                       Latest balance:{" "}

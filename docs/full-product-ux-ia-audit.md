@@ -1,7 +1,7 @@
 # Full Product UX / IA Audit
 
 Date: 2026-05-18  
-Scope: WalletFlow Phase 64 product UX and information architecture audit (updated through Phase 70 status)
+Scope: WalletFlow Phase 64 product UX and information architecture audit (updated through Phase 70 sidebar stabilization)
 
 ## 1) Executive summary
 
@@ -22,8 +22,8 @@ Scope: WalletFlow Phase 64 product UX and information architecture audit (update
 ### What is release-blocking
 
 - Cash-flow semantics and copy were materially misleading for users who rely on credit cards for spending (addressed in Phase 65 with Financial Pulse summary framing).
-- Product navigation model is not yet cohesive enough for confidence at release-candidate positioning.
-- RC readiness should be blocked until UX/IA findings are triaged and execution priority is agreed.
+- Product navigation model required true sidebar/drawer implementation and clearer grouping for secondary workflows (addressed in Phase 70).
+- RC readiness should stay gated on final manual smoke pass and evidence capture.
 
 ### What should be redesigned later
 
@@ -151,7 +151,7 @@ Option review:
 - Option B: Taxonomy-driven nav (`Track/Plan/Pay/Reports/More`) is promising but higher migration and learning cost.
 - Option C: Sidebar + mobile bottom nav requires larger structural redesign and should follow IA agreement.
 
-Recommended direction: **Option A** (implemented in Phase 66)
+Recommended direction: **Option A** (implemented in Phases 66 and 70)
 
 - Why:
   - Lowest risk to existing mental model.
@@ -159,6 +159,7 @@ Recommended direction: **Option A** (implemented in Phase 66)
   - Removes overloaded account menu role.
   - Enables staged migration of tools out of account menu without major UI breakage.
   - Phase 66 status: main nav remains unchanged; dedicated `Tools` secondary surface added; account menu now focuses on account/household/privacy/support actions.
+  - Phase 70 status: true sidebar (desktop) + drawer (mobile) shipped with grouped sections (`Main`, `Planning`, `Money Setup`, `System`) so Income/Savings/Accounts/Liabilities are directly reachable.
 
 ## 6) Account menu audit
 
@@ -268,17 +269,21 @@ Phase 70 status:
 - Addressed: Account Settings now carries readable Security & session context instead of menu-heavy session emphasis.
 - Addressed: Backup/Restore copy now explicitly warns about trusted files, invalid JSON rejection, merge behavior, and irreversible destructive actions.
 - Addressed: Privacy and support copy now better emphasize sensitive financial-data handling without unsupported security claims.
+- Addressed: professional enum display labels are now normalized in UI (for example `checking` -> `Checking`, `student_loan` -> `Student Loan`) without changing stored values.
+- Addressed: liabilities flow now supports month-level "No liabilities confirmed" review state to suppress false missing-liability warnings.
+- Addressed: Insights Spending Composition now keeps chart/list content within card bounds and shows percentages consistently.
 
 ## 10) Release recommendation
 
 ### Is app ready to tag RC?
 
-- **Not yet for final confidence positioning.**
-- Technical quality is strong, but UX/IA semantics and navigation clarity need triage and prioritization before claiming final RC readiness.
+- **Conditionally yes after final manual smoke evidence is recorded.**
+- Core UX/IA blockers from the Phase 64 audit are now addressed to MVP depth across Phases 65-70.
 
 ### Release blockers
 
-- Missing agreed IA direction for where daily tools live (account menu vs app-level tools).
+- No open code-level UX/IA blockers identified after Phase 70 implementation.
+- Remaining blocker is operational: complete and record final manual RC smoke evidence.
 
 ### High priority before RC
 

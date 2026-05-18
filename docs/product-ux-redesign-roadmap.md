@@ -120,17 +120,29 @@ Status: implemented in Phase 69 (2026-05-18)
   - users can identify next actions from insights cards
   - all existing insights math remains consistent
 
-## Phase 70: Privacy and trust polish
+## Phase 70: Release-blocking UX stabilization
 
 Status: implemented in Phase 70 (2026-05-18)
 
 - Goal:
-  - Increase user confidence via clearer data/privacy and account safety experiences.
+  - Close release-blocking UX gaps with true sidebar/drawer navigation and final trust/readability polish.
 - Scope:
-  - tighten trust copy
-  - consolidate privacy/data controls narrative
-  - polish destructive-action guidance
+  - ship true desktop sidebar and mobile drawer with grouped navigation
+  - make Money Setup workflows directly reachable
+  - keep account menu compact/account-focused
+  - keep Quick Add reachable in app shell
+  - add no-liabilities month confirmation with existing monthly-close review state
+  - centralize professional enum label formatting
+  - fix Insights spending-composition overflow and percentage clarity
+  - keep privacy/trust copy polish from earlier Phase 70 pass
 - Files to inspect:
+  - `src/components/layout/AppShell.jsx`
+  - `src/components/layout/Navigation.jsx`
+  - `src/components/layout/navigationItems.js`
+  - `src/features/liabilities/components/Liabilities.jsx`
+  - `src/features/dashboard/monthlyCloseChecklist.js`
+  - `src/features/insights/components/Insights.jsx`
+  - `src/lib/displayLabels.js`
   - `src/features/auth/components/*`
   - `src/features/backup/components/*`
   - `src/features/legal/components/*`
@@ -140,12 +152,18 @@ Status: implemented in Phase 70 (2026-05-18)
   - auth provider behavior
   - schema
 - Tests needed:
+  - sidebar/drawer navigation behavior and grouped target coverage
+  - no-liabilities confirmation state and warning suppression coverage
+  - enum display-label formatter coverage
+  - insights composition percent/overflow-safe rendering checks
   - trust-copy and menu-presence tests
   - destructive-flow wording consistency tests
   - regression checks for deletion/export entry points
 - Acceptance criteria:
-  - trust and privacy surfaces feel consistent and professional
-  - users can find export/delete/privacy controls quickly
+  - true sidebar/drawer navigation is present and stable
+  - Money Setup items are directly reachable
+  - trust/privacy surfaces remain consistent and professional
+  - no-liability month confirmation suppresses false missing-data warnings
   - no routing/regression issues
 
 ## Phase 71: Final release candidate retest
