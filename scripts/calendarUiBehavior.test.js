@@ -15,11 +15,13 @@ describe("calendar ui behavior", () => {
     assert.equal(source.includes('{ id: "agenda", label: "Agenda" }'), true);
   });
 
-  it("renders month grid weekday columns and selected day panel", () => {
+  it("renders fullcalendar month view and selected day panel", () => {
     const source = read("src/features/calendar/components/Calendar.jsx");
 
-    assert.equal(source.includes("grid-cols-7"), true);
-    assert.equal(source.includes("calendar-weekday-header"), true);
+    assert.equal(source.includes("FullCalendar"), true);
+    assert.equal(source.includes('initialView="dayGridMonth"'), true);
+    assert.equal(source.includes("dayMaxEvents={2}"), true);
+    assert.equal(source.includes("displayEventTime={false}"), true);
     assert.equal(source.includes("Selected day"), true);
   });
 });

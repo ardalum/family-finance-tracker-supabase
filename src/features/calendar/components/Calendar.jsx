@@ -1,4 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import interactionPlugin from "@fullcalendar/interaction";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import EmptyState from "../../../components/ui/EmptyState.jsx";
@@ -8,12 +11,12 @@ import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
 import { dispatchNavigation } from "../../../lib/navigationTargets.js";
 import {
   buildCalendarEventsForMonth,
-  buildCalendarMonthGrid,
   getCalendarEmptyState,
-  getCalendarDayMobileIndicatorCount,
-  getCalendarDayOverflowCount,
   getInitialSelectedCalendarDate,
+  getSelectedDateFromCalendarDateClick,
+  getSelectedDateFromFullCalendarEventClick,
   getSelectedDateEvents,
+  mapCalendarEventsToFullCalendarEvents,
 } from "../calendarService.js";
 
 const FILTER_OPTIONS = [
@@ -40,6 +43,7 @@ export default function Calendar({
   incomeSources = [],
   monthlyCloseReview = null,
 }) {
+  const fullCalendarRef = useRef(null);
   const [activeFilter, setActiveFilter] = useState("all");
   const [activeView, setActiveView] = useState("calendar");
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
@@ -99,14 +103,15 @@ export default function Calendar({
     }
   }, [activeFilter, filteredEvents, selectedDate, selectedMonth]);
 
-  const monthGrid = useMemo(
-    () => buildCalendarMonthGrid(selectedMonth, filteredEvents),
-    [selectedMonth, filteredEvents],
+  const fullCalendarEvents = useMemo(
+    () => mapCalendarEventsToFullCalendarEvents(filteredEvents),
+    [filteredEvents],
   );
   const selectedDateEvents = useMemo(
     () => getSelectedDateEvents(filteredEvents, selectedDate),
     [filteredEvents, selectedDate],
   );
+  const selectedDateLabel = `${formatMonthLabel(selectedDate.slice(0, 7))} ${Number(selectedDate.slice(8, 10))}`;
 
   const counts = useMemo(() => {
     const dueNow = filteredEvents.filter((event) =>
@@ -123,6 +128,15 @@ export default function Calendar({
       completed,
     };
   }, [filteredEvents]);
+
+  useEffect(() => {
+    const api = fullCalendarRef.current?.getApi();
+    if (!api) return;
+    const targetDate = `${selectedMonth}-01`;
+    if (api.getDate().toISOString().slice(0, 7) !== selectedMonth) {
+      api.gotoDate(targetDate);
+    }
+  }, [selectedMonth]);
 
   return (
     <section className="grid gap-4 sm:gap-6">
@@ -203,86 +217,69 @@ export default function Calendar({
       {activeView === "calendar" ? (
         <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
           <Card className="p-3 sm:p-4">
-            <div
-              className="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-text-muted"
-              aria-label="calendar-weekday-header"
-            >
-              {monthGrid.columns.map((label) => (
-                <div key={label} className="py-1">
-                  {label}
-                </div>
-              ))}
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-sm font-semibold uppercase tracking-normal text-text-muted">
+                Month calendar
+              </h3>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  className="rounded-lg border border-app-border px-2 py-1 text-xs font-semibold text-text-main transition hover:bg-app-muted"
+                  onClick={() => fullCalendarRef.current?.getApi().prev()}
+                >
+                  Prev
+                </button>
+                <button
+                  type="button"
+                  className="rounded-lg border border-app-border px-2 py-1 text-xs font-semibold text-text-main transition hover:bg-app-muted"
+                  onClick={() => fullCalendarRef.current?.getApi().today()}
+                >
+                  Today
+                </button>
+                <button
+                  type="button"
+                  className="rounded-lg border border-app-border px-2 py-1 text-xs font-semibold text-text-main transition hover:bg-app-muted"
+                  onClick={() => fullCalendarRef.current?.getApi().next()}
+                >
+                  Next
+                </button>
+              </div>
             </div>
-            <div className="mt-2 grid grid-cols-7 gap-1">
-              {monthGrid.days.map((day) => {
-                const isSelected = day.date === selectedDate;
-                const cellEvents = getSelectedDateEvents(filteredEvents, day.date);
-                const overflowCount = getCalendarDayOverflowCount(day.eventCount, 2);
-                const mobileIndicatorCount = getCalendarDayMobileIndicatorCount(day.eventCount, 3);
-                return (
-                  <button
-                    key={day.date}
-                    type="button"
-                    className={`min-h-16 overflow-hidden rounded-lg border p-1.5 text-left transition sm:min-h-20 sm:p-2 ${
-                      day.inSelectedMonth
-                        ? "border-app-border bg-app-background"
-                        : "border-app-border/60 bg-app-muted/50 text-text-muted"
-                    } ${isSelected ? "ring-2 ring-brand-primary/70" : ""} ${
-                      day.isToday ? "border-status-infoDark/60" : ""
-                    }`}
-                    onClick={() => setSelectedDate(day.date)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span
-                        className={`text-xs font-semibold ${
-                          day.isToday
-                            ? "rounded-full bg-status-infoBg px-1.5 py-0.5 text-status-infoDark"
-                            : ""
-                        }`}
-                      >
-                        {day.dayLabel}
-                      </span>
-                      {day.eventCount > 0 ? (
-                        <span className="text-[10px] font-semibold text-text-muted">
-                          {day.eventCount}
-                        </span>
-                      ) : null}
-                    </div>
-                    {day.inSelectedMonth ? (
-                      <div className="mt-1 hidden grid-cols-1 gap-1 sm:grid">
-                        {cellEvents.slice(0, 2).map((event) => (
-                          <span
-                            key={event.id}
-                            className={`truncate rounded px-1 py-0.5 text-[10px] font-medium ${toneClass(event.severity)}`}
-                          >
-                            {event.title}
-                          </span>
-                        ))}
-                        {overflowCount > 0 ? (
-                          <span className="text-[10px] text-text-muted">+{overflowCount} more</span>
-                        ) : null}
-                      </div>
-                    ) : null}
-                    {day.inSelectedMonth && day.eventCount > 0 ? (
-                      <div className="mt-1 flex gap-1 sm:hidden">
-                        {Array.from({ length: mobileIndicatorCount }).map((_, index) => (
-                          <span
-                            key={`${day.date}-dot-${index}`}
-                            className="h-1.5 w-1.5 rounded-full bg-text-muted"
-                          />
-                        ))}
-                      </div>
-                    ) : null}
-                  </button>
-                );
-              })}
+            <div className="walletflow-calendar" aria-label="fullcalendar-month-grid">
+              <FullCalendar
+                ref={fullCalendarRef}
+                plugins={[dayGridPlugin, interactionPlugin]}
+                initialView="dayGridMonth"
+                initialDate={`${selectedMonth}-01`}
+                headerToolbar={false}
+                height="auto"
+                fixedWeekCount={false}
+                dayMaxEvents={2}
+                displayEventTime={false}
+                events={fullCalendarEvents}
+                dateClick={(info) => {
+                  const nextSelectedDate = getSelectedDateFromCalendarDateClick(info.dateStr);
+                  if (nextSelectedDate) setSelectedDate(nextSelectedDate);
+                }}
+                eventClick={(info) => {
+                  const nextSelectedDate = getSelectedDateFromFullCalendarEventClick(info.event);
+                  if (nextSelectedDate) setSelectedDate(nextSelectedDate);
+                }}
+                datesSet={(info) => {
+                  const nextMonth = formatDateToIsoLocal(info.view.currentStart).slice(0, 7);
+                  if (nextMonth !== selectedMonth) onMonthChange(nextMonth);
+                }}
+                dayCellClassNames={(info) => {
+                  const isoDate = formatDateToIsoLocal(info.date);
+                  return isoDate === selectedDate ? ["wf-calendar-day-selected"] : [];
+                }}
+              />
             </div>
           </Card>
 
           <Card className="p-4 sm:p-5">
             <h3 className="text-sm font-semibold uppercase tracking-normal text-text-muted">
-              Selected day {formatMonthLabel(selectedDate.slice(0, 7))}{" "}
-              {Number(selectedDate.slice(8, 10))}
+              Selected day {selectedDateLabel}
             </h3>
             {selectedDateEvents.length === 0 ? (
               <p className="mt-3 rounded-lg border border-dashed border-app-border p-3 text-sm text-text-muted">
@@ -401,6 +398,12 @@ function toneClass(severity) {
   if (severity === "success") return "bg-status-successBg text-status-successDark";
   if (severity === "muted") return "bg-app-muted text-text-muted";
   return "bg-status-infoBg text-status-infoDark";
+}
+
+function formatDateToIsoLocal(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
+    date.getDate(),
+  ).padStart(2, "0")}`;
 }
 
 Calendar.defaultProps = {

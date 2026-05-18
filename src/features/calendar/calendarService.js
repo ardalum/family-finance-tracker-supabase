@@ -373,6 +373,39 @@ export function getCalendarDayMobileIndicatorCount(eventCount = 0, maxIndicators
   return Math.min(normalizedEventCount, normalizedMaxIndicators);
 }
 
+export function mapCalendarEventsToFullCalendarEvents(events = []) {
+  return events
+    .filter((event) => isValidIsoDate(event?.date))
+    .map((event) => ({
+      id: event.id,
+      title: event.title,
+      start: event.date,
+      allDay: true,
+      classNames: getFullCalendarEventClassNames(event),
+      extendedProps: {
+        source: event.source,
+        sourceId: event.sourceId,
+        subtitle: event.subtitle,
+        amount: event.amount,
+        status: event.status,
+        severity: event.severity,
+        targetView: event.targetView,
+        targetMonth: event.targetMonth,
+        originalEvent: event,
+      },
+    }));
+}
+
+export function getSelectedDateFromCalendarDateClick(dateStr = "") {
+  if (!isValidIsoDate(dateStr)) return "";
+  return dateStr;
+}
+
+export function getSelectedDateFromFullCalendarEventClick(calendarEvent) {
+  const dateStr = calendarEvent?.startStr || "";
+  return getSelectedDateFromCalendarDateClick(dateStr);
+}
+
 function severityWeight(severity) {
   const map = { danger: 1, warning: 2, info: 3, success: 4, muted: 5 };
   return map[severity] ?? 6;
@@ -430,4 +463,11 @@ function dedupeCalendarEventsById(events = []) {
     deduped.push(event);
   }
   return deduped;
+}
+
+function getFullCalendarEventClassNames(event = {}) {
+  const classes = ["wf-calendar-event"];
+  if (event.source) classes.push(`wf-calendar-source-${event.source}`);
+  if (event.severity) classes.push(`wf-calendar-severity-${event.severity}`);
+  return classes;
 }
