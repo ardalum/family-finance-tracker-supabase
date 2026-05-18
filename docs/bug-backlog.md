@@ -1,6 +1,6 @@
 ﻿# Bug Backlog
 
-Last updated: 2026-05-17 (Phase 55 encoding cleanup and no-balance action polish)
+Last updated: 2026-05-17 (Phase 56 calendar design and event-source audit)
 
 ## Triage Legend
 
@@ -46,6 +46,7 @@ Last updated: 2026-05-17 (Phase 55 encoding cleanup and no-balance action polish
 - Future navigation promotion decision for Financial Position remains backlog scope (see `docs/financial-position-navigation-decision.md`).
 - Larger IA redesign for secondary tools remains future scope beyond compact menu cleanup.
 - Merge-import intentionally remains non-destructive (add/skip) rather than overwrite restore.
+- Calendar feature is planned as a future secondary-view workflow (design/audit completed in Phase 56; see `docs/calendar-feature-design.md`).
 
 ## Deferred Enhancements
 
