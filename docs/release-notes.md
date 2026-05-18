@@ -39,6 +39,7 @@
 - Production deployment smoke-test runbooks were added and linked.
 - Post-fix production smoke-test results document was added.
 - Release/readiness/QA docs were aligned for consistency and regression tracking.
+- Phase 64 full-product UX/IA audit identified release-blocking semantics/IA decisions that must be triaged before final RC tagging.
 
 ### Notes and limitations
 
@@ -63,3 +64,4 @@
 ### Planned improvements (not in this release)
 
 - Calendar follow-ons: reminders/notifications, custom events, and external sync/export.
+- UX/IA roadmap phases 65-70: dashboard cash-flow semantics redesign, navigation/account-menu IA cleanup, quick-add entry acceleration, Insights chart modernization, and trust-surface polish.
