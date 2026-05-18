@@ -285,4 +285,4 @@ No new database table for MVP. Compose events from existing data with a normaliz
 - **Phase 60**: Calendar dashboard/account-menu discoverability and release-readiness retest - completed
 - **Phase 61**: FullCalendar month-grid migration - completed
 - **Phase 62**: FullCalendar mobile polish and release-blocker retest - completed
-- **Phase 63**: Reminders/export integration design
+- **Phase 63**: Final release-readiness documentation alignment after FullCalendar migration/polish

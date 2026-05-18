@@ -1,8 +1,8 @@
-# Release Readiness Production QA Pass (Phase 48)
+# Release Readiness Production QA Pass (Phase 63)
 
-Date: 2026-05-17  
+Date: 2026-05-18  
 Project: WalletFlow / Family Finance Tracker  
-Scope: Final release-readiness review after backup/export coverage and restore/import validation hardening.
+Scope: Final release-readiness review after FullCalendar migration and mobile polish retest.
 
 ## 1) Release scope
 
@@ -33,7 +33,7 @@ Included in this release candidate:
 - manual liabilities/debt + snapshots
 - net worth summary and trends based on snapshots
 - financial position hub (secondary view)
-- calendar agenda/list MVP (secondary view from existing data)
+- FullCalendar calendar month grid + agenda toggle (secondary view from existing data)
 - backup/export (Supabase JSON + Excel)
 - restore/import validation hardening (merge-safe behavior)
 
@@ -66,6 +66,7 @@ Validated via automated checks (`npm run verify`) and focused static QA audit:
 - restore is merge-style (add/skip) by design; full overwrite restore is intentionally out of scope
 - real-device mobile matrix checks still require manual pass each release
 - computed summaries are derived and intentionally not restored/exported as standalone datasets
+- calendar remains existing-data-only (no custom events, reminders, or Google/Apple sync/export)
 
 ## 6) Known product gaps
 
@@ -82,9 +83,12 @@ Product gaps (not release defects):
 - Cards/Budget/Spending/Bills workflows run create-update-delete paths
 - Insights opens and all major sections render
 - Income/Savings/Accounts/Liabilities/Net Worth/Financial Position open and route correctly
+- Calendar opens from Dashboard quick action and Account menu Tools
+- FullCalendar month grid appears first and remains usable at mobile widths
 - Monthly Close review and reopen flows work
 - account menu and settings/legal/support pages open
 - main nav remains: Dashboard, Cards, Budget, Spending, Bills, Insights
+- stale PR #338 is treated as obsolete after FullCalendar migration and not merged
 
 ## 8) Required Supabase checks
 

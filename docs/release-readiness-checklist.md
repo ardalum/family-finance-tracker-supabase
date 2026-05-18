@@ -198,6 +198,8 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Verify FullCalendar event overflow remains readable/compact at small widths.
 - [ ] Execute `docs/calendar-release-readiness-retest.md` and capture outcomes.
 - [ ] Execute `docs/fullcalendar-release-blocker-retest.md` and capture outcomes.
+- [ ] Confirm FullCalendar dependency set remains non-premium only (`core`, `react`, `daygrid`, `interaction`).
+- [ ] Confirm stale PR #338 is not merged (close/ignore as obsolete after FullCalendar migration).
 
 ## Known Limitations
 

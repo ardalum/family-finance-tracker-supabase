@@ -1,6 +1,6 @@
 # Credit Card Tracker Supabase
 
-A Vite + React household finance tracker backed by Supabase. The app supports Supabase Auth, household setup, household profiles, Dashboard/Cards/Budget/Spending/Bills/Insights workflows, Financial Position hub, Income/Savings/Accounts/Liabilities/Net Worth tracking, monthly close review flow, Supabase JSON backup/import, Excel export, and secure account/household deletion flows through Supabase Edge Functions.
+A Vite + React household finance tracker backed by Supabase. The app supports Supabase Auth, household setup, household profiles, Dashboard/Cards/Budget/Spending/Bills/Insights workflows, Financial Position hub, a secondary Calendar workspace powered by FullCalendar, Income/Savings/Accounts/Liabilities/Net Worth tracking, monthly close review flow, Supabase JSON backup/import, Excel export, and secure account/household deletion flows through Supabase Edge Functions.
 
 ## Project Docs
 
