@@ -57,7 +57,7 @@ Last updated: 2026-05-18 (Phase 62 FullCalendar mobile polish)
 - Dashboard cash-flow semantics gap: resolved in Phase 65 by replacing leftover-style cash-flow wording with grouped Financial Pulse summary semantics (cash position, budget usage, obligations, savings, planned cushion).
 - Navigation IA gap: partially resolved in Phase 66 with dedicated Tools surface and account-menu cleanup; broader IA evolution remains future scope.
 - Data-entry friction gap: partially resolved in Phase 68 with global Quick Add transaction MVP; follow-on enhancements include duplicate-last flow and expansion to income/bills/savings/accounts/liabilities quick entry.
-- Insights visualization gap: heavy horizontal-bar usage limits trend readability and actionable intelligence cues (tracked in `docs/full-product-ux-ia-audit.md`).
+- Insights visualization gap: partially resolved in Phase 69 with multi-chart Insights redesign and actionable cards; follow-on enhancements remain for predictive guidance depth.
 - Privacy/trust polish gap: account/privacy/data controls need stronger trust-first grouping and copy consistency (tracked in `docs/full-product-ux-ia-audit.md`).
 
 ## Deferred Enhancements

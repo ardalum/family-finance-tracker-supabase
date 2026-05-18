@@ -1,4 +1,8 @@
 import { useMemo, useState } from "react";
+import DonutChart from "../../../components/charts/DonutChart.jsx";
+import LineTrendChart from "../../../components/charts/LineTrendChart.jsx";
+import StackedBarChart from "../../../components/charts/StackedBarChart.jsx";
+import VerticalBarChart from "../../../components/charts/VerticalBarChart.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import EmptyState from "../../../components/ui/EmptyState.jsx";
 import HorizontalBarChart from "../../../components/ui/HorizontalBarChart.jsx";
@@ -6,11 +10,15 @@ import ProgressBar from "../../../components/ui/ProgressBar.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { buildMonthOptions, getCurrentMonthKey } from "../../../lib/dates.js";
 import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
+import { dispatchNavigation } from "../../../lib/navigationTargets.js";
 import { getDashboardData } from "../../dashboard/dashboardUtils.js";
 import InsightsSummaryCards from "./InsightsSummaryCards.jsx";
 import {
   calculateSharePercent,
+  getActionableInsightCards,
+  getBudgetVsActualRows,
   getBudgetInsights,
+  getMonthlyTrendRows,
   getTopCategories,
   getTopMerchants,
   getTransactionTypeMixRows,
@@ -138,6 +146,37 @@ export default function Insights({
   const hasAnyLiabilitySnapshots = netWorthByMonth.some(
     (row) => row.hasData && Number(row.totalLiabilities) > 0,
   );
+  const monthlyTrendRows = useMemo(
+    () => getMonthlyTrendRows(ytdData.ytdSpendingByMonth ?? []),
+    [ytdData.ytdSpendingByMonth],
+  );
+  const budgetVsActualRows = useMemo(
+    () => getBudgetVsActualRows(budgetInsights.all ?? []),
+    [budgetInsights.all],
+  );
+  const actionableCards = useMemo(
+    () =>
+      getActionableInsightCards({
+        summary: data.summary,
+        budgetInsights,
+        merchantRows,
+        categoryRows,
+        ytdData,
+        netWorthTrendStatus,
+        hasNetWorthData: hasAnyNetWorthSnapshots,
+        hasLiabilitySnapshots: hasAnyLiabilitySnapshots,
+      }),
+    [
+      budgetInsights,
+      categoryRows,
+      data.summary,
+      hasAnyLiabilitySnapshots,
+      hasAnyNetWorthSnapshots,
+      merchantRows,
+      netWorthTrendStatus,
+      ytdData,
+    ],
+  );
 
   const hasInsightData = data.transactions.length > 0 || data.budgets.length > 0;
 
@@ -173,37 +212,44 @@ export default function Insights({
 
       {!hasInsightData ? <InsightsEmptyState selectedMonth={selectedMonth} /> : null}
 
-      <InsightsSummaryCards summary={data.summary} overBudgetCount={budgetInsights.over.length} />
+      <InsightsSummaryCards
+        summary={data.summary}
+        overBudgetCount={budgetInsights.over.length}
+        topCategory={categoryRows[0] ?? null}
+        ytdSignal={ytdData.highestSpendingMonth?.formattedValue ?? ""}
+      />
 
       <section className="grid gap-6 xl:grid-cols-2">
         <Card>
           <SectionHeader
-            title="Spending by Category"
-            description="Net category spending ranked highest to lowest for this month."
+            title="Actionable Insights"
+            description="Rule-based recommendations from this month and YTD trend context."
           />
-          <div className="p-5">
-            <HorizontalBarChart
-              title="Spending by Category"
-              description="Category spending bars with amount labels"
-              items={categoryRows}
-              valueLabel="Net spending"
-              emptyMessage="No category spending for this month."
-            />
+          <div className="grid gap-3 p-5">
+            {actionableCards.map((card) => (
+              <ActionableInsightCard key={card.id} card={card} />
+            ))}
           </div>
         </Card>
 
         <Card>
           <SectionHeader
-            title="Top Merchants"
-            description="Merchants with highest net spending this month, excluding non-spending transfer/payment effects."
+            title="Spending Composition"
+            description="Category composition with a ranked list for fast pattern recognition."
           />
-          <div className="p-5">
+          <div className="grid gap-4 p-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+            <DonutChart
+              data={categoryRows.map((row) => ({ label: row.label, value: row.value }))}
+              valueLabel="Category spend"
+              emptyMessage="No category spending for this month."
+            />
             <HorizontalBarChart
-              title="Top Merchants"
-              description="Merchant spending bars with amount and transaction counts"
-              items={merchantRows}
+              title="Category ranking"
+              description="Spending by category ranked highest to lowest"
+              items={categoryRows}
               valueLabel="Net spending"
-              emptyMessage="No merchant spending for this month."
+              emptyMessage="No category ranking yet."
+              maxItems={6}
             />
           </div>
         </Card>
@@ -212,24 +258,80 @@ export default function Insights({
       <section className="grid gap-6 xl:grid-cols-2">
         <Card>
           <SectionHeader
-            title="Budget Usage"
-            description="Spent vs budget with clear status labels for over, near, and safe categories."
+            title="Monthly Spending Trend"
+            description="Month-by-month YTD spending totals for quick trend reading."
           />
-          {budgetInsights.all.length === 0 ? (
-            <EmptyPanel message="No budget categories for this month." />
+          {monthlyTrendRows.length === 0 ? (
+            <EmptyPanel message="Add transactions to unlock monthly spending trend." />
           ) : (
             <div className="grid gap-4 p-5">
-              <BudgetUsageGroup title="Over budget" rows={budgetInsights.over} />
-              <BudgetUsageGroup title="Near limit" rows={budgetInsights.near} />
-              <BudgetUsageGroup title="Under budget / safe" rows={budgetInsights.safe} />
+              <LineTrendChart
+                data={monthlyTrendRows}
+                lineKey="value"
+                lineName="Monthly spending"
+                xKey="label"
+                emptyMessage="No monthly trend data."
+              />
+              <VerticalBarChart
+                data={monthlyTrendRows}
+                dataKey="value"
+                dataName="Monthly spending"
+                xKey="label"
+                emptyMessage="No monthly bar data."
+              />
             </div>
           )}
         </Card>
 
         <Card>
           <SectionHeader
+            title="Budget vs Actual"
+            description="Top categories compared by budget and tracked spending."
+          />
+          {budgetVsActualRows.length === 0 ? (
+            <EmptyPanel message="No budget comparison data for this month." />
+          ) : (
+            <div className="grid gap-3 p-5">
+              <StackedBarChart
+                data={budgetVsActualRows}
+                xKey="label"
+                stackAKey="budget"
+                stackAName="Budget"
+                stackBKey="spent"
+                stackBName="Spent"
+                emptyMessage="No budget vs actual chart data."
+              />
+              <BudgetStatusList rows={budgetVsActualRows} />
+            </div>
+          )}
+        </Card>
+      </section>
+
+      <section className="grid gap-6 xl:grid-cols-2">
+        <Card>
+          <SectionHeader
+            title="Merchant Concentration"
+            description="Top merchants with share and transaction-count context."
+          />
+          <div className="grid gap-4 p-5">
+            <HorizontalBarChart
+              title="Top merchants"
+              description="Merchant spending bars with amount and transaction counts"
+              items={merchantRows}
+              valueLabel="Net spending"
+              emptyMessage="No merchant spending for this month."
+            />
+            <MerchantConcentrationCard
+              topMerchant={merchantRows[0] ?? null}
+              spendingTotal={Number(data.summary.spendingTotal || 0)}
+            />
+          </div>
+        </Card>
+
+        <Card>
+          <SectionHeader
             title="Transaction Type Mix"
-            description="Shows entered amounts and net spending impact by transaction type (refunds reduce spend; payments/transfers/income have zero net spending impact)."
+            description="Entered amount and net spending impact by transaction type."
           />
           {transactionTypeRows.length === 0 ? (
             <EmptyPanel message="No transactions for this month." />
@@ -493,13 +595,14 @@ export default function Insights({
                     <h4 className="mb-2 text-sm font-semibold text-text-main">
                       Net Worth by Month
                     </h4>
-                    <HorizontalBarChart
-                      title="Net Worth by Month"
-                      description="Monthly net worth trend from manual snapshots"
-                      items={netWorthTrendRows}
-                      valueLabel="Net worth"
+                    <LineTrendChart
+                      data={netWorthTrendRows
+                        .filter((row) => row.hasData)
+                        .map((row) => ({ id: row.id, label: row.label, value: row.netWorth }))}
+                      lineKey="value"
+                      lineName="Net worth"
+                      xKey="label"
                       emptyMessage="No net worth trend data yet."
-                      maxItems={12}
                     />
                   </div>
                   <div>
@@ -543,55 +646,78 @@ function InsightsEmptyState({ selectedMonth }) {
   );
 }
 
-function BudgetUsageGroup({ title, rows }) {
+function ActionableInsightCard({ card }) {
   return (
-    <div className="rounded-2xl border border-app-border p-4">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <h4 className="text-sm font-semibold text-text-main">{title}</h4>
-        <span className="rounded-full border border-app-border bg-app-soft px-2.5 py-1 text-xs font-semibold text-text-main">
-          {rows.length}
-        </span>
-      </div>
-      {rows.length === 0 ? (
-        <p className="text-sm text-text-muted">Nothing here right now.</p>
-      ) : (
-        <div className="grid gap-3">
-          {rows.slice(0, 6).map((row) => {
-            const copy = BUDGET_STATUS_COPY[row.status] ?? BUDGET_STATUS_COPY.safe;
-            return (
-              <div key={row.category} className="grid gap-2">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p
-                      className="truncate text-sm font-semibold text-text-main"
-                      title={row.category}
-                    >
-                      {row.category}
-                    </p>
-                    <p className="text-xs text-text-muted">
-                      {formatCurrency(row.spent)} of {formatCurrency(row.budget)}
-                    </p>
-                  </div>
-                  <span
-                    className={`rounded-full border px-2 py-0.5 text-xs font-semibold ${copy.badge}`}
-                  >
-                    {copy.label}
-                  </span>
-                </div>
-                <ProgressBar
-                  value={row.spent}
-                  max={row.budget}
-                  label={row.category}
-                  helperText={`${row.percentUsed.toFixed(0)}% used`}
-                />
-              </div>
-            );
-          })}
-          {rows.length > 6 ? (
-            <p className="text-xs text-text-muted">+{rows.length - 6} more</p>
-          ) : null}
-        </div>
-      )}
+    <div className="rounded-2xl border border-app-border bg-app-background p-4">
+      <p className="text-sm font-semibold text-text-main">{card.title}</p>
+      <p className="mt-1 text-sm text-text-muted">{card.explanation}</p>
+      <p className="mt-2 text-xs font-medium text-text-soft">Recommended: {card.action}</p>
+      {card.targetView ? (
+        <button
+          type="button"
+          className="mt-3 rounded-lg border border-app-border bg-app-surface px-3 py-1.5 text-xs font-semibold text-brand-primary hover:border-brand-primary/40 hover:bg-app-background"
+          onClick={() => dispatchNavigation(card.targetView)}
+        >
+          Open {card.targetView}
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+function MerchantConcentrationCard({ topMerchant, spendingTotal }) {
+  if (!topMerchant || spendingTotal <= 0) {
+    return (
+      <p className="text-sm text-text-muted">
+        Merchant concentration appears after you have spending data.
+      </p>
+    );
+  }
+
+  const share = calculateSharePercent(topMerchant.value, spendingTotal);
+  const isHigh = share >= 30;
+
+  return (
+    <div className="rounded-2xl border border-app-border bg-app-background p-4">
+      <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+        Top merchant concentration
+      </p>
+      <p className="mt-1 text-sm font-semibold text-text-main">
+        {topMerchant.label}: {share.toFixed(0)}% of monthly spending
+      </p>
+      <p className="mt-1 text-xs text-text-muted">
+        {topMerchant.helperText} | {topMerchant.formattedValue}
+      </p>
+      <p
+        className={`mt-2 text-xs font-semibold ${isHigh ? "text-status-warningDark" : "text-text-muted"}`}
+      >
+        {isHigh
+          ? "Concentration warning: one merchant is a large share of spending."
+          : "Concentration is currently moderate."}
+      </p>
+    </div>
+  );
+}
+
+function BudgetStatusList({ rows }) {
+  if (!rows.length) return null;
+
+  return (
+    <div className="grid gap-2">
+      {rows.map((row) => {
+        const copy = BUDGET_STATUS_COPY[row.status] ?? BUDGET_STATUS_COPY.safe;
+        return (
+          <div
+            key={row.id}
+            className="flex items-center justify-between gap-3 rounded-xl border border-app-border bg-app-background px-3 py-2"
+          >
+            <p className="text-sm font-medium text-text-main">{row.label}</p>
+            <span className={`rounded-full border px-2 py-0.5 text-xs font-semibold ${copy.badge}`}>
+              {copy.label}
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }

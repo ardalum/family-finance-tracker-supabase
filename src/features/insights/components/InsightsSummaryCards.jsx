@@ -25,16 +25,37 @@ const cards = [
     type: "count",
     warnIfPositive: true,
   },
+  {
+    label: "Top Category",
+    key: "topCategory",
+    description: "Highest spending category for the selected month.",
+    type: "text",
+  },
+  {
+    label: "YTD Signal",
+    key: "ytdSignal",
+    description: "Highest YTD month spending reference.",
+    type: "text",
+  },
 ];
 
-export default function InsightsSummaryCards({ summary, overBudgetCount = 0 }) {
+export default function InsightsSummaryCards({
+  summary,
+  overBudgetCount = 0,
+  topCategory = null,
+  ytdSignal = "",
+}) {
   const values = {
     ...summary,
     overBudgetCount,
+    topCategory: topCategory
+      ? `${topCategory.label} (${topCategory.formattedValue})`
+      : "No category data",
+    ytdSignal: ytdSignal || "Add more monthly data",
   };
 
   return (
-    <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
       {cards.map((card) => {
         const value = Number(values[card.key] || 0);
         const isWarning = (card.warnIfNegative && value < 0) || (card.warnIfPositive && value > 0);
@@ -42,13 +63,19 @@ export default function InsightsSummaryCards({ summary, overBudgetCount = 0 }) {
         return (
           <Card key={card.key} className="p-5">
             <p className="text-sm font-medium text-text-muted">{card.label}</p>
-            <p
-              className={`mt-2 text-2xl font-semibold tracking-normal ${
-                isWarning ? "text-status-danger" : "text-text-main"
-              }`}
-            >
-              {card.type === "count" ? value : formatCurrency(value)}
-            </p>
+            {card.type === "text" ? (
+              <p className="mt-2 text-sm font-semibold tracking-normal text-text-main">
+                {values[card.key]}
+              </p>
+            ) : (
+              <p
+                className={`mt-2 text-2xl font-semibold tracking-normal ${
+                  isWarning ? "text-status-danger" : "text-text-main"
+                }`}
+              >
+                {card.type === "count" ? value : formatCurrency(value)}
+              </p>
+            )}
             <p className="mt-2 text-xs text-text-muted">{card.description}</p>
           </Card>
         );

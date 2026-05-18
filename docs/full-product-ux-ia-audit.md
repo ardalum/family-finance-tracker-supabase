@@ -230,6 +230,11 @@ Current state:
 - Insights relies heavily on horizontal bar-style visualizations.
 - Content breadth is good, but visual grammar is repetitive and less intuitive for trend interpretation.
 
+Phase 69 update:
+
+- Partially addressed: Insights now includes varied visualizations (donut composition, line trend, vertical bars, stacked budget-vs-actual, and net-worth trend line) plus actionable recommendation cards.
+- Remaining work: deeper guided intelligence (forecasting, subscription anomaly detection, and richer next-best-action sequencing).
+
 Recommended future visuals:
 
 - donut/pie: spending by category

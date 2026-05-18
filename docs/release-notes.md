@@ -38,6 +38,7 @@
 - Navigation was simplified with a dedicated Tools workspace for secondary workflows, while keeping main nav unchanged.
 - Account menu was cleaned up to focus on account, household, privacy/data, and support (daily planning tools moved out of account menu).
 - Quick Add transaction MVP now provides a global, faster amount-first modal flow with recent-merchant shortcuts and existing spending-save logic reuse.
+- Insights visual analytics were redesigned with varied Recharts-based visuals (donut composition, monthly trend, budget-vs-actual comparison, and net-worth trend) plus actionable insight cards.
 
 ### QA and Release Readiness
 
