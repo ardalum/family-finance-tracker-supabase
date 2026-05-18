@@ -19,6 +19,14 @@ describe("page content config", () => {
     assert.equal(pageContent["terms-of-use"].title, "Terms of Use");
   });
 
+  it("contains calendar page content", () => {
+    assert.equal(pageContent.calendar.title, "Calendar");
+    assert.equal(
+      pageContent.calendar.description,
+      "Review upcoming card, bill, income, and month-close dates.",
+    );
+  });
+
   it("contains page content for every main finance view", () => {
     for (const viewId of primaryFinanceViewIds) {
       const content = pageContent[viewId];
