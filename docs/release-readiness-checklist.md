@@ -174,6 +174,17 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Recurring workspace sections are usable on mobile.
 - [ ] Dashboard cards and Monthly Close Checklist are readable on mobile.
 
+## 10b) Quick Add MVP Verification
+
+- [ ] Global `Quick Add` button is visible in the header on desktop and reachable on mobile.
+- [ ] Quick Add opens a transaction modal without changing the current workspace.
+- [ ] Amount field is focused first for rapid entry.
+- [ ] Required field validation prevents invalid saves (amount, merchant, payment method/card, category/date).
+- [ ] Save button disables while saving and prevents duplicate submissions.
+- [ ] Successful save closes modal and refreshes spending/dashboard data through existing app flow.
+- [ ] Save error state surfaces a clear message without crashing.
+- [ ] Recent merchant shortcuts render when transactions exist and prefill relevant fields safely.
+
 ## 11) Production Smoke Workflow
 
 - [ ] Execute `docs/production-qa-checklist.md`.

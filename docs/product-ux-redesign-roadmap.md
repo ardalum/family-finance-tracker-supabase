@@ -64,13 +64,15 @@ Status: implemented in Phase 66 (2026-05-18)
 
 ## Phase 67: Frictionless data entry / Quick Add MVP
 
+Status: implemented as MVP in Phase 67 (2026-05-18)
+
 - Goal:
   - Reduce taps/clicks for frequent entries, especially transactions.
 - Scope:
   - Add global Quick Add entry.
   - Add quick-add transaction modal.
   - Add recent merchant/category shortcuts.
-  - Add duplicate-last-transaction support.
+  - Defer duplicate-last-transaction support to a follow-up.
 - Files to inspect:
   - `src/features/spending/components/*`
   - `src/features/income/components/*`

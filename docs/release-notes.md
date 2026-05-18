@@ -26,11 +26,7 @@
 ### UX and Navigation Fixes
 
 - Browser Back/Forward now works between app views using hash-based URLs.
-- Account menu Tools section was simplified to keep it shorter and clearer:
-  - Financial Position
-  - Calendar
-  - Backup & Restore
-  - App Settings
+- Account menu was simplified to keep it shorter and account/trust focused (Account Settings, Household Settings, Privacy & Data, Support links), while secondary workflows moved to the Tools workspace.
 - Monthly card balance status no longer falsely shows `Checked - No balance` after clearing an entry.
 - Numeric amount inputs now support direct typing over default values via focus-select behavior.
 - Dashboard summary was reframed from cash-flow leftover wording to a clearer Financial Pulse model:
@@ -41,6 +37,7 @@
   - planned cash cushion labeled as a planning estimate
 - Navigation was simplified with a dedicated Tools workspace for secondary workflows, while keeping main nav unchanged.
 - Account menu was cleaned up to focus on account, household, privacy/data, and support (daily planning tools moved out of account menu).
+- Quick Add transaction MVP now provides a global, faster amount-first modal flow with recent-merchant shortcuts and existing spending-save logic reuse.
 
 ### QA and Release Readiness
 

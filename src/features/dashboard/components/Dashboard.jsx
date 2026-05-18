@@ -12,6 +12,7 @@ import {
   WalletCards,
 } from "lucide-react";
 import Card from "../../../components/ui/Card.jsx";
+import FeatureIcon from "../../../components/ui/FeatureIcon.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { buildMonthOptions, getCurrentMonthKey } from "../../../lib/dates.js";
 import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
@@ -56,6 +57,7 @@ const quickActions = [
     view: "credit-cards",
     target: "monthly-balances",
     icon: CreditCard,
+    iconVariant: "violet",
   },
   {
     label: "Add transactions",
@@ -63,6 +65,7 @@ const quickActions = [
     view: "spending",
     target: "add-transaction",
     icon: ReceiptText,
+    iconVariant: "orange",
   },
   {
     label: "Open recurring bills",
@@ -70,6 +73,7 @@ const quickActions = [
     view: "recurring",
     target: "this-month",
     icon: Repeat,
+    iconVariant: "rose",
   },
   {
     label: "Tools",
@@ -77,6 +81,7 @@ const quickActions = [
     view: "tools",
     target: "tools-home",
     icon: Wrench,
+    iconVariant: "indigo",
   },
   {
     label: "Review budget",
@@ -84,6 +89,7 @@ const quickActions = [
     view: "budgets",
     target: "budget-table",
     icon: WalletCards,
+    iconVariant: "emerald",
   },
   {
     label: "Calendar",
@@ -91,6 +97,7 @@ const quickActions = [
     view: "calendar",
     target: "monthly-calendar",
     icon: CalendarDays,
+    iconVariant: "teal",
   },
 ];
 
@@ -276,7 +283,6 @@ function DashboardQuickActions() {
       </div>
       <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-4">
         {quickActions.map((action) => {
-          const Icon = action.icon;
           return (
             <button
               key={action.view}
@@ -284,9 +290,7 @@ function DashboardQuickActions() {
               className="grid gap-2 rounded-2xl border border-app-border bg-app-surface p-4 text-left transition hover:border-brand-primary/40 hover:bg-app-background focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
               onClick={() => navigateToView(action.view, action.target)}
             >
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-app-background text-text-main ring-1 ring-inset ring-app-border">
-                <Icon size={18} aria-hidden="true" />
-              </span>
+              <FeatureIcon icon={action.icon} variant={action.iconVariant} />
               <span className="text-sm font-semibold text-text-main">{action.label}</span>
               <span className="text-xs text-text-muted">{action.description}</span>
             </button>

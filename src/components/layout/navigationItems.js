@@ -12,31 +12,37 @@ const navigationItemByView = {
     label: "Dashboard",
     shortLabel: "Dashboard",
     icon: LayoutDashboard,
+    iconVariant: "blue",
   },
   "credit-cards": {
     label: "Cards",
     shortLabel: "Cards",
     icon: CreditCard,
+    iconVariant: "violet",
   },
   budgets: {
     label: "Budget",
     shortLabel: "Budget",
     icon: WalletCards,
+    iconVariant: "emerald",
   },
   spending: {
     label: "Spending",
     shortLabel: "Spending",
     icon: ReceiptText,
+    iconVariant: "orange",
   },
   recurring: {
     label: "Bills",
     shortLabel: "Bills",
     icon: CalendarSync,
+    iconVariant: "rose",
   },
   insights: {
     label: "Insights",
     shortLabel: "Insights",
     icon: ChartNoAxesCombined,
+    iconVariant: "cyan",
   },
 };
 

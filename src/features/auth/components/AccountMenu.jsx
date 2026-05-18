@@ -1,5 +1,6 @@
 import { LogOut, UserCircle } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import FeatureIcon from "../../../components/ui/FeatureIcon.jsx";
 import { useHouseholds } from "../../households/HouseholdProvider.jsx";
 import { getAccountIdentity } from "../authAccountDisplayUtils.js";
 import { getFriendlyAuthError } from "../authErrors.js";
@@ -112,6 +113,7 @@ export default function AccountMenu({ onNavigate }) {
                     <MenuButton
                       key={item.view}
                       icon={item.icon}
+                      iconVariant={item.iconVariant}
                       label={item.label}
                       description={item.description}
                       onClick={() => navigate(item.view)}
@@ -151,7 +153,7 @@ export default function AccountMenu({ onNavigate }) {
   );
 }
 
-function MenuButton({ icon: Icon, label, description, onClick }) {
+function MenuButton({ icon: Icon, iconVariant = "neutral", label, description, onClick }) {
   return (
     <button
       type="button"
@@ -159,7 +161,12 @@ function MenuButton({ icon: Icon, label, description, onClick }) {
       onClick={onClick}
       role="menuitem"
     >
-      <Icon size={16} className="mt-0.5 shrink-0 text-text-muted" aria-hidden="true" />
+      <FeatureIcon
+        icon={Icon}
+        variant={iconVariant}
+        size={15}
+        className="mt-0.5 h-8 w-8 shrink-0 rounded-lg"
+      />
       <span className="min-w-0">
         <span className="block text-sm font-semibold text-text-main">{label}</span>
         <span className="mt-0.5 block text-xs leading-snug text-text-muted">{description}</span>

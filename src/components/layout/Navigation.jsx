@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import FeatureIcon from "../ui/FeatureIcon.jsx";
 import { NAVIGATE_EVENT } from "../../lib/navigationTargets.js";
 import { navItems } from "./navigationItems.js";
 import { shouldHandleNavigationView } from "./navigationEventUtils.js";
@@ -20,13 +21,9 @@ export default function Navigation({ activeView, onChange }) {
   return (
     <nav className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap" aria-label="Primary navigation">
       {navItems.map((item) => {
-        const Icon = item.icon;
         const isActive = activeView === item.id;
         const isHovered = hoveredId === item.id;
         const tabStyle = getTabStyle({ isActive, isHovered });
-        const iconStyle = {
-          color: isActive ? "#FFFFFF" : isHovered ? "#111827" : "#374151",
-        };
 
         return (
           <button
@@ -43,7 +40,14 @@ export default function Navigation({ activeView, onChange }) {
             aria-label={`Go to ${item.label}`}
             title={item.label}
           >
-            <Icon size={16} style={iconStyle} aria-hidden="true" />
+            <FeatureIcon
+              icon={item.icon}
+              variant={item.iconVariant}
+              mode="plain"
+              size={16}
+              active={isActive}
+              iconClassName={isHovered && !isActive ? "text-text-main" : ""}
+            />
             <span className="sm:hidden">{item.shortLabel}</span>
             <span className="hidden sm:inline">{item.label}</span>
           </button>

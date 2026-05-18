@@ -202,6 +202,11 @@ Friction themes:
 - No central acceleration pattern for frequent household logging.
 - Mobile data entry works, but high-frequency logging ergonomics can improve.
 
+Phase 67 update:
+
+- Partially addressed: global `Quick Add` transaction entry now exists with fast amount-first modal flow, validation, and recent-merchant shortcuts sourced from existing transactions.
+- Remaining work: extend Quick Add pattern to additional entry types (income, bills, savings, snapshots) and add deeper duplicate/template acceleration.
+
 Recommendations:
 
 - Add global `Quick Add` entry point.
