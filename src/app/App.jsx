@@ -4,6 +4,7 @@ import { AppSetupLoadingScreen } from "./AppStatusMessages.jsx";
 import AppFirstTimeSetupScreen from "./AppFirstTimeSetupScreen.jsx";
 import AppShellFrame from "./AppShellFrame.jsx";
 import AppViewRenderer from "./AppViewRenderer.jsx";
+import QuickAddTransactionModal from "../features/quickAdd/components/QuickAddTransactionModal.jsx";
 import {
   getInitialSetupStatusState,
   getSetupStatusErrorMessage,
@@ -75,6 +76,7 @@ function FinanceTrackerApp() {
   const [selectedNetWorthMonth, setSelectedNetWorthMonth] = useState(
     initialSelectedMonths.netWorth,
   );
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
   useEffect(() => {
     let isCurrent = true;
 
@@ -625,6 +627,16 @@ function FinanceTrackerApp() {
     updateSupabaseSavingsContribution,
     deleteSupabaseSavingsContribution,
   });
+
+  function openQuickAdd() {
+    setQuickAddOpen(true);
+  }
+
+  function closeQuickAdd() {
+    if (spendingSaving) return;
+    setQuickAddOpen(false);
+  }
+
   if (setupCheckLoading) {
     return <AppSetupLoadingScreen />;
   }
@@ -654,8 +666,18 @@ function FinanceTrackerApp() {
       headerAlerts={headerAlerts}
       setupCheckError={setupCheckError}
       onViewChange={setActiveView}
+      onQuickAdd={openQuickAdd}
     >
       <AppViewRenderer activeView={activeView} {...appViewProps} />
+      <QuickAddTransactionModal
+        open={quickAddOpen}
+        cards={supabaseCreditCards.filter((card) => card.isActive)}
+        categories={spendingCategories}
+        transactions={spendingTransactions}
+        isSaving={spendingSaving}
+        onClose={closeQuickAdd}
+        onCreateTransaction={createSupabaseTransaction}
+      />
     </AppShellFrame>
   );
 }

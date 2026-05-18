@@ -8,6 +8,7 @@ export default function AppShellFrame({
   headerAlerts,
   setupCheckError,
   onViewChange,
+  onQuickAdd,
   children,
 }) {
   return (
@@ -16,7 +17,13 @@ export default function AppShellFrame({
       onViewChange={onViewChange}
       pageTitle={currentPage.title}
       pageDescription={currentPage.description}
-      accountSlot={<AppHeaderAccountSlot alerts={headerAlerts} onNavigate={onViewChange} />}
+      accountSlot={
+        <AppHeaderAccountSlot
+          alerts={headerAlerts}
+          onNavigate={onViewChange}
+          onQuickAdd={onQuickAdd}
+        />
+      }
     >
       <AppSetupErrorMessage error={setupCheckError} />
       {children}
