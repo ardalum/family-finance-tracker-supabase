@@ -1,6 +1,6 @@
 # Bug Backlog
 
-Last updated: 2026-05-17 (Phase 50 production UX bug audit and critical fixes)
+Last updated: 2026-05-17 (Phase 54 monthly-balance checked/no-balance fix)
 
 ## Triage Legend
 
@@ -13,7 +13,9 @@ Last updated: 2026-05-17 (Phase 50 production UX bug audit and critical fixes)
 
 ## High
 
-- None open.
+| Item                                                                           | Status | Notes                                                                                  |
+| ------------------------------------------------------------------------------ | ------ | -------------------------------------------------------------------------------------- |
+| Monthly-balance implicit checked/no-balance state from load/save normalization | fixed  | Re-opened from Phase 50 follow-up, corrected in Phase 54 with loader/save/status tests |
 
 ## Medium
 
@@ -32,7 +34,7 @@ Last updated: 2026-05-17 (Phase 50 production UX bug audit and critical fixes)
 
 - Account menu Tools length reduced to compact entries (`fixed`, Phase 50)
 - Browser back/forward support added for app views via hash-backed navigation (`fixed`, Phase 50)
-- Monthly-balance false `Checked � No balance` state after clearing balance fixed (`fixed`, Phase 50)
+- Monthly-balance false `Checked � No balance` state after clearing balance fixed (`fixed`, Phase 54 follow-up)
 - Numeric amount overwrite friction with default `0` reduced via focus-select behavior (`fixed`, Phase 50)
 - Restore/import validation hardening gaps for JSON shape safety (`fixed`, Phase 47)
 - Backup/export full-finance section coverage omissions (`fixed`, Phase 46)
@@ -51,7 +53,7 @@ Last updated: 2026-05-17 (Phase 50 production UX bug audit and critical fixes)
 
 ## Release Blocker Summary
 
-- No open code-level `critical` or `high` blockers identified after Phase 50 fixes.
+- No open code-level `critical` or `high` blockers identified after Phase 54 fixes.
 - Remaining deferred items are manual QA evidence tasks and future product enhancements.
 
 ## Deployment risk tracking
@@ -59,7 +61,7 @@ Last updated: 2026-05-17 (Phase 50 production UX bug audit and critical fixes)
 - GitHub Pages environment secret drift (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) remains a deployment risk and requires release-by-release smoke verification.
 - Supabase migration drift between environments remains a deployment risk and requires pre-release migration list checks.
 
-## Phase 51 note
+## Phase 51/54 note
 
-- Phase 50 high-priority UX fixes remain marked fixed after local regression verification.
+- Phase 50 monthly-balance bug was re-opened by production follow-up and closed in Phase 54 after corrected regression coverage.
 - Deployed-app confirmation remains pending until manual smoke evidence is captured in docs/post-fix-production-smoke-test-results.md.

@@ -7,6 +7,7 @@ export default function MonthlyBalanceMobileList({
   onEditCard,
   onBalanceChange,
   onCheckedNoBalance,
+  onResetNoBalance,
   onPaidChange,
 }) {
   return (
@@ -20,6 +21,7 @@ export default function MonthlyBalanceMobileList({
           onEditCard={onEditCard}
           onBalanceChange={onBalanceChange}
           onCheckedNoBalance={onCheckedNoBalance}
+          onResetNoBalance={onResetNoBalance}
           onPaidChange={onPaidChange}
         />
       ))}

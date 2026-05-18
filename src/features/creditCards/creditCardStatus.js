@@ -4,8 +4,9 @@ import { isStatementPaid } from "./statementPaymentUtils.js";
 export function getRowStatus(card, monthKey, entry) {
   const hasEntry = Boolean(entry);
   const balance = Number(entry?.balance || 0);
-  const paid = isStatementPaid(entry);
-  const hasExplicitPaidMarker = Boolean(entry?.paid);
+  const checkedNoBalance =
+    Boolean(entry?.checkedNoBalance) || (balance <= 0 && Boolean(entry?.paid));
+  const paid = balance > 0 ? isStatementPaid(entry) : false;
   const daysUntilDue = getStatementDaysUntilDue(entry, monthKey, card);
 
   if (!hasEntry) {
@@ -20,7 +21,7 @@ export function getRowStatus(card, monthKey, entry) {
     };
   }
 
-  if (balance <= 0 && hasExplicitPaidMarker) {
+  if (checkedNoBalance) {
     return {
       label: "Checked � No balance",
       rowClass: "bg-white",

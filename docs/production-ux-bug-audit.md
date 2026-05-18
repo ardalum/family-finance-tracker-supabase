@@ -1,4 +1,4 @@
-# Production UX Bug Audit (Phase 50)
+# Production UX Bug Audit (Phases 50 and 54)
 
 Date: 2026-05-17  
 Project: WalletFlow / Family Finance Tracker  
@@ -39,12 +39,12 @@ Source: production smoke-test findings + targeted code audit
 
 - Navigation state was persisted only via React state + localStorage without URL history integration.
 - Account menu exposed both hub and every detailed finance tool directly, increasing length and scannability cost.
-- Zero-balance status logic treated any saved non-positive entry as intentional checked-no-balance.
+- Zero-balance status logic and save/load normalization conflated not-checked vs explicit no-balance states.
 - Numeric input focus behavior did not optimize overwrite flow for default `0` values.
 
 ## 4) Fix applied or deferred
 
-### Fixed in Phase 50
+### Phase 50 fixes
 
 - Added hash-based URL-backed view synchronization (`#/...`) with safe fallback behavior.
 - Added browser back/forward support via hashchange-driven active view updates.
@@ -53,12 +53,23 @@ Source: production smoke-test findings + targeted code audit
   - Backup & Restore
   - App Settings
 - Kept detailed finance pages accessible through Financial Position (not deleted).
-- Fixed monthly balance status logic:
-  - `no entry` => `Not checked`
-  - `balance <= 0 && paid` => `Checked � No balance`
-  - `balance <= 0 && not paid` => `Not checked`
-- Clearing monthly balance input now removes the saved entry instead of persisting implicit zero-checked state.
 - Added numeric input focus-select behavior for `type="number"` in shared input component and monthly balance inputs.
+
+### Phase 50 follow-up finding
+
+- Monthly-balance fix was incomplete. Production follow-up showed loader/save paths could still surface implicit checked state on zero-balance rows.
+
+### Corrected in Phase 54
+
+- Monthly-balance status logic now separates implicit zero from explicit no-payment-needed:
+  - `no entry` => `Not checked`
+  - `balance <= 0 && paid false` => `Not checked`
+  - `balance <= 0 && paid true` => `Checked � No balance` (explicit marker)
+- Loader behavior no longer auto-promotes zero-balance unpaid rows into paid/checked state.
+- Upsert behavior now deletes/reset rows for zero/unpaid entries instead of persisting implicit checked state.
+- Clearing/resetting monthly balance now reliably returns status to `Not checked`.
+- Added explicit reset action for cards marked `Checked � No balance`.
+- Corrected label encoding to `Checked � No balance`.
 
 ### Deferred
 
@@ -76,10 +87,12 @@ Source: production smoke-test findings + targeted code audit
    - no entry shows `Not checked`
    - enter positive balance then clear it and confirm returns to `Not checked`
    - click `Mark checked, no balance` and confirm `Checked � No balance`
+   - use reset action and confirm status returns to `Not checked`
 7. Focus numeric amount inputs containing `0` and confirm direct typing overwrites value without manual delete.
 8. Confirm no critical console errors during the above flows.
 
-## Phase 51 verification note
+## Phase 51/54 verification note
 
-- Phase 50 fixes are code/test-verified in local regression runs.
-- Deployed-app manual pass/fail logging is tracked in docs/post-fix-production-smoke-test-results.md.
+- Phase 50 monthly-balance fix was re-opened after follow-up evidence.
+- Phase 54 applies the corrected service + status + reset behavior with targeted regression tests.
+- Deployed-app manual pass/fail logging is tracked in `docs/post-fix-production-smoke-test-results.md`.

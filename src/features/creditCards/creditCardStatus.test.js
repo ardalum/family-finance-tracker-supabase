@@ -40,4 +40,14 @@ describe("credit card status", () => {
 
     assert.equal(status.label, "Paid");
   });
+
+  it("marks positive unpaid balances as due/upcoming", () => {
+    const status = getRowStatus(card, "2099-05", {
+      balance: 100,
+      paid: false,
+      paymentDueDate: "2099-06-20",
+    });
+
+    assert.equal(["Upcoming", "Due soon", "Due now", "Past due"].includes(status.label), true);
+  });
 });

@@ -95,7 +95,7 @@ Run on deployed app with test account + test household:
 
 - Account menu length was too long for production UX standards (fixed in Phase 50 by compact Tools entries).
 - Browser back/forward did not work across app views due to state-only navigation (fixed in Phase 50 with hash-backed navigation).
-- Monthly balance `Checked · No balance` could be triggered after balance clear without explicit intent (fixed in Phase 50).
+- Monthly balance `Checked · No balance` could be triggered after balance clear without explicit intent (reopened after Phase 50 and corrected in Phase 54).
 - Numeric amount fields with default `0` needed manual clearing before typing (fixed in Phase 50 with focus-select behavior).
 
 ## Phase 51 post-fix retest reference

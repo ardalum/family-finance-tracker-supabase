@@ -219,6 +219,7 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Dark/light mode behavior checked if theme switching is enabled in environment.
 - [ ] Main nav remains exactly: Dashboard, Cards, Budget, Spending, Bills, Insights.
 - [ ] Finance totals behavior remains unchanged from expected baselines.
+- [ ] Phase 54 monthly-balance regression retest passes: zero/unpaid is `Not checked`, explicit no-balance is `Checked · No balance`, and clearing/reset returns to `Not checked`.
 
 ## 13) Post-Fix Verification Evidence
 

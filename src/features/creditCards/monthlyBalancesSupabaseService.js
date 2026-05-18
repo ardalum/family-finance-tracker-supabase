@@ -3,11 +3,11 @@ import {
   getPaymentDueDateForStatementMonth,
   getStatementCloseDateForStatementMonth,
 } from "./statementCycleUtils.js";
+import { getStatementPaidAmount, isStatementPaid } from "./statementPaymentUtils.js";
 import {
-  getStatementPaidAmount,
-  getStatementUnpaidAmount,
-  isStatementPaid,
-} from "./statementPaymentUtils.js";
+  normalizeMonthlyBalancePatchForPersist,
+  toLoadedMonthBalanceEntry,
+} from "./monthlyBalancePersistence.js";
 
 function requireSupabase() {
   if (!supabase) {
@@ -36,34 +36,8 @@ function toMonthBalanceEntry(row, cardsBySupabaseId, statementsByCardMonth = new
   const card = cardsBySupabaseId.get(row.credit_card_id);
   const cardId = card?.id ?? row.credit_card_id;
   const statement = statementsByCardMonth.get(`${row.credit_card_id}:${row.month_key}`);
-  const balance = Number(row.balance || 0);
 
-  return [
-    cardId,
-    {
-      balance,
-      paid: isStatementPaid({
-        balance,
-        paid: row.paid,
-        paidAmount: statement?.paid_amount ?? (row.paid ? balance : 0),
-      }),
-      updatedAt: row.updated_at,
-      statementId: statement?.id,
-      statementCloseDate: statement?.statement_close_date ?? null,
-      paymentDueDate: statement?.payment_due_date ?? null,
-      minimumPayment: Number(statement?.minimum_payment || 0),
-      paidAmount: getStatementPaidAmount({
-        paidAmount: statement?.paid_amount ?? (row.paid ? balance : 0),
-      }),
-      paidDate: statement?.paid_date ?? null,
-      autopayEnabled: Boolean(statement?.autopay_enabled),
-      autopayDate: statement?.autopay_date ?? null,
-      confirmationNumber: statement?.confirmation_number ?? "",
-      statementStatus:
-        statement?.status ??
-        (getStatementUnpaidAmount({ balance, paid: row.paid }) > 0 ? "unpaid" : "paid"),
-    },
-  ];
+  return [cardId, toLoadedMonthBalanceEntry(row, statement)];
 }
 
 function getStatementStatus(patch) {
@@ -170,13 +144,18 @@ export async function listAllMonthlyBalances(householdId, cards) {
 export async function upsertMonthlyBalance(householdId, monthKey, card, patch) {
   const client = requireSupabase();
   const creditCardId = getSupabaseCardId(card);
-  const balance = Number(patch.balance ?? 0) || 0;
-  const paidAmount = getStatementPaidAmount(patch);
+  const normalized = normalizeMonthlyBalancePatchForPersist(patch);
+
+  if (normalized.shouldDelete) {
+    await deleteMonthlyBalance(householdId, monthKey, card);
+    return null;
+  }
+
   const normalizedPatch = {
     ...patch,
-    balance,
-    paid: isStatementPaid({ ...patch, balance, paidAmount }),
-    paidAmount,
+    balance: normalized.balance,
+    paid: normalized.paid,
+    paidAmount: normalized.paidAmount,
   };
 
   const { data, error } = await client

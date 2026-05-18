@@ -47,17 +47,20 @@ export function useMonthlyBalances({
     async (monthKey, cardId, entry) => {
       const card = supabaseCreditCards.find((currentCard) => currentCard.id === cardId);
       if (!card) return;
+      const normalizedBalance = Number(entry?.balance ?? 0) || 0;
+      const shouldDelete = !entry || (normalizedBalance <= 0 && entry.paid !== true);
 
       setMonthlyBalancesError("");
       setSupabaseMonthlyBalances((balances) => {
         const monthEntries = { ...(balances[monthKey] ?? {}) };
 
-        if (!entry) {
+        if (shouldDelete) {
           delete monthEntries[cardId];
         } else {
           monthEntries[cardId] = {
-            balance: Number(entry.balance ?? 0) || 0,
+            balance: normalizedBalance,
             paid: Boolean(entry.paid),
+            checkedNoBalance: normalizedBalance <= 0 && Boolean(entry.paid),
             updatedAt: new Date().toISOString(),
           };
         }
@@ -71,7 +74,7 @@ export function useMonthlyBalances({
       setMonthlyBalancesSaving(true);
 
       try {
-        if (!entry) {
+        if (shouldDelete) {
           await deleteMonthlyBalance(activeHouseholdId, monthKey, card);
         } else {
           await upsertMonthlyBalance(activeHouseholdId, monthKey, card, entry);
