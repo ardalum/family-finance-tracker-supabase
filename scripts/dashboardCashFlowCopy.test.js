@@ -7,13 +7,14 @@ function read(path) {
 }
 
 describe("dashboard cash-flow copy", () => {
-  it("keeps formula and limitation copy", () => {
+  it("uses financial pulse framing and removes misleading leftover/cash-flow badges", () => {
     const source = read("src/features/dashboard/components/DashboardCashFlowSummary.jsx");
-    assert.equal(source.includes("Estimated leftover formula"), true);
-    assert.equal(source.includes("Unpaid card balances are not included"), true);
-    assert.equal(
-      source.includes("Savings lowers available cash here, but does not count as spending."),
-      true,
-    );
+    assert.equal(source.includes("Financial Pulse"), true);
+    assert.equal(source.includes("Card purchases count toward spending and budgets."), true);
+    assert.equal(source.includes("Planned cash cushion"), true);
+    assert.equal(source.includes("Estimated leftover"), false);
+    assert.equal(source.includes("Positive cash flow"), false);
+    assert.equal(source.includes("Negative cash flow"), false);
+    assert.equal(source.includes("Savings this month"), true);
   });
 });

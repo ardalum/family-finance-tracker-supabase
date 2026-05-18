@@ -171,8 +171,13 @@ export default function Dashboard({
         selectedMonth={selectedMonth}
         incomeEntries={appData.incomeEntries}
         savingsContributions={appData.savingsContributions}
+        cashAccounts={appData.cashAccounts}
+        accountBalanceSnapshots={appData.accountBalanceSnapshots}
+        budgetTotal={data.summary.budgetTotal}
+        remainingBudget={data.summary.remainingBudget}
         spendingTotal={data.summary.spendingTotal}
         recurringRemaining={data.summary.recurringRemaining}
+        unpaidCardBalanceTotal={data.summary.unpaidBalanceTotal}
       />
 
       <DashboardQuickActions />

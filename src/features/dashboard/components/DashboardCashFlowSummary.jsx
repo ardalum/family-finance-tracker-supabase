@@ -26,95 +26,106 @@ function Metric({ label, value, muted = false }) {
   );
 }
 
-function StatusBadge({ status }) {
-  if (status === "missing-income") {
-    return (
-      <span className="inline-flex w-fit rounded-full bg-status-warningBg px-3 py-1 text-xs font-semibold text-status-warningDark">
-        Missing income data
-      </span>
-    );
-  }
-
-  if (status === "negative") {
-    return (
-      <span className="inline-flex w-fit rounded-full bg-status-dangerBg px-3 py-1 text-xs font-semibold text-status-danger">
-        Negative cash flow
-      </span>
-    );
-  }
-
-  return (
-    <span className="inline-flex w-fit rounded-full bg-status-successBg px-3 py-1 text-xs font-semibold text-status-successDark">
-      Positive cash flow
-    </span>
-  );
-}
-
 export default function DashboardCashFlowSummary({
   selectedMonth,
   incomeEntries,
   savingsContributions,
+  cashAccounts,
+  accountBalanceSnapshots,
+  budgetTotal,
+  remainingBudget,
   spendingTotal,
   recurringRemaining,
+  unpaidCardBalanceTotal,
 }) {
   const cashFlow = getDashboardCashFlow({
     selectedMonth,
     incomeEntries,
     savingsContributions,
+    cashAccounts,
+    accountBalanceSnapshots,
+    budgetTotal,
+    remainingBudget,
     spendingTotal,
     recurringRemaining,
+    unpaidCardBalanceTotal,
   });
 
   return (
     <Card className="overflow-hidden">
       <div className="border-b border-app-border p-5">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 className="text-base font-semibold text-text-main">Cash-flow summary</h3>
-          <StatusBadge status={cashFlow.status} />
-        </div>
+        <h3 className="text-base font-semibold text-text-main">Financial Pulse</h3>
         <p className="mt-1 text-sm text-text-muted">
-          Savings lowers available cash here, but does not count as spending.
-        </p>
-        <p className="mt-1 text-xs text-text-muted">
-          Estimated leftover formula: Income - spending - recurring remaining - savings.
-        </p>
-        <p className="mt-1 text-xs text-text-muted">
-          Unpaid card balances are not included in estimated leftover in this MVP.
+          Card purchases count toward spending and budgets. Cash changes when bills, savings, or
+          card payments are paid.
         </p>
       </div>
 
-      <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-5">
-        <Metric label="Income this month" value={formatCurrency(cashFlow.incomeTotal)} />
+      <div className="grid gap-3 p-4 md:grid-cols-2 xl:grid-cols-4">
+        <Metric
+          label="Cash position"
+          value={
+            cashFlow.hasCashSnapshotData
+              ? formatCurrency(cashFlow.cashPositionTotal)
+              : "Add account snapshots"
+          }
+          muted={!cashFlow.hasCashSnapshotData}
+        />
         <Metric label="Spending this month" value={formatCurrency(cashFlow.spendingTotal)} />
+        <Metric label="Total budget" value={formatCurrency(cashFlow.budgetTotal)} />
+        <Metric label="Budget remaining" value={formatCurrency(cashFlow.remainingBudget)} />
+        <Metric
+          label="Upcoming obligations"
+          value={formatCurrency(cashFlow.upcomingObligationsTotal)}
+        />
+        <Metric
+          label="Recurring bills remaining"
+          value={formatCurrency(cashFlow.recurringRemaining)}
+          muted={!cashFlow.hasRecurringRemaining}
+        />
+        <Metric
+          label="Unpaid card payments"
+          value={formatCurrency(cashFlow.unpaidCardBalanceTotal)}
+          muted={!cashFlow.hasUnpaidCardObligations}
+        />
         <Metric
           label="Savings this month"
           value={formatCurrency(cashFlow.savingsContributionTotal)}
+          muted={!cashFlow.hasSavingsData}
         />
-        <Metric label="Recurring remaining" value={formatCurrency(cashFlow.recurringRemaining)} />
+      </div>
+
+      <div className="grid gap-1 px-4 pb-2 text-xs text-text-muted">
+        {!cashFlow.hasCashSnapshotData ? <p>Add account snapshots to see cash position.</p> : null}
+        {!cashFlow.hasBudgetData ? <p>Add budget categories to track budget remaining.</p> : null}
+        {!cashFlow.hasUpcomingObligations ? (
+          <p>No upcoming recurring or unpaid card obligations this month.</p>
+        ) : null}
+        {!cashFlow.hasSavingsData ? (
+          <p>No savings contributions recorded for this month yet.</p>
+        ) : null}
+        <p>
+          Planned cash cushion is a planning estimate: income - recurring remaining - unpaid card
+          payments - savings.
+        </p>
+      </div>
+
+      <div className="grid gap-3 px-4 pb-4 md:grid-cols-2">
         <Metric
-          label="Estimated leftover"
-          value={cashFlow.hasIncomeData ? formatCurrency(cashFlow.estimatedLeftover) : "Not ready"}
+          label="Income this month"
+          value={
+            cashFlow.hasIncomeData ? formatCurrency(cashFlow.incomeTotal) : "Add income entries"
+          }
+          muted={!cashFlow.hasIncomeData}
+        />
+        <Metric
+          label="Planned cash cushion"
+          value={cashFlow.hasIncomeData ? formatCurrency(cashFlow.plannedCashCushion) : "Not ready"}
           muted={!cashFlow.hasIncomeData}
         />
       </div>
 
-      {!cashFlow.hasIncomeData ? (
-        <div className="px-4 pb-1 text-sm text-status-warningDark">
-          Add income entries to calculate estimated leftover.
-        </div>
-      ) : null}
-      {!cashFlow.hasSavingsData ? (
-        <div className="px-4 pb-1 text-xs text-text-muted">
-          No savings contributions recorded for this month yet.
-        </div>
-      ) : null}
-      {!cashFlow.hasRecurringRemaining ? (
-        <div className="px-4 pb-1 text-xs text-text-muted">
-          No recurring bills remaining for this month.
-        </div>
-      ) : null}
-
-      <div className="grid gap-2 p-4 pt-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-2 border-t border-app-border p-4 sm:grid-cols-2 xl:grid-cols-4">
         <Button
           type="button"
           variant="secondary"

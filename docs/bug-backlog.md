@@ -54,7 +54,7 @@ Last updated: 2026-05-18 (Phase 62 FullCalendar mobile polish)
 - Merge-import intentionally remains non-destructive (add/skip) rather than overwrite restore.
 - Calendar follow-on work remains UX/product backlog: reminders, custom events, and external sync/export (month-grid secondary view is shipped; see `docs/calendar-feature-design.md`).
 - Calendar month-grid implementation and mobile polish are completed on main via FullCalendar; remaining items are enhancements only, not RC blockers.
-- Dashboard cash-flow semantics gap: current summary mixes spending and near-term cash obligations in ways that can mislead card-first households (tracked in `docs/full-product-ux-ia-audit.md`).
+- Dashboard cash-flow semantics gap: resolved in Phase 65 by replacing leftover-style cash-flow wording with grouped Financial Pulse summary semantics (cash position, budget usage, obligations, savings, planned cushion).
 - Navigation IA gap: daily workflows and secondary tools are split across quick actions and account menu with no single standard model yet (tracked in `docs/full-product-ux-ia-audit.md`).
 - Data-entry friction gap: no global quick-add/fast-entry path for frequent logging workflows (tracked in `docs/full-product-ux-ia-audit.md`).
 - Insights visualization gap: heavy horizontal-bar usage limits trend readability and actionable intelligence cues (tracked in `docs/full-product-ux-ia-audit.md`).

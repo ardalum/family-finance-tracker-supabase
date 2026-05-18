@@ -5,6 +5,8 @@ Scope: Planned implementation phases after Phase 64 UX/IA audit
 
 ## Phase 65: Dashboard financial model and cash-flow terminology redesign
 
+Status: implemented in Phase 65 (2026-05-18)
+
 - Goal:
   - Make Dashboard summary terminology and logic framing understandable for cash vs card behavior.
 - Scope:
