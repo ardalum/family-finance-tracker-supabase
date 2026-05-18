@@ -31,6 +31,7 @@ Implemented (current release scope):
 - no advanced conflict-resolution UX for restore/import
 - no broader non-cash asset coverage (investments, retirement, property)
 - no predictive forecasting workflow for upcoming monthly cash pressure
+- no recurring income prediction engine for future payday projection in Calendar
 - limited guided recommendations in Insights (mostly descriptive analytics)
 - Calendar MVP is implemented as a secondary FullCalendar month-grid plus agenda view using existing data; remaining gaps are reminders, external sync/export, and custom events (see `docs/calendar-feature-design.md`)
 

@@ -1,6 +1,6 @@
 ﻿# Release Notes
 
-## Release Candidate - 2026-05-17 (Phases 48-52)
+## Release Candidate - 2026-05-18 (Phases 48-63)
 
 ### Highlights
 
@@ -45,11 +45,20 @@
 - Many position/reporting flows are manual-entry MVPs (no bank sync/import automation).
 - Restore remains merge-safe (add/skip) rather than destructive overwrite mode.
 - Final release sign-off still requires deployed manual smoke execution and evidence capture.
-- Calendar uses existing WalletFlow data only and does not add reminders, custom events, or external calendar sync.
+- Calendar event sources in this release are existing WalletFlow data only:
+  - card due dates
+  - statement close dates
+  - recurring bills
+  - income entries
+  - monthly close marker
+- Calendar limitations remain:
+  - no custom calendar events
+  - no reminders/notifications
+  - no Google/Apple calendar sync/export
 
 ### Release Handoff
 
-- Phase 53 release-tag/deployment handoff guide: `docs/release-tag-deployment-handoff.md`
+- Final RC release-tag/deployment handoff guide: `docs/release-tag-deployment-handoff.md`
 
 ### Planned improvements (not in this release)
 

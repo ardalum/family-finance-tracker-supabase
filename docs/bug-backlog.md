@@ -26,9 +26,10 @@ Last updated: 2026-05-18 (Phase 62 FullCalendar mobile polish)
 
 ## Low
 
-| Item                                                                 | Status   | Notes                                                     |
-| -------------------------------------------------------------------- | -------- | --------------------------------------------------------- |
-| Cross-device mobile verification coverage incomplete in smoke record | deferred | Requires manual iOS/Android verification matrix evidence. |
+| Item                                                                 | Status   | Notes                                                                          |
+| -------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------ |
+| Cross-device mobile verification coverage incomplete in smoke record | deferred | Requires manual iOS/Android verification matrix evidence.                      |
+| Stale Calendar PR #338 still referenced in old planning context      | deferred | FullCalendar is already shipped on main; PR #338 should be closed, not merged. |
 
 ## Fixed (recent notable)
 
@@ -52,6 +53,7 @@ Last updated: 2026-05-18 (Phase 62 FullCalendar mobile polish)
 - Larger IA redesign for secondary tools remains future scope beyond compact menu cleanup.
 - Merge-import intentionally remains non-destructive (add/skip) rather than overwrite restore.
 - Calendar follow-on work remains UX/product backlog: reminders, custom events, and external sync/export (month-grid secondary view is shipped; see `docs/calendar-feature-design.md`).
+- Calendar month-grid implementation and mobile polish are completed on main via FullCalendar; remaining items are enhancements only, not RC blockers.
 
 ## Deferred Enhancements
 

@@ -1,6 +1,6 @@
-﻿# Production Deployment Smoke Test (Phase 49)
+# Production Deployment Smoke Test (Phase 63)
 
-Date: 2026-05-17  
+Date: 2026-05-18  
 Project: WalletFlow / Family Finance Tracker
 
 ## 1) Deployment target
@@ -70,6 +70,10 @@ Run on deployed app with test account + test household:
 - [ ] Dashboard opens and quick actions route correctly.
 - [ ] Cards, Budget, Spending, Bills, Insights open successfully.
 - [ ] Financial Position, Income, Savings, Accounts, Liabilities, Net Worth open successfully.
+- [ ] Calendar opens from Dashboard/account menu entry points.
+- [ ] FullCalendar month grid appears first and month navigation works.
+- [ ] Calendar event actions route correctly to Cards/Bills/Income/Dashboard.
+- [ ] Calendar mobile width has no horizontal scrolling.
 - [ ] Monthly Close checklist render/review/reopen flows work.
 - [ ] Backup export works (JSON + Excel).
 - [ ] Restore validation rejects invalid JSON with clear message.
@@ -85,11 +89,17 @@ Run on deployed app with test account + test household:
 - Incorrect GitHub Pages secret configuration for Supabase env vars will break auth/data load.
 - Migration mismatch across environments can surface as missing-table/column runtime errors.
 - Restore is intentionally merge-safe (add/skip) and not destructive overwrite; expectations must be clear during smoke.
+- Calendar remains existing-data-only and intentionally excludes custom events, reminders, and external calendar sync/export.
 
 ## 11) Go/no-go recommendation
 
 - **Go** when: workflow verify/deploy pass, deployed smoke checklist passes, and no critical runtime or data-access errors are found.
 - **No-go** when: deployed app fails to load, auth/data queries fail from env or migration misconfiguration, or critical workflow routing/regression is observed.
+
+## 12) FullCalendar and stale PR reminder
+
+- Release candidate expects only non-premium FullCalendar packages (`core`, `react`, `daygrid`, `interaction`).
+- Do not merge stale PR #338; it predates the FullCalendar migration and should be closed/ignored.
 
 ## Phase 50 follow-up issues discovered
 

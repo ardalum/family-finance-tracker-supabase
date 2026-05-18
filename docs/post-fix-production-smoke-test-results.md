@@ -71,6 +71,12 @@
 - **Conditional Go**: automated quality gates are green and Phase 50 fixes are verified by code/tests.
 - Final release sign-off requires completing the manual deployed-app checklist and recording pass/fail evidence.
 
+## Phase 63 release-candidate note
+
+- Calendar release posture now assumes FullCalendar month-grid implementation with mobile polish complete.
+- Final manual smoke should include Calendar entry points (Dashboard and Account menu), FullCalendar month-grid visibility, mobile no-horizontal-scroll check, and event action routing checks.
+- Stale PR #338 predates this FullCalendar implementation and should be closed/ignored, not merged.
+
 ## Phase 54 follow-up note
 
 - Production follow-up identified the monthly-balance `Checked - No balance` bug was not fully resolved in Phase 50.
