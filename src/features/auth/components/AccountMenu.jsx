@@ -1,15 +1,14 @@
-import { Clock3, LogOut, UserCircle } from "lucide-react";
+import { LogOut, UserCircle } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useHouseholds } from "../../households/HouseholdProvider.jsx";
 import { getAccountIdentity } from "../authAccountDisplayUtils.js";
 import { getFriendlyAuthError } from "../authErrors.js";
 import { useAuth } from "../AuthProvider.jsx";
 import { signOut, signOutEverywhere } from "../authService.js";
-import { getSessionSummary } from "../authSessionUtils.js";
 import { accountMenuSections } from "./accountMenuSections.js";
 
 export default function AccountMenu({ onNavigate }) {
-  const { session, user, setError } = useAuth();
+  const { user, setError } = useAuth();
   const { activeHousehold, activeMembership } = useHouseholds();
   const [signingOutMode, setSigningOutMode] = useState("");
   const [open, setOpen] = useState(false);
@@ -18,7 +17,6 @@ export default function AccountMenu({ onNavigate }) {
     () => getAccountIdentity(user, activeMembership, activeHousehold),
     [activeHousehold, activeMembership, user],
   );
-  const sessionStatus = useMemo(() => getSessionSummary(session), [session]);
   const isSigningOut = Boolean(signingOutMode);
 
   useEffect(() => {
@@ -100,17 +98,6 @@ export default function AccountMenu({ onNavigate }) {
                     {identity.role}
                   </p>
                 ) : null}
-              </div>
-            </div>
-          </div>
-          <div className="border-b border-app-border px-4 py-3">
-            <div className="flex items-start gap-3 rounded-xl bg-app-background px-3 py-2.5">
-              <Clock3 size={16} className="mt-0.5 shrink-0 text-text-muted" aria-hidden="true" />
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-text-main">{sessionStatus.label}</p>
-                <p className="mt-0.5 text-xs leading-snug text-text-muted">
-                  {sessionStatus.description}
-                </p>
               </div>
             </div>
           </div>

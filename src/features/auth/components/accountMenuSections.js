@@ -1,12 +1,9 @@
 import {
-  ClipboardList,
-  CalendarDays,
-  WalletCards,
+  BookOpenText,
   DatabaseBackup,
   Home,
   Info,
   LifeBuoy,
-  Settings,
   ShieldCheck,
   UserCircle,
 } from "lucide-react";
@@ -19,14 +16,8 @@ export const accountMenuSections = [
       {
         icon: UserCircle,
         label: "Account Settings",
-        description: "Profile identity, session details, and sign-out controls.",
+        description: "Profile identity, security, and session controls.",
         view: AUTH_VIEW_TARGETS.accountSettings,
-      },
-      {
-        icon: ShieldCheck,
-        label: "Data & Privacy",
-        description: "Privacy policy, data handling, exports, and deletion notes.",
-        view: "privacy-policy",
       },
     ],
   },
@@ -42,36 +33,24 @@ export const accountMenuSections = [
     ],
   },
   {
-    title: "Tools",
+    title: "Privacy & Data",
     items: [
       {
-        icon: WalletCards,
-        label: "Financial Position",
-        description: "Income, savings, cash, debt, and net worth in one summary view.",
-        view: "financial-position",
-      },
-      {
-        icon: CalendarDays,
-        label: "Calendar",
-        description: "Upcoming card, bill, income, and month-close events.",
-        view: "calendar",
+        icon: ShieldCheck,
+        label: "Data & Privacy",
+        description: "Privacy policy, data handling, exports, and deletion notes.",
+        view: "privacy-policy",
       },
       {
         icon: DatabaseBackup,
         label: "Backup & Restore",
-        description: "Export data or restore legacy local backups.",
+        description: "Export data and manage restore/import safety workflows.",
         view: "backup",
-      },
-      {
-        icon: Settings,
-        label: "App Settings",
-        description: "Display preferences and app behavior.",
-        view: "app-settings",
       },
     ],
   },
   {
-    title: "Info",
+    title: "Support",
     items: [
       {
         icon: LifeBuoy,
@@ -80,7 +59,7 @@ export const accountMenuSections = [
         view: "help-support",
       },
       {
-        icon: ClipboardList,
+        icon: BookOpenText,
         label: "Release Notes",
         description: "Recent app changes, cleanup passes, and improvements.",
         view: "release-notes",

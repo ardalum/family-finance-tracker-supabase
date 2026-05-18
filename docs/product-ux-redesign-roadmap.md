@@ -34,6 +34,8 @@ Status: implemented in Phase 65 (2026-05-18)
 
 ## Phase 66: Navigation IA simplification and account menu cleanup
 
+Status: implemented in Phase 66 (2026-05-18)
+
 - Goal:
   - Standardize primary navigation vs tools/settings discovery.
 - Scope:

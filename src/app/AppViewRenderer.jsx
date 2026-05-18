@@ -20,6 +20,7 @@ import HelpSupport from "../features/support/components/HelpSupport.jsx";
 import ReleaseNotes from "../features/support/components/ReleaseNotes.jsx";
 import SpendingTracker from "../features/spending/components/SpendingTracker.jsx";
 import AccountSettings from "../features/auth/components/AccountSettings.jsx";
+import Tools from "../features/tools/components/Tools.jsx";
 
 export default function AppViewRenderer({
   activeView,
@@ -47,6 +48,7 @@ export default function AppViewRenderer({
       {activeView === "spending" ? <SpendingTracker {...spendingProps} /> : null}
       {activeView === "recurring" ? <RecurringPayments {...recurringProps} /> : null}
       {activeView === "insights" ? <Insights {...insightsProps} /> : null}
+      {activeView === "tools" ? <Tools /> : null}
       {activeView === "calendar" ? <Calendar {...calendarProps} /> : null}
       {activeView === "financial-position" ? (
         <FinancialPosition {...financialPositionProps} />

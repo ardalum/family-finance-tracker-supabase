@@ -8,8 +8,8 @@ import {
   CreditCard,
   ReceiptText,
   Repeat,
+  Wrench,
   WalletCards,
-  Scale,
 } from "lucide-react";
 import Card from "../../../components/ui/Card.jsx";
 import Select from "../../../components/ui/Select.jsx";
@@ -72,11 +72,11 @@ const quickActions = [
     icon: Repeat,
   },
   {
-    label: "Financial Position",
-    description: "Review income, savings, cash, debt, and net worth.",
-    view: "financial-position",
-    target: "monthly-financial-position",
-    icon: Scale,
+    label: "Tools",
+    description: "Open planning, setup, and maintenance tools.",
+    view: "tools",
+    target: "tools-home",
+    icon: Wrench,
   },
   {
     label: "Review budget",
