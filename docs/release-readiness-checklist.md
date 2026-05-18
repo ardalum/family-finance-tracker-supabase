@@ -181,17 +181,19 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Verify Financial Position secondary hub opens from Dashboard quick action and Account menu Tools.
 - [ ] Verify Financial Position links route to Income, Savings, Accounts, Liabilities, Net Worth, and Insights.
 - [ ] Verify Financial Position hardening states: all-data-missing empty state, partial net-worth advisory, and loading/error copy.
-- [ ] Verify Dashboard quick actions are consolidated to the compact set (Update card balances, Add transactions, Open recurring bills, Review budget, Financial Position).
+- [ ] Verify Dashboard quick actions are consolidated to the compact set (Update card balances, Add transactions, Open recurring bills, Review budget, Financial Position, Calendar).
 - [ ] Verify Financial Position is the Dashboard hub entry point for income/savings/accounts/debts/net-worth workflows.
 - [ ] Verify Financial Position mobile layout at small widths: no horizontal scrolling, readable summary cards, and easy-to-tap action buttons.
 - [ ] Verify Financial Position remains a secondary view for this release and is not promoted into top-level main nav.
+- [ ] Verify Calendar secondary view opens from Dashboard quick action and Account menu Tools.
+- [ ] Verify Calendar month selector, empty state, and source-target links (Cards/Bills/Income/Dashboard) are working.
 
 ## Known Limitations
 
 - Manual production smoke and real-device mobile checks are still required release-by-release.
 - Destructive-action validation must remain isolated to test accounts/households.
 - Migration history mismatches require careful repair workflow, not production reset.
-- Calendar feature is intentionally excluded from the current release scope; see `docs/calendar-feature-design.md` for planned phases.
+- Calendar MVP is included as a secondary view; month-grid/reminders/custom events/sync remain out of scope.
 - Real-data readiness is currently limited by missing native income/savings/cash-flow tracking; releases before that feature is implemented should not claim full household cash-flow completeness.
 - Income export is included in Supabase JSON/Excel output, but income merge-import behavior is not yet a complete dedicated workflow with income-specific conflict handling.
 - Savings export is included in Supabase JSON/Excel output, but savings merge-import behavior is not yet a complete dedicated workflow with savings-specific conflict handling.
@@ -213,7 +215,7 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Auth/session behavior verified (sign-in, sign-out, session persistence, and account-settings visibility).
 - [ ] Active household loading and household setup-complete behavior verified.
 - [ ] Main workflow pages verified: Dashboard, Cards, Budget, Spending, Bills, Insights.
-- [ ] Secondary workflow pages verified: Income, Savings, Accounts, Liabilities, Net Worth, Financial Position.
+- [ ] Secondary workflow pages verified: Calendar, Income, Savings, Accounts, Liabilities, Net Worth, Financial Position.
 - [ ] Monthly Close checklist review + reopen verified.
 - [ ] Backup/export and restore/import validation checks completed.
 - [ ] Mobile layout checked for key pages with no obvious horizontal scrolling.

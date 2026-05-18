@@ -1,6 +1,7 @@
 import { isKnownPageView } from "./pageContent.js";
 
 export const secondaryViewIds = [
+  "calendar",
   "financial-position",
   "accounts",
   "liabilities",

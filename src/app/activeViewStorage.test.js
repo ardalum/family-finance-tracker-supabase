@@ -87,6 +87,7 @@ describe("active view storage", () => {
   it("reads hash view aliases safely", () => {
     assert.equal(getActiveViewFromHash("#/cards"), "credit-cards");
     assert.equal(getActiveViewFromHash("#/budget"), "budgets");
+    assert.equal(getActiveViewFromHash("#/calendar"), "calendar");
     assert.equal(getActiveViewFromHash("#/not-real"), DEFAULT_ACTIVE_VIEW);
   });
 

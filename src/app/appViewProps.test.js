@@ -28,6 +28,7 @@ const input = {
   selectedSpendingMonth: "spending-month",
   selectedDashboardMonth: "dashboard-month",
   selectedInsightsMonth: "insights-month",
+  selectedCalendarMonth: "calendar-month",
   selectedFinancialPositionMonth: "financial-position-month",
   selectedRecurringMonth: "recurring-month",
   selectedNetWorthMonth: "net-worth-month",
@@ -63,6 +64,7 @@ const input = {
   setSelectedSpendingMonth: callback,
   setSelectedRecurringMonth: callback,
   setSelectedInsightsMonth: callback,
+  setSelectedCalendarMonth: callback,
   setSelectedFinancialPositionMonth: callback,
   setSelectedNetWorthMonth: callback,
   createSupabaseCreditCard: callback,
@@ -148,6 +150,27 @@ describe("app view props", () => {
     assert.equal(props.financialPositionProps.recurringPayments.length, 1);
     assert.equal(props.financialPositionProps.incomeEntries.length, 1);
     assert.equal(props.financialPositionProps.savingsContributions.length, 1);
+  });
+
+  it("maps calendar props", () => {
+    const props = createAppViewProps({
+      ...input,
+      supabaseCreditCards: [{ id: "card-1" }],
+      supabaseMonthlyBalances: { "calendar-month": { "card-1": { balance: 50, paid: false } } },
+      recurringPayments: [{ id: "rec-1" }],
+      recurringStatusByMonth: { "2026-05": {} },
+      incomeEntries: [{ id: "inc-1" }],
+      incomeSources: [{ id: "source-1", name: "Employer" }],
+      monthlyCloseReview: { monthKey: "calendar-month", status: "in_progress" },
+    });
+
+    assert.equal(props.calendarProps.selectedMonth, input.selectedCalendarMonth);
+    assert.equal(props.calendarProps.onMonthChange, input.setSelectedCalendarMonth);
+    assert.equal(props.calendarProps.creditCards.length, 1);
+    assert.equal(props.calendarProps.monthlyBalances["card-1"].balance, 50);
+    assert.equal(props.calendarProps.recurringPayments.length, 1);
+    assert.equal(props.calendarProps.incomeEntries.length, 1);
+    assert.equal(props.calendarProps.targetView, undefined);
   });
 
   it("maps credit card props", () => {

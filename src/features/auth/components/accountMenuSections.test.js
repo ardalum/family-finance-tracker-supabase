@@ -18,7 +18,7 @@ describe("account menu sections", () => {
       [
         ["Account Settings", "Data & Privacy"],
         ["Household Settings"],
-        ["Financial Position", "Backup & Restore", "App Settings"],
+        ["Financial Position", "Calendar", "Backup & Restore", "App Settings"],
         ["Help / Support", "Release Notes", "About WalletFlow"],
       ],
     );
@@ -30,7 +30,7 @@ describe("account menu sections", () => {
       [
         ["account-settings", "privacy-policy"],
         ["household-settings"],
-        ["financial-position", "backup", "app-settings"],
+        ["financial-position", "calendar", "backup", "app-settings"],
         ["help-support", "release-notes", "about"],
       ],
     );
@@ -43,6 +43,7 @@ describe("account menu sections", () => {
     assert.equal(toolLabels.includes("Financial Position"), true);
     assert.equal(toolLabels.includes("Backup & Restore"), true);
     assert.equal(toolLabels.includes("App Settings"), true);
+    assert.equal(toolLabels.includes("Calendar"), true);
     assert.equal(toolLabels.includes("Income"), false);
     assert.equal(toolLabels.includes("Savings"), false);
     assert.equal(toolLabels.includes("Accounts"), false);

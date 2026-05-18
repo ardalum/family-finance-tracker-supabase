@@ -23,6 +23,10 @@ export const pageContent = {
     title: "Insights",
     description: "Review spending trends, budget performance, and payment patterns.",
   },
+  calendar: {
+    title: "Calendar",
+    description: "Review upcoming card, bill, income, and month-close dates.",
+  },
   "financial-position": {
     title: "Financial Position",
     description: "Review income, savings, cash, debts, and net worth in one place.",

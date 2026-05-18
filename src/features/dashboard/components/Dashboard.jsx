@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import {
   AlertTriangle,
   BarChart3,
+  CalendarDays,
   CheckCircle2,
   Clock3,
   CreditCard,
@@ -83,6 +84,13 @@ const quickActions = [
     view: "budgets",
     target: "budget-table",
     icon: WalletCards,
+  },
+  {
+    label: "Calendar",
+    description: "Review upcoming card, bill, income, and close dates.",
+    view: "calendar",
+    target: "monthly-calendar",
+    icon: CalendarDays,
   },
 ];
 

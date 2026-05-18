@@ -15,6 +15,7 @@ describe("dashboard quick actions", () => {
     assert.equal(source.includes('label: "Open recurring bills"'), true);
     assert.equal(source.includes('label: "Review budget"'), true);
     assert.equal(source.includes('label: "Financial Position"'), true);
+    assert.equal(source.includes('label: "Calendar"'), true);
   });
 
   it("includes Financial Position quick action target", () => {
@@ -32,5 +33,12 @@ describe("dashboard quick actions", () => {
     assert.equal(source.includes('label: "Manage accounts"'), false);
     assert.equal(source.includes('label: "Manage debts"'), false);
     assert.equal(source.includes('label: "Net worth"'), false);
+  });
+
+  it("includes Calendar quick action target", () => {
+    const source = read("src/features/dashboard/components/Dashboard.jsx");
+
+    assert.equal(source.includes('view: "calendar"'), true);
+    assert.equal(source.includes('target: "monthly-calendar"'), true);
   });
 });

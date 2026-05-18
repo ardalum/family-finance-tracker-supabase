@@ -1,5 +1,6 @@
 import {
   ClipboardList,
+  CalendarDays,
   WalletCards,
   DatabaseBackup,
   Home,
@@ -48,6 +49,12 @@ export const accountMenuSections = [
         label: "Financial Position",
         description: "Income, savings, cash, debt, and net worth in one summary view.",
         view: "financial-position",
+      },
+      {
+        icon: CalendarDays,
+        label: "Calendar",
+        description: "Upcoming card, bill, income, and month-close events.",
+        view: "calendar",
       },
       {
         icon: DatabaseBackup,
