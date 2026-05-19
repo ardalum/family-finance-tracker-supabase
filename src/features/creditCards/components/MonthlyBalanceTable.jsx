@@ -7,6 +7,7 @@ import { getRowStatus } from "../creditCardStatus.js";
 import { getSortedCards } from "../creditCardSort.js";
 import { getMonthlyBalanceSummary } from "../creditCardsService.js";
 import { getMonthlyBalanceDisplayRow } from "../monthlyBalanceDisplay.js";
+import { shouldShowMonthlyBalanceCard } from "../monthlyBalanceVisibility.js";
 import MonthlyBalanceControls from "./MonthlyBalanceControls.jsx";
 import MonthlyBalanceDesktopTable from "./MonthlyBalanceDesktopTable.jsx";
 import MonthlyBalanceMobileList from "./MonthlyBalanceMobileList.jsx";
@@ -18,13 +19,6 @@ const defaultFilters = {
   status: "",
 };
 
-function getCardSearchText(card) {
-  return [card.name, card.owner, card.network, card.lastFour]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-}
-
 function getStatusFilterValue(status) {
   if (status.isNotChecked) return "not-checked";
   if (status.isCheckedNoBalance) return "checked-no-balance";
@@ -32,20 +26,6 @@ function getStatusFilterValue(status) {
   if (status.label === "Past due") return "past-due";
   if (status.label === "Due soon") return "due-soon";
   return "unpaid";
-}
-
-export function shouldShowMonthlyBalanceCard({
-  card,
-  filters,
-  searchTerm,
-  statusValue,
-  activeBalanceEditCardId,
-}) {
-  const matchesSearch = !searchTerm || getCardSearchText(card).includes(searchTerm);
-  const matchesOwner = !filters.owner || card.owner === filters.owner;
-  const isActiveBalanceEdit = card.id === activeBalanceEditCardId;
-  const matchesStatus = !filters.status || statusValue === filters.status || isActiveBalanceEdit;
-  return matchesSearch && matchesOwner && matchesStatus;
 }
 
 export default function MonthlyBalanceTable({
