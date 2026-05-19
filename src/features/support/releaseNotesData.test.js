@@ -43,7 +43,7 @@ describe("release notes data", () => {
 
   it("includes the real-data readiness candidate entry", () => {
     const readinessEntry = releaseNotes.find(
-      (release) => release.version === "WalletFlow real-data readiness candidate",
+      (release) => release.version === "Spedger real-data readiness candidate",
     );
 
     assert.ok(readinessEntry);

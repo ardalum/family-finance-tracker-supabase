@@ -1,12 +1,12 @@
 # Release Readiness Production QA Pass (Phase 75)
 
 Date: 2026-05-18  
-Project: WalletFlow / Family Finance Tracker  
+Project: Spedger / Family Finance Tracker  
 Scope: Final release-candidate retest after Dashboard, navigation, Quick Add, Insights, privacy/trust, liabilities, card-debt sync, carry-forward, and mobile stabilization.
 
 ## 1) Release scope
 
-This pass covers WalletFlow production readiness for current implemented scope:
+This pass covers Spedger production readiness for current implemented scope:
 
 - main-nav workflows (Dashboard, Cards, Budget, Spending, Bills, Insights)
 - secondary finance workflows (Calendar, Income, Savings, Accounts, Liabilities, Net Worth, Financial Position)
@@ -226,3 +226,15 @@ Phase 76 automated verification:
 - `npm run verify` passed.
 
 Recommendation remains **Conditional Go for RC tag handoff** from local automation. Production approval still requires the browser/mobile/deployed smoke evidence above.
+
+## 10e) Phase 77 app rename
+
+Phase 77 renames user-facing branding from WalletFlow to Spedger.
+
+Verification scope:
+
+- Browser title and app metadata now use Spedger.
+- User-facing app shell, About, Help, Privacy, Terms, account menu, release notes, and QA docs now use Spedger.
+- GitHub Pages base path remains unchanged as `/family-finance-tracker-supabase/`.
+- Supabase schema/database/env identifiers are unchanged.
+- Legacy lowercase technical compatibility keys may remain where not visible to users.

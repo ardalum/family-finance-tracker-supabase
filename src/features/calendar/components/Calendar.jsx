@@ -164,7 +164,7 @@ export default function Calendar({
               reviews.
             </p>
             <p className="mt-1 text-sm text-text-muted">
-              Calendar uses existing WalletFlow data. It does not create payments, reminders, or new
+              Calendar uses existing Spedger data. It does not create payments, reminders, or new
               records.
             </p>
           </div>

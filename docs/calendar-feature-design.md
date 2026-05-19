@@ -9,7 +9,7 @@ Last updated: 2026-05-18 (Phase 62 FullCalendar mobile polish and release-blocke
 - Phase 58: real month-grid calendar implemented as default view with responsive mobile layout and selected-day agenda panel.
 - Phase 59: calendar hardening completed for event-accuracy QA, month-end close-date marker, duplicate-event ID safety, and selected-day/filter behavior polish.
 - Phase 60: discoverability integration validated from Dashboard quick actions and Account menu Tools.
-- Phase 61: custom month-grid replaced by FullCalendar dayGrid month view while preserving existing WalletFlow event generation and selected-day agenda behavior.
+- Phase 61: custom month-grid replaced by FullCalendar dayGrid month view while preserving existing Spedger event generation and selected-day agenda behavior.
 - Phase 62: FullCalendar desktop/mobile polish completed with release-blocker retest checklist.
 - Calendar now includes:
   - FullCalendar month grid (dayGridMonth)
@@ -22,11 +22,11 @@ Last updated: 2026-05-18 (Phase 62 FullCalendar mobile polish and release-blocke
   - no external calendar sync/export
   - no custom calendar events
   - no recurring-income prediction engine
-  - no custom persisted calendar records (events remain derived from existing WalletFlow data)
+  - no custom persisted calendar records (events remain derived from existing Spedger data)
 
 ## 1) Problem statement
 
-WalletFlow needs a Calendar because key date-driven finance work is spread across multiple pages. Users currently have to switch between Cards, Bills, Income, and Monthly Close to understand timing.
+Spedger needs a Calendar because key date-driven finance work is spread across multiple pages. Users currently have to switch between Cards, Bills, Income, and Monthly Close to understand timing.
 
 A calendar can unify:
 

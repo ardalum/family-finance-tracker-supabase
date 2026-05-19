@@ -215,7 +215,7 @@ Required GitHub repository secrets:
 Release flow:
 
 1. Push to `main`.
-2. Confirm `Deploy WalletFlow to GitHub Pages` succeeds in GitHub Actions.
+2. Confirm `Deploy Spedger to GitHub Pages` succeeds in GitHub Actions.
 3. Confirm the workflow `Verify` step passed (`npm run verify`).
 4. Open the deployed GitHub Pages site and complete smoke checks from `docs/production-qa-checklist.md`.
 

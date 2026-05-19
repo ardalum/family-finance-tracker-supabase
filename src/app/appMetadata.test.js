@@ -6,6 +6,10 @@ import { appMetadata } from "./appMetadata.js";
 const packageJson = JSON.parse(
   readFileSync(new URL("../../package.json", import.meta.url), "utf8"),
 );
+const appBrandNameSource = readFileSync(
+  new URL("../components/branding/AppBrandName.jsx", import.meta.url),
+  "utf8",
+);
 
 const requiredMetadataFields = [
   "tagline",
@@ -24,12 +28,19 @@ describe("app metadata", () => {
   });
 
   it("keeps required app metadata fields populated", () => {
-    assert.equal(appMetadata.name, "WalletFlow");
+    assert.equal(appMetadata.name, "Spedger");
 
     for (const field of requiredMetadataFields) {
       assert.equal(typeof appMetadata[field], "string");
       assert.notEqual(appMetadata[field].trim(), "");
     }
+  });
+
+  it("keeps rendered brand text aligned with the current app name", () => {
+    assert.equal(appBrandNameSource.includes("Sped"), true);
+    assert.equal(appBrandNameSource.includes("ger"), true);
+    assert.equal(appBrandNameSource.includes("Wallet"), false);
+    assert.equal(appBrandNameSource.includes("Flow"), false);
   });
 
   it("keeps copyright year metadata usable", () => {

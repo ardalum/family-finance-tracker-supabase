@@ -22,7 +22,7 @@ function AboutIntroDescription() {
   );
 }
 
-export default function AboutWalletFlow() {
+export default function AboutSpedger() {
   return (
     <section className="grid gap-6">
       <PageHero
@@ -33,7 +33,7 @@ export default function AboutWalletFlow() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="p-5">
-          <h3 className="text-lg font-semibold text-text-main">What WalletFlow Helps Track</h3>
+          <h3 className="text-lg font-semibold text-text-main">What Spedger Helps Track</h3>
           <CheckList items={aboutTrackingItems} />
         </Card>
 

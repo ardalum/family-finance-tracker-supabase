@@ -1,4 +1,4 @@
-﻿# Release Notes
+# Release Notes
 
 ## Release Candidate - 2026-05-18 (Phases 48-63)
 
@@ -7,7 +7,7 @@
 - Dashboard quick actions were consolidated to a compact set focused on regular monthly updates.
 - Calendar now uses a FullCalendar month-grid view as the default secondary workspace, with Agenda list available as a secondary toggle.
 - Calendar hardening pass improved event-accuracy QA behavior (month-end close marker, duplicate-event safety, and selected-day/filter polish).
-- Calendar keeps Dashboard/account-menu entry points while preserving existing WalletFlow event-source behavior.
+- Calendar keeps Dashboard/account-menu entry points while preserving existing Spedger event-source behavior.
 - Calendar FullCalendar mobile polish pass improved small-width event density and control usability.
 - Financial Position hub is implemented as the main secondary entry point for income, savings, cash accounts, liabilities, and net worth review.
 - Income tracking is available with manual income sources and income entries.
@@ -74,7 +74,7 @@
 - Many position/reporting flows are manual-entry MVPs (no bank sync/import automation).
 - Restore remains merge-safe (add/skip) rather than destructive overwrite mode.
 - Final release sign-off still requires deployed manual smoke execution and evidence capture.
-- Calendar event sources in this release are existing WalletFlow data only:
+- Calendar event sources in this release are existing Spedger data only:
   - card due dates
   - statement close dates
   - recurring bills
@@ -99,3 +99,9 @@
 - Final release-candidate checklist closure confirmed local automated gates: `format:check`, `build`, `test:run`, `lint`, and `verify` passed with `481` tests and `0` failures.
 - The remaining PR #354 mobile/regression checklist items are documented as browser/manual verification requirements where they cannot be truthfully validated from a code-only run.
 - Release tag handoff now recommends `v0.1.0-rc.1` with a conditional-go posture until manual mobile/deployed smoke evidence is recorded.
+
+## Phase 77 app rename
+
+- User-facing product branding is renamed from WalletFlow to Spedger.
+- No Supabase schema, database table, routing, or GitHub Pages base-path changes were made for the rename.
+- Stable technical compatibility identifiers may still use legacy lowercase keys where they are not visible to users, such as localStorage keys, CSS hooks, or navigation event names.

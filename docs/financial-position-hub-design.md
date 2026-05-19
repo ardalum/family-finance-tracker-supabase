@@ -1,7 +1,7 @@
 # Financial Position Hub Design (Phase 40)
 
 Date: 2026-05-17  
-Project: WalletFlow / Family Finance Tracker  
+Project: Spedger / Family Finance Tracker  
 Scope: Design-only plan for a future Financial Position hub (no implementation in this phase)
 
 ## Phase 41 Status Update
@@ -59,7 +59,7 @@ Scope: Design-only plan for a future Financial Position hub (no implementation i
 
 ## 1. Problem Statement
 
-WalletFlow now includes Income, Savings, Accounts, Liabilities, and Net Worth as separate secondary tools. Each tool works on its own, but the overall household financial-position workflow is scattered across multiple entry points.
+Spedger now includes Income, Savings, Accounts, Liabilities, and Net Worth as separate secondary tools. Each tool works on its own, but the overall household financial-position workflow is scattered across multiple entry points.
 
 Current pain:
 

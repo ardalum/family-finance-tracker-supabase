@@ -34,7 +34,7 @@ Last updated: 2026-05-18 (Phase 76 final checklist closure)
 ## Fixed (recent notable)
 
 - Final RC automated retest passed with `npm run verify` after mobile/liability/card-debt stabilization; no new release-blocking regression found (`fixed`, Phase 75)
-- Mobile header overcrowding was corrected with a compact single-row app bar, icon-only WalletFlow mark on phone widths, balanced icon controls, and hidden mobile household selector (`fixed`, Phase 74 correction)
+- Mobile header overcrowding was corrected with a compact single-row app bar, icon-only Spedger mark on phone widths, balanced icon controls, and hidden mobile household selector (`fixed`, Phase 74 correction)
 - Mobile Quick Add duplication was reduced to one visible phone header entry point while preserving desktop/sidebar/drawer access (`fixed`, Phase 74 correction)
 - Credit Cards monthly balance cards and summary tiles received overflow-safe mobile containers, wrapping currency values, and tighter mobile padding (`fixed`, Phase 74 correction)
 - Recurring/Bills responsive containers were tightened so wide bill tables scroll inside bounded card sections instead of forcing page-level horizontal scroll (`fixed`, Phase 74 correction)
@@ -110,3 +110,9 @@ Last updated: 2026-05-18 (Phase 76 final checklist closure)
 - PR #354's remaining unchecked mobile/regression items are now tracked as manual browser evidence tasks rather than open code defects.
 - No new code-level critical/high blocker was identified in the Phase 76 local pass.
 - Final production approval still requires deployed/mobile browser smoke evidence, including the 360px/375px/390px/414px mobile matrix and console-error check.
+
+## Phase 77 Branding Rename Notes
+
+- User-facing app branding was renamed from WalletFlow to Spedger.
+- No schema, table, routing, deployment path, or financial calculation changes were made for the rename.
+- Remaining lowercase `walletflow` references are technical compatibility identifiers only and are not user-visible branding.

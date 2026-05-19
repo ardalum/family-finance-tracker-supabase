@@ -1,7 +1,7 @@
 # FullCalendar Release Blocker Retest
 
 Date: 2026-05-18
-Scope: WalletFlow Phase 62 FullCalendar mobile polish and release-blocker retest
+Scope: Spedger Phase 62 FullCalendar mobile polish and release-blocker retest
 
 ## 1) FullCalendar migration status
 
@@ -10,7 +10,7 @@ Scope: WalletFlow Phase 62 FullCalendar mobile polish and release-blocker retest
   - `@fullcalendar/react`
   - `@fullcalendar/daygrid`
   - `@fullcalendar/interaction`
-- Calendar still uses existing WalletFlow event generation as source of truth.
+- Calendar still uses existing Spedger event generation as source of truth.
 - Calendar remains a secondary view and does not introduce new persistence.
 
 ## 2) Desktop checks
@@ -63,7 +63,7 @@ Scope: WalletFlow Phase 62 FullCalendar mobile polish and release-blocker retest
 - No reminders/notifications.
 - No Google/Apple calendar export.
 - No automatic bank/card sync.
-- Calendar uses existing WalletFlow data only.
+- Calendar uses existing Spedger data only.
 
 ## 7) Issues found/fixed
 

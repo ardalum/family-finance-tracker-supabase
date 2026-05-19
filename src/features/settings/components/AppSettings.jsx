@@ -79,7 +79,7 @@ export default function AppSettings() {
 
         <SettingsSection
           title="Planned preferences"
-          description="These settings are not active yet in WalletFlow."
+          description="These settings are not active yet in Spedger."
         >
           <ul className="list-disc space-y-2 pl-5 text-sm text-text-muted">
             <li>Date format</li>

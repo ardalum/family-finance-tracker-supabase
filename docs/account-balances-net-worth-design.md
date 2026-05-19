@@ -1,7 +1,7 @@
 # Account Balance Snapshots and Net Worth Design (Phase 29)
 
 Date: 2026-05-17  
-Project: WalletFlow / Family Finance Tracker  
+Project: Spedger / Family Finance Tracker  
 Scope: Design-only planning for account balance snapshots and net worth (no implementation in this phase)
 
 ## Phase 30 Status Update
@@ -61,7 +61,7 @@ Scope: Design-only planning for account balance snapshots and net worth (no impl
 
 ## 1. Problem Statement
 
-WalletFlow now covers transactions, budgets, recurring bills, cards, insights, income, savings goals, and a Dashboard cash-flow summary. It is still incomplete as a full household finance tracker because it does not capture real account balance snapshots or net worth over time.
+Spedger now covers transactions, budgets, recurring bills, cards, insights, income, savings goals, and a Dashboard cash-flow summary. It is still incomplete as a full household finance tracker because it does not capture real account balance snapshots or net worth over time.
 
 Without balance snapshots and net worth:
 

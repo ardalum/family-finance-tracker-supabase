@@ -1,7 +1,7 @@
 # Financial Position Navigation Decision (Phase 45)
 
 Date: 2026-05-17  
-Project: WalletFlow / Family Finance Tracker  
+Project: Spedger / Family Finance Tracker  
 Scope: Navigation decision and future recommendation only (no nav implementation changes in this phase)
 
 ## 1. Current Navigation State

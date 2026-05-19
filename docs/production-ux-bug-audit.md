@@ -1,7 +1,7 @@
-﻿# Production UX Bug Audit (Phases 50, 54, and 55)
+# Production UX Bug Audit (Phases 50, 54, and 55)
 
 Date: 2026-05-17  
-Project: WalletFlow / Family Finance Tracker  
+Project: Spedger / Family Finance Tracker  
 Source: production smoke-test findings + targeted code audit
 
 ## 1) Issues found during deployed-app smoke testing

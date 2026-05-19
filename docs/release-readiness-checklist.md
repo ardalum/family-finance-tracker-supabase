@@ -1,4 +1,4 @@
-﻿# Release Readiness Checklist
+# Release Readiness Checklist
 
 Use this checklist before each production release.
 
@@ -27,7 +27,7 @@ Latest local result, 2026-05-18:
 ## 2) GitHub Actions
 
 - [ ] `verify` workflow passes on the release commit.
-- [ ] `Deploy WalletFlow to GitHub Pages` workflow passes.
+- [ ] `Deploy Spedger to GitHub Pages` workflow passes.
 - [ ] Workflow logs show `npm ci`, `npm run verify`, and build/deploy success.
 
 ## 3) GitHub Pages Deployment
@@ -209,8 +209,8 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 ## 10) Mobile Layout Checklist
 
 - [ ] App shell uses true sidebar on desktop/tablet and a hamburger-triggered drawer on mobile.
-- [ ] Mobile header stays on one compact row without clipped WalletFlow wordmark text.
-- [ ] Mobile shows the WalletFlow logo mark without cutting off the full wordmark.
+- [ ] Mobile header stays on one compact row without clipped Spedger wordmark text.
+- [ ] Mobile shows the Spedger logo mark without cutting off the full wordmark.
 - [ ] Hamburger, alert, Quick Add, and account controls are visually balanced and aligned.
 - [ ] Household selector does not render as a wide overflowing mobile control; it remains available from larger layouts/settings surfaces.
 - [ ] Mobile Quick Add appears as a single compact shell entry point, not duplicated as competing large buttons.
@@ -372,3 +372,10 @@ Phase 76 recommendation:
 
 - **Conditional Go for RC tag handoff**: local automated verification is clean and no code-level critical/high blockers are open.
 - **Final tag/release approval should wait for manual browser/mobile smoke evidence** unless those checks have already been completed outside this local code-only run.
+
+## Phase 77 app rename verification
+
+- Verify the browser title, app shell/header/sidebar/drawer, About, Help, Privacy, Terms, Release Notes, and account menu copy use Spedger.
+- Confirm no visible WalletFlow copy remains in the rendered app.
+- Confirm the GitHub Pages base path remains `/family-finance-tracker-supabase/`.
+- Confirm no Supabase schema, database table, or financial calculation changes are included in the rename.

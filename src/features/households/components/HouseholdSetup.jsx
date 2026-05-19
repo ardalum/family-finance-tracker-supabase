@@ -38,7 +38,7 @@ export default function HouseholdSetup() {
               <h1 className="text-xl font-semibold tracking-normal text-[#111827]">
                 Set up household
               </h1>
-              <p className="text-sm text-[#6B7280]">Create a private workspace for WalletFlow.</p>
+              <p className="text-sm text-[#6B7280]">Create a private workspace for Spedger.</p>
             </div>
           </div>
           <AccountMenu />

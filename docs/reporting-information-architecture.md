@@ -1,12 +1,12 @@
 # Reporting Information Architecture and Dashboard/Insights UX Plan (Phase 19)
 
 Date: 2026-05-17  
-Project: WalletFlow / Family Finance Tracker  
+Project: Spedger / Family Finance Tracker  
 Scope: UI/UX information architecture planning only (no implementation in this phase)
 
 ## 1. Problem Statement
 
-WalletFlow's Dashboard is effective for monthly status, but it cannot safely carry every future feature without becoming cluttered and confusing. Upcoming scope includes:
+Spedger's Dashboard is effective for monthly status, but it cannot safely carry every future feature without becoming cluttered and confusing. Upcoming scope includes:
 
 - Monthly alerts
 - Monthly Close Checklist

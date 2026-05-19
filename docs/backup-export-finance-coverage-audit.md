@@ -1,7 +1,7 @@
 # Backup/Export Finance Coverage Audit (Phase 46)
 
 Date: 2026-05-17  
-Project: WalletFlow / Family Finance Tracker  
+Project: Spedger / Family Finance Tracker  
 Scope: Supabase JSON backup/export, merge-import restore, Excel export coverage review
 
 ## 1) Persisted Finance Data Types

@@ -1,5 +1,5 @@
 export const appMetadata = {
-  name: "WalletFlow",
+  name: "Spedger",
   tagline: "Track your cards, budget, and spending in one clear place.",
   trackingDisclaimer:
     "Personal finance tracking only. Verify balances, payments, and due dates with the original provider.",

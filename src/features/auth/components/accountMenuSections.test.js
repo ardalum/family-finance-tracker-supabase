@@ -21,7 +21,7 @@ describe("account menu sections", () => {
         ["Account Settings"],
         ["Household Settings"],
         ["Data & Privacy", "Backup & Restore"],
-        ["Help / Support", "Release Notes", "About WalletFlow"],
+        ["Help / Support", "Release Notes", "About Spedger"],
       ],
     );
   });
