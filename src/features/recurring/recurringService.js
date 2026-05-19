@@ -160,6 +160,8 @@ export function getRecurringDisplayStatus(template, monthKey, instance, today = 
 }
 
 export function getRecurringAmountForMonth(template, instance) {
+  if (template?.billType === "fixed") return Number(template.estimatedAmount || 0);
+
   const actualAmount = Number(instance?.actualAmount);
   if (Number.isFinite(actualAmount) && actualAmount > 0) return actualAmount;
   return Number(template.estimatedAmount || 0);

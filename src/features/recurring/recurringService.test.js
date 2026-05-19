@@ -115,9 +115,28 @@ describe("recurring service", () => {
     assert.equal(getRecurringDisplayStatus({ dueDay: 30 }, "2026-05", null, today), "Upcoming");
   });
 
-  it("uses actual amount when present and estimated amount otherwise", () => {
-    assert.equal(getRecurringAmountForMonth({ estimatedAmount: 100 }, { actualAmount: 125 }), 125);
-    assert.equal(getRecurringAmountForMonth({ estimatedAmount: 100 }, { actualAmount: null }), 100);
+  it("uses template amount for fixed bills and actual amount for variable bills", () => {
+    assert.equal(
+      getRecurringAmountForMonth(
+        { billType: "fixed", estimatedAmount: 100 },
+        { actualAmount: 125 },
+      ),
+      100,
+    );
+    assert.equal(
+      getRecurringAmountForMonth(
+        { billType: "variable", estimatedAmount: 100 },
+        { actualAmount: 125 },
+      ),
+      125,
+    );
+    assert.equal(
+      getRecurringAmountForMonth(
+        { billType: "variable", estimatedAmount: 100 },
+        { actualAmount: null },
+      ),
+      100,
+    );
   });
 
   it("marks recurring status as paid when an instance or generated transaction exists", () => {
@@ -155,7 +174,7 @@ describe("recurring service", () => {
       "2026-05",
       {
         "2026-05": {
-          rent: { status: "paid", actualAmount: 1400 },
+          rent: { status: "paid", actualAmount: 1550 },
           electric: { status: "unpaid", actualAmount: 150 },
         },
       },
@@ -164,6 +183,7 @@ describe("recurring service", () => {
 
     assert.equal(rows.length, 2);
     assert.equal(rows[0].template.id, "rent");
+    assert.equal(rows[0].amount, 1400);
     assert.equal(rows[0].paidAmount, 1400);
     assert.equal(rows[1].template.id, "electric");
     assert.equal(rows[1].amount, 150);
@@ -173,7 +193,7 @@ describe("recurring service", () => {
   it("summarizes recurring rows", () => {
     const summary = getRecurringSummary(templates, "2026-05", {
       "2026-05": {
-        rent: { status: "paid", actualAmount: 1400 },
+        rent: { status: "paid", actualAmount: 1550 },
         electric: { status: "unpaid", actualAmount: 150 },
       },
     });
