@@ -1,27 +1,34 @@
 import Card from "../../../components/ui/Card.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
-import { getOwnerCreditLimitTotal } from "../creditCardsService.js";
+import { getCreditLimitSummary } from "../creditCardsService.js";
 
 export default function CreditLimitSummary({ cards }) {
-  const arvinTotal = getOwnerCreditLimitTotal(cards, "Arvin");
-  const kristineTotal = getOwnerCreditLimitTotal(cards, "Kristine");
-  const combinedTotal = arvinTotal + kristineTotal;
-  const activeCount = cards.filter((card) => card.isActive).length;
-  const inactiveCount = cards.length - activeCount;
+  const summary = getCreditLimitSummary(cards);
 
   return (
     <section className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(280px,1fr)]">
       <div className="grid min-w-0 gap-4 md:grid-cols-3">
-        <SummaryTile label="Arvin total limit" value={formatCurrency(arvinTotal)} />
-        <SummaryTile label="Kristine total limit" value={formatCurrency(kristineTotal)} />
-        <SummaryTile label="Combined total limit" value={formatCurrency(combinedTotal)} emphasis />
+        {summary.ownerTotals.length > 0 ? (
+          summary.ownerTotals.map((ownerTotal) => (
+            <SummaryTile
+              key={ownerTotal.owner}
+              label={`${ownerTotal.owner} total limit`}
+              value={formatCurrency(ownerTotal.total)}
+            />
+          ))
+        ) : (
+          <SummaryTile label="Active card limit" value={formatCurrency(0)} />
+        )}
+        <SummaryTile label="Combined total limit" value={formatCurrency(summary.combinedTotal)} emphasis />
       </div>
       <Card className="p-5">
         <p className="text-sm font-medium text-[#6B7280]">Credit cards</p>
-        <p className="mt-2 text-3xl font-semibold tracking-normal text-[#111827]">{cards.length}</p>
+        <p className="mt-2 text-3xl font-semibold tracking-normal text-[#111827]">
+          {summary.cardCount}
+        </p>
         <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
-          <CountItem label="Active" value={activeCount} />
-          <CountItem label="Inactive" value={inactiveCount} />
+          <CountItem label="Active" value={summary.activeCount} />
+          <CountItem label="Inactive" value={summary.inactiveCount} />
         </div>
       </Card>
     </section>
