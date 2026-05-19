@@ -50,7 +50,11 @@ export function useIncomeData({ activeHouseholdId }) {
       setIncomeSources(sources);
       setIncomeEntries(entries);
       setIncomeDepositMovements(incomeMovements);
-      return { incomeSources: sources, incomeEntries: entries, incomeDepositMovements: incomeMovements };
+      return {
+        incomeSources: sources,
+        incomeEntries: entries,
+        incomeDepositMovements: incomeMovements,
+      };
     } catch (error) {
       setIncomeError(error.message || "Could not load income data.");
       setIncomeSources([]);

@@ -170,8 +170,8 @@ export default function Income({
               Manual income entries only for this MVP. No sync or imports.
             </p>
             <p className="mt-1 text-sm text-text-muted">
-              Choose a tracked account if this income should affect projected cash. Account snapshots
-              remain your actual balance record.
+              Choose a tracked account if this income should affect projected cash. Account
+              snapshots remain your actual balance record.
             </p>
           </div>
           <Select
@@ -253,7 +253,10 @@ export default function Income({
               label="Deposit to account"
               value={entryDraft.depositAccountId || ""}
               onChange={(event) =>
-                setEntryDraft((draft) => ({ ...draft, depositAccountId: event.target.value || null }))
+                setEntryDraft((draft) => ({
+                  ...draft,
+                  depositAccountId: event.target.value || null,
+                }))
               }
             >
               <option value="">Not deposited yet</option>
@@ -485,7 +488,10 @@ export default function Income({
           ) : (
             monthEntries.map((entry) => {
               const entryId = entry.supabaseId ?? entry.id;
-              const depositAccountValue = getIncomeDepositAccountValue(entry, incomeDepositMovements);
+              const depositAccountValue = getIncomeDepositAccountValue(
+                entry,
+                incomeDepositMovements,
+              );
               const sourceName =
                 entry.incomeSourceId && sourceIdByOption.has(entry.incomeSourceId)
                   ? sourceOptions.find((option) => option.value === entry.incomeSourceId)?.label
@@ -505,7 +511,8 @@ export default function Income({
                       {entry.entryDate} - {sourceName}
                     </p>
                     <p className="mt-1 text-xs text-text-muted">
-                      Deposit to: {getDepositAccountLabel(depositAccountValue, depositAccountOptions)}
+                      Deposit to:{" "}
+                      {getDepositAccountLabel(depositAccountValue, depositAccountOptions)}
                     </p>
                     {entry.notes ? (
                       <p className="mt-1 text-xs text-text-soft">{entry.notes}</p>
