@@ -6,6 +6,8 @@ export default function MonthlyBalanceMobileList({
   isCardSaving,
   onEditCard,
   onBalanceChange,
+  onBalanceFocus,
+  onBalanceBlur,
   onCheckedNoBalance,
   onResetNoBalance,
   onPaidChange,
@@ -20,6 +22,8 @@ export default function MonthlyBalanceMobileList({
           isCardSaving={isCardSaving}
           onEditCard={onEditCard}
           onBalanceChange={onBalanceChange}
+          onBalanceFocus={onBalanceFocus}
+          onBalanceBlur={onBalanceBlur}
           onCheckedNoBalance={onCheckedNoBalance}
           onResetNoBalance={onResetNoBalance}
           onPaidChange={onPaidChange}
