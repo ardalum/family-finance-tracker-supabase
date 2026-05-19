@@ -130,7 +130,12 @@ export default function RecurringBillRow({
             </Button>
           )}
           {!isPaid ? (
-            <Button type="button" variant="secondary" onClick={() => onSkip(row)} disabled={isSaving}>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => onSkip(row)}
+              disabled={isSaving}
+            >
               <SkipForward size={16} aria-hidden="true" />
               {isSkipped ? "Keep Skipped" : "Skip"}
             </Button>
