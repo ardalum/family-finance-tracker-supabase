@@ -4,7 +4,7 @@ export default function MonthlyBalanceSummaryCards({ summary }) {
   const unpaidTotal = summary.unpaidBalance;
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <MonthlyBalanceSummaryCard
         label="Statement balance"
         value={formatCurrency(summary.statementBalance, { cents: true })}
@@ -33,10 +33,10 @@ export default function MonthlyBalanceSummaryCards({ summary }) {
 
 function MonthlyBalanceSummaryCard({ label, value, helper, danger = false }) {
   return (
-    <div className="rounded-2xl border border-app-border bg-app-surface p-4 shadow-sm">
+    <div className="min-w-0 rounded-2xl border border-app-border bg-app-surface p-4 shadow-sm">
       <p className="text-sm font-medium text-text-muted">{label}</p>
       <p
-        className={`mt-1 text-2xl font-semibold ${danger ? "text-status-danger" : "text-text-main"}`}
+        className={`mt-1 break-words text-xl font-semibold sm:text-2xl ${danger ? "text-status-danger" : "text-text-main"}`}
       >
         {value}
       </p>

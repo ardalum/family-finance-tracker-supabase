@@ -14,8 +14,8 @@ export default function MonthlyBalanceCard({
 }) {
   const { card, displayEntry, status, closingDateText, dueDateText, statementGenerated } = row;
   return (
-    <article className={`rounded-2xl border border-app-border p-4 ${status.rowClass}`}>
-      <div className="flex items-start justify-between gap-3">
+    <article className={`min-w-0 rounded-2xl border border-app-border p-4 ${status.rowClass}`}>
+      <div className="flex min-w-0 items-start justify-between gap-3">
         <div className="min-w-0">
           <LinkedCardName card={card} />
           <p className="mt-1 text-xs text-text-muted">
@@ -37,15 +37,15 @@ export default function MonthlyBalanceCard({
       </div>
 
       <div className="mt-3 grid gap-2 text-sm text-text-soft">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
           <span>Statement closes</span>
           <span className="font-medium text-text-main">{closingDateText}</span>
         </div>
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
           <span>Payment due</span>
           <span className="font-medium text-text-main">{dueDateText}</span>
         </div>
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
           <span>Cycle</span>
           <span
             className={`rounded-md px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ${
@@ -74,11 +74,11 @@ export default function MonthlyBalanceCard({
         >
           Statement balance
         </label>
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           <span className={`font-semibold ${status.balanceClass}`}>$</span>
           <input
             id={`mobile-balance-${card.id}`}
-            className={`h-10 w-full rounded-xl border border-app-border bg-app-surface px-3 text-sm font-semibold outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/10 ${status.balanceClass}`}
+            className={`h-10 min-w-0 flex-1 rounded-xl border border-app-border bg-app-surface px-3 text-sm font-semibold outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/10 ${status.balanceClass}`}
             type="number"
             min="0"
             step="0.01"

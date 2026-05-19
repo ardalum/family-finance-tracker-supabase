@@ -7,7 +7,7 @@ export default function HouseholdSwitcher() {
   if (households.length === 0) return null;
 
   return (
-    <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-app-border bg-app-surface px-3 py-2 shadow-sm sm:flex-none">
+    <div className="hidden min-w-0 items-center gap-2 rounded-xl border border-app-border bg-app-surface px-3 py-2 shadow-sm md:flex md:flex-none">
       <Home size={16} className="shrink-0 text-text-muted" aria-hidden="true" />
       <label className="grid min-w-0 flex-1 gap-0.5 sm:flex sm:items-center sm:gap-2">
         <span className="text-[0.68rem] font-semibold uppercase tracking-wide text-text-muted sm:text-xs sm:normal-case sm:tracking-normal">

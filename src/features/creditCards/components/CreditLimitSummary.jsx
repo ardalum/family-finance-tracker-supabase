@@ -10,8 +10,8 @@ export default function CreditLimitSummary({ cards }) {
   const inactiveCount = cards.length - activeCount;
 
   return (
-    <section className="grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(280px,1fr)]">
-      <div className="grid gap-4 md:grid-cols-3">
+    <section className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(280px,1fr)]">
+      <div className="grid min-w-0 gap-4 md:grid-cols-3">
         <SummaryTile label="Arvin total limit" value={formatCurrency(arvinTotal)} />
         <SummaryTile label="Kristine total limit" value={formatCurrency(kristineTotal)} />
         <SummaryTile label="Combined total limit" value={formatCurrency(combinedTotal)} emphasis />
@@ -32,7 +32,9 @@ function SummaryTile({ label, value, emphasis = false }) {
   return (
     <Card className={`p-5 ${emphasis ? "border-[#1F2937]" : ""}`}>
       <p className="text-sm font-medium text-[#6B7280]">{label}</p>
-      <p className="mt-2 text-3xl font-semibold tracking-normal text-[#111827]">{value}</p>
+      <p className="mt-2 break-words text-2xl font-semibold tracking-normal text-[#111827] sm:text-3xl">
+        {value}
+      </p>
     </Card>
   );
 }

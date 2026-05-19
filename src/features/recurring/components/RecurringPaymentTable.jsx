@@ -26,8 +26,8 @@ export default function RecurringPaymentTable({
   return (
     <>
       <Card className="overflow-hidden">
-        <div className="grid gap-3 border-b border-app-border p-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
-          <div>
+        <div className="grid min-w-0 gap-3 border-b border-app-border p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-5">
+          <div className="min-w-0">
             <h3 className="text-base font-semibold text-text-main">Recurring templates</h3>
             <p className="mt-1 text-sm text-text-muted">
               These templates become monthly bills in the selected month.
@@ -47,13 +47,13 @@ export default function RecurringPaymentTable({
             </p>
           </div>
         ) : (
-          <div className="grid gap-3 p-4">
+          <div className="grid min-w-0 gap-3 p-4">
             {templates.map((template) => {
               const card = cards.find((item) => item.id === template.cardId);
               return (
                 <article
                   key={template.id}
-                  className="grid gap-4 rounded-2xl border border-app-border bg-app-surface p-4 transition hover:border-brand-primary/30 hover:bg-app-background"
+                  className="grid min-w-0 gap-4 rounded-2xl border border-app-border bg-app-surface p-4 transition hover:border-brand-primary/30 hover:bg-app-background"
                 >
                   <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
                     <div className="grid min-w-0 gap-1">
@@ -73,8 +73,8 @@ export default function RecurringPaymentTable({
                       </p>
                     </div>
 
-                    <div className="text-left sm:text-right">
-                      <p className="text-lg font-semibold text-text-main">
+                    <div className="min-w-0 text-left sm:text-right">
+                      <p className="break-words text-lg font-semibold text-text-main">
                         {formatCurrency(template.estimatedAmount)}
                       </p>
                       <p className="text-xs font-medium text-text-muted">
@@ -83,7 +83,7 @@ export default function RecurringPaymentTable({
                     </div>
                   </div>
 
-                  <div className="grid gap-3 text-sm text-text-soft md:grid-cols-3">
+                  <div className="grid min-w-0 gap-3 text-sm text-text-soft md:grid-cols-3">
                     <TemplateDetail icon={CalendarDays} label="Due">
                       Day {template.dueDay}
                     </TemplateDetail>
@@ -110,7 +110,7 @@ export default function RecurringPaymentTable({
                     </p>
                   ) : null}
 
-                  <div className="flex flex-wrap justify-end gap-2 border-t border-app-border pt-3">
+                  <div className="grid grid-cols-2 gap-2 border-t border-app-border pt-3 sm:flex sm:flex-wrap sm:justify-end">
                     <Button
                       type="button"
                       variant="secondary"

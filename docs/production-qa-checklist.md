@@ -37,6 +37,12 @@ Use this checklist before each production release.
 - [ ] Desktop shows a true left sidebar (not top-nav-only) and content reflows beside it.
 - [ ] Sidebar collapse/expand control works and keeps icon-only entries accessible.
 - [ ] Mobile shows a hamburger button that opens a drawer.
+- [ ] Mobile app header remains a compact single row with no overlapping controls.
+- [ ] WalletFlow wordmark is not clipped on mobile; phone widths show compact branding instead.
+- [ ] Hamburger, alert, Quick Add, and account buttons have balanced icon sizing/tap targets.
+- [ ] Household selector does not overflow or overlap mobile header controls.
+- [ ] Quick Add appears once as a compact mobile shell action and remains tappable.
+- [ ] Body/app has no page-level horizontal scrolling at 360px, 375px, 390px, or 414px.
 - [ ] Drawer contains grouped sections: Main, Planning, Money Setup, System.
 - [ ] Group headers are expandable/collapsible with clear chevrons and accessible expanded state.
 - [ ] Main is expanded by default; Planning/Money Setup/System are collapsed by default unless active.
@@ -53,6 +59,9 @@ Use this checklist before each production release.
 - [ ] Delete card works and confirmation dialog appears.
 - [ ] Monthly balances desktop table works.
 - [ ] Monthly balances mobile cards work.
+- [ ] Credit Cards page has no page-level horizontal scrolling on mobile.
+- [ ] Monthly balance summary cards stack/wrap on mobile and large currency values stay inside cards.
+- [ ] Monthly balance controls and filters wrap without forcing viewport overflow.
 - [ ] Paid checkbox updates correctly.
 - [ ] Mark no balance action works.
 - [ ] Statement details save correctly.
@@ -91,6 +100,9 @@ Use this checklist before each production release.
 - [ ] Skip works.
 - [ ] Variable bill actual amount flow works.
 - [ ] Recurring-generated transactions appear correctly.
+- [ ] Recurring/Bills page has no page-level horizontal scrolling on mobile.
+- [ ] Recurring summary cards stack/wrap on mobile without clipping amount values.
+- [ ] Wide recurring bill review tables scroll inside their card container only when needed.
 
 ## Income
 

@@ -140,17 +140,17 @@ export default function RecurringGenerationPanel({
   }
 
   return (
-    <Card>
-      <div className="grid gap-4 border-b border-gray-200 p-5">
-        <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
-          <div>
+    <Card className="overflow-hidden">
+      <div className="grid min-w-0 gap-4 border-b border-gray-200 p-4 sm:p-5">
+        <div className="grid min-w-0 gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
+          <div className="min-w-0">
             <h3 className="text-lg font-semibold text-gray-950">Monthly recurring bills</h3>
             <p className="mt-1 text-sm text-gray-500">
               Review each bill, enter the actual amount, then mark it paid. Paid bills create or
               update one linked spending transaction.
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-4 lg:min-w-[420px]">
+          <div className="grid min-w-0 grid-cols-2 gap-2 text-xs sm:grid-cols-4 lg:min-w-[420px]">
             <StatusCount label="Needs action" value={workflowCounts.needsAction} />
             <StatusCount label="Paid" value={workflowCounts.paid} />
             <StatusCount label="Skipped" value={workflowCounts.skipped} />
@@ -182,7 +182,7 @@ export default function RecurringGenerationPanel({
           No active recurring payments apply to this month.
         </div>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="max-w-full overflow-x-auto">
           <table className="min-w-full border-separate border-spacing-0 text-left text-sm">
             <thead className="bg-gray-50 text-xs uppercase tracking-normal text-gray-500">
               <tr>

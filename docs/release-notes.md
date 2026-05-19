@@ -58,6 +58,8 @@
 - Active liability balances now carry forward into Net Worth and Financial Position until superseded, explicitly zeroed, paid through synced card cleanup, or closed.
 - Fresh app loads initialize month-scoped workspaces to the current month; manual month changes remain user-driven.
 - Net Worth guidance now reminds users that paying debt is net-worth neutral when cash/account snapshots are updated too.
+- Mobile release-blocker polish tightened the app shell header, hid the full wordmark/household selector on phone widths, balanced hamburger/alert/account controls, and kept one compact mobile Quick Add entry point.
+- Credit Cards and Recurring/Bills mobile layouts were hardened to avoid page-level horizontal overflow, with stacked/wrapping cards and bounded internal table scrolling where needed.
 
 ### QA and Release Readiness
 

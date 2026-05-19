@@ -116,8 +116,8 @@ export default function MonthlyBalanceTable({
   }
 
   return (
-    <Card>
-      <div className="grid gap-4 border-b border-app-border p-5">
+    <Card className="overflow-hidden">
+      <div className="grid min-w-0 gap-4 border-b border-app-border p-4 sm:p-5">
         <MonthlyBalanceControls
           selectedMonth={selectedMonth}
           monthOptions={monthOptions}
