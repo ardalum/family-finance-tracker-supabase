@@ -386,6 +386,7 @@ function FinanceTrackerApp() {
   } = useBudgets({
     activeHouseholdId,
     initialSelectedMonth: initialSelectedMonths.budget,
+    loadSpendingCategories,
     loadDashboardData,
     loadInsightsData,
     localBudgetsByMonth: appData.budgetsByMonth,

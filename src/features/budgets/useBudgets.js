@@ -1,8 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import {
-  createDashboardInsightsRefreshers,
-  runRefreshSequence,
-} from "../../app/refreshDataUtils.js";
+import { createBudgetCategoryRefreshers, runRefreshSequence } from "../../app/refreshDataUtils.js";
 import { defaultBudgetCategories } from "./budgetDefaults.js";
 import {
   addBudgetCategoryToSupabase,
@@ -16,6 +13,7 @@ import {
 export function useBudgets({
   activeHouseholdId,
   initialSelectedMonth,
+  loadSpendingCategories,
   loadDashboardData,
   loadInsightsData,
   localBudgetsByMonth,
@@ -53,6 +51,18 @@ export function useBudgets({
     loadSupabaseBudgets();
   }, [loadSupabaseBudgets]);
 
+  const refreshAfterBudgetCategoryChange = useCallback(
+    () =>
+      runRefreshSequence(
+        createBudgetCategoryRefreshers({
+          loadSpendingCategories,
+          loadDashboardData,
+          loadInsightsData,
+        }),
+      ),
+    [loadDashboardData, loadInsightsData, loadSpendingCategories],
+  );
+
   const createSupabaseBudget = useCallback(
     async (input) => {
       setBudgetsSaving(true);
@@ -65,12 +75,7 @@ export function useBudgets({
           input,
         );
         setSupabaseBudgets((budgets) => [...budgets, budget]);
-        await runRefreshSequence(
-          createDashboardInsightsRefreshers({
-            loadDashboardData,
-            loadInsightsData,
-          }),
-        );
+        await refreshAfterBudgetCategoryChange();
         return budget;
       } catch (error) {
         setBudgetsError(error.message || "Could not add budget category.");
@@ -79,7 +84,7 @@ export function useBudgets({
         setBudgetsSaving(false);
       }
     },
-    [activeHouseholdId, loadDashboardData, loadInsightsData, selectedBudgetMonth],
+    [activeHouseholdId, refreshAfterBudgetCategoryChange, selectedBudgetMonth],
   );
 
   const updateSupabaseBudget = useCallback(
@@ -92,12 +97,7 @@ export function useBudgets({
         setSupabaseBudgets((budgets) =>
           budgets.map((currentBudget) => (currentBudget.id === budget.id ? budget : currentBudget)),
         );
-        await runRefreshSequence(
-          createDashboardInsightsRefreshers({
-            loadDashboardData,
-            loadInsightsData,
-          }),
-        );
+        await refreshAfterBudgetCategoryChange();
         return budget;
       } catch (error) {
         setBudgetsError(error.message || "Could not update budget category.");
@@ -106,7 +106,7 @@ export function useBudgets({
         setBudgetsSaving(false);
       }
     },
-    [loadDashboardData, loadInsightsData],
+    [refreshAfterBudgetCategoryChange],
   );
 
   const deleteSupabaseBudget = useCallback(
@@ -119,12 +119,7 @@ export function useBudgets({
         setSupabaseBudgets((budgets) =>
           budgets.filter((budget) => (budget.supabaseId ?? budget.id) !== budgetId),
         );
-        await runRefreshSequence(
-          createDashboardInsightsRefreshers({
-            loadDashboardData,
-            loadInsightsData,
-          }),
-        );
+        await refreshAfterBudgetCategoryChange();
       } catch (error) {
         setBudgetsError(error.message || "Could not delete budget category.");
         throw error;
@@ -132,7 +127,7 @@ export function useBudgets({
         setBudgetsSaving(false);
       }
     },
-    [loadDashboardData, loadInsightsData],
+    [refreshAfterBudgetCategoryChange],
   );
 
   const importSupabaseBudgetCategories = useCallback(async () => {
@@ -145,7 +140,8 @@ export function useBudgets({
       });
       await runRefreshSequence([
         loadSupabaseBudgets,
-        ...createDashboardInsightsRefreshers({
+        ...createBudgetCategoryRefreshers({
+          loadSpendingCategories,
           loadDashboardData,
           loadInsightsData,
         }),
@@ -161,6 +157,7 @@ export function useBudgets({
     activeHouseholdId,
     loadDashboardData,
     loadInsightsData,
+    loadSpendingCategories,
     loadSupabaseBudgets,
     localBudgetsByMonth,
     selectedBudgetMonth,
@@ -191,12 +188,7 @@ export function useBudgets({
       }
 
       setSupabaseBudgets((budgets) => [...budgets, ...createdBudgets]);
-      await runRefreshSequence(
-        createDashboardInsightsRefreshers({
-          loadDashboardData,
-          loadInsightsData,
-        }),
-      );
+      await refreshAfterBudgetCategoryChange();
       return createdBudgets;
     } catch (error) {
       setBudgetsError(error.message || "Could not add default budget categories.");
@@ -204,13 +196,7 @@ export function useBudgets({
     } finally {
       setBudgetsSaving(false);
     }
-  }, [
-    activeHouseholdId,
-    loadDashboardData,
-    loadInsightsData,
-    selectedBudgetMonth,
-    supabaseBudgets,
-  ]);
+  }, [activeHouseholdId, refreshAfterBudgetCategoryChange, selectedBudgetMonth, supabaseBudgets]);
 
   const copyPreviousMonthBudgetCategoriesToSupabase = useCallback(async () => {
     setBudgetsSaving(true);
@@ -224,7 +210,8 @@ export function useBudgets({
 
       await runRefreshSequence([
         loadSupabaseBudgets,
-        ...createDashboardInsightsRefreshers({
+        ...createBudgetCategoryRefreshers({
+          loadSpendingCategories,
           loadDashboardData,
           loadInsightsData,
         }),
@@ -241,6 +228,7 @@ export function useBudgets({
     activeHouseholdId,
     loadDashboardData,
     loadInsightsData,
+    loadSpendingCategories,
     loadSupabaseBudgets,
     selectedBudgetMonth,
   ]);
