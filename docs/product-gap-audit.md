@@ -1,6 +1,6 @@
 # Product Gap Audit
 
-Last updated: 2026-05-18 (Phase 73 correction: debt modal/month/carry-forward)
+Last updated: 2026-05-18 (Phase 75 final RC retest)
 
 ## Scope
 
@@ -45,12 +45,14 @@ Implemented (current release scope):
 - Liability carry-forward gap: addressed in Phase 73 correction so active liability balances carry forward into Net Worth/Financial Position until a newer snapshot, explicit zero, paid synced card cleanup, or inactive/closed account state stops them.
 - Debt deletion UX gap: addressed in Phase 73 correction by replacing Liabilities native browser confirms with app modal confirmations.
 - Insights composition readability gap: addressed in Phase 71 with overflow-safe layout plus conditional scrolling so normal category counts do not force unnecessary internal scroll.
+- Mobile responsiveness release-blocker gap: addressed in Phase 74 and re-verified in Phase 75 automation with compact app-shell header contracts, one visible mobile Quick Add entry, hidden mobile household selector, and overflow-safe Credit Cards/Recurring layout contracts.
 
 ## Release Blockers vs Product Gaps
 
 Release blockers (current):
 
-- none identified from automated verification in this phase
+- none identified from Phase 75 automated verification
+- production approval still requires manual deployed smoke evidence and mobile viewport/device checks
 
 Product gaps (deferred roadmap):
 

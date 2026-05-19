@@ -5,11 +5,24 @@ Use this checklist before each production release.
 ## 1) Local Verification
 
 - [ ] `npm run verify` passes locally.
+- [ ] Phase 75 final RC automated retest is recorded in `docs/release-readiness-production-qa-pass.md`.
 - [ ] `npm run dev` is used for any UI behavior check needed in this release.
 - [ ] Local branch only contains intended release changes.
 - [ ] No secrets are committed (`.env.local`, service keys, or private exports).
 - [ ] Phase 64 UX/IA audit findings are triaged and signed off (`docs/full-product-ux-ia-audit.md`) before declaring final RC readiness.
 - [ ] Fresh app load initializes every month-scoped view to the current real-world month.
+
+### Phase 75 automated RC retest
+
+Latest local result, 2026-05-18:
+
+- [x] `npm run format:check` passed.
+- [x] `npm run build` passed with existing non-blocking Vite chunk/import warnings.
+- [x] `npm run test:run` passed (`481` tests, `0` failures).
+- [x] `npm run lint` passed.
+- [x] `npm run verify` passed.
+- [x] No new code-level critical/high release blockers were found in automation.
+- [ ] Manual signed-in browser, deployed smoke, and real mobile viewport/device evidence still need to be captured before production approval.
 
 ## 2) GitHub Actions
 

@@ -17,13 +17,13 @@ Use this checklist before each production release.
 - [ ] Due soon and past due credit-card alerts appear correctly.
 - [ ] Budget overage and near-limit alerts appear correctly.
 - [ ] Recurring unpaid and past-due alerts appear correctly.
-- [ ] Cash-flow summary card appears.
-- [ ] Cash-flow income/spending/savings/recurring values match selected month data.
-- [ ] Missing-income state appears when no income entries exist for selected month.
-- [ ] Cash-flow formula copy is clear: Income - spending - recurring remaining - savings.
-- [ ] Cash-flow limitation copy is clear: unpaid card balances are excluded from MVP leftover.
-- [ ] Cash-flow action buttons route to Income, Savings, Spending, and Bills workspaces.
-- [ ] Estimated leftover updates when income/savings/spending/recurring values change.
+- [ ] Financial Pulse summary appears.
+- [ ] Financial Pulse separates cash position, spending/budget usage, upcoming obligations, and savings.
+- [ ] Missing cash/account snapshot state shows helpful guidance instead of pretending income minus spending is current cash.
+- [ ] Spending this month is presented as budget/spending usage, not immediate cash outflow.
+- [ ] Card purchases are not labeled as current cash leaving today; card payments/obligations are handled separately.
+- [ ] Financial Pulse action buttons route to Income, Savings, Spending, and Bills workspaces.
+- [ ] Planned cash cushion, if shown, is framed as a planning estimate rather than actual bank balance.
 - [ ] Dashboard quick actions are compact and limited to: Update card balances, Add transactions, Open recurring bills, Review budget, Financial Position, and Calendar.
 - [ ] Dashboard does not show separate quick actions for Income, Savings, Accounts, Liabilities/Debt, or Net Worth.
 - [ ] Financial Position quick action opens the Financial Position hub.
