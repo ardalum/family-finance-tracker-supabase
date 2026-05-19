@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import {
+  deleteAccountMoneyMovementBySource,
+  listAccountMoneyMovements,
+  replaceAccountMoneyMovementBySource,
+} from "../accounts/accountMoneyMovementsSupabaseService.js";
+import {
   createIncomeEntry,
   createIncomeSource,
   deleteIncomeEntry,
@@ -9,10 +14,16 @@ import {
   updateIncomeEntry,
   updateIncomeSource,
 } from "./incomeSupabaseService.js";
+import { buildIncomeDepositMovementPayload } from "./incomeService.js";
+
+function isIncomeDepositMovement(movement) {
+  return movement.sourceType === "income_entry" && movement.movementType === "income_deposit";
+}
 
 export function useIncomeData({ activeHouseholdId }) {
   const [incomeSources, setIncomeSources] = useState([]);
   const [incomeEntries, setIncomeEntries] = useState([]);
+  const [incomeDepositMovements, setIncomeDepositMovements] = useState([]);
   const [incomeLoading, setIncomeLoading] = useState(true);
   const [incomeSaving, setIncomeSaving] = useState(false);
   const [incomeError, setIncomeError] = useState("");
@@ -21,26 +32,35 @@ export function useIncomeData({ activeHouseholdId }) {
     if (!activeHouseholdId) {
       setIncomeSources([]);
       setIncomeEntries([]);
+      setIncomeDepositMovements([]);
       setIncomeLoading(false);
-      return { incomeSources: [], incomeEntries: [] };
+      return { incomeSources: [], incomeEntries: [], incomeDepositMovements: [] };
     }
 
     setIncomeLoading(true);
     setIncomeError("");
 
     try {
-      const [sources, entries] = await Promise.all([
+      const [sources, entries, movements] = await Promise.all([
         listIncomeSources(activeHouseholdId),
         listIncomeEntries(activeHouseholdId),
+        listAccountMoneyMovements(activeHouseholdId),
       ]);
+      const incomeMovements = movements.filter(isIncomeDepositMovement);
       setIncomeSources(sources);
       setIncomeEntries(entries);
-      return { incomeSources: sources, incomeEntries: entries };
+      setIncomeDepositMovements(incomeMovements);
+      return {
+        incomeSources: sources,
+        incomeEntries: entries,
+        incomeDepositMovements: incomeMovements,
+      };
     } catch (error) {
       setIncomeError(error.message || "Could not load income data.");
       setIncomeSources([]);
       setIncomeEntries([]);
-      return { incomeSources: [], incomeEntries: [] };
+      setIncomeDepositMovements([]);
+      return { incomeSources: [], incomeEntries: [], incomeDepositMovements: [] };
     } finally {
       setIncomeLoading(false);
     }
@@ -49,6 +69,24 @@ export function useIncomeData({ activeHouseholdId }) {
   useEffect(() => {
     loadIncomeData();
   }, [loadIncomeData]);
+
+  const saveIncomeDepositMovement = useCallback(
+    async (entry, payload) => {
+      const movementPayload = buildIncomeDepositMovementPayload(entry, payload.depositAccountId);
+
+      if (!movementPayload) {
+        await deleteAccountMoneyMovementBySource(
+          activeHouseholdId,
+          "income_entry",
+          entry.supabaseId ?? entry.id,
+        );
+        return;
+      }
+
+      await replaceAccountMoneyMovementBySource(activeHouseholdId, movementPayload);
+    },
+    [activeHouseholdId],
+  );
 
   const createSupabaseIncomeSource = useCallback(
     async (payload) => {
@@ -110,7 +148,8 @@ export function useIncomeData({ activeHouseholdId }) {
       setIncomeError("");
 
       try {
-        await createIncomeEntry(activeHouseholdId, payload);
+        const entry = await createIncomeEntry(activeHouseholdId, payload);
+        await saveIncomeDepositMovement(entry, payload);
         await loadIncomeData();
       } catch (error) {
         setIncomeError(error.message || "Could not add income entry.");
@@ -119,7 +158,7 @@ export function useIncomeData({ activeHouseholdId }) {
         setIncomeSaving(false);
       }
     },
-    [activeHouseholdId, loadIncomeData],
+    [activeHouseholdId, loadIncomeData, saveIncomeDepositMovement],
   );
 
   const updateSupabaseIncomeEntry = useCallback(
@@ -128,7 +167,8 @@ export function useIncomeData({ activeHouseholdId }) {
       setIncomeError("");
 
       try {
-        await updateIncomeEntry(entryId, payload);
+        const entry = await updateIncomeEntry(entryId, payload);
+        await saveIncomeDepositMovement(entry, payload);
         await loadIncomeData();
       } catch (error) {
         setIncomeError(error.message || "Could not update income entry.");
@@ -137,7 +177,7 @@ export function useIncomeData({ activeHouseholdId }) {
         setIncomeSaving(false);
       }
     },
-    [loadIncomeData],
+    [loadIncomeData, saveIncomeDepositMovement],
   );
 
   const deleteSupabaseIncomeEntry = useCallback(
@@ -147,6 +187,7 @@ export function useIncomeData({ activeHouseholdId }) {
 
       try {
         await deleteIncomeEntry(entryId);
+        await deleteAccountMoneyMovementBySource(activeHouseholdId, "income_entry", entryId);
         await loadIncomeData();
       } catch (error) {
         setIncomeError(error.message || "Could not delete income entry.");
@@ -155,12 +196,13 @@ export function useIncomeData({ activeHouseholdId }) {
         setIncomeSaving(false);
       }
     },
-    [loadIncomeData],
+    [activeHouseholdId, loadIncomeData],
   );
 
   return {
     incomeSources,
     incomeEntries,
+    incomeDepositMovements,
     incomeLoading,
     incomeSaving,
     incomeError,

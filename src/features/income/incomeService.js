@@ -18,6 +18,7 @@ export const INCOME_ENTRY_TYPES = [
   "adjustment",
   "other",
 ];
+export const INCOME_DEPOSIT_OUTSIDE_ACCOUNT = "outside_untracked";
 
 function normalizeAmount(value) {
   const parsed = Number(value);
@@ -50,6 +51,11 @@ function normalizeEntryType(value) {
   return INCOME_ENTRY_TYPES.includes(value) ? value : "paycheck";
 }
 
+function normalizeDepositAccountId(value) {
+  const normalized = normalizeText(value);
+  return normalized || null;
+}
+
 export function normalizeIncomeSourceForm(input = {}) {
   return {
     name: normalizeText(input.name),
@@ -71,8 +77,48 @@ export function normalizeIncomeEntryForm(input = {}) {
     monthKey: normalizeMonthKey(input.monthKey || entryDate.slice(0, 7)),
     amount: normalizeAmount(input.amount),
     entryType: normalizeEntryType(input.entryType),
+    depositAccountId: normalizeDepositAccountId(input.depositAccountId),
     notes: normalizeText(input.notes),
   };
+}
+
+export function getIncomeEntryMovementSourceId(entry = {}) {
+  return entry.supabaseId ?? entry.id ?? null;
+}
+
+export function buildIncomeDepositMovementPayload(entry = {}, depositAccountId = null) {
+  const normalizedDepositAccountId = normalizeDepositAccountId(depositAccountId);
+  const sourceId = getIncomeEntryMovementSourceId(entry);
+
+  if (!sourceId || !normalizedDepositAccountId) return null;
+
+  const isOutside = normalizedDepositAccountId === INCOME_DEPOSIT_OUTSIDE_ACCOUNT;
+
+  return {
+    accountId: isOutside ? null : normalizedDepositAccountId,
+    sourceType: "income_entry",
+    sourceId,
+    movementType: "income_deposit",
+    direction: "inflow",
+    amount: normalizeAmount(entry.amount),
+    movementDate: normalizeDate(entry.entryDate),
+    monthKey: normalizeMonthKey(entry.monthKey || entry.entryDate?.slice(0, 7)),
+    description: `Income deposit: ${normalizeEntryType(entry.entryType)}`,
+    isTracked: !isOutside,
+  };
+}
+
+export function getIncomeDepositAccountValue(entry = {}, movements = []) {
+  const sourceId = getIncomeEntryMovementSourceId(entry);
+  if (!sourceId) return "";
+
+  const movement = movements.find(
+    (currentMovement) =>
+      currentMovement.sourceType === "income_entry" && currentMovement.sourceId === sourceId,
+  );
+
+  if (!movement) return "";
+  return movement.isTracked === false ? INCOME_DEPOSIT_OUTSIDE_ACCOUNT : movement.accountId || "";
 }
 
 export function getIncomeEntriesForMonth(entries = [], monthKey) {

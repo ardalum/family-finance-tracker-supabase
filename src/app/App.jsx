@@ -288,6 +288,7 @@ function FinanceTrackerApp() {
   const {
     incomeSources,
     incomeEntries,
+    incomeDepositMovements,
     incomeLoading,
     incomeSaving,
     incomeError,
@@ -635,6 +636,7 @@ function FinanceTrackerApp() {
     insightsError,
     incomeSources,
     incomeEntries,
+    incomeDepositMovements,
     cashAccounts,
     accountBalanceSnapshots,
     liabilityAccounts,
@@ -748,10 +750,8 @@ function FinanceTrackerApp() {
         householdProfilesLoading={householdProfilesLoading}
         householdProfilesSaving={householdProfilesSaving}
         onCreateProfile={createHouseholdProfile}
-        onUpdateProfile={saveHouseholdProfile}
-        onDeactivateProfile={deactivateProfile}
-        onCreateCard={createSupabaseCreditCard}
         creditCardsSaving={creditCardsSaving}
+        onCreateCard={createSupabaseCreditCard}
         onAddDefaultBudgets={addDefaultBudgetsToSupabase}
         budgetsSaving={budgetsSaving}
         onFinish={finishFirstTimeSetup}

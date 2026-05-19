@@ -7,9 +7,12 @@ import Input from "../../../components/ui/Input.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { buildMonthOptions, formatDateKey, getCurrentMonthKey } from "../../../lib/dates.js";
 import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
+import { buildCashAccountOptions } from "../../accounts/accountsService.js";
 import {
   buildIncomeSourceOptions,
+  getIncomeDepositAccountValue,
   getIncomeEntriesForMonth,
+  INCOME_DEPOSIT_OUTSIDE_ACCOUNT,
   INCOME_ENTRY_TYPES,
   INCOME_FREQUENCIES,
   INCOME_SOURCE_TYPES,
@@ -18,9 +21,20 @@ import {
   summarizeIncomeForMonth,
 } from "../incomeService.js";
 
+const DEPOSIT_NONE = "";
+const LIQUID_ACCOUNT_TYPES = new Set(["checking", "savings", "cash", "money_market"]);
+
+function getDepositAccountLabel(value, accountOptions) {
+  if (!value) return "Not deposited yet";
+  if (value === INCOME_DEPOSIT_OUTSIDE_ACCOUNT) return "Outside / untracked";
+  return accountOptions.find((option) => option.value === value)?.label ?? "Deleted account";
+}
+
 export default function Income({
   incomeSources,
   incomeEntries,
+  incomeDepositMovements = [],
+  cashAccounts = [],
   householdProfiles,
   selectedMonth,
   onMonthChange,
@@ -35,6 +49,13 @@ export default function Income({
   onDeleteIncomeEntry,
 }) {
   const sourceOptions = useMemo(() => buildIncomeSourceOptions(incomeSources), [incomeSources]);
+  const depositAccountOptions = useMemo(
+    () =>
+      buildCashAccountOptions(
+        cashAccounts.filter((account) => LIQUID_ACCOUNT_TYPES.has(account.accountType)),
+      ),
+    [cashAccounts],
+  );
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const monthEntries = useMemo(
     () =>
@@ -52,6 +73,7 @@ export default function Income({
     normalizeIncomeEntryForm({
       entryDate: formatDateKey(new Date()),
       monthKey: selectedMonth,
+      depositAccountId: DEPOSIT_NONE,
     }),
   );
   const [editingEntryId, setEditingEntryId] = useState("");
@@ -79,6 +101,7 @@ export default function Income({
       normalizeIncomeEntryForm({
         entryDate: formatDateKey(new Date()),
         monthKey: selectedMonth,
+        depositAccountId: DEPOSIT_NONE,
       }),
     );
   }
@@ -147,7 +170,8 @@ export default function Income({
               Manual income entries only for this MVP. No sync or imports.
             </p>
             <p className="mt-1 text-sm text-text-muted">
-              Income entries are tracked separately and do not change spending or budget totals.
+              Choose a tracked account if this income should affect projected cash. Account
+              snapshots remain your actual balance record.
             </p>
           </div>
           <Select
@@ -225,6 +249,28 @@ export default function Income({
                 </option>
               ))}
             </Select>
+            <Select
+              label="Deposit to account"
+              value={entryDraft.depositAccountId || ""}
+              onChange={(event) =>
+                setEntryDraft((draft) => ({
+                  ...draft,
+                  depositAccountId: event.target.value || null,
+                }))
+              }
+            >
+              <option value="">Not deposited yet</option>
+              {depositAccountOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+              <option value={INCOME_DEPOSIT_OUTSIDE_ACCOUNT}>Outside / untracked account</option>
+            </Select>
+            <p className="text-xs text-text-muted">
+              Tracked accounts create projected cash inflows only. They do not update actual account
+              snapshots.
+            </p>
             <Select
               label="Entry type"
               value={entryDraft.entryType}
@@ -442,6 +488,10 @@ export default function Income({
           ) : (
             monthEntries.map((entry) => {
               const entryId = entry.supabaseId ?? entry.id;
+              const depositAccountValue = getIncomeDepositAccountValue(
+                entry,
+                incomeDepositMovements,
+              );
               const sourceName =
                 entry.incomeSourceId && sourceIdByOption.has(entry.incomeSourceId)
                   ? sourceOptions.find((option) => option.value === entry.incomeSourceId)?.label
@@ -459,6 +509,10 @@ export default function Income({
                     </p>
                     <p className="text-xs text-text-muted">
                       {entry.entryDate} - {sourceName}
+                    </p>
+                    <p className="mt-1 text-xs text-text-muted">
+                      Deposit to:{" "}
+                      {getDepositAccountLabel(depositAccountValue, depositAccountOptions)}
                     </p>
                     {entry.notes ? (
                       <p className="mt-1 text-xs text-text-soft">{entry.notes}</p>
@@ -479,6 +533,7 @@ export default function Income({
                             monthKey: entry.monthKey,
                             amount: entry.amount,
                             entryType: entry.entryType,
+                            depositAccountId: depositAccountValue,
                             notes: entry.notes,
                           }),
                         );
