@@ -141,11 +141,14 @@ export function useBudgets({
       const importedBudgets = await importLocalBudgetCategories(activeHouseholdId, {
         [selectedBudgetMonth]: localBudgetsByMonth?.[selectedBudgetMonth] ?? [],
       });
-      await runRefreshSequence([loadSupabaseBudgets, ...createBudgetCategoryRefreshers({
-        loadSpendingCategories,
-        loadDashboardData,
-        loadInsightsData,
-      })]);
+      await runRefreshSequence([
+        loadSupabaseBudgets,
+        ...createBudgetCategoryRefreshers({
+          loadSpendingCategories,
+          loadDashboardData,
+          loadInsightsData,
+        }),
+      ]);
       return importedBudgets;
     } catch (error) {
       setBudgetsError(error.message || "Could not import local budget categories.");
@@ -208,11 +211,14 @@ export function useBudgets({
         selectedBudgetMonth,
       );
 
-      await runRefreshSequence([loadSupabaseBudgets, ...createBudgetCategoryRefreshers({
-        loadSpendingCategories,
-        loadDashboardData,
-        loadInsightsData,
-      })]);
+      await runRefreshSequence([
+        loadSupabaseBudgets,
+        ...createBudgetCategoryRefreshers({
+          loadSpendingCategories,
+          loadDashboardData,
+          loadInsightsData,
+        }),
+      ]);
 
       return copiedBudgets;
     } catch (error) {
