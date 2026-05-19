@@ -7,31 +7,41 @@ export default function CreditLimitSummary({ cards }) {
   const hasMultipleOwners = summary.ownerTotals.length > 1;
   const singleOwnerTotal = summary.ownerTotals[0];
 
+  const summaryTiles = hasMultipleOwners
+    ? [
+        ...summary.ownerTotals.map((ownerTotal) => ({
+          key: ownerTotal.owner,
+          label: `${ownerTotal.owner} total limit`,
+          value: formatCurrency(ownerTotal.total),
+          emphasis: false,
+        })),
+        {
+          key: "combined-total",
+          label: "Combined total limit",
+          value: formatCurrency(summary.combinedTotal),
+          emphasis: true,
+        },
+      ]
+    : [
+        {
+          key: "total-credit-limit",
+          label: "Total credit limit",
+          value: formatCurrency(singleOwnerTotal?.total ?? 0),
+          emphasis: true,
+        },
+      ];
+
   return (
-    <section className="grid max-w-5xl min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-[minmax(260px,320px)_minmax(280px,420px)]">
-      {hasMultipleOwners ? (
-        <div className="grid min-w-0 gap-4 sm:col-span-2 sm:grid-cols-2 xl:col-span-1">
-          {summary.ownerTotals.map((ownerTotal) => (
-            <SummaryTile
-              key={ownerTotal.owner}
-              label={`${ownerTotal.owner} total limit`}
-              value={formatCurrency(ownerTotal.total)}
-            />
-          ))}
-          <SummaryTile
-            label="Combined total limit"
-            value={formatCurrency(summary.combinedTotal)}
-            emphasis
-          />
-        </div>
-      ) : (
+    <section className="grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {summaryTiles.map((tile) => (
         <SummaryTile
-          label="Total credit limit"
-          value={formatCurrency(singleOwnerTotal?.total ?? 0)}
-          emphasis
+          key={tile.key}
+          label={tile.label}
+          value={tile.value}
+          emphasis={tile.emphasis}
         />
-      )}
-      <Card className="p-5">
+      ))}
+      <Card className="min-w-0 p-5">
         <p className="text-sm font-medium text-[#6B7280]">Credit cards</p>
         <p className="mt-2 text-3xl font-semibold tracking-normal text-[#111827]">
           {summary.cardCount}
@@ -49,7 +59,7 @@ function SummaryTile({ label, value, emphasis = false }) {
   return (
     <Card className={`min-w-0 p-5 ${emphasis ? "border-[#1F2937]" : ""}`}>
       <p className="text-sm font-medium text-[#6B7280]">{label}</p>
-      <p className="mt-2 whitespace-nowrap text-2xl font-semibold tracking-normal text-[#111827] sm:text-3xl">
+      <p className="mt-2 break-words text-2xl font-semibold tracking-normal text-[#111827] sm:text-3xl">
         {value}
       </p>
     </Card>
