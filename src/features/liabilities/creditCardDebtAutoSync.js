@@ -2,9 +2,8 @@ import { getPaymentDueDateForStatementMonth } from "../creditCards/statementCycl
 import { getStatementUnpaidAmount, isStatementPaid } from "../creditCards/statementPaymentUtils.js";
 
 export const AUTO_SYNC_ACCOUNT_NOTE =
-  "WalletFlow auto-sync: created from a past-due credit card statement.";
-export const AUTO_SYNC_SNAPSHOT_NOTE =
-  "WalletFlow auto-sync: unpaid credit card statement balance.";
+  "Spedger auto-sync: created from a past-due credit card statement.";
+export const AUTO_SYNC_SNAPSHOT_NOTE = "Spedger auto-sync: unpaid credit card statement balance.";
 
 async function getDefaultOperations() {
   const service = await import("./liabilitiesSupabaseService.js");

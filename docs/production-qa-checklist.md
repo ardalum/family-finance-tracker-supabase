@@ -1,4 +1,4 @@
-﻿# Production QA checklist
+# Production QA checklist
 
 Use this checklist before each production release.
 
@@ -38,7 +38,7 @@ Use this checklist before each production release.
 - [ ] Sidebar collapse/expand control works and keeps icon-only entries accessible.
 - [ ] Mobile shows a hamburger button that opens a drawer.
 - [ ] Mobile app header remains a compact single row with no overlapping controls.
-- [ ] WalletFlow wordmark is not clipped on mobile; phone widths show compact branding instead.
+- [ ] Spedger wordmark is not clipped on mobile; phone widths show compact branding instead.
 - [ ] Hamburger, alert, Quick Add, and account buttons have balanced icon sizing/tap targets.
 - [ ] Household selector does not overflow or overlap mobile header controls.
 - [ ] Quick Add appears once as a compact mobile shell action and remains tappable.
@@ -412,3 +412,13 @@ Manual browser/mobile checks still required before final production approval:
 - [ ] Requires browser/manual verification: Browser console has no critical runtime errors.
 
 Release recommendation from this checklist state: **Conditional Go for RC tag handoff**, with final tag/release approval waiting for manual browser/mobile smoke evidence unless that evidence has already been captured outside this local code-only pass.
+
+## Phase 77 branding QA
+
+- [ ] Browser tab title shows Spedger.
+- [ ] Desktop header/sidebar branding shows Spedger.
+- [ ] Mobile header/drawer branding uses Spedger or the compact logo mark without clipped old text.
+- [ ] About, Help, Privacy, Terms, Release Notes, and account menu copy use Spedger.
+- [ ] No visible WalletFlow text remains in the rendered app.
+- [ ] GitHub Pages base path remains `/family-finance-tracker-supabase/`.
+- [ ] Supabase project/table/env names are unchanged.

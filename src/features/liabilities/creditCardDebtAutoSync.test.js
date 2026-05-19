@@ -87,7 +87,7 @@ describe("past-due credit card debt auto-sync", () => {
     assert.equal(calls.snapshots[0].payload.monthKey, "2026-04");
     assert.equal(calls.snapshots[0].payload.snapshotDate, "2026-05-10");
     assert.equal(calls.snapshots[0].payload.balanceAmount, 500);
-    assert.match(calls.snapshots[0].payload.notes, /WalletFlow auto-sync/);
+    assert.match(calls.snapshots[0].payload.notes, /Spedger auto-sync/);
   });
 
   it("syncs only the remaining unpaid amount for partial payments", () => {

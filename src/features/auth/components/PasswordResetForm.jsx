@@ -85,8 +85,8 @@ export default function PasswordResetForm() {
           </div>
           <div>
             <h1 className="text-xl font-semibold tracking-normal">
-              <span className="text-[#1F2937]">Wallet</span>
-              <span className="text-[#10B981]">Flow</span>
+              <span className="text-[#1F2937]">Sped</span>
+              <span className="text-[#10B981]">ger</span>
             </h1>
             <p className="text-sm text-[#6B7280]">{AUTH_RECOVERY_FORM_COPY.brandDescription}</p>
           </div>

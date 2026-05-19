@@ -1,6 +1,6 @@
 # Frontend architecture plan
 
-This document tracks frontend architecture and tooling cleanup work for WalletFlow.
+This document tracks frontend architecture and tooling cleanup work for Spedger.
 
 ## Current status
 

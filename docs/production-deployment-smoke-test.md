@@ -1,7 +1,7 @@
 # Production Deployment Smoke Test (Phase 75)
 
 Date: 2026-05-18  
-Project: WalletFlow / Family Finance Tracker
+Project: Spedger / Family Finance Tracker
 
 Status note: Phase 75 local automated RC retest passed (`npm run verify`, `481` tests, `0` failures). This document still tracks the required deployed-environment smoke pass that must be completed with a test account/household before production approval.
 
@@ -131,3 +131,13 @@ The PR #354 mobile/regression checklist gap is now documented as follows:
 - Rendered browser checks remain required for mobile header overflow at 360px, 375px, 390px, and 414px; drawer usability; household selector fit; single Quick Add usability; page-level horizontal scroll checks; chart responsiveness; Liabilities/Net Worth mobile usability; and critical console errors.
 
 Post-tag deployed smoke must include the Phase 76 mobile checklist before final production approval.
+
+## 14) Phase 77 app rename smoke
+
+Before approving the Spedger RC, confirm on the deployed app:
+
+- Browser tab title shows Spedger.
+- Header/sidebar/drawer branding no longer displays WalletFlow.
+- About, Help, Privacy, Terms, Release Notes, and account menu copy use Spedger.
+- No visible WalletFlow text appears in the rendered app.
+- Deployment path remains `/family-finance-tracker-supabase/`.

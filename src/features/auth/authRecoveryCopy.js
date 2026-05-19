@@ -8,7 +8,7 @@ export const AUTH_RECOVERY_FORM_COPY = {
 };
 
 export const AUTH_RECOVERY_FORM_STATUS_COPY = {
-  placeholderSuccess: "Your password has been updated. You can continue using WalletFlow.",
+  placeholderSuccess: "Your password has been updated. You can continue using Spedger.",
   submitting: "Updating password...",
 };
 

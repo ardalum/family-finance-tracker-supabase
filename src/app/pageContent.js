@@ -72,17 +72,17 @@ export const pageContent = {
     description: "Review account identity, session status, and sign-out controls.",
   },
   about: {
-    title: "About WalletFlow",
-    description: "Learn more about WalletFlow.",
+    title: "About Spedger",
+    description: "Learn more about Spedger.",
   },
   "privacy-policy": {
     title: "Privacy Policy",
     description:
-      "Review how WalletFlow handles account and household finance data, backups, and deletion guidance.",
+      "Review how Spedger handles account and household finance data, backups, and deletion guidance.",
   },
   "terms-of-use": {
     title: "Terms of Use",
-    description: "Review the rules, responsibilities, and disclaimers for using WalletFlow.",
+    description: "Review the rules, responsibilities, and disclaimers for using Spedger.",
   },
   "help-support": {
     title: "Help / Support",
@@ -90,7 +90,7 @@ export const pageContent = {
   },
   "release-notes": {
     title: "Release Notes",
-    description: "Review recent WalletFlow changes and improvements.",
+    description: "Review recent Spedger changes and improvements.",
   },
 };
 

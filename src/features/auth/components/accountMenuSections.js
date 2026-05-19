@@ -72,7 +72,7 @@ export const accountMenuSections = [
       },
       {
         icon: Info,
-        label: "About WalletFlow",
+        label: "About Spedger",
         description: "App purpose, version notes, and credits.",
         view: "about",
         iconVariant: "neutral",

@@ -1,7 +1,7 @@
 # Full Product UX / IA Audit
 
 Date: 2026-05-18  
-Scope: WalletFlow Phase 64 product UX and information architecture audit (updated through Phase 70 sidebar stabilization)
+Scope: Spedger Phase 64 product UX and information architecture audit (updated through Phase 70 sidebar stabilization)
 
 ## 1) Executive summary
 

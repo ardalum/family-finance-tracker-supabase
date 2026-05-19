@@ -1,4 +1,4 @@
-name: Deploy WalletFlow to GitHub Pages
+name: Deploy Spedger to GitHub Pages
 
 on:
   workflow_dispatch:

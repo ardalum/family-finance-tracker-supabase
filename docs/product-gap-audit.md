@@ -77,3 +77,8 @@ Product gaps (deferred roadmap):
 - Local automated gates are passing through `npm run verify` with `481` tests and `0` failures.
 - No code-level critical/high release blockers are open from the local pass.
 - Remaining RC risk is evidence-based, not a newly identified product gap: final browser/mobile/deployed smoke results still need to be captured before production approval.
+
+## Phase 77 Branding Status
+
+- The product name is now Spedger in user-facing app copy and release documentation.
+- This is a branding change only; repo/deployment path, Supabase schema, and financial models remain unchanged.

@@ -1,7 +1,7 @@
 # Product UX Audit After Finance Expansion (Phase 39)
 
 Date: 2026-05-17  
-Project: WalletFlow / Family Finance Tracker  
+Project: Spedger / Family Finance Tracker  
 Scope: UX/product audit after expansion to income, savings, accounts, liabilities, net worth, and expanded Insights reporting
 
 ## 1. Product Structure

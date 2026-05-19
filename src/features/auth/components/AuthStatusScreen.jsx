@@ -9,18 +9,18 @@ const statusConfig = {
     icon: MailCheck,
     title: "Check your inbox",
     description:
-      "Open the email from WalletFlow and follow the link to finish setting up your account.",
+      "Open the email from Spedger and follow the link to finish setting up your account.",
   },
   [AUTH_STATUS_TYPES.verified]: {
     icon: CheckCircle2,
     title: "Account verified",
-    description: "Your account is ready. You can continue using WalletFlow.",
+    description: "Your account is ready. You can continue using Spedger.",
   },
   [AUTH_STATUS_TYPES.resetPassword]: {
     icon: KeyRound,
     title: "Reset your password",
     description:
-      "Follow the password reset steps from your email to continue securing your WalletFlow account.",
+      "Follow the password reset steps from your email to continue securing your Spedger account.",
   },
   [AUTH_STATUS_TYPES.signedOut]: {
     icon: UserCircle,

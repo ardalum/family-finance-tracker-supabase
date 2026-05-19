@@ -1,14 +1,14 @@
 import { appMetadata } from "../../app/appMetadata.js";
 
 export const releaseNotesHero = {
-  eyebrow: `WalletFlow v${appMetadata.version}`,
+  eyebrow: `Spedger v${appMetadata.version}`,
   title: "Release Notes",
-  description: "Review recent WalletFlow changes, cleanup passes, and user-facing improvements.",
+  description: "Review recent Spedger changes, cleanup passes, and user-facing improvements.",
 };
 
 export const releaseNotes = [
   {
-    version: "WalletFlow real-data readiness candidate",
+    version: "Spedger real-data readiness candidate",
     date: "May 2026",
     items: [
       "Validated Monthly Close workflow readiness, including persisted month review state and manual check tracking by household/month.",

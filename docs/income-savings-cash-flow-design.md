@@ -1,14 +1,14 @@
 # Income, Savings, and Cash-Flow Design (Phase 17)
 
 Date: 2026-05-17  
-Project: WalletFlow / Family Finance Tracker  
+Project: Spedger / Family Finance Tracker  
 Scope: Design-only planning for next major feature (no implementation in this phase)
 
 > Status update (Phase 28): Income Tracking MVP is implemented and hardened (manual income sources, manual income entries, month filtering, and monthly income total). Savings Goals MVP is implemented and hardened (manual goals, manual contributions, and progress tracking). Dashboard Cash-Flow Summary MVP is implemented and hardened with clear missing-income states and formula guidance (Income - spending - recurring remaining - savings). Income and savings remain separate from spending/budget totals. Known limitation: unpaid card balance carry is excluded from estimated leftover in this MVP. Still missing: emergency-fund specific workflows and richer income/savings reporting overlays.
 
 ## 1. Problem Statement
 
-WalletFlow currently provides strong credit-card, spending, budget, recurring bill, insight, backup/restore, and monthly-close workflows. However, the product is still incomplete as a household finance tracker because users cannot record where money comes from (income), where reserve money is intentionally moved (savings), or whether monthly inflows cover monthly outflows (cash flow).
+Spedger currently provides strong credit-card, spending, budget, recurring bill, insight, backup/restore, and monthly-close workflows. However, the product is still incomplete as a household finance tracker because users cannot record where money comes from (income), where reserve money is intentionally moved (savings), or whether monthly inflows cover monthly outflows (cash flow).
 
 Without explicit income/savings/cash-flow tracking:
 

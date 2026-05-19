@@ -1,12 +1,12 @@
 # Visual Analytics, YTD Reporting, and Historical Performance Design (Phase 18)
 
 Date: 2026-05-17  
-Project: WalletFlow / Family Finance Tracker  
+Project: Spedger / Family Finance Tracker  
 Scope: Design-only planning for visual analytics and historical reporting (no chart implementation in this phase)
 
 ## 1. Problem Statement
 
-WalletFlow currently has strong monthly operations for cards, spending, budgets, recurring bills, and monthly close. However, the product remains incomplete as a household finance tracker without visual analytics, year-to-date (YTD) reporting, previous-year comparison, and historical trend analysis.
+Spedger currently has strong monthly operations for cards, spending, budgets, recurring bills, and monthly close. However, the product remains incomplete as a household finance tracker without visual analytics, year-to-date (YTD) reporting, previous-year comparison, and historical trend analysis.
 
 Today, users can review month snapshots but cannot easily evaluate longer-term performance. The app does not yet answer key questions such as:
 

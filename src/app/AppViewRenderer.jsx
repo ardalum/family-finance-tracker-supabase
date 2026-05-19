@@ -1,4 +1,4 @@
-import AboutWalletFlow from "../features/about/components/AboutWalletFlow.jsx";
+import AboutSpedger from "../features/about/components/AboutSpedger.jsx";
 import BackupRestore from "../features/backup/components/BackupRestore.jsx";
 import BudgetTracker from "../features/budgets/components/BudgetTracker.jsx";
 import CreditCardTracker from "../features/creditCards/components/CreditCardTracker.jsx";
@@ -64,7 +64,7 @@ export default function AppViewRenderer({
       ) : null}
       {activeView === "app-settings" ? <AppSettings /> : null}
       {activeView === "account-settings" ? <AccountSettings /> : null}
-      {activeView === "about" ? <AboutWalletFlow /> : null}
+      {activeView === "about" ? <AboutSpedger /> : null}
       {activeView === "privacy-policy" ? <PrivacyPolicy /> : null}
       {activeView === "terms-of-use" ? <TermsOfUse /> : null}
       {activeView === "help-support" ? <HelpSupport /> : null}

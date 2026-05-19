@@ -1,7 +1,7 @@
 # Liability and Debt Snapshots Design (Phase 32)
 
 Date: 2026-05-17  
-Project: WalletFlow / Family Finance Tracker  
+Project: Spedger / Family Finance Tracker  
 Scope: Design-only planning for liability/debt account snapshots (no implementation in this phase)
 
 ## Phase 33 Status Update
@@ -41,7 +41,7 @@ Scope: Design-only planning for liability/debt account snapshots (no implementat
 
 ## 1. Problem Statement
 
-WalletFlow cannot produce trustworthy net worth until liabilities are tracked with the same clarity as asset balances. Cash account snapshots now exist, but debt balances are still missing, so total household position is incomplete.
+Spedger cannot produce trustworthy net worth until liabilities are tracked with the same clarity as asset balances. Cash account snapshots now exist, but debt balances are still missing, so total household position is incomplete.
 
 Without liability/debt snapshots:
 

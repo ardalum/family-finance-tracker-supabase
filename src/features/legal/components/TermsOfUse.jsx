@@ -5,14 +5,14 @@ const userResponsibilities = [
   "Enter accurate information and review it regularly",
   "Verify balances, due dates, and payments with the original financial institution or service provider",
   "Protect login credentials and exported backup files",
-  "Use WalletFlow only for lawful personal or household finance tracking",
+  "Use Spedger only for lawful personal or household finance tracking",
 ];
 
 const notAllowedItems = [
-  "Relying on WalletFlow as the only source for payment due dates or account balances",
+  "Relying on Spedger as the only source for payment due dates or account balances",
   "Using the app to store information that does not belong to the household",
   "Attempting to bypass authentication, household access controls, or data protections",
-  "Treating WalletFlow as financial, tax, legal, investment, credit, or lending advice",
+  "Treating Spedger as financial, tax, legal, investment, credit, or lending advice",
 ];
 
 export default function TermsOfUse() {
@@ -31,8 +31,8 @@ export default function TermsOfUse() {
               Terms of Use
             </h2>
             <p className="mt-4 text-sm leading-6 text-text-muted">
-              These terms explain the basic rules for using WalletFlow. By using the app, users
-              agree to use it as a personal tracking tool and to verify important financial details
+              These terms explain the basic rules for using Spedger. By using the app, users agree
+              to use it as a personal tracking tool and to verify important financial details
               outside the app.
             </p>
           </div>
@@ -93,10 +93,10 @@ export default function TermsOfUse() {
           <div>
             <h3 className="text-lg font-semibold text-text-main">No financial advice</h3>
             <p className="mt-3 text-sm leading-6 text-text-muted">
-              WalletFlow is only for personal tracking and organization. It does not provide
-              financial, legal, tax, credit, lending, or investment advice. Users should consult a
-              qualified professional before making decisions that affect money, taxes, credit,
-              loans, insurance, or investments.
+              Spedger is only for personal tracking and organization. It does not provide financial,
+              legal, tax, credit, lending, or investment advice. Users should consult a qualified
+              professional before making decisions that affect money, taxes, credit, loans,
+              insurance, or investments.
             </p>
           </div>
         </div>
@@ -113,7 +113,7 @@ export default function TermsOfUse() {
             <div>
               <h3 className="text-lg font-semibold text-text-main">Accuracy and availability</h3>
               <p className="mt-3 text-sm leading-6 text-text-muted">
-                WalletFlow depends on user-entered data. The app may contain mistakes, downtime, or
+                Spedger depends on user-entered data. The app may contain mistakes, downtime, or
                 incomplete information. Users remain responsible for checking official statements,
                 account portals, lender notices, and provider communications.
               </p>
@@ -142,7 +142,7 @@ export default function TermsOfUse() {
       <Card className="p-5">
         <h3 className="text-lg font-semibold text-text-main">Changes to these terms</h3>
         <p className="mt-3 text-sm leading-6 text-text-muted">
-          These terms may be updated as WalletFlow changes. Continued use of the app after updates
+          These terms may be updated as Spedger changes. Continued use of the app after updates
           means the user accepts the revised terms.
         </p>
       </Card>

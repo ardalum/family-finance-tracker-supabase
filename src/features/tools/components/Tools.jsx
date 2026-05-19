@@ -121,13 +121,13 @@ const toolGroups = [
       {
         view: "release-notes",
         label: "Release Notes",
-        description: "See recent WalletFlow changes and hardening updates.",
+        description: "See recent Spedger changes and hardening updates.",
         icon: BookOpenText,
         iconVariant: "neutral",
       },
       {
         view: "about",
-        label: "About WalletFlow",
+        label: "About Spedger",
         description: "Learn about scope, version, and project direction.",
         icon: Info,
         iconVariant: "neutral",

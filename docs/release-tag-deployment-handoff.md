@@ -1,7 +1,7 @@
 # Release Tag and Deployment Handoff (Phase 63)
 
 Date: 2026-05-18  
-Project: WalletFlow / Family Finance Tracker
+Project: Spedger / Family Finance Tracker
 
 ## 1) Release candidate status
 
@@ -71,7 +71,7 @@ npm run verify
 - Supabase Auth configured for production URL + redirects.
 - RLS-enabled finance tables for cards/budgets/spending/recurring/monthly close/income/savings/accounts/liabilities.
 - Household setup/profile/security migrations already present.
-- No dedicated calendar persistence table is used; calendar events are derived from existing WalletFlow records.
+- No dedicated calendar persistence table is used; calendar events are derived from existing Spedger records.
 
 ## 7b) FullCalendar dependency notes
 
@@ -189,7 +189,7 @@ Phase 76 status on 2026-05-18:
 
 Recommended release title:
 
-- `WalletFlow v0.1.0 RC1 - Family finance tracker release candidate`
+- `Spedger v0.1.0 RC1 - Family finance tracker release candidate`
 
 Recommended tag:
 
@@ -210,7 +210,7 @@ Suggested tag commands (do not run until the candidate commit is final):
 
 ```bash
 git status
-git tag -a v0.1.0-rc.1 -m "WalletFlow v0.1.0 RC1"
+git tag -a v0.1.0-rc.1 -m "Spedger v0.1.0 RC1"
 git push origin v0.1.0-rc.1
 ```
 
@@ -226,3 +226,21 @@ Phase 76 go/no-go recommendation:
 
 - **Conditional Go for RC tag handoff** from local automation.
 - **No-Go for final production release** until manual browser/mobile/deployed smoke evidence is recorded.
+
+## 17) Phase 77 app rename handoff
+
+The release candidate product name is now **Spedger**.
+
+Branding handoff notes:
+
+- User-facing WalletFlow copy was renamed to Spedger.
+- GitHub repository and GitHub Pages base path are intentionally unchanged.
+- Supabase schema, tables, and environment variable names are intentionally unchanged.
+- Stable non-visible technical keys may retain legacy lowercase `walletflow` identifiers for compatibility.
+
+Updated suggested tag message:
+
+```bash
+git tag -a v0.1.0-rc.1 -m "Spedger v0.1.0 RC1"
+git push origin v0.1.0-rc.1
+```

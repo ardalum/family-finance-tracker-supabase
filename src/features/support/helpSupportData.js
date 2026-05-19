@@ -1,7 +1,7 @@
 export const helpSupportHero = {
   title: "Help / Support",
   description:
-    "Use this page for troubleshooting notes, privacy-safe testing reminders, and support contact guidance for WalletFlow.",
+    "Use this page for troubleshooting notes, privacy-safe testing reminders, and support contact guidance for Spedger.",
 };
 
 export const supportGuidanceCards = [

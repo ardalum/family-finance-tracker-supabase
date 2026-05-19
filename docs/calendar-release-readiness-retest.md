@@ -1,11 +1,11 @@
 # Calendar Release Readiness Retest
 
 Date: 2026-05-18
-Scope: WalletFlow Phase 61 FullCalendar migration retest
+Scope: Spedger Phase 61 FullCalendar migration retest
 
 ## 1) Calendar feature scope
 
-- Calendar remains a secondary WalletFlow workspace sourced from existing data only.
+- Calendar remains a secondary Spedger workspace sourced from existing data only.
 - FullCalendar React now renders the default month grid (`dayGridMonth`).
 - Agenda grouped list remains available via Calendar/Agenda toggle.
 - Selected-day detail panel remains below/beside the calendar depending on viewport.
@@ -66,7 +66,7 @@ Scope: WalletFlow Phase 61 FullCalendar migration retest
 - No reminders/notifications yet.
 - No Google/Apple calendar export yet.
 - No automatic bank/card sync.
-- Calendar events come from existing WalletFlow data only.
+- Calendar events come from existing Spedger data only.
 
 ## 8) Go/no-go recommendation
 

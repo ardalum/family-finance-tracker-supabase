@@ -5,17 +5,17 @@ const collectedItems = [
   {
     title: "Account and session information",
     description:
-      "WalletFlow may use sign-in details, session status, and profile identity information so the app can identify the signed-in user.",
+      "Spedger may use sign-in details, session status, and profile identity information so the app can identify the signed-in user.",
   },
   {
     title: "Household and finance tracking data",
     description:
-      "WalletFlow stores the household, credit card, budget, spending, recurring payment, and related notes that users enter into the app.",
+      "Spedger stores the household, credit card, budget, spending, recurring payment, and related notes that users enter into the app.",
   },
   {
     title: "App settings and backup data",
     description:
-      "WalletFlow may store preferences, selected views, and legacy local data in the browser. Exported backup files are created and stored by the user.",
+      "Spedger may store preferences, selected views, and legacy local data in the browser. Exported backup files are created and stored by the user.",
   },
 ];
 
@@ -42,7 +42,7 @@ export default function PrivacyPolicy() {
               Privacy Policy
             </h2>
             <p className="mt-4 text-sm leading-6 text-text-muted">
-              WalletFlow is a personal household finance tracker created by Arvin Dalumpines. This
+              Spedger is a personal household finance tracker created by Arvin Dalumpines. This
               policy explains what the app is designed to collect, store, and help users control.
             </p>
           </div>
@@ -86,7 +86,7 @@ export default function PrivacyPolicy() {
             <div>
               <h3 className="text-lg font-semibold text-text-main">Data storage and security</h3>
               <p className="mt-3 text-sm leading-6 text-text-muted">
-                WalletFlow uses Supabase for account authentication and household data storage. Some
+                Spedger uses Supabase for account authentication and household data storage. Some
                 preferences or legacy backup data may also be stored in the browser. Users should
                 protect their login credentials, use trusted devices, and sign out from shared
                 devices.
@@ -120,19 +120,19 @@ export default function PrivacyPolicy() {
           <div>
             <h3 className="text-lg font-semibold text-text-main">Data deletion</h3>
             <p className="mt-3 text-sm leading-6 text-text-muted">
-              WalletFlow supports destructive controls in Backup & Restore for household finance
-              reset and account deletion flows. Deletion is permanent and should only be performed
-              after exporting a fresh private backup.
+              Spedger supports destructive controls in Backup & Restore for household finance reset
+              and account deletion flows. Deletion is permanent and should only be performed after
+              exporting a fresh private backup.
             </p>
           </div>
         </div>
       </Card>
 
       <Card className="p-5">
-        <h3 className="text-lg font-semibold text-text-main">What WalletFlow does not do</h3>
+        <h3 className="text-lg font-semibold text-text-main">What Spedger does not do</h3>
         <p className="mt-3 text-sm leading-6 text-text-muted">
-          WalletFlow does not connect directly to bank accounts, pull credit scores, process
-          payments, sell user finance data, or provide financial, legal, tax, or investment advice.
+          Spedger does not connect directly to bank accounts, pull credit scores, process payments,
+          sell user finance data, or provide financial, legal, tax, or investment advice.
         </p>
       </Card>
     </section>
