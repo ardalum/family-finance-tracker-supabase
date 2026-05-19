@@ -62,6 +62,7 @@ export function createAppViewProps({
   insightsError,
   incomeSources,
   incomeEntries,
+  incomeDepositMovements,
   cashAccounts,
   accountBalanceSnapshots,
   liabilityAccounts,
@@ -328,6 +329,8 @@ export function createAppViewProps({
     incomeProps: {
       incomeSources,
       incomeEntries,
+      incomeDepositMovements,
+      cashAccounts,
       householdProfiles,
       selectedMonth: selectedIncomeMonth,
       loading: incomeLoading,
