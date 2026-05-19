@@ -6,8 +6,8 @@ export default function CreditLimitSummary({ cards }) {
   const summary = getCreditLimitSummary(cards);
 
   return (
-    <section className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(280px,1fr)]">
-      <div className="grid min-w-0 gap-4 md:grid-cols-3">
+    <section className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(280px,0.4fr)]">
+      <div className="grid min-w-0 gap-4 sm:grid-cols-2 2xl:grid-cols-3">
         {summary.ownerTotals.length > 0 ? (
           summary.ownerTotals.map((ownerTotal) => (
             <SummaryTile
@@ -41,9 +41,9 @@ export default function CreditLimitSummary({ cards }) {
 
 function SummaryTile({ label, value, emphasis = false }) {
   return (
-    <Card className={`p-5 ${emphasis ? "border-[#1F2937]" : ""}`}>
+    <Card className={`min-w-0 p-5 ${emphasis ? "border-[#1F2937]" : ""}`}>
       <p className="text-sm font-medium text-[#6B7280]">{label}</p>
-      <p className="mt-2 break-words text-2xl font-semibold tracking-normal text-[#111827] sm:text-3xl">
+      <p className="mt-2 whitespace-nowrap text-2xl font-semibold tracking-normal text-[#111827] sm:text-3xl">
         {value}
       </p>
     </Card>
