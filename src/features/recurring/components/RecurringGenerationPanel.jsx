@@ -1,28 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { CheckCircle2, Clock, RotateCcw, SkipForward, AlertTriangle } from "lucide-react";
-import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
-import Input from "../../../components/ui/Input.jsx";
-import { formatCurrency } from "../../../lib/formatters.js";
-import { getCategoryName } from "../../spending/spendingService.js";
-import {
-  getMonthlyRecurringRows,
-  getRecurringAmountForMonth,
-  getRecurringDueDate,
-} from "../recurringService.js";
+import { getMonthlyRecurringRows, getRecurringDueDate } from "../recurringService.js";
+import RecurringBillRow from "./RecurringBillRow.jsx";
 
 function todayDate() {
   return new Date().toISOString().slice(0, 10);
 }
-
-const statusStyles = {
-  Paid: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-  Skipped: "bg-amber-50 text-amber-700 ring-amber-200",
-  "Past due": "bg-red-50 text-red-700 ring-red-200",
-  "Due now": "bg-red-50 text-red-700 ring-red-200",
-  "Due soon": "bg-amber-50 text-amber-700 ring-amber-200",
-  Upcoming: "bg-gray-100 text-gray-600 ring-gray-200",
-};
 
 const messageStyles = {
   success: "border-emerald-200 bg-emerald-50 text-emerald-700",
@@ -91,7 +74,11 @@ export default function RecurringGenerationPanel({
 
   async function handleMarkPaid(row) {
     const draft = drafts[row.template.id] ?? {};
-    const amount = Number(draft.actualAmount);
+    const amount =
+      row.template.billType === "fixed"
+        ? Number(row.template.estimatedAmount || 0)
+        : Number(draft.actualAmount);
+
     if (!Number.isFinite(amount) || amount <= 0) {
       setMessage({
         type: "error",
@@ -120,7 +107,7 @@ export default function RecurringGenerationPanel({
       await onMarkUnpaid(row.template);
       setMessage({
         type: "warning",
-        text: `${row.template.name} marked unpaid. The linked spending transaction was removed for this month.`,
+        text: `${row.template.name} marked unpaid. This month’s linked spending entry was cleared.`,
       });
     } catch (error) {
       setMessage({ type: "error", text: error.message || "Could not mark recurring bill unpaid." });
@@ -146,8 +133,9 @@ export default function RecurringGenerationPanel({
           <div className="min-w-0">
             <h3 className="text-lg font-semibold text-gray-950">Monthly recurring bills</h3>
             <p className="mt-1 text-sm text-gray-500">
-              Review each bill, enter the actual amount, then mark it paid. Paid bills create or
-              update one linked spending transaction.
+              Review each bill, then mark it paid. Fixed bills use the template amount. Variable
+              bills can be adjusted before payment. Paid bills create or update one linked spending
+              transaction.
             </p>
           </div>
           <div className="grid min-w-0 grid-cols-2 gap-2 text-xs sm:grid-cols-4 lg:min-w-[420px]">
@@ -163,9 +151,9 @@ export default function RecurringGenerationPanel({
         </div>
 
         <div className="rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-800">
-          Tip: Use <span className="font-semibold">Update Paid</span> to correct the amount or paid
-          date. Use <span className="font-semibold">Mark Unpaid</span> to remove the linked spending
-          transaction for this month.
+          Tip: Fixed bills use their template amount automatically. Variable bills keep the editable
+          actual amount field. Use <span className="font-semibold">Mark Unpaid</span> to clear this
+          month’s linked spending entry.
         </div>
 
         {message ? (
@@ -198,145 +186,19 @@ export default function RecurringGenerationPanel({
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {billRows.map((row) => {
-                const draft = drafts[row.template.id] ?? {};
-                const isPaid = row.instance?.status === "paid";
-                const isSkipped = row.instance?.status === "skipped";
-                const needsAction = !isPaid && !isSkipped;
-                const amount = getRecurringAmountForMonth(row.template, row.instance);
-
-                return (
-                  <tr
-                    key={row.template.id}
-                    className={row.displayStatus === "Past due" ? "bg-red-50/70" : "bg-white"}
-                  >
-                    <td className="px-5 py-4 align-middle font-semibold text-gray-950">
-                      <div className="grid gap-1">
-                        <span>{row.template.name}</span>
-                        {isPaid ? (
-                          <span className="text-xs font-medium text-gray-500">
-                            Linked spending transaction protected from direct edit/delete.
-                          </span>
-                        ) : needsAction ? (
-                          <span className="text-xs font-medium text-gray-500">
-                            Waiting for amount and paid date.
-                          </span>
-                        ) : null}
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap px-5 py-4 align-middle text-gray-700">
-                      {row.dueDate}
-                    </td>
-                    <td className="px-5 py-4 align-middle text-gray-700">
-                      {getCategoryName(row.template.categoryId, categories)}
-                    </td>
-                    <td className="px-5 py-4 align-middle text-gray-700">
-                      {row.template.paymentMethod}
-                    </td>
-                    <td className="px-5 py-4 align-middle text-gray-700">
-                      {formatCurrency(row.template.estimatedAmount)}
-                    </td>
-                    <td className="px-5 py-4 align-middle">
-                      <Input
-                        label="Actual amount"
-                        type="number"
-                        min="0.01"
-                        step="0.01"
-                        value={draft.actualAmount ?? ""}
-                        onChange={(event) =>
-                          updateDraft(row.template.id, { actualAmount: event.target.value })
-                        }
-                        placeholder={
-                          row.template.billType === "variable"
-                            ? formatCurrency(row.template.estimatedAmount)
-                            : ""
-                        }
-                        disabled={isSkipped}
-                      />
-                    </td>
-                    <td className="px-5 py-4 align-middle">
-                      <span
-                        className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${statusStyles[row.displayStatus] ?? statusStyles.Upcoming}`}
-                      >
-                        {isPaid ? <CheckCircle2 size={13} aria-hidden="true" /> : null}
-                        {isSkipped ? <SkipForward size={13} aria-hidden="true" /> : null}
-                        {row.displayStatus === "Past due" ? (
-                          <AlertTriangle size={13} aria-hidden="true" />
-                        ) : null}
-                        {!isPaid && !isSkipped && row.displayStatus !== "Past due" ? (
-                          <Clock size={13} aria-hidden="true" />
-                        ) : null}
-                        {row.displayStatus}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4 align-middle">
-                      <Input
-                        label="Paid date"
-                        type="date"
-                        value={draft.paidDate ?? todayDate()}
-                        onChange={(event) =>
-                          updateDraft(row.template.id, { paidDate: event.target.value })
-                        }
-                        disabled={isSkipped}
-                      />
-                    </td>
-                    <td className="px-5 py-4 align-middle">
-                      <div className="flex flex-wrap gap-2">
-                        {isPaid ? (
-                          <>
-                            <Button
-                              type="button"
-                              onClick={() => handleMarkPaid(row)}
-                              disabled={isSaving}
-                            >
-                              <CheckCircle2 size={16} aria-hidden="true" />
-                              Update Paid
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="secondary"
-                              onClick={() => handleMarkUnpaid(row)}
-                              disabled={isSaving}
-                            >
-                              <RotateCcw size={16} aria-hidden="true" />
-                              Mark Unpaid
-                            </Button>
-                          </>
-                        ) : (
-                          <Button
-                            type="button"
-                            onClick={() => handleMarkPaid(row)}
-                            disabled={isSaving || isSkipped}
-                          >
-                            <CheckCircle2 size={16} aria-hidden="true" />
-                            Mark Paid
-                          </Button>
-                        )}
-                        {!isPaid ? (
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            onClick={() => handleSkip(row)}
-                            disabled={isSaving}
-                          >
-                            <SkipForward size={16} aria-hidden="true" />
-                            {isSkipped ? "Keep Skipped" : "Skip"}
-                          </Button>
-                        ) : null}
-                      </div>
-                      {isPaid ? (
-                        <p className="mt-2 text-xs text-gray-500">
-                          Linked spending: {formatCurrency(amount)}
-                        </p>
-                      ) : isSkipped ? (
-                        <p className="mt-2 text-xs text-gray-500">
-                          Skipped bills do not create spending transactions.
-                        </p>
-                      ) : null}
-                    </td>
-                  </tr>
-                );
-              })}
+              {billRows.map((row) => (
+                <RecurringBillRow
+                  key={row.template.id}
+                  row={row}
+                  categories={categories}
+                  draft={drafts[row.template.id] ?? {}}
+                  isSaving={isSaving}
+                  onDraftChange={updateDraft}
+                  onMarkPaid={handleMarkPaid}
+                  onMarkUnpaid={handleMarkUnpaid}
+                  onSkip={handleSkip}
+                />
+              ))}
             </tbody>
           </table>
         </div>
