@@ -1,27 +1,44 @@
 import Card from "../../../components/ui/Card.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
-import { getOwnerCreditLimitTotal } from "../creditCardsService.js";
+import { getCreditLimitSummary } from "../creditCardsService.js";
 
 export default function CreditLimitSummary({ cards }) {
-  const arvinTotal = getOwnerCreditLimitTotal(cards, "Arvin");
-  const kristineTotal = getOwnerCreditLimitTotal(cards, "Kristine");
-  const combinedTotal = arvinTotal + kristineTotal;
-  const activeCount = cards.filter((card) => card.isActive).length;
-  const inactiveCount = cards.length - activeCount;
+  const summary = getCreditLimitSummary(cards);
+  const hasMultipleOwners = summary.ownerTotals.length > 1;
+  const singleOwnerTotal = summary.ownerTotals[0];
 
   return (
-    <section className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(280px,1fr)]">
-      <div className="grid min-w-0 gap-4 md:grid-cols-3">
-        <SummaryTile label="Arvin total limit" value={formatCurrency(arvinTotal)} />
-        <SummaryTile label="Kristine total limit" value={formatCurrency(kristineTotal)} />
-        <SummaryTile label="Combined total limit" value={formatCurrency(combinedTotal)} emphasis />
-      </div>
+    <section className="grid max-w-5xl min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-[minmax(260px,320px)_minmax(280px,420px)]">
+      {hasMultipleOwners ? (
+        <div className="grid min-w-0 gap-4 sm:col-span-2 sm:grid-cols-2 xl:col-span-1">
+          {summary.ownerTotals.map((ownerTotal) => (
+            <SummaryTile
+              key={ownerTotal.owner}
+              label={`${ownerTotal.owner} total limit`}
+              value={formatCurrency(ownerTotal.total)}
+            />
+          ))}
+          <SummaryTile
+            label="Combined total limit"
+            value={formatCurrency(summary.combinedTotal)}
+            emphasis
+          />
+        </div>
+      ) : (
+        <SummaryTile
+          label="Total credit limit"
+          value={formatCurrency(singleOwnerTotal?.total ?? 0)}
+          emphasis
+        />
+      )}
       <Card className="p-5">
         <p className="text-sm font-medium text-[#6B7280]">Credit cards</p>
-        <p className="mt-2 text-3xl font-semibold tracking-normal text-[#111827]">{cards.length}</p>
+        <p className="mt-2 text-3xl font-semibold tracking-normal text-[#111827]">
+          {summary.cardCount}
+        </p>
         <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
-          <CountItem label="Active" value={activeCount} />
-          <CountItem label="Inactive" value={inactiveCount} />
+          <CountItem label="Active" value={summary.activeCount} />
+          <CountItem label="Inactive" value={summary.inactiveCount} />
         </div>
       </Card>
     </section>
@@ -30,9 +47,9 @@ export default function CreditLimitSummary({ cards }) {
 
 function SummaryTile({ label, value, emphasis = false }) {
   return (
-    <Card className={`p-5 ${emphasis ? "border-[#1F2937]" : ""}`}>
+    <Card className={`min-w-0 p-5 ${emphasis ? "border-[#1F2937]" : ""}`}>
       <p className="text-sm font-medium text-[#6B7280]">{label}</p>
-      <p className="mt-2 break-words text-2xl font-semibold tracking-normal text-[#111827] sm:text-3xl">
+      <p className="mt-2 whitespace-nowrap text-2xl font-semibold tracking-normal text-[#111827] sm:text-3xl">
         {value}
       </p>
     </Card>
