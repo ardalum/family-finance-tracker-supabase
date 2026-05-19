@@ -120,11 +120,7 @@ export default function RecurringBillRow({
               </Button>
             </>
           ) : (
-            <Button
-              type="button"
-              onClick={() => onMarkPaid(row)}
-              disabled={isSaving || isSkipped}
-            >
+            <Button type="button" onClick={() => onMarkPaid(row)} disabled={isSaving || isSkipped}>
               <CheckCircle2 size={16} aria-hidden="true" />
               Mark Paid
             </Button>

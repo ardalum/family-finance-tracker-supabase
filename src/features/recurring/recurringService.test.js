@@ -117,7 +117,10 @@ describe("recurring service", () => {
 
   it("uses template amount for fixed bills and actual amount for variable bills", () => {
     assert.equal(
-      getRecurringAmountForMonth({ billType: "fixed", estimatedAmount: 100 }, { actualAmount: 125 }),
+      getRecurringAmountForMonth(
+        { billType: "fixed", estimatedAmount: 100 },
+        { actualAmount: 125 },
+      ),
       100,
     );
     assert.equal(
