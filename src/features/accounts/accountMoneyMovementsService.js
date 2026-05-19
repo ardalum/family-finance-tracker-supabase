@@ -40,10 +40,9 @@ function normalizeMonthKey(value, fallbackDate = "") {
   return getCurrentMonthKey();
 }
 
-function normalizeAllowed(value, allowedValues, fallback, fieldName) {
+function normalizeAllowed(value, allowedValues, fieldName) {
   const normalized = normalizeText(value);
   if (allowedValues.includes(normalized)) return normalized;
-  if (fallback) return fallback;
   throw new Error(`${fieldName} must be one of: ${allowedValues.join(", ")}.`);
 }
 
@@ -60,7 +59,7 @@ function toSourceId(value) {
 export function normalizeMoneyMovementForm(input = {}) {
   const movementDate = normalizeDate(input.movementDate);
   const isTracked = input.isTracked !== false;
-  const accountId = isTracked ? toAccountId(input.accountId) : toAccountId(input.accountId);
+  const accountId = toAccountId(input.accountId);
 
   if (isTracked && !accountId) {
     throw new Error("Tracked money movements require an account.");
@@ -69,20 +68,10 @@ export function normalizeMoneyMovementForm(input = {}) {
   return {
     householdId: input.householdId || null,
     accountId,
-    sourceType: normalizeAllowed(
-      input.sourceType,
-      MONEY_MOVEMENT_SOURCE_TYPES,
-      "manual_adjustment",
-      "sourceType",
-    ),
+    sourceType: normalizeAllowed(input.sourceType, MONEY_MOVEMENT_SOURCE_TYPES, "sourceType"),
     sourceId: toSourceId(input.sourceId),
-    movementType: normalizeAllowed(
-      input.movementType,
-      MONEY_MOVEMENT_TYPES,
-      "adjustment",
-      "movementType",
-    ),
-    direction: normalizeAllowed(input.direction, MONEY_MOVEMENT_DIRECTIONS, null, "direction"),
+    movementType: normalizeAllowed(input.movementType, MONEY_MOVEMENT_TYPES, "movementType"),
+    direction: normalizeAllowed(input.direction, MONEY_MOVEMENT_DIRECTIONS, "direction"),
     amount: normalizeAmount(input.amount),
     movementDate,
     monthKey: normalizeMonthKey(input.monthKey, movementDate),
