@@ -93,3 +93,9 @@
 
 - Calendar follow-ons: reminders/notifications, custom events, and external sync/export.
 - UX/IA roadmap phases 65-70: dashboard cash-flow semantics redesign, navigation/account-menu IA cleanup, quick-add entry acceleration, Insights chart modernization, and trust-surface polish.
+
+### Phase 76 RC checklist closure
+
+- Final release-candidate checklist closure confirmed local automated gates: `format:check`, `build`, `test:run`, `lint`, and `verify` passed with `481` tests and `0` failures.
+- The remaining PR #354 mobile/regression checklist items are documented as browser/manual verification requirements where they cannot be truthfully validated from a code-only run.
+- Release tag handoff now recommends `v0.1.0-rc.1` with a conditional-go posture until manual mobile/deployed smoke evidence is recorded.

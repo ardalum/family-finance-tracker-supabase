@@ -1,6 +1,6 @@
 # Product Gap Audit
 
-Last updated: 2026-05-18 (Phase 75 final RC retest)
+Last updated: 2026-05-18 (Phase 76 final checklist closure)
 
 ## Scope
 
@@ -71,3 +71,9 @@ Product gaps (deferred roadmap):
 - Keep product gaps separate from defects in `docs/bug-backlog.md`.
 - For current release, Financial Position remains secondary by design (see `docs/financial-position-navigation-decision.md`).
 - Computed summaries remain intentionally derived from persisted records and are not backed up/restored as standalone persisted datasets.
+
+## Phase 76 Release Checklist Closure
+
+- Local automated gates are passing through `npm run verify` with `481` tests and `0` failures.
+- No code-level critical/high release blockers are open from the local pass.
+- Remaining RC risk is evidence-based, not a newly identified product gap: final browser/mobile/deployed smoke results still need to be captured before production approval.

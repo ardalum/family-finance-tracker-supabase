@@ -1,6 +1,6 @@
-﻿# Bug Backlog
+# Bug Backlog
 
-Last updated: 2026-05-18 (Phase 75 final RC retest)
+Last updated: 2026-05-18 (Phase 76 final checklist closure)
 
 ## Triage Legend
 
@@ -103,3 +103,10 @@ Last updated: 2026-05-18 (Phase 75 final RC retest)
 - Phase 50 monthly-balance bug was re-opened by production follow-up and closed in Phase 54 after corrected regression coverage.
 - Phase 55 closed remaining no-balance action polish and encoding cleanup blockers.
 - Deployed-app confirmation remains pending until manual smoke evidence is captured in docs/post-fix-production-smoke-test-results.md.
+
+## Phase 76 Checklist Closure Notes
+
+- Final RC local automated gates passed on 2026-05-18 (`format:check`, `build`, `test:run`, `lint`, and `verify`).
+- PR #354's remaining unchecked mobile/regression items are now tracked as manual browser evidence tasks rather than open code defects.
+- No new code-level critical/high blocker was identified in the Phase 76 local pass.
+- Final production approval still requires deployed/mobile browser smoke evidence, including the 360px/375px/390px/414px mobile matrix and console-error check.

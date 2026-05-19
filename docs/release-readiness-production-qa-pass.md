@@ -192,3 +192,37 @@ Production smoke testing surfaced UX/navigation defects (account-menu length, br
 - Phase 50 UX fixes have been regression-verified in the local pipeline (`npm run verify`).
 - Manual deployed-app retest tracking is recorded in
   `docs/post-fix-production-smoke-test-results.md`.
+
+## 10d) Phase 76 manual checklist closure
+
+Completed locally on 2026-05-18.
+
+| Checklist item                                              | Phase 76 status                      | Evidence                                                                                                                            |
+| ----------------------------------------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Header does not overflow at 360px                           | Requires browser/manual verification | Source-level mobile header contracts are covered, but rendered viewport verification is still required.                             |
+| Header does not overflow at 375px                           | Requires browser/manual verification | Source-level mobile header contracts are covered, but rendered viewport verification is still required.                             |
+| Header does not overflow at 390px                           | Requires browser/manual verification | Source-level mobile header contracts are covered, but rendered viewport verification is still required.                             |
+| Header does not overflow at 414px                           | Requires browser/manual verification | Source-level mobile header contracts are covered, but rendered viewport verification is still required.                             |
+| Sidebar drawer works                                        | Requires browser/manual verification | Navigation/drawer source behavior is covered; rendered interaction smoke is still required.                                         |
+| Household selector does not overflow                        | Requires browser/manual verification | Source checks expect the wide household selector to be hidden/controlled on mobile; visual viewport confirmation is still required. |
+| Quick Add appears once and remains usable                   | Requires browser/manual verification | Source checks cover one visible mobile shell entry; rendered usability confirmation is still required.                              |
+| Credit Cards has no page-level horizontal scroll            | Requires browser/manual verification | Responsive source contracts are covered; browser viewport confirmation is still required.                                           |
+| Recurring/Bills has no page-level horizontal scroll         | Requires browser/manual verification | Bounded responsive containers are covered at source level; browser viewport confirmation is still required.                         |
+| Insights charts are responsive                              | Requires browser/manual verification | Chart helper and responsive structure tests pass; rendered chart behavior still needs browser confirmation.                         |
+| Liabilities/Net Worth pages are usable                      | Requires browser/manual verification | Liability carry-forward/no-liability/source behavior is covered; rendered mobile usability still needs confirmation.                |
+| No horizontal scrolling                                     | Requires browser/manual verification | Must be confirmed in browser at 360px, 375px, 390px, and 414px.                                                                     |
+| No duplicate synced liability accounts                      | Passed by automation                 | Card-debt sync idempotency tests are covered in `npm run test:run`.                                                                 |
+| No duplicate synced liability snapshots                     | Passed by automation                 | Card-debt sync idempotency tests are covered in `npm run test:run`.                                                                 |
+| User-created liability records are not deleted accidentally | Passed by automation                 | Auto-sync tests protect user-created snapshots.                                                                                     |
+| Delete debt uses app modal, not browser confirm             | Passed by automation/source coverage | Liabilities delete flows use app modal confirmation copy and tests/source checks.                                                   |
+| No critical console errors                                  | Requires browser/manual verification | Console validation requires a rendered app smoke test.                                                                              |
+
+Phase 76 automated verification:
+
+- `npm run format:check` passed.
+- `npm run build` passed.
+- `npm run test:run` passed (`481` tests, `0` failures).
+- `npm run lint` passed.
+- `npm run verify` passed.
+
+Recommendation remains **Conditional Go for RC tag handoff** from local automation. Production approval still requires the browser/mobile/deployed smoke evidence above.
