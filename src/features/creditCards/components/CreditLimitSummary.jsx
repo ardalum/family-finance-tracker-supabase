@@ -19,7 +19,11 @@ export default function CreditLimitSummary({ cards }) {
         ) : (
           <SummaryTile label="Active card limit" value={formatCurrency(0)} />
         )}
-        <SummaryTile label="Combined total limit" value={formatCurrency(summary.combinedTotal)} emphasis />
+        <SummaryTile
+          label="Combined total limit"
+          value={formatCurrency(summary.combinedTotal)}
+          emphasis
+        />
       </div>
       <Card className="p-5">
         <p className="text-sm font-medium text-[#6B7280]">Credit cards</p>
