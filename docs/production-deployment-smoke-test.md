@@ -1,7 +1,9 @@
-# Production Deployment Smoke Test (Phase 63)
+# Production Deployment Smoke Test (Phase 75)
 
 Date: 2026-05-18  
 Project: WalletFlow / Family Finance Tracker
+
+Status note: Phase 75 local automated RC retest passed (`npm run verify`, `481` tests, `0` failures). This document still tracks the required deployed-environment smoke pass that must be completed with a test account/household before production approval.
 
 ## 1) Deployment target
 
@@ -79,6 +81,7 @@ Run on deployed app with test account + test household:
 - [ ] Restore validation rejects invalid JSON with clear message.
 - [ ] Account menu opens and Settings pages are reachable (no dead ends).
 - [ ] Mobile-width checks show no obvious horizontal scrolling on key pages.
+- [ ] Mobile widths 360px, 375px, 390px, and 414px show compact header controls, unclipped branding, one Quick Add entry, and no page-level horizontal scrolling on Dashboard/Cards/Bills/Insights/Calendar/Financial Position.
 - [ ] Browser console has no critical runtime errors.
 - [ ] No Supabase missing-table errors appear.
 

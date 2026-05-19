@@ -1,8 +1,8 @@
-# Release Readiness Production QA Pass (Phase 63)
+# Release Readiness Production QA Pass (Phase 75)
 
 Date: 2026-05-18  
 Project: WalletFlow / Family Finance Tracker  
-Scope: Final release-readiness review after FullCalendar migration and mobile polish retest.
+Scope: Final release-candidate retest after Dashboard, navigation, Quick Add, Insights, privacy/trust, liabilities, card-debt sync, carry-forward, and mobile stabilization.
 
 ## 1) Release scope
 
@@ -118,6 +118,48 @@ Product gaps (not release defects):
 - Financial Position hub remains readable and tappable on small widths
 - account menu and key forms remain usable at mobile widths
 
+## 10b) Phase 75 automated retest results
+
+Completed locally on 2026-05-18:
+
+- `npm run format:check` passed
+- `npm run build` passed
+- `npm run test:run` passed (`481` tests, `0` failures)
+- `npm run lint` passed
+- `npm run verify` passed
+
+Build warnings observed but not release-blocking:
+
+- Vite reports the existing mixed static/dynamic import warning for `liabilitiesSupabaseService.js`.
+- Vite reports existing large chunk-size warnings.
+
+No release-blocking regression was found in the automated retest.
+
+## 10c) Phase 75 checklist status
+
+Automated coverage confirms:
+
+- main nav and grouped sidebar/navigation target integrity
+- hash/back-forward routing helpers
+- current-month selected-month initialization
+- Dashboard Financial Pulse copy/math separation
+- Quick Add modal wiring and validation helpers
+- Credit Cards status, statement payment, no-balance, and mobile layout source contracts
+- past-due card debt auto-sync, partial-payment behavior, idempotency, and no-liability override behavior
+- liability carry-forward into Net Worth and Net Worth trend helpers
+- app modal debt-delete copy instead of native browser confirm
+- professional enum display labels
+- Insights visual/chart helpers and Spending Composition responsive layout contracts
+- mobile shell/header source contracts for compact branding, single Quick Add entry, hidden mobile household selector, and bounded Cards/Bills containers
+
+Manual browser/device evidence still required before production approval:
+
+- signed-in Supabase workflow smoke tests
+- create/edit/delete flows against a disposable test household
+- deployed GitHub Pages auth/data loading
+- mobile viewport/device inspection at 360px, 375px, 390px, and 414px
+- backup/export/restore validation with trusted test files
+
 ## 11) Go/No-Go checklist
 
 Go only if all are true:
@@ -128,6 +170,11 @@ Go only if all are true:
 - manual browser + mobile + deployed smoke checks are completed and recorded
 - backup/export/restore validation checks pass in QA environment
 - no schema/calculation changes outside approved scope
+
+Phase 75 recommendation:
+
+- **Conditional Go for RC tagging from local automation**: local verification is clean and no code-level critical/high blockers are open.
+- **No-Go for production release until manual/deployed smoke evidence is captured**: the deployment/auth/mobile/browser checklist still requires real environment validation.
 
 No-Go if any are true:
 

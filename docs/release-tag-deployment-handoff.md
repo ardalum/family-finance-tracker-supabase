@@ -5,10 +5,10 @@ Project: WalletFlow / Family Finance Tracker
 
 ## 1) Release candidate status
 
-- Release candidate documentation is complete through Phase 63.
-- FullCalendar migration and mobile polish are implemented and regression-tested in automation.
-- Automated quality gate is passing (`npm run verify`).
-- Remaining risk is manual deployed-app smoke evidence capture.
+- Release candidate documentation is complete through Phase 75.
+- FullCalendar, Dashboard Financial Pulse, grouped sidebar navigation, Quick Add, Insights visual analytics, privacy/trust polish, liabilities/no-liability review, professional labels, past-due card debt sync, liability carry-forward, debt-delete modal, and mobile responsiveness stabilization are implemented.
+- Automated quality gate is passing (`npm run verify`) with `481` tests.
+- Remaining risk is manual deployed-app smoke evidence capture and real mobile/browser validation.
 
 ## 2) Recommended release tag name
 
@@ -29,7 +29,13 @@ Rationale:
 - Restore/import validation hardening (merge-safe behavior).
 - Hash-based browser Back/Forward support between app views.
 - Account menu simplification and numeric input UX improvements.
-- Dashboard and Account menu Calendar discoverability entry points.
+- Dashboard Financial Pulse summary semantics.
+- Quick Add transaction MVP.
+- Grouped desktop sidebar and mobile drawer navigation.
+- Dashboard and Tools Calendar discoverability entry points.
+- Past-due unpaid credit card debt auto-sync into linked liabilities.
+- Liability carry-forward into Net Worth/Financial Position.
+- Mobile app shell, Credit Cards, and Recurring/Bills overflow stabilization.
 
 ## 4) What is intentionally excluded
 
@@ -113,6 +119,7 @@ Security note: never expose `SUPABASE_SERVICE_ROLE_KEY` in frontend env vars or 
 
 - [ ] Confirm `main` contains only intended release changes.
 - [ ] Confirm `npm run verify` passes on release candidate commit.
+- [ ] Confirm Phase 75 automated retest results are reflected in `docs/release-readiness-production-qa-pass.md`.
 - [ ] Confirm release docs are updated:
   - `docs/release-notes.md`
   - `docs/release-readiness-checklist.md`
@@ -141,6 +148,7 @@ Security note: never expose `SUPABASE_SERVICE_ROLE_KEY` in frontend env vars or 
 - [ ] Restore validation rejects invalid JSON safely.
 - [ ] Browser Back/Forward navigation works between views.
 - [ ] Mobile width has no obvious horizontal scrolling on key pages.
+- [ ] Mobile widths 360px, 375px, 390px, and 414px show compact header, unclipped branding, one Quick Add entry, and no page-level horizontal scroll on Dashboard/Cards/Bills/Insights/Calendar/Financial Position.
 - [ ] No critical console errors or Supabase missing-table errors.
 - [ ] Calendar has no horizontal scrolling on common mobile widths (360px and 390px).
 
@@ -161,6 +169,7 @@ Security note: never expose `SUPABASE_SERVICE_ROLE_KEY` in frontend env vars or 
 
 ## 15) Go/No-Go decision
 
-- **Current recommendation: Conditional Go**
-  - Go for tag/deploy once manual pre-tag checklist is complete and deployed smoke evidence is recorded.
-  - No-Go if deployed smoke reveals critical auth/data/navigation regressions.
+- **Current recommendation: Conditional Go for RC tagging**
+  - Local automated retest is clean and no code-level critical/high blockers are open.
+  - Go for production release only once manual pre-tag checklist, deployed smoke evidence, and mobile viewport/device checks are recorded.
+  - No-Go if deployed smoke reveals critical auth/data/navigation/mobile regressions.

@@ -66,7 +66,8 @@
 - Production deployment smoke-test runbooks were added and linked.
 - Post-fix production smoke-test results document was added.
 - Release/readiness/QA docs were aligned for consistency and regression tracking.
-- Phase 64 full-product UX/IA audit identified release-blocking semantics/IA decisions that must be triaged before final RC tagging.
+- Final RC automated retest passed locally after the Dashboard, navigation, Quick Add, Insights, privacy/trust, liability, card-debt sync, carry-forward, and mobile stabilization phases.
+- Manual deployed smoke evidence remains required before production release approval.
 
 ### Notes and limitations
 

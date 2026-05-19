@@ -1,6 +1,6 @@
 ﻿# Bug Backlog
 
-Last updated: 2026-05-18 (Phase 74 correction: mobile responsiveness blockers)
+Last updated: 2026-05-18 (Phase 75 final RC retest)
 
 ## Triage Legend
 
@@ -33,6 +33,7 @@ Last updated: 2026-05-18 (Phase 74 correction: mobile responsiveness blockers)
 
 ## Fixed (recent notable)
 
+- Final RC automated retest passed with `npm run verify` after mobile/liability/card-debt stabilization; no new release-blocking regression found (`fixed`, Phase 75)
 - Mobile header overcrowding was corrected with a compact single-row app bar, icon-only WalletFlow mark on phone widths, balanced icon controls, and hidden mobile household selector (`fixed`, Phase 74 correction)
 - Mobile Quick Add duplication was reduced to one visible phone header entry point while preserving desktop/sidebar/drawer access (`fixed`, Phase 74 correction)
 - Credit Cards monthly balance cards and summary tiles received overflow-safe mobile containers, wrapping currency values, and tighter mobile padding (`fixed`, Phase 74 correction)
@@ -89,8 +90,8 @@ Last updated: 2026-05-18 (Phase 74 correction: mobile responsiveness blockers)
 
 ## Release Blocker Summary
 
-- No open code-level `critical` or `high` blockers identified after Phase 54 fixes.
-- Remaining deferred items are manual QA evidence tasks and future product enhancements.
+- No open code-level `critical` or `high` blockers identified after the Phase 75 automated RC retest.
+- Remaining deferred items are manual QA evidence tasks, deployed-environment smoke evidence, and future product enhancements.
 
 ## Deployment risk tracking
 
