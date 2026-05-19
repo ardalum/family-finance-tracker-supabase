@@ -102,7 +102,9 @@ export function replaceMovementBySource(movements = [], movementInput = {}) {
   }
 
   return [
-    ...movements.filter((currentMovement) => getMoneyMovementSourceKey(currentMovement) !== sourceKey),
+    ...movements.filter(
+      (currentMovement) => getMoneyMovementSourceKey(currentMovement) !== sourceKey,
+    ),
     movement,
   ];
 }
@@ -121,11 +123,15 @@ export function deleteMovementBySource(movements = [], sourceType, sourceId) {
 
 export function getTrackedMovementsForMonth(movements = [], monthKey = "") {
   return movements.filter(
-    (movement) => movement.isTracked !== false && movement.monthKey === monthKey && movement.accountId,
+    (movement) =>
+      movement.isTracked !== false && movement.monthKey === monthKey && movement.accountId,
   );
 }
 
-export function calculateProjectedMovementTotal(movements = [], { accountId = "", monthKey = "" } = {}) {
+export function calculateProjectedMovementTotal(
+  movements = [],
+  { accountId = "", monthKey = "" } = {},
+) {
   return movements.reduce((total, movement) => {
     if (movement.isTracked === false) return total;
     if (monthKey && movement.monthKey !== monthKey) return total;
@@ -148,12 +154,16 @@ export function summarizeProjectedMovementsByAccount(movements = [], monthKey = 
   return totalsByAccount;
 }
 
-export function applyProjectedMovementsToAccountRows(accountRows = [], movements = [], monthKey = "") {
+export function applyProjectedMovementsToAccountRows(
+  accountRows = [],
+  movements = [],
+  monthKey = "",
+) {
   const totalsByAccount = summarizeProjectedMovementsByAccount(movements, monthKey);
 
   return accountRows.map((row) => {
     const accountId = row.account?.supabaseId ?? row.account?.id;
-    const projectedMovementTotal = accountId ? totalsByAccount.get(accountId) ?? 0 : 0;
+    const projectedMovementTotal = accountId ? (totalsByAccount.get(accountId) ?? 0) : 0;
     const latestBalanceAmount = Number(row.latestBalanceAmount || 0);
 
     return {
