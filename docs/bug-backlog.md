@@ -1,6 +1,6 @@
 ﻿# Bug Backlog
 
-Last updated: 2026-05-18 (Phase 73 correction: debt modal/month/carry-forward)
+Last updated: 2026-05-18 (Phase 74 correction: mobile responsiveness blockers)
 
 ## Triage Legend
 
@@ -33,6 +33,10 @@ Last updated: 2026-05-18 (Phase 73 correction: debt modal/month/carry-forward)
 
 ## Fixed (recent notable)
 
+- Mobile header overcrowding was corrected with a compact single-row app bar, icon-only WalletFlow mark on phone widths, balanced icon controls, and hidden mobile household selector (`fixed`, Phase 74 correction)
+- Mobile Quick Add duplication was reduced to one visible phone header entry point while preserving desktop/sidebar/drawer access (`fixed`, Phase 74 correction)
+- Credit Cards monthly balance cards and summary tiles received overflow-safe mobile containers, wrapping currency values, and tighter mobile padding (`fixed`, Phase 74 correction)
+- Recurring/Bills responsive containers were tightened so wide bill tables scroll inside bounded card sections instead of forcing page-level horizontal scroll (`fixed`, Phase 74 correction)
 - Liability/debt delete flows now use app modal confirmation instead of native browser confirm, including auto-synced card debt reappearance guidance (`fixed`, Phase 73 correction)
 - Net Worth and Financial Position now carry forward latest prior active liability snapshots until superseded, zeroed, paid through synced card debt cleanup, or closed (`fixed`, Phase 73 correction)
 - Month selector defaults were verified through the shared fresh-load month initializer so all month-scoped views start on the current month (`fixed`, Phase 73 correction)

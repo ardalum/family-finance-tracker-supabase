@@ -19,15 +19,15 @@ export default function MonthlyBalanceControls({
 }) {
   return (
     <>
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-        <div>
+      <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+        <div className="min-w-0">
           <h2 className="text-lg font-semibold text-text-main">Monthly balance table</h2>
           <p className="mt-1 text-sm text-text-muted">
             Track statement balances, payment status, and which cards still need review for{" "}
             {formatMonthLabel(selectedMonth)}.
           </p>
         </div>
-        <div className="grid gap-3 sm:grid-cols-[160px_180px_auto] sm:items-end">
+        <div className="grid min-w-0 gap-3 sm:grid-cols-[160px_180px_auto] sm:items-end">
           <Select
             label="Month"
             value={selectedMonth}
@@ -57,7 +57,7 @@ export default function MonthlyBalanceControls({
         </div>
       </div>
 
-      <div className="grid gap-3 lg:grid-cols-[minmax(240px,1fr)_180px_200px_auto] lg:items-end">
+      <div className="grid min-w-0 gap-3 lg:grid-cols-[minmax(0,1fr)_180px_200px_auto] lg:items-end">
         <Input
           label="Search cards"
           value={filters.search}

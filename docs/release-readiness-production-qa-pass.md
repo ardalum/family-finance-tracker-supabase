@@ -109,7 +109,12 @@ Product gaps (not release defects):
 
 ## 10) Required mobile checks
 
+- Mobile app header remains one compact row with unclipped branding and aligned hamburger/Quick Add/alerts/account controls
+- Household selector does not overflow the mobile header
+- Quick Add appears once as a compact mobile shell action and remains reachable
 - Dashboard, Cards, Spending, Bills, Insights render without obvious horizontal scrolling
+- Credit Cards monthly summary/balance cards fit the viewport at 360px, 375px, 390px, and 414px widths
+- Recurring/Bills pages avoid page-level horizontal scroll; wide tables scroll only inside their card container
 - Financial Position hub remains readable and tappable on small widths
 - account menu and key forms remain usable at mobile widths
 

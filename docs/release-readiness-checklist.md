@@ -196,6 +196,12 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 ## 10) Mobile Layout Checklist
 
 - [ ] App shell uses true sidebar on desktop/tablet and a hamburger-triggered drawer on mobile.
+- [ ] Mobile header stays on one compact row without clipped WalletFlow wordmark text.
+- [ ] Mobile shows the WalletFlow logo mark without cutting off the full wordmark.
+- [ ] Hamburger, alert, Quick Add, and account controls are visually balanced and aligned.
+- [ ] Household selector does not render as a wide overflowing mobile control; it remains available from larger layouts/settings surfaces.
+- [ ] Mobile Quick Add appears as a single compact shell entry point, not duplicated as competing large buttons.
+- [ ] No page-level horizontal scrolling at 360px, 375px, 390px, or 414px common phone widths.
 - [ ] Sidebar supports collapse/expand and keeps accessible icon labels in collapsed mode.
 - [ ] Drawer opens/closes cleanly and closes after selecting a navigation item.
 - [ ] Sidebar/drawer groups are visible and clear: Main, Planning, Money Setup, System.
@@ -205,8 +211,11 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 - [ ] Money Setup workflows (Income, Savings, Accounts, Liabilities) are directly reachable from sidebar/drawer.
 - [ ] Quick Add remains reachable from desktop and mobile shell.
 - [ ] Cards > Monthly Balances is usable without horizontal table dependence on mobile.
+- [ ] Credit Cards summary cards stack/wrap on mobile and large dollar values do not force viewport overflow.
+- [ ] Credit Cards page has no page-level horizontal scrolling on mobile.
 - [ ] Spending filters and transaction actions are usable on mobile.
 - [ ] Recurring workspace sections are usable on mobile.
+- [ ] Recurring/Bills page has no page-level horizontal scrolling; wide tables scroll only inside bounded card sections when needed.
 - [ ] Dashboard cards and Monthly Close Checklist are readable on mobile.
 
 ## 10b) Quick Add MVP Verification

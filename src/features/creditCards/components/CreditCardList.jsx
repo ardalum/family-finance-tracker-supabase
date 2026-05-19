@@ -50,18 +50,18 @@ export default function CreditCardList({ cards, onEdit, onDelete, isSaving = fal
 
   return (
     <>
-      <Card>
-        <div className="grid gap-4 border-b border-gray-200 p-5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
+      <Card className="overflow-hidden">
+        <div className="grid min-w-0 gap-4 border-b border-gray-200 p-4 sm:p-5">
+          <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
+            <div className="min-w-0">
               <h2 className="text-lg font-semibold text-gray-950">Credit cards</h2>
               <p className="text-sm text-gray-500">Stored in Supabase for the active household.</p>
             </div>
-            <span className="rounded-md bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">
+            <span className="shrink-0 rounded-md bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">
               Showing {visibleCards.length} of {cards.length}
             </span>
           </div>
-          <div className="grid gap-3 lg:grid-cols-[minmax(240px,1fr)_180px_180px_auto] lg:items-end">
+          <div className="grid min-w-0 gap-3 lg:grid-cols-[minmax(0,1fr)_180px_180px_auto] lg:items-end">
             <Input
               label="Search cards"
               value={filters.search}
@@ -115,7 +115,7 @@ export default function CreditCardList({ cards, onEdit, onDelete, isSaving = fal
             {visibleCards.map((card) => (
               <article
                 key={card.id}
-                className="grid gap-4 p-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-center"
+                className="grid min-w-0 gap-4 p-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:p-5"
               >
                 <div className="min-w-0">
                   <LinkedCardName card={card} />
@@ -128,8 +128,8 @@ export default function CreditCardList({ cards, onEdit, onDelete, isSaving = fal
                     <span>{card.isActive ? "Active" : "Inactive"}</span>
                   </div>
                 </div>
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="text-sm font-semibold text-gray-950">
+                <div className="flex min-w-0 flex-wrap items-center gap-3">
+                  <span className="break-words text-sm font-semibold text-gray-950">
                     {formatCurrency(card.creditLimit)}
                   </span>
                   <Button

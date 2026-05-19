@@ -11,7 +11,7 @@ export default function MonthlyBalanceMobileList({
   onPaidChange,
 }) {
   return (
-    <div className="grid gap-3 p-4 sm:hidden">
+    <div className="grid min-w-0 gap-3 p-3 sm:hidden">
       {rows.map((row) => (
         <MonthlyBalanceCard
           key={row.card.id}

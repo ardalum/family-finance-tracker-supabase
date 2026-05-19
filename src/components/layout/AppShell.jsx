@@ -19,20 +19,20 @@ export default function AppShell({
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-app-background text-text-main">
+    <div className="min-h-screen overflow-x-hidden bg-app-background text-text-main">
       <header className="border-b border-app-border bg-app-surface">
-        <div className="flex items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
+        <div className="flex min-w-0 items-center justify-between gap-2 px-3 py-3 sm:px-6 lg:px-8">
           <div className="flex min-w-0 items-center gap-3">
             <button
               type="button"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-app-border bg-white text-text-main md:hidden"
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-app-border bg-white text-text-main md:hidden"
               onClick={() => setMobileDrawerOpen(true)}
               aria-label="Open navigation menu"
             >
-              <Menu size={18} />
+              <Menu size={17} />
             </button>
             <AppBrandMark />
-            <div className="min-w-0 leading-tight">
+            <div className="hidden min-w-0 leading-tight sm:block">
               <h1 className="truncate text-base font-semibold tracking-normal sm:text-lg">
                 <AppBrandName />
               </h1>
@@ -41,11 +41,11 @@ export default function AppShell({
               </p>
             </div>
           </div>
-          <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">{accountSlot}</div>
+          <div className="flex shrink-0 items-center justify-end gap-2">{accountSlot}</div>
         </div>
       </header>
 
-      <div className="flex min-h-[calc(100vh-73px)]">
+      <div className="flex min-h-[calc(100vh-73px)] min-w-0 max-w-full">
         <aside
           className={`hidden border-r border-app-border bg-app-surface md:block ${
             sidebarCollapsed ? "w-[76px]" : "w-[260px]"
@@ -87,19 +87,15 @@ export default function AppShell({
           </div>
         </aside>
 
-        <main className="min-w-0 flex-1">
-          <div className="grid gap-6 px-4 py-6 sm:px-6 lg:px-8">
-            <div className="flex items-start justify-between gap-3">
+        <main className="min-w-0 max-w-full flex-1 overflow-x-hidden">
+          <div className="grid min-w-0 max-w-full gap-6 px-4 py-6 sm:px-6 lg:px-8">
+            <div className="min-w-0">
               <div className="min-w-0">
-                <h2 className="text-2xl font-semibold tracking-normal text-text-main">
+                <h2 className="break-words text-2xl font-semibold tracking-normal text-text-main">
                   {pageTitle}
                 </h2>
                 <p className="mt-1 text-sm text-text-muted">{pageDescription}</p>
               </div>
-              <Button type="button" className="h-9 px-3 text-xs md:hidden" onClick={onQuickAdd}>
-                <Plus size={14} />
-                Quick Add
-              </Button>
             </div>
             {children}
           </div>

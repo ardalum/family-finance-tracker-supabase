@@ -99,7 +99,7 @@ export default function RecurringPayments({
   }
 
   return (
-    <section className="grid gap-6">
+    <section className="grid min-w-0 gap-6">
       {error ? <InlineAlert>{error}</InlineAlert> : null}
       {categoriesError ? <InlineAlert>{categoriesError}</InlineAlert> : null}
 
@@ -110,11 +110,11 @@ export default function RecurringPayments({
         disabled={loading || isSaving}
       />
 
-      <Card className="p-5">
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-end">
-          <div>
+      <Card className="p-4 sm:p-5">
+        <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-end">
+          <div className="min-w-0">
             <p className="text-sm font-medium text-gray-500">Recurring payments</p>
-            <h2 className="mt-1 text-2xl font-semibold tracking-normal text-gray-950">
+            <h2 className="mt-1 break-words text-2xl font-semibold tracking-normal text-gray-950">
               {formatMonthLabel(selectedMonth)}
             </h2>
             <p className="mt-1 text-sm text-gray-500">
