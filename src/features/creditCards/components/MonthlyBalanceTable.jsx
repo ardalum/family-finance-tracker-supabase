@@ -7,6 +7,7 @@ import { getRowStatus } from "../creditCardStatus.js";
 import { getSortedCards } from "../creditCardSort.js";
 import { getMonthlyBalanceSummary } from "../creditCardsService.js";
 import { getMonthlyBalanceDisplayRow } from "../monthlyBalanceDisplay.js";
+import { shouldShowMonthlyBalanceCard } from "../monthlyBalanceVisibility.js";
 import MonthlyBalanceControls from "./MonthlyBalanceControls.jsx";
 import MonthlyBalanceDesktopTable from "./MonthlyBalanceDesktopTable.jsx";
 import MonthlyBalanceMobileList from "./MonthlyBalanceMobileList.jsx";
@@ -17,13 +18,6 @@ const defaultFilters = {
   owner: "",
   status: "",
 };
-
-function getCardSearchText(card) {
-  return [card.name, card.owner, card.network, card.lastFour]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-}
 
 function getStatusFilterValue(status) {
   if (status.isNotChecked) return "not-checked";
@@ -48,6 +42,7 @@ export default function MonthlyBalanceTable({
 }) {
   const [sortMode, setSortMode] = useState("default");
   const [filters, setFilters] = useState(defaultFilters);
+  const [activeBalanceEditCardId, setActiveBalanceEditCardId] = useState(null);
   const monthBalances = monthlyBalances[selectedMonth] ?? {};
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const summary = useMemo(
@@ -68,12 +63,15 @@ export default function MonthlyBalanceTable({
       const entry = monthBalances[card.id];
       const status = getRowStatus(card, selectedMonth, entry);
       const statusValue = getStatusFilterValue(status);
-      const matchesSearch = !searchTerm || getCardSearchText(card).includes(searchTerm);
-      const matchesOwner = !filters.owner || card.owner === filters.owner;
-      const matchesStatus = !filters.status || statusValue === filters.status;
-      return matchesSearch && matchesOwner && matchesStatus;
+      return shouldShowMonthlyBalanceCard({
+        card,
+        filters,
+        searchTerm,
+        statusValue,
+        activeBalanceEditCardId,
+      });
     });
-  }, [filters, monthBalances, selectedMonth, sortedCards]);
+  }, [activeBalanceEditCardId, filters, monthBalances, selectedMonth, sortedCards]);
   const visibleCardRows = useMemo(
     () =>
       visibleCards.map((card) =>
@@ -81,6 +79,16 @@ export default function MonthlyBalanceTable({
       ),
     [monthBalances, selectedMonth, visibleCards],
   );
+
+  function handleBalanceFocus(cardId) {
+    setActiveBalanceEditCardId(cardId);
+  }
+
+  function handleBalanceBlur(cardId) {
+    setActiveBalanceEditCardId((currentCardId) =>
+      currentCardId === cardId ? null : currentCardId,
+    );
+  }
 
   function handleBalanceChange(cardId, value) {
     if (value === "") {
@@ -151,6 +159,8 @@ export default function MonthlyBalanceTable({
             isCardSaving={isCardSaving}
             onEditCard={onEditCard}
             onBalanceChange={handleBalanceChange}
+            onBalanceFocus={handleBalanceFocus}
+            onBalanceBlur={handleBalanceBlur}
             onCheckedNoBalance={handleCheckedNoBalance}
             onResetNoBalance={handleResetNoBalance}
             onPaidChange={handlePaidChange}
@@ -161,6 +171,8 @@ export default function MonthlyBalanceTable({
             isCardSaving={isCardSaving}
             onEditCard={onEditCard}
             onBalanceChange={handleBalanceChange}
+            onBalanceFocus={handleBalanceFocus}
+            onBalanceBlur={handleBalanceBlur}
             onCheckedNoBalance={handleCheckedNoBalance}
             onResetNoBalance={handleResetNoBalance}
             onPaidChange={handlePaidChange}

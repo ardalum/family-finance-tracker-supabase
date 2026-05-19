@@ -8,6 +8,8 @@ export default function MonthlyBalanceCard({
   isCardSaving,
   onEditCard,
   onBalanceChange,
+  onBalanceFocus,
+  onBalanceBlur,
   onCheckedNoBalance,
   onResetNoBalance,
   onPaidChange,
@@ -83,7 +85,11 @@ export default function MonthlyBalanceCard({
             min="0"
             step="0.01"
             value={displayEntry.balance}
-            onFocus={(event) => event.target.select()}
+            onFocus={(event) => {
+              onBalanceFocus(card.id);
+              event.target.select();
+            }}
+            onBlur={() => onBalanceBlur(card.id)}
             onChange={(event) => onBalanceChange(card.id, event.target.value)}
           />
         </div>
