@@ -378,3 +378,37 @@ Use this checklist before each production release.
 
 - [ ] Numeric amount fields allow direct typing over default `0` on focus.
 - [ ] Clearing amount fields does not create false complete/paid/checked states.
+
+## Phase 76 final manual checklist closure
+
+Phase 76 separates automated/source-level coverage from manual browser evidence so the PR #354 mobile/regression checklist can be closed honestly before release tagging.
+
+Automated/source-level checks completed locally on 2026-05-18:
+
+- [x] `npm run format:check` passed.
+- [x] `npm run build` passed.
+- [x] `npm run test:run` passed (`481` tests, `0` failures).
+- [x] `npm run lint` passed.
+- [x] `npm run verify` passed.
+- [x] Automated/source coverage confirms synced card debt does not duplicate linked liability accounts.
+- [x] Automated/source coverage confirms synced card debt does not duplicate auto-synced liability snapshots.
+- [x] Automated/source coverage confirms user-created liability records are not deleted accidentally by auto-sync.
+- [x] Automated/source coverage confirms debt delete flows use app modal confirmation instead of native browser confirm.
+
+Manual browser/mobile checks still required before final production approval:
+
+- [ ] Requires browser/manual verification: Header does not overflow at 360px.
+- [ ] Requires browser/manual verification: Header does not overflow at 375px.
+- [ ] Requires browser/manual verification: Header does not overflow at 390px.
+- [ ] Requires browser/manual verification: Header does not overflow at 414px.
+- [ ] Requires browser/manual verification: Sidebar drawer opens, closes, and remains usable.
+- [ ] Requires browser/manual verification: Household selector does not overflow.
+- [ ] Requires browser/manual verification: Quick Add appears once and remains usable.
+- [ ] Requires browser/manual verification: Credit Cards has no page-level horizontal scroll.
+- [ ] Requires browser/manual verification: Recurring/Bills has no page-level horizontal scroll.
+- [ ] Requires browser/manual verification: Insights charts are responsive.
+- [ ] Requires browser/manual verification: Liabilities/Net Worth pages are usable.
+- [ ] Requires browser/manual verification: No horizontal scrolling appears across the mobile smoke matrix.
+- [ ] Requires browser/manual verification: Browser console has no critical runtime errors.
+
+Release recommendation from this checklist state: **Conditional Go for RC tag handoff**, with final tag/release approval waiting for manual browser/mobile smoke evidence unless that evidence has already been captured outside this local code-only pass.

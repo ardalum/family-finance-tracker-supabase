@@ -114,3 +114,20 @@ Run on deployed app with test account + test household:
 ## Phase 51 post-fix retest reference
 
 - Post-fix production retest log: `docs/post-fix-production-smoke-test-results.md`
+
+## 13) Phase 76 final RC checklist closure
+
+Phase 76 local gate results on 2026-05-18:
+
+- `npm run format:check` passed.
+- `npm run build` passed.
+- `npm run test:run` passed (`481` tests, `0` failures).
+- `npm run lint` passed.
+- `npm run verify` passed.
+
+The PR #354 mobile/regression checklist gap is now documented as follows:
+
+- Automation/source-level coverage is recorded for synced-debt idempotency, user-created liability record protection, app-modal debt deletion, mobile shell contracts, responsive Cards/Bills containers, and Insights composition/chart helpers.
+- Rendered browser checks remain required for mobile header overflow at 360px, 375px, 390px, and 414px; drawer usability; household selector fit; single Quick Add usability; page-level horizontal scroll checks; chart responsiveness; Liabilities/Net Worth mobile usability; and critical console errors.
+
+Post-tag deployed smoke must include the Phase 76 mobile checklist before final production approval.

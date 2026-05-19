@@ -173,3 +173,56 @@ Security note: never expose `SUPABASE_SERVICE_ROLE_KEY` in frontend env vars or 
   - Local automated retest is clean and no code-level critical/high blockers are open.
   - Go for production release only once manual pre-tag checklist, deployed smoke evidence, and mobile viewport/device checks are recorded.
   - No-Go if deployed smoke reveals critical auth/data/navigation/mobile regressions.
+
+## 16) Phase 76 release tag handoff closure
+
+Phase 76 status on 2026-05-18:
+
+- Local automated gates passed:
+  - `npm run format:check`
+  - `npm run build`
+  - `npm run test:run` (`481` tests, `0` failures)
+  - `npm run lint`
+  - `npm run verify`
+- PR #354 mobile/regression checklist items are now explicitly tracked as either automated/source-covered or requiring browser/manual verification.
+- No code-level critical/high release blockers are open from this local pass.
+
+Recommended release title:
+
+- `WalletFlow v0.1.0 RC1 - Family finance tracker release candidate`
+
+Recommended tag:
+
+- `v0.1.0-rc.1`
+
+Recommended release summary:
+
+- Dashboard Financial Pulse, grouped sidebar/mobile drawer navigation, Quick Add transaction MVP, FullCalendar Calendar, Insights visual analytics, privacy/trust polish, no-liability confirmation, professional labels, past-due card debt sync, liability carry-forward, debt-delete modal confirmation, and mobile responsiveness stabilization.
+
+Pre-tag requirements:
+
+- Confirm the working tree contains only intended release documentation/code changes.
+- Confirm GitHub Actions `Verify` is passing on the candidate commit.
+- Complete or explicitly accept pending browser/manual smoke items from Phase 76.
+- Confirm stale PR #338 is closed or ignored and is not merged into the RC.
+
+Suggested tag commands (do not run until the candidate commit is final):
+
+```bash
+git status
+git tag -a v0.1.0-rc.1 -m "WalletFlow v0.1.0 RC1"
+git push origin v0.1.0-rc.1
+```
+
+Post-tag smoke requirements:
+
+- Deploy workflow succeeds from the tagged/main release commit.
+- Deployed app loads on GitHub Pages with production Supabase env vars.
+- Mobile browser matrix at 360px, 375px, 390px, and 414px confirms no header/page-level horizontal overflow.
+- Sidebar drawer, Quick Add, Credit Cards, Recurring/Bills, Insights, Liabilities, Net Worth, and Financial Position remain usable on mobile.
+- Browser console has no critical runtime errors.
+
+Phase 76 go/no-go recommendation:
+
+- **Conditional Go for RC tag handoff** from local automation.
+- **No-Go for final production release** until manual browser/mobile/deployed smoke evidence is recorded.

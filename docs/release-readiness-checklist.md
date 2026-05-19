@@ -333,3 +333,42 @@ If migration history mismatch occurs (including legacy duplicate migration-numbe
 
 - [ ] `docs/post-fix-production-smoke-test-results.md` is updated with deployed-app pass/fail evidence for Phase 50 regression checks.
 - [ ] `docs/production-deployment-smoke-test.md` and `docs/post-fix-production-smoke-test-results.md` do not contradict each other.
+
+## Phase 76 final RC checklist closure
+
+Date: 2026-05-18
+
+Automated gate status:
+
+- `npm run format:check` passed.
+- `npm run build` passed.
+- `npm run test:run` passed (`481` tests, `0` failures).
+- `npm run lint` passed.
+- `npm run verify` passed.
+
+Phase 76 closes the documentation gap from the PR #354 checklist by separating automated/source-level evidence from checks that still require a rendered browser or deployed-app manual pass.
+
+Automated/source-level evidence recorded:
+
+- Synced credit-card debt idempotency is covered: no duplicate linked liability accounts or auto-synced snapshots should be created by repeated sync runs.
+- User-created liability records are protected by auto-sync tests and should not be deleted accidentally.
+- Debt delete flows are covered by app-modal confirmation tests/source checks rather than native browser confirm flows.
+- Mobile shell contracts are covered by source tests for compact header behavior, single visible mobile Quick Add entry, hidden mobile household selector, and responsive Cards/Bills containers.
+- Insights chart helpers and Spending Composition responsive structure are covered by automated tests.
+
+Requires browser/manual verification before final production approval:
+
+- Mobile header has no overflow at 360px, 375px, 390px, and 414px.
+- Sidebar drawer opens/closes and grouped navigation remains usable on mobile.
+- Household selector does not overflow in the rendered mobile shell.
+- Quick Add appears once and remains usable in the rendered mobile shell.
+- Credit Cards and Recurring/Bills have no page-level horizontal scrolling in the browser.
+- Insights charts are responsive in the rendered browser.
+- Liabilities/Net Worth pages are usable at mobile widths.
+- No horizontal scrolling appears across the mobile smoke matrix.
+- Browser console has no critical runtime errors.
+
+Phase 76 recommendation:
+
+- **Conditional Go for RC tag handoff**: local automated verification is clean and no code-level critical/high blockers are open.
+- **Final tag/release approval should wait for manual browser/mobile smoke evidence** unless those checks have already been completed outside this local code-only run.
