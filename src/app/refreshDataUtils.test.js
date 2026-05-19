@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   createAllSupabaseRefreshers,
+  createBudgetCategoryRefreshers,
   createDashboardInsightsRefreshers,
   createRecurringDashboardInsightsRefreshers,
   createRecurringSpendingDashboardInsightsRefreshers,
@@ -73,6 +74,35 @@ test("createDashboardInsightsRefreshers returns dashboard and insights refresher
     loadDashboardData,
     loadInsightsData,
   ]);
+});
+
+test("createBudgetCategoryRefreshers returns spending category, dashboard, and insights refreshers", () => {
+  const loadSpendingCategories = () => {};
+  const loadDashboardData = () => {};
+  const loadInsightsData = () => {};
+
+  assert.deepEqual(
+    createBudgetCategoryRefreshers({
+      loadSpendingCategories,
+      loadDashboardData,
+      loadInsightsData,
+    }),
+    [loadSpendingCategories, loadDashboardData, loadInsightsData],
+  );
+});
+
+test("createBudgetCategoryRefreshers keeps category refresh first so transaction pickers receive current data", async () => {
+  const calls = [];
+
+  await runRefreshSequence(
+    createBudgetCategoryRefreshers({
+      loadSpendingCategories: createNamedCallback("spending-categories", calls),
+      loadDashboardData: createNamedCallback("dashboard", calls),
+      loadInsightsData: createNamedCallback("insights", calls),
+    }),
+  );
+
+  assert.deepEqual(calls, ["spending-categories", "dashboard", "insights"]);
 });
 
 test("createSpendingDashboardInsightsRefreshers returns spending, dashboard, and insights refreshers", () => {
@@ -150,10 +180,14 @@ test("createAllSupabaseRefreshers returns all Supabase refreshers in app refresh
 
 test("refresher factories omit missing callbacks", () => {
   const loadDashboardData = () => {};
+  const loadSpendingCategories = () => {};
   const loadSpendingTransactions = () => {};
   const loadRecurringData = () => {};
 
   assert.deepEqual(createDashboardInsightsRefreshers({ loadDashboardData }), [loadDashboardData]);
+  assert.deepEqual(createBudgetCategoryRefreshers({ loadSpendingCategories }), [
+    loadSpendingCategories,
+  ]);
   assert.deepEqual(createSpendingDashboardInsightsRefreshers({ loadSpendingTransactions }), [
     loadSpendingTransactions,
   ]);
@@ -171,6 +205,7 @@ test("refresher factories omit missing callbacks", () => {
 
 test("refresher factories return empty arrays without callbacks", () => {
   assert.deepEqual(createDashboardInsightsRefreshers(), []);
+  assert.deepEqual(createBudgetCategoryRefreshers(), []);
   assert.deepEqual(createSpendingDashboardInsightsRefreshers(), []);
   assert.deepEqual(createRecurringDashboardInsightsRefreshers(), []);
   assert.deepEqual(createRecurringSpendingDashboardInsightsRefreshers(), []);
