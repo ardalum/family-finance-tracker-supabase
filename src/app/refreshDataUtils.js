@@ -8,6 +8,14 @@ export function createDashboardInsightsRefreshers({ loadDashboardData, loadInsig
   return [loadDashboardData, loadInsightsData].filter(Boolean);
 }
 
+export function createBudgetCategoryRefreshers({
+  loadSpendingCategories,
+  loadDashboardData,
+  loadInsightsData,
+} = {}) {
+  return [loadSpendingCategories, loadDashboardData, loadInsightsData].filter(Boolean);
+}
+
 export function createSpendingDashboardInsightsRefreshers({
   loadSpendingTransactions,
   loadDashboardData,
