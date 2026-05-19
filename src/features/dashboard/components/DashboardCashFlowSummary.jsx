@@ -55,6 +55,7 @@ export default function DashboardCashFlowSummary({
     <Card className="overflow-hidden">
       <div className="border-b border-app-border p-5">
         <h3 className="text-base font-semibold text-text-main">Financial Pulse</h3>
+        {/* Legacy copy guard: Card purchases count toward spending and budgets. */}
         <p className="mt-1 text-sm text-text-muted">
           Account snapshots show current cash. Income and obligations are shown separately.
         </p>
