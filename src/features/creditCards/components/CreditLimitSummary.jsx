@@ -8,31 +8,29 @@ export default function CreditLimitSummary({ cards }) {
   const singleOwnerTotal = summary.ownerTotals[0];
 
   return (
-    <section className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(280px,0.4fr)]">
-      <div className="grid min-w-0 gap-4 sm:grid-cols-2 2xl:grid-cols-3">
-        {hasMultipleOwners ? (
-          summary.ownerTotals.map((ownerTotal) => (
+    <section className="grid max-w-5xl min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-[minmax(260px,320px)_minmax(280px,420px)]">
+      {hasMultipleOwners ? (
+        <div className="grid min-w-0 gap-4 sm:col-span-2 sm:grid-cols-2 xl:col-span-1">
+          {summary.ownerTotals.map((ownerTotal) => (
             <SummaryTile
               key={ownerTotal.owner}
               label={`${ownerTotal.owner} total limit`}
               value={formatCurrency(ownerTotal.total)}
             />
-          ))
-        ) : (
-          <SummaryTile
-            label="Total credit limit"
-            value={formatCurrency(singleOwnerTotal?.total ?? 0)}
-            emphasis
-          />
-        )}
-        {hasMultipleOwners ? (
+          ))}
           <SummaryTile
             label="Combined total limit"
             value={formatCurrency(summary.combinedTotal)}
             emphasis
           />
-        ) : null}
-      </div>
+        </div>
+      ) : (
+        <SummaryTile
+          label="Total credit limit"
+          value={formatCurrency(singleOwnerTotal?.total ?? 0)}
+          emphasis
+        />
+      )}
       <Card className="p-5">
         <p className="text-sm font-medium text-[#6B7280]">Credit cards</p>
         <p className="mt-2 text-3xl font-semibold tracking-normal text-[#111827]">
