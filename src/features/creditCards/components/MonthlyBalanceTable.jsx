@@ -34,6 +34,20 @@ function getStatusFilterValue(status) {
   return "unpaid";
 }
 
+export function shouldShowMonthlyBalanceCard({
+  card,
+  filters,
+  searchTerm,
+  statusValue,
+  activeBalanceEditCardId,
+}) {
+  const matchesSearch = !searchTerm || getCardSearchText(card).includes(searchTerm);
+  const matchesOwner = !filters.owner || card.owner === filters.owner;
+  const isActiveBalanceEdit = card.id === activeBalanceEditCardId;
+  const matchesStatus = !filters.status || statusValue === filters.status || isActiveBalanceEdit;
+  return matchesSearch && matchesOwner && matchesStatus;
+}
+
 export default function MonthlyBalanceTable({
   cards,
   monthlyBalances,
@@ -48,6 +62,7 @@ export default function MonthlyBalanceTable({
 }) {
   const [sortMode, setSortMode] = useState("default");
   const [filters, setFilters] = useState(defaultFilters);
+  const [activeBalanceEditCardId, setActiveBalanceEditCardId] = useState(null);
   const monthBalances = monthlyBalances[selectedMonth] ?? {};
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const summary = useMemo(
@@ -68,12 +83,15 @@ export default function MonthlyBalanceTable({
       const entry = monthBalances[card.id];
       const status = getRowStatus(card, selectedMonth, entry);
       const statusValue = getStatusFilterValue(status);
-      const matchesSearch = !searchTerm || getCardSearchText(card).includes(searchTerm);
-      const matchesOwner = !filters.owner || card.owner === filters.owner;
-      const matchesStatus = !filters.status || statusValue === filters.status;
-      return matchesSearch && matchesOwner && matchesStatus;
+      return shouldShowMonthlyBalanceCard({
+        card,
+        filters,
+        searchTerm,
+        statusValue,
+        activeBalanceEditCardId,
+      });
     });
-  }, [filters, monthBalances, selectedMonth, sortedCards]);
+  }, [activeBalanceEditCardId, filters, monthBalances, selectedMonth, sortedCards]);
   const visibleCardRows = useMemo(
     () =>
       visibleCards.map((card) =>
@@ -81,6 +99,16 @@ export default function MonthlyBalanceTable({
       ),
     [monthBalances, selectedMonth, visibleCards],
   );
+
+  function handleBalanceFocus(cardId) {
+    setActiveBalanceEditCardId(cardId);
+  }
+
+  function handleBalanceBlur(cardId) {
+    setActiveBalanceEditCardId((currentCardId) =>
+      currentCardId === cardId ? null : currentCardId,
+    );
+  }
 
   function handleBalanceChange(cardId, value) {
     if (value === "") {
@@ -151,6 +179,8 @@ export default function MonthlyBalanceTable({
             isCardSaving={isCardSaving}
             onEditCard={onEditCard}
             onBalanceChange={handleBalanceChange}
+            onBalanceFocus={handleBalanceFocus}
+            onBalanceBlur={handleBalanceBlur}
             onCheckedNoBalance={handleCheckedNoBalance}
             onResetNoBalance={handleResetNoBalance}
             onPaidChange={handlePaidChange}
@@ -161,6 +191,8 @@ export default function MonthlyBalanceTable({
             isCardSaving={isCardSaving}
             onEditCard={onEditCard}
             onBalanceChange={handleBalanceChange}
+            onBalanceFocus={handleBalanceFocus}
+            onBalanceBlur={handleBalanceBlur}
             onCheckedNoBalance={handleCheckedNoBalance}
             onResetNoBalance={handleResetNoBalance}
             onPaidChange={handlePaidChange}
