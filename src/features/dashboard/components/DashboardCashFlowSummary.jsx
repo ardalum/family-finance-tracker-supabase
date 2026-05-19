@@ -56,8 +56,7 @@ export default function DashboardCashFlowSummary({
       <div className="border-b border-app-border p-5">
         <h3 className="text-base font-semibold text-text-main">Financial Pulse</h3>
         <p className="mt-1 text-sm text-text-muted">
-          Card purchases count toward spending and budgets. Cash changes when bills, savings, or
-          card payments are paid.
+          Account snapshots show current cash. Income and obligations are shown separately.
         </p>
       </div>
 
@@ -106,7 +105,7 @@ export default function DashboardCashFlowSummary({
         ) : null}
         <p>
           Planned cash cushion is a planning estimate: income - recurring remaining - unpaid card
-          payments - savings.
+          payments - savings. It is not an account balance.
         </p>
       </div>
 
