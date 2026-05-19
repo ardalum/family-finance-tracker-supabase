@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { getMonthlyBalanceDisplayRow } from "../monthlyBalanceDisplay.js";
-import { shouldShowMonthlyBalanceCard } from "./MonthlyBalanceTable.jsx";
+import { shouldShowMonthlyBalanceCard } from "../monthlyBalanceVisibility.js";
 
 describe("monthly balance display row", () => {
   it("prepares card display values used by desktop and mobile layouts", () => {
