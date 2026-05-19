@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { normalizeCardFormInput, toSupabaseCardFormInput } from "./cardFormUtils.js";
 import {
+  getCreditLimitSummary,
   getMonthTotal,
   getMonthlyBalanceSummary,
   getOwnerCreditLimitTotal,
@@ -55,6 +56,45 @@ describe("credit card service", () => {
     ];
 
     assert.equal(getOwnerCreditLimitTotal(cards, "Arvin"), 0);
+  });
+
+  it("builds credit limit summaries from actual card owners only", () => {
+    const summary = getCreditLimitSummary([
+      {
+        owner: "Test",
+        creditLimit: 5000,
+        isActive: true,
+      },
+      {
+        owner: "Test",
+        creditLimit: "2500",
+        isActive: true,
+      },
+      {
+        owner: "Ghost",
+        creditLimit: 1000,
+        isActive: false,
+      },
+    ]);
+
+    assert.deepEqual(summary.ownerTotals, [{ owner: "Test", total: 7500 }]);
+    assert.equal(summary.combinedTotal, 7500);
+    assert.equal(summary.activeCount, 2);
+    assert.equal(summary.inactiveCount, 1);
+    assert.equal(summary.cardCount, 3);
+  });
+
+  it("uses an unassigned bucket for active cards without owner names", () => {
+    const summary = getCreditLimitSummary([
+      {
+        owner: "",
+        creditLimit: 1200,
+        isActive: true,
+      },
+    ]);
+
+    assert.deepEqual(summary.ownerTotals, [{ owner: "Unassigned", total: 1200 }]);
+    assert.equal(summary.combinedTotal, 1200);
   });
 
   it("calculates monthly statement balance totals", () => {
