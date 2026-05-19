@@ -4,11 +4,13 @@ import { getCreditLimitSummary } from "../creditCardsService.js";
 
 export default function CreditLimitSummary({ cards }) {
   const summary = getCreditLimitSummary(cards);
+  const hasMultipleOwners = summary.ownerTotals.length > 1;
+  const singleOwnerTotal = summary.ownerTotals[0];
 
   return (
     <section className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(280px,0.4fr)]">
       <div className="grid min-w-0 gap-4 sm:grid-cols-2 2xl:grid-cols-3">
-        {summary.ownerTotals.length > 0 ? (
+        {hasMultipleOwners ? (
           summary.ownerTotals.map((ownerTotal) => (
             <SummaryTile
               key={ownerTotal.owner}
@@ -17,13 +19,19 @@ export default function CreditLimitSummary({ cards }) {
             />
           ))
         ) : (
-          <SummaryTile label="Active card limit" value={formatCurrency(0)} />
+          <SummaryTile
+            label="Total credit limit"
+            value={formatCurrency(singleOwnerTotal?.total ?? 0)}
+            emphasis
+          />
         )}
-        <SummaryTile
-          label="Combined total limit"
-          value={formatCurrency(summary.combinedTotal)}
-          emphasis
-        />
+        {hasMultipleOwners ? (
+          <SummaryTile
+            label="Combined total limit"
+            value={formatCurrency(summary.combinedTotal)}
+            emphasis
+          />
+        ) : null}
       </div>
       <Card className="p-5">
         <p className="text-sm font-medium text-[#6B7280]">Credit cards</p>
