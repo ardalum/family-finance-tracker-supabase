@@ -3,11 +3,20 @@ import Card from "../../../components/ui/Card.jsx";
 import EmptyState from "../../../components/ui/EmptyState.jsx";
 import LoadingMessage from "../../../components/ui/LoadingMessage.jsx";
 import { buildMonthOptions, getCurrentMonthKey } from "../../../lib/dates.js";
+import { buildCashAccountOptions } from "../../accounts/accountsService.js";
 import { getRowStatus } from "../creditCardStatus.js";
+import {
+  buildCardPaymentDraft,
+  buildPaidEntryFromDraft,
+  shouldOpenCardPaymentModal,
+} from "../cardPaymentModalState.js";
 import { getSortedCards } from "../creditCardSort.js";
 import { getMonthlyBalanceSummary } from "../creditCardsService.js";
 import { getMonthlyBalanceDisplayRow } from "../monthlyBalanceDisplay.js";
+import { LIQUID_ACCOUNT_TYPES } from "../../spending/spendingService.js";
+import { CARD_PAYMENT_OUTSIDE_ACCOUNT } from "../statementPaymentUtils.js";
 import { shouldShowMonthlyBalanceCard } from "../monthlyBalanceVisibility.js";
+import CardPaymentModal from "./CardPaymentModal.jsx";
 import MonthlyBalanceControls from "./MonthlyBalanceControls.jsx";
 import MonthlyBalanceDesktopTable from "./MonthlyBalanceDesktopTable.jsx";
 import MonthlyBalanceMobileList from "./MonthlyBalanceMobileList.jsx";
@@ -30,6 +39,7 @@ function getStatusFilterValue(status) {
 
 export default function MonthlyBalanceTable({
   cards,
+  cashAccounts = [],
   monthlyBalances,
   selectedMonth = getCurrentMonthKey(),
   loading = false,
@@ -42,6 +52,7 @@ export default function MonthlyBalanceTable({
 }) {
   const [sortMode, setSortMode] = useState("default");
   const [filters, setFilters] = useState(defaultFilters);
+  const [paymentModalDraft, setPaymentModalDraft] = useState(null);
   const [activeBalanceEditCardId, setActiveBalanceEditCardId] = useState(null);
   const monthBalances = monthlyBalances[selectedMonth] ?? {};
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
@@ -52,6 +63,13 @@ export default function MonthlyBalanceTable({
   const ownerOptions = useMemo(
     () => Array.from(new Set(cards.map((card) => card.owner).filter(Boolean))).sort(),
     [cards],
+  );
+  const paymentAccountOptions = useMemo(
+    () =>
+      buildCashAccountOptions(
+        cashAccounts.filter((account) => LIQUID_ACCOUNT_TYPES.has(account.accountType)),
+      ),
+    [cashAccounts],
   );
   const sortedCards = useMemo(
     () => getSortedCards(cards, monthBalances, selectedMonth, sortMode),
@@ -106,7 +124,24 @@ export default function MonthlyBalanceTable({
 
   function handlePaidChange(cardId, paid) {
     const currentEntry = monthBalances[cardId] ?? { balance: 0, paid: false };
-    onBalanceChange(selectedMonth, cardId, { ...currentEntry, paid });
+    if (shouldOpenCardPaymentModal(currentEntry, paid)) {
+      const card = cards.find((currentCard) => currentCard.id === cardId);
+      setPaymentModalDraft(buildCardPaymentDraft(currentEntry, card));
+      return;
+    }
+
+    if (paid) {
+      onBalanceChange(selectedMonth, cardId, { ...currentEntry, paid: true });
+      return;
+    }
+
+    onBalanceChange(selectedMonth, cardId, {
+      ...currentEntry,
+      paid: false,
+      paidAmount: 0,
+      paidDate: null,
+      paymentAccountId: "",
+    });
   }
 
   function handleCheckedNoBalance(cardId) {
@@ -179,6 +214,22 @@ export default function MonthlyBalanceTable({
           />
         </>
       )}
+      <CardPaymentModal
+        open={Boolean(paymentModalDraft)}
+        draft={paymentModalDraft}
+        paymentAccountOptions={[
+          ...paymentAccountOptions,
+          { value: CARD_PAYMENT_OUTSIDE_ACCOUNT, label: "Outside / untracked account" },
+        ]}
+        isSaving={saving}
+        onCancel={() => setPaymentModalDraft(null)}
+        onSave={(draft) => {
+          const cardId = draft.cardId;
+          const currentEntry = monthBalances[cardId] ?? { balance: 0, paid: false };
+          onBalanceChange(selectedMonth, cardId, buildPaidEntryFromDraft(currentEntry, draft));
+          setPaymentModalDraft(null);
+        }}
+      />
     </Card>
   );
 }

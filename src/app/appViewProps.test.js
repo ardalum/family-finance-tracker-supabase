@@ -20,6 +20,7 @@ const input = {
   spendingTransactions: [{ id: "transaction" }],
   recurringCategories: [{ id: "recurring-category" }],
   recurringPayments: [{ id: "recurring" }],
+  cashAccounts: [{ id: "cash-default" }],
   recurringStatusByMonth: { current: { recurring: "paid" } },
   recurringTransactions: [{ id: "recurring-transaction" }],
   householdProfiles: [{ id: "profile" }],
@@ -198,6 +199,7 @@ describe("app view props", () => {
     const props = createAppViewProps(input);
 
     assert.equal(props.creditCardProps.creditCards, input.supabaseCreditCards);
+    assert.equal(props.creditCardProps.cashAccounts, input.cashAccounts);
     assert.equal(props.creditCardProps.monthlyBalances, input.supabaseMonthlyBalances);
     assert.equal(props.creditCardProps.selectedBalanceMonth, input.selectedBalanceMonth);
     assert.equal(props.creditCardProps.loading, input.creditCardsLoading);

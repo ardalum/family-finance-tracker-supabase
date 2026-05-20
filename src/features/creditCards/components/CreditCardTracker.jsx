@@ -13,6 +13,7 @@ import StatementDetailsEditor from "./StatementDetailsEditor.jsx";
 
 export default function CreditCardTracker({
   creditCards,
+  cashAccounts = [],
   monthlyBalances,
   selectedBalanceMonth,
   loading = false,
@@ -112,6 +113,7 @@ export default function CreditCardTracker({
         {activeSection === "monthly-balances" ? (
           <MonthlyBalanceTable
             cards={activeCards}
+            cashAccounts={cashAccounts}
             monthlyBalances={monthlyBalances}
             selectedMonth={selectedBalanceMonth}
             loading={monthlyBalancesLoading}
@@ -128,6 +130,7 @@ export default function CreditCardTracker({
           <>
             <StatementDetailsEditor
               cards={activeCards}
+              cashAccounts={cashAccounts}
               monthlyBalances={monthlyBalances}
               selectedMonth={selectedBalanceMonth}
               onStatementChange={onMonthlyBalanceChange}

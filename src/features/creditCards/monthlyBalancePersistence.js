@@ -1,10 +1,11 @@
 import {
+  CARD_PAYMENT_OUTSIDE_ACCOUNT,
   getStatementPaidAmount,
   getStatementUnpaidAmount,
   isStatementPaid,
 } from "./statementPaymentUtils.js";
 
-export function toLoadedMonthBalanceEntry(row, statement = null) {
+export function toLoadedMonthBalanceEntry(row, statement = null, paymentMovement = null) {
   const balance = Number(row.balance || 0);
   const rawPaid = Boolean(row.paid);
   const checkedNoBalance = balance <= 0 && rawPaid;
@@ -30,6 +31,11 @@ export function toLoadedMonthBalanceEntry(row, statement = null) {
     autopayEnabled: Boolean(statement?.autopay_enabled),
     autopayDate: statement?.autopay_date ?? null,
     confirmationNumber: statement?.confirmation_number ?? "",
+    paymentAccountId: paymentMovement
+      ? paymentMovement.is_tracked
+        ? (paymentMovement.account_id ?? "")
+        : CARD_PAYMENT_OUTSIDE_ACCOUNT
+      : "",
     statementStatus:
       statement?.status ??
       (getStatementUnpaidAmount({ balance, paid: row.paid }) > 0 ? "unpaid" : "paid"),

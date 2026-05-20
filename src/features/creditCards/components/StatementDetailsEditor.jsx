@@ -3,14 +3,17 @@ import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import Input from "../../../components/ui/Input.jsx";
 import Select from "../../../components/ui/Select.jsx";
+import { buildCashAccountOptions } from "../../accounts/accountsService.js";
 import { formatCurrency } from "../../../lib/formatters.js";
-import { isStatementPaid } from "../statementPaymentUtils.js";
+import { LIQUID_ACCOUNT_TYPES } from "../../spending/spendingService.js";
+import { CARD_PAYMENT_OUTSIDE_ACCOUNT, isStatementPaid } from "../statementPaymentUtils.js";
 
 function emptyStatement(entry = {}) {
   return {
     minimumPayment: String(entry.minimumPayment ?? 0),
     paidAmount: String(entry.paidAmount ?? (entry.paid ? entry.balance : 0) ?? 0),
     paidDate: entry.paidDate ?? "",
+    paymentAccountId: entry.paymentAccountId ?? "",
     autopayEnabled: Boolean(entry.autopayEnabled),
     autopayDate: entry.autopayDate ?? "",
     confirmationNumber: entry.confirmationNumber ?? "",
@@ -29,12 +32,20 @@ function getStatusLabel(entry) {
 
 export default function StatementDetailsEditor({
   cards,
+  cashAccounts = [],
   monthlyBalances,
   selectedMonth,
   onStatementChange,
   saving = false,
 }) {
   const monthBalances = monthlyBalances[selectedMonth] ?? {};
+  const paymentAccountOptions = useMemo(
+    () =>
+      buildCashAccountOptions(
+        cashAccounts.filter((account) => LIQUID_ACCOUNT_TYPES.has(account.accountType)),
+      ),
+    [cashAccounts],
+  );
   const [selectedCardId, setSelectedCardId] = useState(cards[0]?.id ?? "");
   const selectedCard = useMemo(
     () => cards.find((card) => card.id === selectedCardId) ?? cards[0],
@@ -61,12 +72,19 @@ export default function StatementDetailsEditor({
   async function handleSubmit(event) {
     event.preventDefault();
     if (!selectedCard) return;
+    const balance = Number(selectedEntry.balance || 0);
+    const paidAmount = Number(form.paidAmount || 0);
+    if (balance > 0 && paidAmount > 0 && !form.paymentAccountId) {
+      setMessage("Select Paid from account before saving a payment.");
+      return;
+    }
 
     await onStatementChange(selectedMonth, selectedCard.id, {
       ...selectedEntry,
       minimumPayment: Number(form.minimumPayment) || 0,
-      paidAmount: Number(form.paidAmount) || 0,
+      paidAmount,
       paidDate: form.paidDate || null,
+      paymentAccountId: form.paymentAccountId || "",
       autopayEnabled: Boolean(form.autopayEnabled),
       autopayDate: form.autopayDate || null,
       confirmationNumber: form.confirmationNumber,
@@ -141,6 +159,20 @@ export default function StatementDetailsEditor({
             value={form.paidDate}
             onChange={(event) => updateField("paidDate", event.target.value)}
           />
+          <Select
+            label="Paid from account"
+            value={form.paymentAccountId}
+            onChange={(event) => updateField("paymentAccountId", event.target.value)}
+            disabled={Number(selectedEntry.balance || 0) <= 0}
+          >
+            <option value="">Select account</option>
+            {paymentAccountOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+            <option value={CARD_PAYMENT_OUTSIDE_ACCOUNT}>Outside / untracked account</option>
+          </Select>
           <Input
             label="Autopay date"
             type="date"
