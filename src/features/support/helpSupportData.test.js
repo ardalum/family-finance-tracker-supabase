@@ -39,7 +39,8 @@ describe("help/support trust copy", () => {
     assert.ok(
       cardGroup.items.some(
         (item) =>
-          /credit card purchase/i.test(item.question) && /do not reduce Cash Position/i.test(item.answer),
+          /credit card purchase/i.test(item.question) &&
+          /does not reduce Cash Position|do not reduce Cash Position/i.test(item.answer),
       ),
     );
     assert.ok(
