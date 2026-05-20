@@ -1,7 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import Card from "../../../components/ui/Card.jsx";
+import { buildCashAccountOptions } from "../../accounts/accountsService.js";
+import { CARD_PAYMENT_OUTSIDE_ACCOUNT } from "../../creditCards/statementPaymentUtils.js";
+import { LIQUID_ACCOUNT_TYPES } from "../../spending/spendingService.js";
+import {
+  buildRecurringPaidDraft,
+  RECURRING_PAID_FROM_CREDIT_CARD,
+} from "../recurringPaymentFlow.js";
 import { getMonthlyRecurringRows, getRecurringDueDate } from "../recurringService.js";
 import RecurringBillRow from "./RecurringBillRow.jsx";
+import RecurringPaymentModal from "./RecurringPaymentModal.jsx";
 
 function todayDate() {
   return new Date().toISOString().slice(0, 10);
@@ -18,6 +26,8 @@ export default function RecurringGenerationPanel({
   templates,
   recurringStatusByMonth,
   categories,
+  cashAccounts = [],
+  creditCards = [],
   onMarkPaid,
   onMarkUnpaid,
   onSkip,
@@ -29,6 +39,15 @@ export default function RecurringGenerationPanel({
   );
   const [drafts, setDrafts] = useState({});
   const [message, setMessage] = useState(null);
+  const [paymentModalRow, setPaymentModalRow] = useState(null);
+  const [paymentModalDraft, setPaymentModalDraft] = useState(null);
+  const cashAccountOptions = useMemo(
+    () =>
+      buildCashAccountOptions(
+        cashAccounts.filter((account) => LIQUID_ACCOUNT_TYPES.has(account.accountType)),
+      ),
+    [cashAccounts],
+  );
 
   const workflowCounts = useMemo(
     () => ({
@@ -72,17 +91,39 @@ export default function RecurringGenerationPanel({
     }));
   }
 
-  async function handleMarkPaid(row) {
-    const draft = drafts[row.template.id] ?? {};
-    const amount =
-      row.template.billType === "fixed"
-        ? Number(row.template.estimatedAmount || 0)
-        : Number(draft.actualAmount);
+  function getPaymentAccountOptions(row) {
+    const options = [...cashAccountOptions];
+    if (row?.template?.paymentMethod === "Credit Card") {
+      const card = creditCards.find((current) => current.id === row.template.cardId);
+      const label = card
+        ? `Credit card: ${card.name}${card.lastFour ? ` **** ${card.lastFour}` : ""}`
+        : "Credit card";
+      options.push({ value: RECURRING_PAID_FROM_CREDIT_CARD, label });
+    }
+    options.push({ value: CARD_PAYMENT_OUTSIDE_ACCOUNT, label: "Outside / untracked account" });
+    return options;
+  }
 
+  function handleStartMarkPaid(row) {
+    const draft = drafts[row.template.id] ?? {};
+    setPaymentModalRow(row);
+    setPaymentModalDraft(
+      buildRecurringPaidDraft({
+        row,
+        monthKey,
+        existingPaidFromAccount: row.instance?.paidFromAccount || "",
+        todayDate: draft.paidDate,
+      }),
+    );
+    setMessage(null);
+  }
+
+  async function handleMarkPaid(row, modalDraft) {
+    const amount = Number(modalDraft?.paidAmount);
     if (!Number.isFinite(amount) || amount <= 0) {
       setMessage({
         type: "error",
-        text: "Enter an actual amount greater than zero before marking paid.",
+        text: "Enter an amount greater than zero before saving payment.",
       });
       return;
     }
@@ -90,9 +131,13 @@ export default function RecurringGenerationPanel({
     try {
       await onMarkPaid({
         template: row.template,
-        actualAmount: amount,
-        paidDate: draft.paidDate || getRecurringDueDate(monthKey, row.template.dueDay),
+        actualAmount:
+          row.template.billType === "fixed" ? Number(row.template.estimatedAmount || 0) : amount,
+        paidDate: modalDraft?.paidDate || getRecurringDueDate(monthKey, row.template.dueDay),
+        paidFromAccount: modalDraft?.paidFromAccount || CARD_PAYMENT_OUTSIDE_ACCOUNT,
       });
+      setPaymentModalRow(null);
+      setPaymentModalDraft(null);
       setMessage({
         type: "success",
         text: `${row.template.name} marked paid. A linked spending transaction was created or updated, not duplicated.`,
@@ -194,7 +239,7 @@ export default function RecurringGenerationPanel({
                   draft={drafts[row.template.id] ?? {}}
                   isSaving={isSaving}
                   onDraftChange={updateDraft}
-                  onMarkPaid={handleMarkPaid}
+                  onStartMarkPaid={handleStartMarkPaid}
                   onMarkUnpaid={handleMarkUnpaid}
                   onSkip={handleSkip}
                 />
@@ -203,6 +248,21 @@ export default function RecurringGenerationPanel({
           </table>
         </div>
       )}
+      <RecurringPaymentModal
+        open={Boolean(paymentModalRow)}
+        billName={paymentModalRow?.template?.name || ""}
+        draft={paymentModalDraft}
+        accountOptions={paymentModalRow ? getPaymentAccountOptions(paymentModalRow) : []}
+        isSaving={isSaving}
+        onCancel={() => {
+          setPaymentModalRow(null);
+          setPaymentModalDraft(null);
+        }}
+        onSave={(modalDraft) => {
+          if (!paymentModalRow) return;
+          handleMarkPaid(paymentModalRow, modalDraft);
+        }}
+      />
     </Card>
   );
 }

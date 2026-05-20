@@ -221,6 +221,7 @@ export function createAppViewProps({
     },
     recurringProps: {
       creditCards: supabaseCreditCards,
+      cashAccounts,
       categories: recurringCategories,
       recurringPayments,
       recurringStatusByMonth,

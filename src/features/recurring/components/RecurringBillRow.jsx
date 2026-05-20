@@ -24,7 +24,7 @@ export default function RecurringBillRow({
   draft,
   isSaving,
   onDraftChange,
-  onMarkPaid,
+  onStartMarkPaid,
   onMarkUnpaid,
   onSkip,
 }) {
@@ -105,7 +105,7 @@ export default function RecurringBillRow({
         <div className="flex flex-wrap gap-2">
           {isPaid ? (
             <>
-              <Button type="button" onClick={() => onMarkPaid(row)} disabled={isSaving}>
+              <Button type="button" onClick={() => onStartMarkPaid(row)} disabled={isSaving}>
                 <CheckCircle2 size={16} aria-hidden="true" />
                 Update Paid
               </Button>
@@ -120,7 +120,11 @@ export default function RecurringBillRow({
               </Button>
             </>
           ) : (
-            <Button type="button" onClick={() => onMarkPaid(row)} disabled={isSaving || isSkipped}>
+            <Button
+              type="button"
+              onClick={() => onStartMarkPaid(row)}
+              disabled={isSaving || isSkipped}
+            >
               <CheckCircle2 size={16} aria-hidden="true" />
               Mark Paid
             </Button>

@@ -17,6 +17,7 @@ import RecurringSummary from "./RecurringSummary.jsx";
 
 export default function RecurringPayments({
   creditCards,
+  cashAccounts = [],
   categories,
   recurringPayments,
   recurringStatusByMonth,
@@ -170,6 +171,8 @@ export default function RecurringPayments({
           templates={recurringPayments}
           recurringStatusByMonth={recurringStatusByMonth}
           categories={categories}
+          cashAccounts={cashAccounts}
+          creditCards={activeCards}
           onMarkPaid={onMarkRecurringPaid}
           onMarkUnpaid={onMarkRecurringUnpaid}
           onSkip={onSkipRecurringPayment}
