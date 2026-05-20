@@ -139,6 +139,26 @@ test("replaceMovementBySource replaces an existing source movement", () => {
   assert.equal(findMovementBySource(result, "recurring_payment", "rent-1")?.amount, 1500);
 });
 
+test("replace/find/delete support composite text source ids", () => {
+  const compositeSourceId = "3c617d5-3696-4178-a31a-052594cef399:2026-05";
+  const compositeMovement = {
+    ...trackedOutflow,
+    sourceType: "credit_card_payment",
+    sourceId: compositeSourceId,
+    movementType: "credit_card_payment",
+    amount: 500,
+  };
+
+  const replaced = replaceMovementBySource([trackedInflow], compositeMovement);
+  assert.equal(
+    findMovementBySource(replaced, "credit_card_payment", compositeSourceId)?.sourceId,
+    compositeSourceId,
+  );
+
+  const deleted = deleteMovementBySource(replaced, "credit_card_payment", compositeSourceId);
+  assert.equal(findMovementBySource(deleted, "credit_card_payment", compositeSourceId), null);
+});
+
 test("deleteMovementBySource removes only the matching source movement", () => {
   const result = deleteMovementBySource(
     [trackedInflow, trackedOutflow],
