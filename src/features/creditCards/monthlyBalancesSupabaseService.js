@@ -237,6 +237,16 @@ export async function upsertMonthlyBalance(householdId, monthKey, card, patch) {
     paidAmount: normalized.paidAmount,
   };
 
+  // Validate movement requirements before any statement/balance write.
+  // A payment amount requires a paid-from account so we don't silently save
+  // paid card state without a linked payment movement.
+  resolveCardPaymentMovementAction({
+    householdId,
+    monthKey,
+    card,
+    patch: normalizedPatch,
+  });
+
   const { data, error } = await client
     .from("monthly_card_balances")
     .upsert(

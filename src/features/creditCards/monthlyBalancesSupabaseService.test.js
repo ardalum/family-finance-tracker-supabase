@@ -99,6 +99,45 @@ describe("monthly balances supabase service helpers", () => {
     assert.equal(result.payload.isTracked, false);
   });
 
+  it("builds upsert movement action for partial payments when paidAmount is positive", () => {
+    const result = resolveCardPaymentMovementAction({
+      householdId: "household-1",
+      monthKey: "2026-05",
+      card: { id: "card-1", supabaseId: "card-supa-1", name: "Main Card" },
+      patch: {
+        balance: 400,
+        paid: false,
+        paidAmount: 120,
+        paidDate: "2026-05-22",
+        paymentAccountId: "checking-1",
+      },
+    });
+
+    assert.equal(result.action, "upsert");
+    assert.equal(result.sourceId, "card-supa-1:2026-05");
+    assert.equal(result.payload.amount, 120);
+    assert.equal(result.payload.accountId, "checking-1");
+  });
+
+  it("throws when paid amount is present but payment account is missing", () => {
+    assert.throws(
+      () =>
+        resolveCardPaymentMovementAction({
+          householdId: "household-1",
+          monthKey: "2026-05",
+          card: { id: "card-1", supabaseId: "card-supa-1", name: "Main Card" },
+          patch: {
+            balance: 400,
+            paid: true,
+            paidAmount: 120,
+            paidDate: "2026-05-22",
+            paymentAccountId: "",
+          },
+        }),
+      /Choose the account used to pay this card\./,
+    );
+  });
+
   it("builds delete movement action for unpaid or reversed entries", () => {
     const result = resolveCardPaymentMovementAction({
       householdId: "household-1",
