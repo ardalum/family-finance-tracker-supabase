@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 export default function MerchantSuggestionInput({
   label,
@@ -10,11 +10,13 @@ export default function MerchantSuggestionInput({
   required = false,
 }) {
   const inputId = useId();
+  const inputRef = useRef(null);
   const listboxId = `${inputId}-merchant-suggestions`;
   const normalizedValue = String(value ?? "");
   const canShowSuggestions =
     normalizedValue.trim().length >= minQueryLength && (suggestions?.length ?? 0) > 0;
   const [isOpen, setIsOpen] = useState(false);
+  const [suppressAutoOpen, setSuppressAutoOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const highlightedSuggestion = useMemo(
     () => (highlightedIndex >= 0 ? suggestions[highlightedIndex] : null),
@@ -28,22 +30,33 @@ export default function MerchantSuggestionInput({
       return;
     }
 
+    if (suppressAutoOpen) return;
+
     setIsOpen(true);
     setHighlightedIndex((current) => (current >= 0 && current < suggestions.length ? current : 0));
-  }, [canShowSuggestions, suggestions.length]);
+  }, [canShowSuggestions, suggestions.length, suppressAutoOpen]);
 
   function handleSelectSuggestion(suggestion) {
+    setSuppressAutoOpen(true);
     onChange?.(suggestion.merchant, suggestion);
     setIsOpen(false);
     setHighlightedIndex(-1);
+    window.setTimeout(() => {
+      inputRef.current?.focus();
+      inputRef.current?.setSelectionRange?.(
+        String(suggestion.merchant).length,
+        String(suggestion.merchant).length,
+      );
+    }, 0);
   }
 
   function handleInputChange(event) {
+    setSuppressAutoOpen(false);
     onChange?.(event.target.value, null);
   }
 
   function handleInputFocus() {
-    if (canShowSuggestions) setIsOpen(true);
+    if (canShowSuggestions && !suppressAutoOpen) setIsOpen(true);
   }
 
   function handleInputBlur() {
@@ -55,7 +68,10 @@ export default function MerchantSuggestionInput({
 
   function handleInputKeyDown(event) {
     if (!isOpen || suggestions.length === 0) {
-      if (event.key === "Escape") setIsOpen(false);
+      if (event.key === "Escape") {
+        setSuppressAutoOpen(true);
+        setIsOpen(false);
+      }
       return;
     }
 
@@ -79,6 +95,7 @@ export default function MerchantSuggestionInput({
 
     if (event.key === "Escape") {
       event.preventDefault();
+      setSuppressAutoOpen(true);
       setIsOpen(false);
       setHighlightedIndex(-1);
     }
@@ -89,6 +106,7 @@ export default function MerchantSuggestionInput({
       {label}
       <div className="relative">
         <input
+          ref={inputRef}
           value={value}
           onChange={handleInputChange}
           onFocus={handleInputFocus}

@@ -33,6 +33,18 @@ test("merchant autosuggest includes keyboard navigation controls", () => {
   assert.match(merchantSuggestionInput, /event\.key === "Escape"/);
 });
 
+test("merchant autosuggest closes after selection and waits for next input edit to reopen", () => {
+  assert.match(merchantSuggestionInput, /const \[suppressAutoOpen, setSuppressAutoOpen\]/);
+  assert.match(
+    merchantSuggestionInput,
+    /setSuppressAutoOpen\(true\);\s*onChange\?\.\(suggestion\.merchant, suggestion\)/,
+  );
+  assert.match(
+    merchantSuggestionInput,
+    /setSuppressAutoOpen\(false\);\s*onChange\?\.\(event\.target\.value, null\)/,
+  );
+});
+
 test("spending and quick add forms use shared merchant suggestion input", () => {
   assert.match(transactionForm, /<MerchantSuggestionInput/);
   assert.match(quickAddModal, /<MerchantSuggestionInput/);
