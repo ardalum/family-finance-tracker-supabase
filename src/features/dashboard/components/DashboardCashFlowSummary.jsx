@@ -1,5 +1,6 @@
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
+import InfoTooltip from "../../../components/ui/InfoTooltip.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
 import { dispatchNavigation } from "../../../lib/navigationTargets.js";
 import { getDashboardCashFlow } from "../dashboardCashFlow.js";
@@ -15,10 +16,13 @@ function navigateToView(view, target = "") {
   dispatchNavigation(view, target);
 }
 
-function Metric({ label, value, muted = false }) {
+function Metric({ label, value, muted = false, helpText = "" }) {
   return (
     <div className="rounded-xl border border-app-border bg-app-background px-3 py-2">
-      <p className="text-xs font-semibold uppercase tracking-normal text-text-muted">{label}</p>
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-xs font-semibold uppercase tracking-normal text-text-muted">{label}</p>
+        {helpText ? <InfoTooltip label={`${label} calculation info`} content={helpText} /> : null}
+      </div>
       <p className={`mt-1 text-lg font-semibold ${muted ? "text-text-muted" : "text-text-main"}`}>
         {value}
       </p>
@@ -72,10 +76,19 @@ export default function DashboardCashFlowSummary({
               : "Add account snapshots"
           }
           muted={!cashFlow.hasCashSnapshotData}
+          helpText="Total tracked bank/cash account balance for the selected month. Starts from account snapshots, then applies tracked money in/out movements. Excludes credit card limits, unpaid card balances, loans, and outside/untracked accounts."
         />
-        <Metric label="Spending this month" value={formatCurrency(cashFlow.spendingTotal)} />
+        <Metric
+          label="Spending this month"
+          value={formatCurrency(cashFlow.spendingTotal)}
+          helpText="Transactions recorded for the selected month. Credit card purchases count as spending and budget activity, but do not reduce Cash Position until the card is paid from a tracked account."
+        />
         <Metric label="Total budget" value={formatCurrency(cashFlow.budgetTotal)} />
-        <Metric label="Budget remaining" value={formatCurrency(cashFlow.remainingBudget)} />
+        <Metric
+          label="Budget remaining"
+          value={formatCurrency(cashFlow.remainingBudget)}
+          helpText="Monthly budget minus spending assigned to budget categories. This is a planning number, not the same as Cash Position."
+        />
         <Metric
           label="Upcoming obligations"
           value={formatCurrency(cashFlow.upcomingObligationsTotal)}
@@ -119,11 +132,13 @@ export default function DashboardCashFlowSummary({
             cashFlow.hasIncomeData ? formatCurrency(cashFlow.incomeTotal) : "Add income entries"
           }
           muted={!cashFlow.hasIncomeData}
+          helpText="Total income entries for the selected month. Only income deposited into a tracked account affects Cash Position."
         />
         <Metric
           label="Planned cash cushion"
           value={cashFlow.hasIncomeData ? formatCurrency(cashFlow.plannedCashCushion) : "Not ready"}
           muted={!cashFlow.hasIncomeData}
+          helpText="Planning estimate based on expected income, remaining obligations, and savings. This is not your bank balance."
         />
       </div>
 

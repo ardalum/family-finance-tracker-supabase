@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import Card from "../../../components/ui/Card.jsx";
 import EmptyState from "../../../components/ui/EmptyState.jsx";
+import InfoTooltip from "../../../components/ui/InfoTooltip.jsx";
 import InlineAlert from "../../../components/ui/InlineAlert.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { buildMonthOptions, getCurrentMonthKey } from "../../../lib/dates.js";
@@ -46,6 +47,13 @@ export default function NetWorth({
     if (summary.status === "negative") return "Negative net worth";
     return "Net worth is currently neutral";
   }, [summary.status]);
+
+  const summaryHelpByLabel = useMemo(
+    () => ({
+      "Net worth": "Tracked assets minus tracked liabilities, based on the snapshots you entered.",
+    }),
+    [],
+  );
 
   return (
     <section className="grid gap-6">
@@ -99,7 +107,15 @@ export default function NetWorth({
       <div className="grid gap-4 md:grid-cols-3">
         {summary.summaryRows.map((row) => (
           <Card key={row.label} className="p-5">
-            <p className="text-sm font-medium text-text-muted">{row.label}</p>
+            <div className="flex items-start justify-between gap-2">
+              <p className="text-sm font-medium text-text-muted">{row.label}</p>
+              {summaryHelpByLabel[row.label] ? (
+                <InfoTooltip
+                  label={`${row.label} calculation info`}
+                  content={summaryHelpByLabel[row.label]}
+                />
+              ) : null}
+            </div>
             <p className="mt-2 text-3xl font-semibold text-text-main">
               {formatCurrency(row.value)}
             </p>
