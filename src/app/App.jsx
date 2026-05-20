@@ -772,6 +772,7 @@ function FinanceTrackerApp() {
       <QuickAddTransactionModal
         open={quickAddOpen}
         cards={supabaseCreditCards.filter((card) => card.isActive)}
+        cashAccounts={cashAccounts}
         categories={spendingCategories}
         transactions={spendingTransactions}
         isSaving={spendingSaving}

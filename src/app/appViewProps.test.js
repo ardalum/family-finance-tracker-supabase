@@ -251,6 +251,7 @@ describe("app view props", () => {
     const props = createAppViewProps(input);
 
     assert.equal(props.spendingProps.creditCards, input.supabaseCreditCards);
+    assert.equal(props.spendingProps.cashAccounts, input.cashAccounts);
     assert.equal(props.spendingProps.categories, input.spendingCategories);
     assert.equal(props.spendingProps.transactions, input.spendingTransactions);
     assert.equal(props.spendingProps.localTransactions, input.appData.transactions);

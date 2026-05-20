@@ -6,6 +6,7 @@ export default function TransactionModal({
   open,
   monthKey,
   cards,
+  cashAccounts = [],
   categories,
   editingTransaction,
   onClose,
@@ -56,6 +57,7 @@ export default function TransactionModal({
           <TransactionForm
             monthKey={monthKey}
             cards={cards}
+            cashAccounts={cashAccounts}
             categories={categories}
             editingTransaction={editingTransaction}
             onCancel={onClose}

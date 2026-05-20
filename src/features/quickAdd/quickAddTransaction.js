@@ -1,4 +1,4 @@
-import { UNCATEGORIZED_ID } from "../spending/spendingService.js";
+import { SPENDING_OUTSIDE_ACCOUNT, UNCATEGORIZED_ID } from "../spending/spendingService.js";
 
 export const QUICK_ADD_DEFAULT_FORM = {
   amount: "",
@@ -6,6 +6,7 @@ export const QUICK_ADD_DEFAULT_FORM = {
   categoryId: UNCATEGORIZED_ID,
   paymentMethod: "Credit Card",
   cardId: "",
+  sourceAccountId: SPENDING_OUTSIDE_ACCOUNT,
   date: getTodayDate(),
   transactionType: "expense",
   notes: "",
@@ -43,6 +44,7 @@ export function buildRecentMerchantOptions(transactions = [], limit = 5) {
       categoryId: transaction.categoryId || UNCATEGORIZED_ID,
       paymentMethod: transaction.paymentMethod || "",
       cardId: transaction.cardId || "",
+      sourceAccountId: transaction.sourceAccountId || SPENDING_OUTSIDE_ACCOUNT,
       transactionType: transaction.transactionType || "expense",
     });
 
@@ -61,6 +63,10 @@ export function applyRecentMerchantPrefill(form, option) {
     categoryId: option.categoryId || form.categoryId,
     paymentMethod: option.paymentMethod || form.paymentMethod,
     cardId: option.paymentMethod === "Credit Card" ? option.cardId || form.cardId : "",
+    sourceAccountId:
+      option.paymentMethod === "Credit Card"
+        ? ""
+        : option.sourceAccountId || form.sourceAccountId || SPENDING_OUTSIDE_ACCOUNT,
     transactionType: option.transactionType || form.transactionType,
   };
 }
@@ -76,6 +82,8 @@ export function getQuickAddValidationError(form, { cards = [] } = {}) {
   if (form.paymentMethod === "Credit Card" && !cards.some((card) => card.id === form.cardId)) {
     return "Select a valid card.";
   }
+  if (form.paymentMethod !== "Credit Card" && !form.sourceAccountId)
+    return "Paid from account is required.";
   if (!form.categoryId) return "Category is required.";
   return "";
 }
@@ -86,6 +94,7 @@ export function buildQuickAddPayload(form) {
     merchant: form.merchant.trim(),
     paymentMethod: form.paymentMethod,
     cardId: form.paymentMethod === "Credit Card" ? form.cardId : "",
+    sourceAccountId: form.paymentMethod === "Credit Card" ? "" : form.sourceAccountId,
     transactionType: form.transactionType,
     categoryId: form.categoryId,
     amount: Number(form.amount),

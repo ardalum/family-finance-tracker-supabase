@@ -3,7 +3,14 @@ import { Plus, Trash2 } from "lucide-react";
 import Button from "../../../components/ui/Button.jsx";
 import Input from "../../../components/ui/Input.jsx";
 import Select from "../../../components/ui/Select.jsx";
-import { getSplitTotal, TRANSACTION_TYPE_OPTIONS, UNCATEGORIZED_ID } from "../spendingService.js";
+import { buildCashAccountOptions } from "../../accounts/accountsService.js";
+import {
+  getSplitTotal,
+  LIQUID_ACCOUNT_TYPES,
+  SPENDING_OUTSIDE_ACCOUNT,
+  TRANSACTION_TYPE_OPTIONS,
+  UNCATEGORIZED_ID,
+} from "../spendingService.js";
 
 function todayDate() {
   return new Date().toISOString().slice(0, 10);
@@ -42,6 +49,7 @@ const emptyForm = {
   merchant: "",
   paymentMethod: "",
   cardId: "",
+  sourceAccountId: "",
   transactionType: "expense",
   categoryId: UNCATEGORIZED_ID,
   amount: "",
@@ -56,6 +64,7 @@ const emptyForm = {
 const defaultSmartDefaults = {
   paymentMethod: "",
   cardId: "",
+  sourceAccountId: "",
   transactionType: "expense",
   categoryId: UNCATEGORIZED_ID,
   splitMode: false,
@@ -65,6 +74,7 @@ const defaultSmartDefaults = {
 export default function TransactionForm({
   monthKey,
   cards,
+  cashAccounts = [],
   categories,
   editingTransaction,
   onCancel,
@@ -83,6 +93,13 @@ export default function TransactionForm({
     () => new Set(cards.map((card) => card.owner).filter(Boolean)).size >= 2,
     [cards],
   );
+  const sourceAccountOptions = useMemo(
+    () =>
+      buildCashAccountOptions(
+        cashAccounts.filter((account) => LIQUID_ACCOUNT_TYPES.has(account.accountType)),
+      ),
+    [cashAccounts],
+  );
   const splitTotal = useMemo(() => getSplitTotal(form.splits), [form.splits]);
   const splitDifference = useMemo(
     () => roundMoney(Number(form.amount || 0) - splitTotal),
@@ -99,6 +116,7 @@ export default function TransactionForm({
             merchant: editingTransaction.merchant,
             paymentMethod: editingTransaction.paymentMethod || "",
             cardId: editingTransaction.cardId || "",
+            sourceAccountId: editingTransaction.sourceAccountId || "",
             transactionType: editingTransaction.transactionType || "expense",
             categoryId: editingTransaction.categoryId || UNCATEGORIZED_ID,
             amount: String(editingTransaction.amount ?? ""),
@@ -118,7 +136,11 @@ export default function TransactionForm({
     setForm((current) => ({
       ...current,
       [field]: value,
-      ...(field === "paymentMethod" && value !== "Credit Card" ? { cardId: "" } : {}),
+      ...(field === "paymentMethod"
+        ? value === "Credit Card"
+          ? { cardId: "", sourceAccountId: "" }
+          : { cardId: "", sourceAccountId: current.sourceAccountId || SPENDING_OUTSIDE_ACCOUNT }
+        : {}),
     }));
   }
 
@@ -292,7 +314,19 @@ export default function TransactionForm({
             ))}
           </Select>
         ) : (
-          <div className="hidden sm:block" aria-hidden="true" />
+          <Select
+            label="Paid from account"
+            value={form.sourceAccountId}
+            onChange={(event) => updateField("sourceAccountId", event.target.value)}
+            required
+          >
+            <option value={SPENDING_OUTSIDE_ACCOUNT}>Outside / untracked</option>
+            {sourceAccountOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </Select>
         )}
         <Input
           label="Amount"
@@ -448,6 +482,8 @@ function getPreparedForm(form) {
     merchant: form.merchant.trim(),
     notes: form.notes.trim(),
     amount: Number(form.amount),
+    sourceAccountId:
+      form.paymentMethod === "Credit Card" ? "" : form.sourceAccountId || SPENDING_OUTSIDE_ACCOUNT,
     splits: form.splitMode
       ? form.splits.map((split) => ({
           ...split,
@@ -468,6 +504,10 @@ function getNewTransactionForm(monthKey, smartDefaults = defaultSmartDefaults) {
     date: defaultDateForMonth(monthKey),
     paymentMethod: smartDefaults.paymentMethod || "",
     cardId: smartDefaults.paymentMethod === "Credit Card" ? smartDefaults.cardId || "" : "",
+    sourceAccountId:
+      smartDefaults.paymentMethod === "Credit Card"
+        ? ""
+        : smartDefaults.sourceAccountId || SPENDING_OUTSIDE_ACCOUNT,
     transactionType: smartDefaults.transactionType || "expense",
     categoryId: smartDefaults.categoryId || UNCATEGORIZED_ID,
     splitMode: Boolean(smartDefaults.splitMode),
@@ -479,6 +519,8 @@ function getSmartDefaults(form) {
   return {
     paymentMethod: form.paymentMethod || "",
     cardId: form.paymentMethod === "Credit Card" ? form.cardId || "" : "",
+    sourceAccountId:
+      form.paymentMethod === "Credit Card" ? "" : form.sourceAccountId || SPENDING_OUTSIDE_ACCOUNT,
     transactionType: form.transactionType || "expense",
     categoryId: form.categoryId || UNCATEGORIZED_ID,
     splitMode: Boolean(form.splitMode),
@@ -504,6 +546,8 @@ function validateForm(form, cards, isEditingRecurring = false) {
   if (form.paymentMethod === "Credit Card" && !form.cardId) return "Card used is required.";
   if (form.paymentMethod === "Credit Card" && !cards.some((card) => card.id === form.cardId))
     return "Select a valid card.";
+  if (form.paymentMethod !== "Credit Card" && !form.sourceAccountId)
+    return "Paid from account is required.";
   if (!Number.isFinite(Number(form.amount)) || Number(form.amount) <= 0)
     return "Amount must be greater than zero.";
   if (!form.splitMode && !form.categoryId) return "Category is required.";

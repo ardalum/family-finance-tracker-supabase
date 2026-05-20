@@ -1,7 +1,11 @@
 import { getMonthDateRange } from "../../lib/dates.js";
 import { supabase } from "../../lib/supabase/client.js";
 import { validateSplitReplacementInput } from "./splitValidation.js";
-import { normalizeTransactionType, UNCATEGORIZED_ID } from "./spendingService.js";
+import {
+  normalizeTransactionType,
+  SPENDING_OUTSIDE_ACCOUNT,
+  UNCATEGORIZED_ID,
+} from "./spendingService.js";
 
 function requireSupabase() {
   if (!supabase) {
@@ -52,7 +56,7 @@ function normalizeTransactionInput(input, cardsByAppId, categoriesByAppId) {
   };
 }
 
-function toAppTransaction(row, cardsBySupabaseId, categoriesBySupabaseId) {
+function toAppTransaction(row, cardsBySupabaseId, categoriesBySupabaseId, sourceAccountBySourceId) {
   const card = cardsBySupabaseId.get(row.credit_card_id);
   const category = categoriesBySupabaseId.get(row.category_id);
   const splits = (row.transaction_splits ?? [])
@@ -78,6 +82,7 @@ function toAppTransaction(row, cardsBySupabaseId, categoriesBySupabaseId) {
     amount: Number(row.amount || 0),
     notes: row.notes ?? "",
     source: row.source ?? "manual",
+    sourceAccountId: sourceAccountBySourceId.get(row.id) || "",
     recurringPaymentId: row.recurring_payment_id,
     recurringMonth: row.recurring_month,
     importedLocalId: row.imported_local_id,
@@ -109,10 +114,29 @@ export async function listTransactions(householdId, monthKey, cards, categories)
 
   if (error) throw error;
 
+  const transactionIds = (data ?? []).map((row) => row.id);
+  let sourceAccountBySourceId = new Map();
+  if (transactionIds.length > 0) {
+    const { data: movementRows, error: movementsError } = await client
+      .from("account_money_movements")
+      .select("source_id, account_id, is_tracked")
+      .eq("household_id", householdId)
+      .eq("source_type", "spending_transaction")
+      .in("source_id", transactionIds);
+
+    if (movementsError) throw movementsError;
+    sourceAccountBySourceId = new Map(
+      (movementRows ?? []).map((movement) => [
+        movement.source_id,
+        movement.is_tracked ? movement.account_id || "" : SPENDING_OUTSIDE_ACCOUNT,
+      ]),
+    );
+  }
+
   const cardsBySupabaseId = buildLookup(cards);
   const categoriesBySupabaseId = buildLookup(categories);
   return (data ?? []).map((row) =>
-    toAppTransaction(row, cardsBySupabaseId, categoriesBySupabaseId),
+    toAppTransaction(row, cardsBySupabaseId, categoriesBySupabaseId, sourceAccountBySourceId),
   );
 }
 

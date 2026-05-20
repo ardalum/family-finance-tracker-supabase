@@ -22,6 +22,7 @@ const emptyFilters = {
 
 export default function SpendingTracker({
   creditCards,
+  cashAccounts = [],
   categories,
   transactions,
   localTransactions,
@@ -69,7 +70,7 @@ export default function SpendingTracker({
   }
 
   async function handleDelete(transaction) {
-    await onDeleteTransaction(transaction.supabaseId ?? transaction.id);
+    await onDeleteTransaction(transaction.supabaseId ?? transaction.id, transaction);
     if (editingTransaction?.id === transaction.id) setEditingTransaction(null);
   }
 
@@ -172,6 +173,7 @@ export default function SpendingTracker({
         open={isTransactionModalOpen}
         monthKey={selectedMonth}
         cards={activeCards}
+        cashAccounts={cashAccounts}
         categories={categories}
         transactions={transactions}
         editingTransaction={editingTransaction}
