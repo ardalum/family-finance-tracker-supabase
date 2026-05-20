@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { X } from "lucide-react";
 import Button from "../../../components/ui/Button.jsx";
 import Input from "../../../components/ui/Input.jsx";
+import MerchantSuggestionInput from "../../../components/ui/MerchantSuggestionInput.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { buildCashAccountOptions } from "../../accounts/accountsService.js";
 import {
@@ -44,10 +45,6 @@ export default function QuickAddTransactionModal({
   const merchantSuggestions = useMemo(
     () => getMerchantSuggestions(merchantTransactions, form.merchant, 8),
     [form.merchant, merchantTransactions],
-  );
-  const merchantSuggestionByName = useMemo(
-    () => new Map(merchantSuggestions.map((option) => [option.merchant, option])),
-    [merchantSuggestions],
   );
   const categoryOptions = useMemo(
     () => [{ id: UNCATEGORIZED_ID, name: "Uncategorized" }, ...categories],
@@ -119,9 +116,11 @@ export default function QuickAddTransactionModal({
     );
   }
 
-  function applyMerchantSuggestionByName(merchantName) {
-    const suggestion = merchantSuggestionByName.get(String(merchantName ?? "").trim());
-    if (!suggestion) return;
+  function applyMerchantSuggestion(merchantName, suggestion = null) {
+    if (!suggestion) {
+      updateField("merchant", merchantName);
+      return;
+    }
     applyRecent(suggestion);
   }
 
@@ -238,26 +237,14 @@ export default function QuickAddTransactionModal({
             />
 
             <div className="sm:col-span-2">
-              <Input
+              <MerchantSuggestionInput
                 label="Merchant or description"
                 value={form.merchant}
-                onChange={(event) => {
-                  const value = event.target.value;
-                  updateField("merchant", value);
-                  applyMerchantSuggestionByName(value);
-                }}
-                onBlur={(event) => applyMerchantSuggestionByName(event.target.value)}
-                list="quick-add-merchant-suggestions"
+                suggestions={merchantSuggestions}
+                onChange={applyMerchantSuggestion}
                 placeholder="Example: Grocery store"
                 required
               />
-              {merchantSuggestions.length > 0 ? (
-                <datalist id="quick-add-merchant-suggestions">
-                  {merchantSuggestions.map((suggestion) => (
-                    <option key={suggestion.merchantKey} value={suggestion.merchant} />
-                  ))}
-                </datalist>
-              ) : null}
             </div>
 
             <Select

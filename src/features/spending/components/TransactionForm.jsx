@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import Button from "../../../components/ui/Button.jsx";
 import Input from "../../../components/ui/Input.jsx";
+import MerchantSuggestionInput from "../../../components/ui/MerchantSuggestionInput.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { buildCashAccountOptions } from "../../accounts/accountsService.js";
 import {
@@ -123,10 +124,6 @@ export default function TransactionForm({
     () => getMerchantSuggestions(merchantTransactions, form.merchant, 8),
     [form.merchant, merchantTransactions],
   );
-  const merchantSuggestionByName = useMemo(
-    () => new Map(merchantSuggestions.map((option) => [option.merchant, option])),
-    [merchantSuggestions],
-  );
   const isEditingRecurring = editingTransaction?.source === "recurring";
 
   useEffect(() => {
@@ -166,9 +163,12 @@ export default function TransactionForm({
     }));
   }
 
-  function applyMerchantSuggestionByName(merchantName) {
-    const suggestion = merchantSuggestionByName.get(String(merchantName ?? "").trim());
-    if (!suggestion) return;
+  function applyMerchantSuggestion(merchantName, suggestion = null) {
+    if (!suggestion) {
+      updateField("merchant", merchantName);
+      return;
+    }
+    setError("");
     setForm((current) =>
       applyMerchantSuggestionPrefill(current, suggestion, {
         categoryIds: categoryOptions.map((category) => category.id),
@@ -307,26 +307,14 @@ export default function TransactionForm({
           ))}
         </Select>
         <div className="sm:col-span-2">
-          <Input
+          <MerchantSuggestionInput
             label="Store or merchant"
             value={form.merchant}
-            onChange={(event) => {
-              const value = event.target.value;
-              updateField("merchant", value);
-              applyMerchantSuggestionByName(value);
-            }}
-            onBlur={(event) => applyMerchantSuggestionByName(event.target.value)}
-            list="transaction-merchant-suggestions"
+            suggestions={merchantSuggestions}
+            onChange={applyMerchantSuggestion}
             placeholder="Example: Walmart, Duke Energy, Chase payment"
             required
           />
-          {merchantSuggestions.length > 0 ? (
-            <datalist id="transaction-merchant-suggestions">
-              {merchantSuggestions.map((suggestion) => (
-                <option key={suggestion.merchantKey} value={suggestion.merchant} />
-              ))}
-            </datalist>
-          ) : null}
         </div>
         <Select
           label="Payment method"
