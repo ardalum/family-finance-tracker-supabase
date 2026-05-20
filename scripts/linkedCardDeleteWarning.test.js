@@ -19,4 +19,17 @@ describe("linked credit card delete warning", () => {
     const source = read("src/features/recurring/components/RecurringPaymentTable.jsx");
     assert.equal(source.includes("Needs review: deleted card"), true);
   });
+
+  it("keeps a single modal-controlled delete flow with guarded submit and error state", () => {
+    const source = read("src/features/creditCards/components/CreditCardList.jsx");
+    assert.equal(source.includes("if (!cardPendingDelete || isDeleting) return;"), true);
+    assert.equal(source.includes("setCardPendingDelete(null);"), true);
+    assert.equal(source.includes("setDeleteError(error?.message"), true);
+    assert.equal(source.includes("window.confirm("), false);
+  });
+
+  it("does not fail modal close when post-delete refresh fails", () => {
+    const source = read("src/app/App.jsx");
+    assert.equal(source.includes("Credit card deleted, but refresh did not finish."), true);
+  });
 });

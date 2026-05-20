@@ -29,6 +29,8 @@ export default function CreditCardList({
 }) {
   const [filters, setFilters] = useState(defaultFilters);
   const [cardPendingDelete, setCardPendingDelete] = useState(null);
+  const [deleteError, setDeleteError] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
   const ownerOptions = useMemo(
     () => Array.from(new Set(cards.map((card) => card.owner).filter(Boolean))).sort(),
     [cards],
@@ -49,12 +51,26 @@ export default function CreditCardList({
   }, [cards, filters]);
 
   async function confirmDelete() {
-    if (!cardPendingDelete) return;
+    if (!cardPendingDelete || isDeleting) return;
     const linkedTemplates = recurringPayments.filter(
       (template) =>
         template.paymentMethod === "Credit Card" && template.cardId === cardPendingDelete.id,
     );
-    await onDelete(cardPendingDelete, linkedTemplates);
+    setDeleteError("");
+    setIsDeleting(true);
+    try {
+      await onDelete(cardPendingDelete, linkedTemplates);
+      setCardPendingDelete(null);
+    } catch (error) {
+      setDeleteError(error?.message || "Could not delete this credit card.");
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
+  function closeDeleteModal() {
+    if (isDeleting) return;
+    setDeleteError("");
     setCardPendingDelete(null);
   }
 
@@ -166,6 +182,7 @@ export default function CreditCardList({
                     disabled={isSaving}
                     className="px-3"
                     aria-label={`Delete ${card.name}`}
+                    data-testid={`delete-card-button-${card.id}`}
                   >
                     <Trash2 size={16} aria-hidden="true" />
                   </Button>
@@ -196,8 +213,8 @@ export default function CreditCardList({
               <button
                 type="button"
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-gray-500 transition hover:bg-gray-100 hover:text-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
-                onClick={() => setCardPendingDelete(null)}
-                disabled={isSaving}
+                onClick={closeDeleteModal}
+                disabled={isSaving || isDeleting}
                 aria-label="Close delete confirmation"
               >
                 <X size={18} aria-hidden="true" />
@@ -215,6 +232,11 @@ export default function CreditCardList({
                 This action can affect related monthly balances and statement records. Export a
                 backup first if you are not sure.
               </p>
+              {deleteError ? (
+                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                  {deleteError}
+                </div>
+              ) : null}
               {linkedTemplates.length > 0 ? (
                 <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
                   <p className="font-semibold">
@@ -236,14 +258,19 @@ export default function CreditCardList({
                 <Button
                   type="button"
                   variant="secondary"
-                  onClick={() => setCardPendingDelete(null)}
-                  disabled={isSaving}
+                  onClick={closeDeleteModal}
+                  disabled={isSaving || isDeleting}
                 >
                   Cancel
                 </Button>
-                <Button type="button" variant="danger" onClick={confirmDelete} disabled={isSaving}>
+                <Button
+                  type="button"
+                  variant="danger"
+                  onClick={confirmDelete}
+                  disabled={isSaving || isDeleting}
+                >
                   <Trash2 size={16} aria-hidden="true" />
-                  {isSaving ? "Deleting..." : "Delete card"}
+                  {isSaving || isDeleting ? "Deleting..." : "Delete card"}
                 </Button>
               </div>
             </div>

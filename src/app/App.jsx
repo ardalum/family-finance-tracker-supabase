@@ -450,13 +450,17 @@ function FinanceTrackerApp() {
       await clearRecurringCreditCardLinks(activeHouseholdId, cardId);
 
       await deleteSupabaseCreditCard(cardId);
-      await runRefreshSequence(
-        createRecurringDashboardInsightsRefreshers({
-          loadRecurringData,
-          loadDashboardData,
-          loadInsightsData,
-        }),
-      );
+      try {
+        await runRefreshSequence(
+          createRecurringDashboardInsightsRefreshers({
+            loadRecurringData,
+            loadDashboardData,
+            loadInsightsData,
+          }),
+        );
+      } catch (error) {
+        console.error("Credit card deleted, but refresh did not finish.", error);
+      }
     },
     [
       activeHouseholdId,
