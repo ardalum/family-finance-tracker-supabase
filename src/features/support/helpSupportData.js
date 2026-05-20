@@ -101,7 +101,7 @@ export const financeConceptGroups = [
       {
         question: "Do credit card purchases reduce Cash Position?",
         answer:
-          "No. A credit card purchase increases spending and may affect your budget, but cash does not leave a bank account until you pay the card.",
+          "No. A credit card purchase increases spending and may affect your budget, but it does not reduce Cash Position because cash does not leave a bank account until you pay the card.",
       },
       {
         question: "What happens when I pay a credit card from a tracked account?",
