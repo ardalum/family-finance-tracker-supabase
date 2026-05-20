@@ -18,6 +18,7 @@ const input = {
   supabaseBudgets: [{ id: "budget" }],
   spendingCategories: [{ id: "spending-category" }],
   spendingTransactions: [{ id: "transaction" }],
+  householdMerchantTransactions: [{ id: "merchant-transaction" }],
   recurringCategories: [{ id: "recurring-category" }],
   recurringPayments: [{ id: "recurring" }],
   cashAccounts: [{ id: "cash-default" }],
@@ -257,6 +258,7 @@ describe("app view props", () => {
     assert.equal(props.spendingProps.cashAccounts, input.cashAccounts);
     assert.equal(props.spendingProps.categories, input.spendingCategories);
     assert.equal(props.spendingProps.transactions, input.spendingTransactions);
+    assert.equal(props.spendingProps.merchantTransactions, input.householdMerchantTransactions);
     assert.equal(props.spendingProps.localTransactions, input.appData.transactions);
     assert.equal(props.spendingProps.selectedMonth, input.selectedSpendingMonth);
     assert.equal(props.spendingProps.loading, input.spendingLoading);

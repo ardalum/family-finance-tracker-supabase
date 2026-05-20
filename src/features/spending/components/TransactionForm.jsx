@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import Button from "../../../components/ui/Button.jsx";
 import Input from "../../../components/ui/Input.jsx";
+import MerchantSuggestionInput from "../../../components/ui/MerchantSuggestionInput.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { buildCashAccountOptions } from "../../accounts/accountsService.js";
 import {
@@ -16,6 +17,7 @@ import {
   TRANSACTION_TYPE_OPTIONS,
   UNCATEGORIZED_ID,
 } from "../spendingService.js";
+import { applyMerchantSuggestionPrefill, getMerchantSuggestions } from "../merchantSuggestions.js";
 
 function todayDate() {
   return new Date().toISOString().slice(0, 10);
@@ -82,6 +84,7 @@ export default function TransactionForm({
   cashAccounts = [],
   categories,
   transactions = [],
+  merchantTransactions = [],
   editingTransaction,
   onCancel,
   onSaved,
@@ -117,6 +120,10 @@ export default function TransactionForm({
   );
   const selectedCategoryUsage = categoryUsageById.get(form.categoryId) ?? null;
   const selectedCategoryTone = getCategoryBudgetUsageTone(selectedCategoryUsage);
+  const merchantSuggestions = useMemo(
+    () => getMerchantSuggestions(merchantTransactions, form.merchant, 8),
+    [form.merchant, merchantTransactions],
+  );
   const isEditingRecurring = editingTransaction?.source === "recurring";
 
   useEffect(() => {
@@ -154,6 +161,20 @@ export default function TransactionForm({
           : { cardId: "", sourceAccountId: current.sourceAccountId || SPENDING_OUTSIDE_ACCOUNT }
         : {}),
     }));
+  }
+
+  function applyMerchantSuggestion(merchantName, suggestion = null) {
+    if (!suggestion) {
+      updateField("merchant", merchantName);
+      return;
+    }
+    setError("");
+    setForm((current) =>
+      applyMerchantSuggestionPrefill(current, suggestion, {
+        categoryIds: categoryOptions.map((category) => category.id),
+        cardIds: cards.map((card) => card.id),
+      }),
+    );
   }
 
   function updateSplit(splitId, field, value) {
@@ -286,10 +307,11 @@ export default function TransactionForm({
           ))}
         </Select>
         <div className="sm:col-span-2">
-          <Input
+          <MerchantSuggestionInput
             label="Store or merchant"
             value={form.merchant}
-            onChange={(event) => updateField("merchant", event.target.value)}
+            suggestions={merchantSuggestions}
+            onChange={applyMerchantSuggestion}
             placeholder="Example: Walmart, Duke Energy, Chase payment"
             required
           />

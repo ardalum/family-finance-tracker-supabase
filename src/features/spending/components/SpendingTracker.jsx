@@ -25,6 +25,7 @@ export default function SpendingTracker({
   cashAccounts = [],
   categories,
   transactions,
+  merchantTransactions = [],
   localTransactions,
   selectedMonth = getCurrentMonthKey(),
   loading = false,
@@ -176,6 +177,7 @@ export default function SpendingTracker({
         cashAccounts={cashAccounts}
         categories={categories}
         transactions={transactions}
+        merchantTransactions={merchantTransactions}
         editingTransaction={editingTransaction}
         onClose={closeTransactionModal}
         onSaved={handleSave}
