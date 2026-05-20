@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import EmptyState from "../../../components/ui/EmptyState.jsx";
+import InfoTooltip from "../../../components/ui/InfoTooltip.jsx";
 import InlineAlert from "../../../components/ui/InlineAlert.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { buildMonthOptions, getCurrentMonthKey } from "../../../lib/dates.js";
@@ -164,9 +165,17 @@ export default function FinancialPosition({
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         <SummaryCard label="Income this month" value={summary.incomeTotal} />
         <SummaryCard label="Savings this month" value={summary.savingsTotal} />
-        <SummaryCard label="Liquid cash" value={summary.liquidCashTotal} />
+        <SummaryCard
+          label="Liquid cash"
+          value={summary.liquidCashTotal}
+          helpText="Total tracked checking, savings, cash, money market, and other cash/bank accounts from snapshots. Excludes liabilities and outside/untracked accounts."
+        />
         <SummaryCard label="Total debt" value={summary.totalDebt} />
-        <SummaryCard label="Net worth" value={summary.netWorthSummary.netWorth} />
+        <SummaryCard
+          label="Net worth"
+          value={summary.netWorthSummary.netWorth}
+          helpText="Tracked assets minus tracked liabilities, based on the snapshots you entered."
+        />
         <SummaryCard
           label="Estimated leftover"
           value={summary.cashFlowSummary.estimatedLeftover}
@@ -241,10 +250,13 @@ export default function FinancialPosition({
   );
 }
 
-function SummaryCard({ label, value, note = "" }) {
+function SummaryCard({ label, value, note = "", helpText = "" }) {
   return (
     <Card className="p-4 sm:p-5">
-      <p className="text-sm font-medium text-text-muted">{label}</p>
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-sm font-medium text-text-muted">{label}</p>
+        {helpText ? <InfoTooltip label={`${label} calculation info`} content={helpText} /> : null}
+      </div>
       <p className="mt-1.5 text-2xl font-semibold text-text-main sm:mt-2 sm:text-3xl">
         {formatCurrency(value)}
       </p>

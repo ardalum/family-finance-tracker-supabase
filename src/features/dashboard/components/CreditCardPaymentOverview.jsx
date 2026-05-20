@@ -1,5 +1,6 @@
 import LinkedCardName from "../../../components/shared/LinkedCardName.jsx";
 import Card from "../../../components/ui/Card.jsx";
+import InfoTooltip from "../../../components/ui/InfoTooltip.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
 
 const MAX_PREVIEW_ROWS = 5;
@@ -16,7 +17,13 @@ export default function CreditCardPaymentOverview({
   return (
     <Card className="overflow-hidden">
       <div className="border-b border-app-border p-5">
-        <h3 className="text-lg font-semibold text-text-main">{title}</h3>
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="text-lg font-semibold text-text-main">{title}</h3>
+          <InfoTooltip
+            label="Credit card payment overview info"
+            content="Shows unpaid card statement balances for this month. Unpaid balances are obligations, not cash outflows yet. Cash Position changes when a card payment is recorded from a tracked account."
+          />
+        </div>
         <p
           className={`mt-1 text-sm font-semibold ${totalUnpaid > 0 ? "text-status-danger" : "text-text-muted"}`}
         >
