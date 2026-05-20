@@ -10,6 +10,7 @@ import MonthlyBalanceGraph from "./MonthlyBalanceGraph.jsx";
 import MonthlyBalanceTable from "./MonthlyBalanceTable.jsx";
 import StatementCycleSummary from "./StatementCycleSummary.jsx";
 import StatementDetailsEditor from "./StatementDetailsEditor.jsx";
+import { getRecurringTemplatesLinkedToCard } from "../linkedRecurringCardUtils.js";
 
 export default function CreditCardTracker({
   creditCards,
@@ -23,6 +24,7 @@ export default function CreditCardTracker({
   monthlyBalancesSaving = false,
   monthlyBalancesError = "",
   householdProfiles = [],
+  recurringPayments = [],
   householdProfilesLoading = false,
   onCreateCard,
   onUpdateCard,
@@ -74,10 +76,14 @@ export default function CreditCardTracker({
 
   const handleDelete = useCallback(
     async (card) => {
-      await onDeleteCard(card.supabaseId ?? card.id);
+      const linkedRecurringTemplates = getRecurringTemplatesLinkedToCard(
+        recurringPayments,
+        card.id,
+      );
+      await onDeleteCard(card, linkedRecurringTemplates);
       setEditingCard((current) => (current?.id === card.id ? null : current));
     },
-    [onDeleteCard],
+    [onDeleteCard, recurringPayments],
   );
 
   return (
@@ -147,6 +153,7 @@ export default function CreditCardTracker({
         {activeSection === "card-list" ? (
           <CreditCardList
             cards={creditCards}
+            recurringPayments={recurringPayments}
             onEdit={openEditModal}
             onDelete={handleDelete}
             isSaving={isSaving}

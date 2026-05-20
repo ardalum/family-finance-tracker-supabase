@@ -428,3 +428,37 @@ export async function importLocalRecurringPayments(householdId, localTemplates, 
   if (error) throw error;
   return data ?? [];
 }
+
+export async function listRecurringPaymentsLinkedToCreditCard(householdId, creditCardId) {
+  if (!householdId || !creditCardId) return [];
+
+  const client = requireSupabase();
+  const { data, error } = await client
+    .from("recurring_payments")
+    .select("id,name,payment_method,credit_card_id")
+    .eq("household_id", householdId)
+    .eq("credit_card_id", creditCardId);
+
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function clearRecurringCreditCardLinks(householdId, creditCardId) {
+  if (!householdId || !creditCardId) return [];
+
+  const linkedRows = await listRecurringPaymentsLinkedToCreditCard(householdId, creditCardId);
+  if (linkedRows.length === 0) return [];
+
+  const client = requireSupabase();
+  const linkedIds = linkedRows.map((row) => row.id);
+  const { error } = await client
+    .from("recurring_payments")
+    .update({
+      payment_method: "Other",
+      credit_card_id: null,
+    })
+    .in("id", linkedIds);
+
+  if (error) throw error;
+  return linkedRows;
+}

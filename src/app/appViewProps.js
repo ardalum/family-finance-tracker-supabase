@@ -168,6 +168,7 @@ export function createAppViewProps({
     },
     creditCardProps: {
       creditCards: supabaseCreditCards,
+      recurringPayments,
       cashAccounts,
       monthlyBalances: supabaseMonthlyBalances,
       selectedBalanceMonth,

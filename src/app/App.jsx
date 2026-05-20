@@ -14,6 +14,7 @@ import {
 import {
   createAllSupabaseRefreshers,
   createDashboardInsightsRefreshers,
+  createRecurringDashboardInsightsRefreshers,
   createSpendingDashboardInsightsRefreshers,
   runRefreshSequence,
 } from "./refreshDataUtils.js";
@@ -37,6 +38,7 @@ import { syncPastDueCreditCardDebt } from "../features/liabilities/creditCardDeb
 import { useSavingsData } from "../features/savings/useSavingsData.js";
 import { useRecurringCategories } from "../features/recurring/useRecurringCategories.js";
 import { useRecurringPayments } from "../features/recurring/useRecurringPayments.js";
+import { clearRecurringCreditCardLinks } from "../features/recurring/recurringSupabaseService.js";
 import { householdHasFinanceData } from "../features/setup/setupService.js";
 import { useSpendingCategories } from "../features/spending/useSpendingCategories.js";
 import { useSpendingTransactions } from "../features/spending/useSpendingTransactions.js";
@@ -441,6 +443,34 @@ function FinanceTrackerApp() {
     [loadDashboardData, loadInsightsData, saveSupabaseMonthlyBalance],
   );
 
+  const deleteSupabaseCreditCardWithRecurringGuard = useCallback(
+    async (card) => {
+      const cardId = card?.supabaseId ?? card?.id;
+      if (!cardId) return;
+      await clearRecurringCreditCardLinks(activeHouseholdId, cardId);
+
+      await deleteSupabaseCreditCard(cardId);
+      try {
+        await runRefreshSequence(
+          createRecurringDashboardInsightsRefreshers({
+            loadRecurringData,
+            loadDashboardData,
+            loadInsightsData,
+          }),
+        );
+      } catch (error) {
+        console.error("Credit card deleted, but refresh did not finish.", error);
+      }
+    },
+    [
+      activeHouseholdId,
+      deleteSupabaseCreditCard,
+      loadDashboardData,
+      loadInsightsData,
+      loadRecurringData,
+    ],
+  );
+
   const finishFirstTimeSetup = useCallback(async () => {
     await completeActiveHouseholdSetup();
     setActiveView("dashboard");
@@ -691,26 +721,26 @@ function FinanceTrackerApp() {
     reopenMonthlyCloseReview,
     createSupabaseCreditCard,
     updateSupabaseCreditCard,
-    deleteSupabaseCreditCard,
+    deleteSupabaseCreditCard: deleteSupabaseCreditCardWithRecurringGuard,
     saveSupabaseMonthlyBalance: saveSupabaseMonthlyBalanceAndRefreshDashboard,
     refreshData,
     createSupabaseBudget,
     updateSupabaseBudget,
     deleteSupabaseBudget,
     addDefaultBudgetsToSupabase,
-    copyPreviousMonthBudgetsToSupabase,
-    importLocalBudgetsToSupabase,
+    copyPreviousMonthBudgetCategories: copyPreviousMonthBudgetsToSupabase,
+    importSupabaseBudgetCategories: importLocalBudgetsToSupabase,
     createSupabaseTransaction,
     updateSupabaseTransaction,
     deleteSupabaseTransaction,
-    importLocalSpendingToSupabase,
+    importSupabaseTransactions: importLocalSpendingToSupabase,
     createSupabaseRecurringPayment,
     updateSupabaseRecurringPayment,
     deleteSupabaseRecurringPayment,
     markSupabaseRecurringPaid,
     markSupabaseRecurringUnpaid,
     skipSupabaseRecurringPayment,
-    importLocalRecurringToSupabase,
+    importLocalRecurringPayments: importLocalRecurringToSupabase,
     refreshSupabaseDataAfterImport,
     createHouseholdProfile,
     saveHouseholdProfile,

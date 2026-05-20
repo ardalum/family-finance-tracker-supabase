@@ -199,6 +199,7 @@ describe("app view props", () => {
     const props = createAppViewProps(input);
 
     assert.equal(props.creditCardProps.creditCards, input.supabaseCreditCards);
+    assert.equal(props.creditCardProps.recurringPayments, input.recurringPayments);
     assert.equal(props.creditCardProps.cashAccounts, input.cashAccounts);
     assert.equal(props.creditCardProps.monthlyBalances, input.supabaseMonthlyBalances);
     assert.equal(props.creditCardProps.selectedBalanceMonth, input.selectedBalanceMonth);
