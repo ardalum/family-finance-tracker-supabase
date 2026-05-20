@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import Button from "../../../components/ui/Button.jsx";
 import Input from "../../../components/ui/Input.jsx";
 import Select from "../../../components/ui/Select.jsx";
+import { buildCashAccountOptions } from "../../accounts/accountsService.js";
+import { CARD_PAYMENT_OUTSIDE_ACCOUNT } from "../statementPaymentUtils.js";
+import { LIQUID_ACCOUNT_TYPES } from "../../spending/spendingService.js";
 
 const emptyForm = {
   name: "",
@@ -14,6 +17,8 @@ const emptyForm = {
   statementClosingDay: "",
   dueDay: "",
   isActive: true,
+  autopayEnabled: false,
+  autopayPaymentAccountId: "",
 };
 
 const networks = ["Visa", "Mastercard", "American Express", "Discover", "Other"];
@@ -26,6 +31,7 @@ export default function CreditCardForm({
   showHeader = true,
   householdProfiles = [],
   householdProfilesLoading = false,
+  cashAccounts = [],
 }) {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
@@ -53,6 +59,8 @@ export default function CreditCardForm({
             statementClosingDay: String(editingCard.statementClosingDay ?? editingCard.dueDay),
             dueDay: String(editingCard.dueDay),
             isActive: editingCard.isActive ?? true,
+            autopayEnabled: Boolean(editingCard.autopayEnabled),
+            autopayPaymentAccountId: editingCard.autopayPaymentAccountId ?? "",
           }
         : emptyForm,
     );
@@ -63,6 +71,9 @@ export default function CreditCardForm({
   }
 
   const ownerOptions = getOwnerOptions(householdProfiles, form.ownerProfileId);
+  const autopayAccountOptions = buildCashAccountOptions(
+    cashAccounts.filter((account) => LIQUID_ACCOUNT_TYPES.has(account.accountType)),
+  );
   const activeOwnerProfiles = householdProfiles.filter((profile) => profile.isActive);
   const singleActiveOwnerProfile = activeOwnerProfiles.length === 1 ? activeOwnerProfiles[0] : null;
 
@@ -241,6 +252,39 @@ export default function CreditCardForm({
         />
         Active card
       </label>
+      <label className="flex items-center gap-3 rounded-md border border-app-border bg-app-background px-3 py-2 text-sm font-medium text-text-soft">
+        <input
+          className="h-4 w-4 rounded border-app-border text-brand-primary focus:ring-brand-primary"
+          type="checkbox"
+          checked={Boolean(form.autopayEnabled)}
+          onChange={(event) => updateField("autopayEnabled", event.target.checked)}
+        />
+        Autopay enabled
+      </label>
+      {form.autopayEnabled ? (
+        <div className="grid gap-2 rounded-md border border-app-border bg-app-background px-3 py-3">
+          <Select
+            label="Autopay paid from account"
+            value={form.autopayPaymentAccountId}
+            onChange={(event) => updateField("autopayPaymentAccountId", event.target.value)}
+            required
+          >
+            <option value="" disabled>
+              Select account
+            </option>
+            {autopayAccountOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+            <option value={CARD_PAYMENT_OUTSIDE_ACCOUNT}>Outside / untracked account</option>
+          </Select>
+          <p className="text-xs text-gray-600">
+            Choose the account that pays this card automatically. Cash Position changes only when
+            the payment is recorded.
+          </p>
+        </div>
+      ) : null}
 
       <div className="flex flex-wrap justify-end gap-3">
         {onCancel ? (
@@ -274,6 +318,9 @@ function validateForm(form) {
   }
   if (Number(form.dueDay) < 1 || Number(form.dueDay) > 31)
     return "Due day must be between 1 and 31.";
+  if (form.autopayEnabled && !String(form.autopayPaymentAccountId || "").trim()) {
+    return "Choose the account autopay uses, or select Outside / untracked.";
+  }
   return "";
 }
 

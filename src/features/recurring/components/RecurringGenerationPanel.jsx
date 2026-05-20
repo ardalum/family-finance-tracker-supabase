@@ -112,6 +112,7 @@ export default function RecurringGenerationPanel({
         row,
         monthKey,
         existingPaidFromAccount: row.instance?.paidFromAccount || "",
+        templateAutopayAccount: row.template?.autopayPaymentAccountId || "",
         todayDate: draft.paidDate,
       }),
     );
@@ -152,7 +153,7 @@ export default function RecurringGenerationPanel({
       await onMarkUnpaid(row.template);
       setMessage({
         type: "warning",
-        text: `${row.template.name} marked unpaid. This month’s linked spending entry was cleared.`,
+        text: `${row.template.name} marked unpaid. This month's linked spending entry was cleared.`,
       });
     } catch (error) {
       setMessage({ type: "error", text: error.message || "Could not mark recurring bill unpaid." });
@@ -198,7 +199,8 @@ export default function RecurringGenerationPanel({
         <div className="rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-800">
           Tip: Fixed bills use their template amount automatically. Variable bills keep the editable
           actual amount field. Use <span className="font-semibold">Mark Unpaid</span> to clear this
-          month’s linked spending entry.
+          month's linked spending entry. Autopay-enabled templates still require payment
+          confirmation so account balance changes are never silent.
         </div>
 
         {message ? (

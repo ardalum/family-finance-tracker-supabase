@@ -3,8 +3,11 @@ import Button from "../../../components/ui/Button.jsx";
 import Input from "../../../components/ui/Input.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { getCurrentMonthKey } from "../../../lib/dates.js";
+import { buildCashAccountOptions } from "../../accounts/accountsService.js";
+import { CARD_PAYMENT_OUTSIDE_ACCOUNT } from "../../creditCards/statementPaymentUtils.js";
 import { UNCATEGORIZED_ID } from "../../spending/spendingService.js";
-import { paymentMethods } from "../recurringService.js";
+import { LIQUID_ACCOUNT_TYPES } from "../../spending/spendingService.js";
+import { isRecurringCashBankPaymentMethod, paymentMethods } from "../recurringService.js";
 
 const emptyForm = {
   name: "",
@@ -14,6 +17,8 @@ const emptyForm = {
   dueDay: "",
   paymentMethod: "",
   cardId: "",
+  autopayEnabled: false,
+  autopayPaymentAccountId: "",
   startMonth: getCurrentMonthKey(),
   endMonth: "",
   active: true,
@@ -22,6 +27,7 @@ const emptyForm = {
 
 export default function RecurringPaymentForm({
   cards,
+  cashAccounts = [],
   categories,
   editingTemplate,
   onCancel,
@@ -34,6 +40,13 @@ export default function RecurringPaymentForm({
   const categoryOptions = useMemo(
     () => [{ id: UNCATEGORIZED_ID, name: "Uncategorized" }, ...categories],
     [categories],
+  );
+  const paidFromAccountOptions = useMemo(
+    () =>
+      buildCashAccountOptions(
+        cashAccounts.filter((account) => LIQUID_ACCOUNT_TYPES.has(account.accountType)),
+      ),
+    [cashAccounts],
   );
 
   useEffect(() => {
@@ -48,6 +61,8 @@ export default function RecurringPaymentForm({
             dueDay: String(editingTemplate.dueDay),
             paymentMethod: editingTemplate.paymentMethod,
             cardId: editingTemplate.cardId ?? "",
+            autopayEnabled: Boolean(editingTemplate.autopayEnabled),
+            autopayPaymentAccountId: editingTemplate.autopayPaymentAccountId ?? "",
             startMonth: editingTemplate.startMonth,
             endMonth: editingTemplate.endMonth ?? "",
             active: Boolean(editingTemplate.active),
@@ -62,7 +77,12 @@ export default function RecurringPaymentForm({
     setForm((current) => ({
       ...current,
       [field]: value,
-      ...(field === "paymentMethod" && value !== "Credit Card" ? { cardId: "" } : {}),
+      ...(field === "paymentMethod"
+        ? {
+            cardId: value === "Credit Card" ? current.cardId : "",
+            autopayPaymentAccountId: value === "Credit Card" ? "" : current.autopayPaymentAccountId,
+          }
+        : {}),
     }));
   }
 
@@ -191,6 +211,28 @@ export default function RecurringPaymentForm({
             </Select>
           </div>
         ) : null}
+        {isRecurringCashBankPaymentMethod(form.paymentMethod) ? (
+          <div className="sm:col-span-2">
+            <Select
+              label={form.autopayEnabled ? "Autopay paid from account" : "Paid from account"}
+              value={form.autopayPaymentAccountId}
+              onChange={(event) => updateField("autopayPaymentAccountId", event.target.value)}
+            >
+              <option value="">Select account</option>
+              {paidFromAccountOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+              <option value={CARD_PAYMENT_OUTSIDE_ACCOUNT}>Outside / untracked account</option>
+            </Select>
+            {form.autopayEnabled ? (
+              <p className="mt-1 text-xs text-gray-600">
+                Choose the account this autopay comes from before it can affect Cash Position.
+              </p>
+            ) : null}
+          </div>
+        ) : null}
         <Input
           label="Start month"
           type="month"
@@ -213,6 +255,14 @@ export default function RecurringPaymentForm({
           onChange={(event) => updateField("active", event.target.checked)}
         />
         Active
+      </label>
+      <label className="inline-flex items-center gap-2 rounded-xl border border-app-border bg-app-background px-3 py-2 text-sm font-medium text-gray-700">
+        <input
+          type="checkbox"
+          checked={Boolean(form.autopayEnabled)}
+          onChange={(event) => updateField("autopayEnabled", event.target.checked)}
+        />
+        Autopay enabled
       </label>
       <label className="grid min-w-0 gap-1.5 text-sm font-medium text-gray-700">
         Notes
@@ -257,6 +307,13 @@ function validateForm(form, cards) {
   if (!form.paymentMethod) return "Payment method is required.";
   if (form.paymentMethod === "Credit Card" && !cards.some((card) => card.id === form.cardId)) {
     return "Select a valid credit card.";
+  }
+  if (
+    form.autopayEnabled &&
+    isRecurringCashBankPaymentMethod(form.paymentMethod) &&
+    !String(form.autopayPaymentAccountId || "").trim()
+  ) {
+    return "Choose the account autopay uses, or select Outside / untracked.";
   }
   if (!form.startMonth) return "Start month is required.";
   if (form.endMonth && form.endMonth < form.startMonth)

@@ -166,6 +166,7 @@ export default function CreditCardTracker({
         editingCard={editingCard}
         householdProfiles={householdProfiles}
         householdProfilesLoading={householdProfilesLoading}
+        cashAccounts={cashAccounts}
         onClose={closeCardModal}
         onSaved={handleSave}
         isSaving={isSaving}

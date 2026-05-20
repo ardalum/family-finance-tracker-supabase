@@ -54,6 +54,9 @@ export default function StatementDetailsEditor({
   const selectedEntry = selectedCard
     ? (monthBalances[selectedCard.id] ?? { balance: 0, paid: false })
     : {};
+  const isAutopayEnabledForCard = Boolean(
+    selectedCard?.autopayEnabled || selectedEntry?.autopayEnabled,
+  );
   const [form, setForm] = useState(() => emptyStatement(selectedEntry));
   const [message, setMessage] = useState("");
 
@@ -107,6 +110,11 @@ export default function StatementDetailsEditor({
           Track minimum payment, paid amount, paid date, autopay, and confirmation details for the
           selected month.
         </p>
+        {isAutopayEnabledForCard ? (
+          <p className="mt-1 text-sm text-text-muted">
+            Autopay is enabled. Confirm payment account before marking paid.
+          </p>
+        ) : null}
       </div>
 
       <form className="mt-5 grid gap-4" onSubmit={handleSubmit}>

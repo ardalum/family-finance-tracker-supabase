@@ -225,6 +225,7 @@ export default function RecurringPayments({
             <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 pb-8">
               <RecurringPaymentForm
                 cards={activeCards}
+                cashAccounts={cashAccounts}
                 categories={categories}
                 editingTemplate={editingTemplate}
                 onCancel={closeTemplateModal}

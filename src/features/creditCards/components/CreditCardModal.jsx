@@ -7,6 +7,7 @@ export default function CreditCardModal({
   editingCard,
   householdProfiles = [],
   householdProfilesLoading = false,
+  cashAccounts = [],
   onClose,
   onSaved,
   isSaving = false,
@@ -58,6 +59,7 @@ export default function CreditCardModal({
             editingCard={editingCard}
             householdProfiles={householdProfiles}
             householdProfilesLoading={householdProfilesLoading}
+            cashAccounts={cashAccounts}
             onCancel={onClose}
             onSaved={onSaved}
             isSaving={isSaving}

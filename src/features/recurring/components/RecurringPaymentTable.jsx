@@ -66,6 +66,11 @@ export default function RecurringPaymentTable({
                         >
                           {template.active ? "Active" : "Inactive"}
                         </span>
+                        {template.autopayEnabled ? (
+                          <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 ring-1 ring-inset ring-blue-200">
+                            Autopay enabled
+                          </span>
+                        ) : null}
                       </div>
                       <p className="text-sm text-text-muted">
                         {getCategoryName(template.categoryId, categories)} ·{" "}

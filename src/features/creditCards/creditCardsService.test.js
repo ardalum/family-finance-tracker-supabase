@@ -160,6 +160,8 @@ describe("credit card service", () => {
       statementClosingDay: "15",
       dueDay: "22",
       isActive: false,
+      autopayEnabled: true,
+      autopayPaymentAccountId: "checking-1",
     });
 
     assert.deepEqual(normalized, {
@@ -173,6 +175,8 @@ describe("credit card service", () => {
       statementClosingDay: 15,
       dueDay: 22,
       isActive: false,
+      autopayEnabled: true,
+      autopayPaymentAccountId: "checking-1",
     });
   });
 
@@ -188,6 +192,8 @@ describe("credit card service", () => {
       statementClosingDay: "",
       dueDay: "",
       isActive: undefined,
+      autopayEnabled: undefined,
+      autopayPaymentAccountId: "  ",
     });
 
     assert.equal(normalized.ownerProfileId, null);
@@ -195,6 +201,8 @@ describe("credit card service", () => {
     assert.equal(normalized.statementClosingDay, 1);
     assert.equal(normalized.dueDay, 1);
     assert.equal(normalized.isActive, true);
+    assert.equal(normalized.autopayEnabled, false);
+    assert.equal(normalized.autopayPaymentAccountId, "");
   });
 
   it("converts card form input to database column names", () => {
@@ -209,6 +217,8 @@ describe("credit card service", () => {
       statementClosingDay: "15",
       dueDay: "22",
       isActive: false,
+      autopayEnabled: true,
+      autopayPaymentAccountId: "outside_untracked",
     });
 
     assert.deepEqual(row, {
@@ -222,6 +232,8 @@ describe("credit card service", () => {
       statement_closing_day: 15,
       due_day: 22,
       is_active: false,
+      autopay_enabled: true,
+      autopay_payment_account_id: null,
     });
   });
 });

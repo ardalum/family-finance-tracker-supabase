@@ -1,5 +1,6 @@
 import { supabase } from "../../lib/supabase/client.js";
 import { toSupabaseCardFormInput } from "./cardFormUtils.js";
+import { CARD_PAYMENT_OUTSIDE_ACCOUNT } from "./statementPaymentUtils.js";
 function requireSupabase() {
   if (!supabase) {
     throw new Error(
@@ -24,6 +25,11 @@ function toAppCreditCard(row) {
     statementClosingDay: row.statement_closing_day,
     dueDay: row.due_day,
     isActive: row.is_active,
+    autopayEnabled: Boolean(row.autopay_enabled),
+    autopayPaymentAccountId:
+      Boolean(row.autopay_enabled) && !row.autopay_payment_account_id
+        ? CARD_PAYMENT_OUTSIDE_ACCOUNT
+        : (row.autopay_payment_account_id ?? ""),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

@@ -66,4 +66,18 @@ describe("recurring payment flow helpers", () => {
     assert.equal(draft.paidAmount, "999");
     assert.equal(draft.isFixed, true);
   });
+
+  it("defaults draft paid-from account from template autopay account", () => {
+    const draft = buildRecurringPaidDraft({
+      row: {
+        template: { billType: "variable", estimatedAmount: 120, paymentMethod: "Checking Account" },
+        instance: {},
+      },
+      monthKey: "2026-05",
+      templateAutopayAccount: "checking-1",
+      todayDate: "2026-05-20",
+    });
+
+    assert.equal(draft.paidFromAccount, "checking-1");
+  });
 });

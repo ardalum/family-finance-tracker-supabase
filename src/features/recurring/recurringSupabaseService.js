@@ -1,6 +1,8 @@
 import { supabase } from "../../lib/supabase/client.js";
 import { getDueDateForMonth } from "../../lib/dates.js";
+import { CARD_PAYMENT_OUTSIDE_ACCOUNT } from "../creditCards/statementPaymentUtils.js";
 import { UNCATEGORIZED_ID } from "../spending/spendingService.js";
+import { isRecurringCashBankPaymentMethod } from "./recurringService.js";
 
 function requireSupabase() {
   if (!supabase) {
@@ -36,6 +38,13 @@ function toAppTemplate(row, cardsBySupabaseId, categoriesBySupabaseId) {
     dueDay: row.due_day,
     paymentMethod: row.payment_method,
     cardId: card?.id ?? "",
+    autopayEnabled: Boolean(row.autopay_enabled),
+    autopayPaymentAccountId:
+      Boolean(row.autopay_enabled) &&
+      isRecurringCashBankPaymentMethod(row.payment_method) &&
+      !row.autopay_payment_account_id
+        ? CARD_PAYMENT_OUTSIDE_ACCOUNT
+        : (row.autopay_payment_account_id ?? ""),
     startMonth: row.start_month,
     endMonth: row.end_month,
     active: Boolean(row.active),
@@ -53,6 +62,14 @@ function buildLookup(items) {
 function normalizeTemplateInput(input, cardsByAppId, categoriesByAppId) {
   const paymentMethod = input.paymentMethod || "Other";
   const card = cardsByAppId.get(input.cardId);
+  const autopayEnabled = Boolean(input.autopayEnabled);
+  const shouldStoreAutopayAccount =
+    autopayEnabled && isRecurringCashBankPaymentMethod(paymentMethod);
+  const rawAutopayPaymentAccountId = shouldStoreAutopayAccount
+    ? String(input.autopayPaymentAccountId || "").trim()
+    : "";
+  const autopayPaymentAccountId =
+    rawAutopayPaymentAccountId === CARD_PAYMENT_OUTSIDE_ACCOUNT ? "" : rawAutopayPaymentAccountId;
 
   return {
     name: input.name.trim(),
@@ -62,6 +79,8 @@ function normalizeTemplateInput(input, cardsByAppId, categoriesByAppId) {
     due_day: Number(input.dueDay) || 1,
     payment_method: paymentMethod,
     credit_card_id: paymentMethod === "Credit Card" ? getSupabaseCardId(card) : null,
+    autopay_enabled: autopayEnabled,
+    autopay_payment_account_id: autopayPaymentAccountId || null,
     start_month: input.startMonth,
     end_month: input.endMonth || null,
     active: Boolean(input.active),

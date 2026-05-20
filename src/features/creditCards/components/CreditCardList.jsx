@@ -159,6 +159,7 @@ export default function CreditCardList({
                     <span>Closes day {card.statementClosingDay ?? card.dueDay}</span>
                     <span>Due day {card.dueDay}</span>
                     <span>{card.isActive ? "Active" : "Inactive"}</span>
+                    {card.autopayEnabled ? <span>Autopay enabled</span> : null}
                   </div>
                 </div>
                 <div className="flex min-w-0 flex-wrap items-center gap-3">

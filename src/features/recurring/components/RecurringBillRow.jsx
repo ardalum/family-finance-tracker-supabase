@@ -33,6 +33,11 @@ export default function RecurringBillRow({
   const needsAction = !isPaid && !isSkipped;
   const isFixed = row.template.billType === "fixed";
   const amount = getRecurringAmountForMonth(row.template, row.instance);
+  const isAutopayReady =
+    row.template.autopayEnabled &&
+    !isPaid &&
+    !isSkipped &&
+    (row.displayStatus === "Due now" || row.displayStatus === "Past due");
 
   return (
     <tr className={row.displayStatus === "Past due" ? "bg-red-50/70" : "bg-white"}>
@@ -42,6 +47,10 @@ export default function RecurringBillRow({
           {isPaid ? (
             <span className="text-xs font-medium text-gray-500">
               Linked spending transaction is managed by this recurring bill.
+            </span>
+          ) : isAutopayReady ? (
+            <span className="text-xs font-medium text-blue-700">
+              Autopay ready. Confirm paid-from account before marking paid.
             </span>
           ) : needsAction ? (
             <span className="text-xs font-medium text-gray-500">Waiting for paid date.</span>
