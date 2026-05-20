@@ -1,4 +1,5 @@
 import { AlertTriangle, CheckCircle2, Clock, RotateCcw, SkipForward } from "lucide-react";
+import LinkedRecurringBillName from "../../../components/shared/LinkedRecurringBillName.jsx";
 import Button from "../../../components/ui/Button.jsx";
 import Input from "../../../components/ui/Input.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
@@ -27,6 +28,7 @@ export default function RecurringBillRow({
   onStartMarkPaid,
   onMarkUnpaid,
   onSkip,
+  onEdit,
 }) {
   const isPaid = row.instance?.status === "paid";
   const isSkipped = row.instance?.status === "skipped";
@@ -43,19 +45,11 @@ export default function RecurringBillRow({
     <tr className={row.displayStatus === "Past due" ? "bg-red-50/70" : "bg-white"}>
       <td className="px-5 py-4 align-middle font-semibold text-gray-950">
         <div className="grid gap-1">
-          {hasSafePortalUrl(row.template.portalUrl) ? (
-            <a
-              className="inline-flex items-center gap-1 text-blue-700 underline-offset-2 hover:text-blue-800 hover:underline"
-              href={row.template.portalUrl}
-              target="_blank"
-              rel="noreferrer"
-              title={`Open ${row.template.name} portal`}
-            >
-              {row.template.name}
-            </a>
-          ) : (
-            <span>{row.template.name}</span>
-          )}
+          <LinkedRecurringBillName
+            billName={row.template.name}
+            portalUrl={row.template.portalUrl}
+            onEdit={onEdit ? () => onEdit(row.template) : undefined}
+          />
           {isPaid ? (
             <span className="text-xs font-medium text-gray-500">
               Linked spending transaction is managed by this recurring bill.
@@ -176,9 +170,4 @@ export default function RecurringBillRow({
       </td>
     </tr>
   );
-}
-
-function hasSafePortalUrl(url) {
-  const normalized = String(url ?? "").trim();
-  return normalized.startsWith("https://") || normalized.startsWith("http://");
 }

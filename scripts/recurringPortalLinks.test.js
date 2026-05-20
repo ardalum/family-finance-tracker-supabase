@@ -14,6 +14,10 @@ const recurringBillRowSource = readFileSync(
   new URL("../src/features/recurring/components/RecurringBillRow.jsx", import.meta.url),
   "utf8",
 );
+const linkedRecurringBillNameSource = readFileSync(
+  new URL("../src/components/shared/LinkedRecurringBillName.jsx", import.meta.url),
+  "utf8",
+);
 
 test("recurring template form includes optional bill portal url field", () => {
   assert.match(recurringFormSource, /label="Bill portal URL"/);
@@ -26,22 +30,31 @@ test("recurring template form validates portal url protocol when provided", () =
 });
 
 test("recurring template table shows portal link only when url exists", () => {
-  assert.match(recurringTableSource, /template\.portalUrl \? \(/);
-  assert.match(recurringTableSource, /href=\{template\.portalUrl\}/);
+  assert.match(recurringTableSource, /safePortalUrl \? \(/);
+  assert.match(recurringTableSource, /href=\{safePortalUrl\}/);
   assert.match(recurringTableSource, /target="_blank"/);
   assert.match(recurringTableSource, /rel="noreferrer"/);
   assert.match(recurringTableSource, /Open portal/);
 });
 
 test("recurring template name is clickable when portal url exists", () => {
-  assert.match(recurringTableSource, /hasSafePortalUrl\(template\.portalUrl\)/);
-  assert.match(recurringTableSource, /title=\{`Open \$\{template\.name\} portal`\}/);
-  assert.match(recurringTableSource, /href=\{template\.portalUrl\}/);
+  assert.match(recurringTableSource, /<LinkedRecurringBillName/);
+  assert.match(recurringTableSource, /portalUrl=\{template\.portalUrl\}/);
 });
 
 test("monthly and due-soon recurring rows use clickable bill names when portal url exists", () => {
-  assert.match(recurringBillRowSource, /hasSafePortalUrl\(row\.template\.portalUrl\)/);
-  assert.match(recurringBillRowSource, /href=\{row\.template\.portalUrl\}/);
-  assert.match(recurringBillRowSource, /target="_blank"/);
-  assert.match(recurringBillRowSource, /rel="noreferrer"/);
+  assert.match(recurringBillRowSource, /<LinkedRecurringBillName/);
+  assert.match(recurringBillRowSource, /portalUrl=\{row\.template\.portalUrl\}/);
+});
+
+test("linked recurring bill name applies safe link attributes and icon fallbacks", () => {
+  assert.match(linkedRecurringBillNameSource, /target="_blank"/);
+  assert.match(linkedRecurringBillNameSource, /rel="noreferrer"/);
+  assert.match(linkedRecurringBillNameSource, /getFaviconUrl/);
+  assert.match(linkedRecurringBillNameSource, /ReceiptText/);
+});
+
+test("linked recurring bill name renders a separate edit button target", () => {
+  assert.match(linkedRecurringBillNameSource, /aria-label=\{`Edit \$\{titleName\}`\}/);
+  assert.match(linkedRecurringBillNameSource, /onClick=\{onEdit\}/);
 });

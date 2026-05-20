@@ -10,6 +10,7 @@ import {
   X,
 } from "lucide-react";
 import LinkedCardName from "../../../components/shared/LinkedCardName.jsx";
+import LinkedRecurringBillName from "../../../components/shared/LinkedRecurringBillName.jsx";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
@@ -59,6 +60,7 @@ export default function RecurringPaymentTable({
           <div className="grid min-w-0 gap-3 p-4">
             {templates.map((template) => {
               const card = cards.find((item) => item.id === template.cardId);
+              const safePortalUrl = getSafeExternalUrl(template.portalUrl);
               return (
                 <article
                   key={template.id}
@@ -68,19 +70,11 @@ export default function RecurringPaymentTable({
                     <div className="grid min-w-0 gap-1">
                       <div className="flex min-w-0 flex-wrap items-center gap-2">
                         <h4 className="min-w-0 text-base font-semibold text-text-main">
-                          {hasSafePortalUrl(template.portalUrl) ? (
-                            <a
-                              className="inline-flex min-w-0 items-center gap-1 text-blue-700 underline-offset-2 hover:text-blue-800 hover:underline"
-                              href={template.portalUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              title={`Open ${template.name} portal`}
-                            >
-                              <span className="truncate">{template.name}</span>
-                            </a>
-                          ) : (
-                            template.name
-                          )}
+                          <LinkedRecurringBillName
+                            billName={template.name}
+                            portalUrl={template.portalUrl}
+                            onEdit={() => onEdit(template)}
+                          />
                         </h4>
                         <span
                           className={`rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${template.active ? "bg-status-successBg text-status-successDark ring-status-successBg" : "bg-app-muted text-text-muted ring-app-muted"}`}
@@ -131,11 +125,11 @@ export default function RecurringPaymentTable({
                       {template.notes}
                     </p>
                   ) : null}
-                  {template.portalUrl ? (
+                  {safePortalUrl ? (
                     <div>
                       <a
                         className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-700 underline-offset-2 hover:text-blue-800 hover:underline"
-                        href={template.portalUrl}
+                        href={safePortalUrl}
                         target="_blank"
                         rel="noreferrer"
                       >
@@ -255,7 +249,12 @@ function formatMonthRange(startMonth, endMonth) {
   return `${startMonth} to ${endMonth}`;
 }
 
-function hasSafePortalUrl(url) {
-  const normalized = String(url ?? "").trim();
-  return normalized.startsWith("https://") || normalized.startsWith("http://");
+function getSafeExternalUrl(url) {
+  try {
+    const parsedUrl = new URL(url);
+    if (!["https:", "http:"].includes(parsedUrl.protocol)) return "";
+    return parsedUrl.toString();
+  } catch {
+    return "";
+  }
 }

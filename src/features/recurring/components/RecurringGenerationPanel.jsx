@@ -35,6 +35,7 @@ export default function RecurringGenerationPanel({
   onMarkPaid,
   onMarkUnpaid,
   onSkip,
+  onEditTemplate,
   isSaving = false,
 }) {
   const billRows = useMemo(
@@ -256,6 +257,7 @@ export default function RecurringGenerationPanel({
                   onStartMarkPaid={handleStartMarkPaid}
                   onMarkUnpaid={handleMarkUnpaid}
                   onSkip={handleSkip}
+                  onEdit={onEditTemplate}
                 />
               ))}
             </tbody>
@@ -299,6 +301,7 @@ export default function RecurringGenerationPanel({
                     onStartMarkPaid={handleStartMarkPaid}
                     onMarkUnpaid={handleMarkUnpaid}
                     onSkip={handleSkip}
+                    onEdit={onEditTemplate}
                   />
                 ))}
               </tbody>
