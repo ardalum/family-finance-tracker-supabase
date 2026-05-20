@@ -5,6 +5,8 @@ import {
   normalizeMonthlyBalancePatchForPersist,
   toLoadedMonthBalanceEntry,
 } from "./monthlyBalancePersistence.js";
+import { resolveCardPaymentMovementAction } from "./monthlyBalanceMovementService.js";
+import { CARD_PAYMENT_OUTSIDE_ACCOUNT } from "./statementPaymentUtils.js";
 
 describe("monthly balances supabase service helpers", () => {
   it("keeps zero-balance unpaid rows as not checked inputs", () => {
@@ -53,5 +55,61 @@ describe("monthly balances supabase service helpers", () => {
     assert.equal(patch.explicitNoBalance, true);
     assert.equal(patch.balance, 0);
     assert.equal(patch.paid, true);
+  });
+
+  it("builds upsert movement action for tracked paid card payments", () => {
+    const result = resolveCardPaymentMovementAction({
+      householdId: "household-1",
+      monthKey: "2026-05",
+      card: { id: "local-card", supabaseId: "card-supa-1", name: "Main Card" },
+      patch: {
+        balance: 500,
+        paid: true,
+        paidAmount: 200,
+        paidDate: "2026-05-20",
+        paymentAccountId: "checking-1",
+      },
+    });
+
+    assert.equal(result.action, "upsert");
+    assert.equal(result.sourceId, "card-supa-1:2026-05");
+    assert.equal(result.payload.accountId, "checking-1");
+    assert.equal(result.payload.amount, 200);
+    assert.equal(result.payload.isTracked, true);
+  });
+
+  it("builds outside/untracked movement action for outside card payments", () => {
+    const result = resolveCardPaymentMovementAction({
+      householdId: "household-1",
+      monthKey: "2026-05",
+      card: { id: "card-1", name: "Travel Card" },
+      patch: {
+        balance: 400,
+        paid: true,
+        paidAmount: 150,
+        paymentAccountId: CARD_PAYMENT_OUTSIDE_ACCOUNT,
+      },
+    });
+
+    assert.equal(result.action, "upsert");
+    assert.equal(result.payload.accountId, null);
+    assert.equal(result.payload.isTracked, false);
+  });
+
+  it("builds delete movement action for unpaid or reversed entries", () => {
+    const result = resolveCardPaymentMovementAction({
+      householdId: "household-1",
+      monthKey: "2026-05",
+      card: { id: "card-1", supabaseId: "card-supa-1" },
+      patch: {
+        balance: 400,
+        paid: false,
+        paidAmount: 0,
+        paymentAccountId: "checking-1",
+      },
+    });
+
+    assert.equal(result.action, "delete");
+    assert.equal(result.sourceId, "card-supa-1:2026-05");
   });
 });

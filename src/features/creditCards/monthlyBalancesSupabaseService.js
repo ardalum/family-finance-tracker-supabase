@@ -1,5 +1,10 @@
 import { supabase } from "../../lib/supabase/client.js";
+import {
+  deleteAccountMoneyMovementBySource,
+  replaceAccountMoneyMovementBySource,
+} from "../accounts/accountMoneyMovementsSupabaseService.js";
 import { getCreditCardPaymentMovementSourceId } from "./statementPaymentUtils.js";
+import { resolveCardPaymentMovementAction } from "./monthlyBalanceMovementService.js";
 import {
   getPaymentDueDateForStatementMonth,
   getStatementCloseDateForStatementMonth,
@@ -56,6 +61,26 @@ function getStatementStatus(patch) {
   if (isStatementPaid({ ...patch, balance, paidAmount })) return "paid";
   if (paidAmount > 0) return "partial";
   return "unpaid";
+}
+
+async function persistCardPaymentMovement({ householdId, monthKey, card, patch }) {
+  const movementAction = resolveCardPaymentMovementAction({
+    householdId,
+    monthKey,
+    card,
+    patch,
+  });
+
+  if (movementAction.action === "upsert") {
+    await replaceAccountMoneyMovementBySource(householdId, movementAction.payload);
+    return;
+  }
+
+  await deleteAccountMoneyMovementBySource(
+    householdId,
+    "credit_card_payment",
+    movementAction.sourceId,
+  );
 }
 
 async function listCardStatements(client, householdId, monthKey = null) {
@@ -215,6 +240,12 @@ export async function upsertMonthlyBalance(householdId, monthKey, card, patch) {
   if (error) throw error;
 
   await upsertCardStatement(client, householdId, monthKey, card, normalizedPatch);
+  await persistCardPaymentMovement({
+    householdId,
+    monthKey,
+    card,
+    patch: normalizedPatch,
+  });
   return data;
 }
 
@@ -239,4 +270,10 @@ export async function deleteMonthlyBalance(householdId, monthKey, card) {
     .eq("month_key", monthKey);
 
   if (statementError) throw statementError;
+
+  await deleteAccountMoneyMovementBySource(
+    householdId,
+    "credit_card_payment",
+    getCreditCardPaymentMovementSourceId(creditCardId, monthKey),
+  );
 }
