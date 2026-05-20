@@ -4,6 +4,11 @@ import Button from "../../../components/ui/Button.jsx";
 import Input from "../../../components/ui/Input.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { buildCashAccountOptions } from "../../accounts/accountsService.js";
+import {
+  buildCategoryBudgetUsageMap,
+  formatCategoryBudgetUsageLabel,
+  getCategoryBudgetUsageTone,
+} from "../../spending/categoryBudgetUsage.js";
 import { TRANSACTION_TYPE_OPTIONS, UNCATEGORIZED_ID } from "../../spending/spendingService.js";
 import { LIQUID_ACCOUNT_TYPES, SPENDING_OUTSIDE_ACCOUNT } from "../../spending/spendingService.js";
 import {
@@ -36,6 +41,12 @@ export default function QuickAddTransactionModal({
     () => [{ id: UNCATEGORIZED_ID, name: "Uncategorized" }, ...categories],
     [categories],
   );
+  const categoryUsageById = useMemo(
+    () => buildCategoryBudgetUsageMap(categories, transactions),
+    [categories, transactions],
+  );
+  const selectedCategoryUsage = categoryUsageById.get(form.categoryId) ?? null;
+  const selectedCategoryTone = getCategoryBudgetUsageTone(selectedCategoryUsage);
   const sourceAccountOptions = useMemo(
     () =>
       buildCashAccountOptions(
@@ -220,10 +231,28 @@ export default function QuickAddTransactionModal({
             >
               {categoryOptions.map((category) => (
                 <option key={category.id} value={category.id}>
-                  {category.name}
+                  {formatCategoryBudgetUsageLabel(
+                    category.name,
+                    categoryUsageById.get(category.id),
+                  )}
                 </option>
               ))}
             </Select>
+            <p
+              className={`text-xs sm:col-span-2 ${
+                selectedCategoryTone === "over"
+                  ? "text-status-dangerDark"
+                  : selectedCategoryTone === "near"
+                    ? "text-status-warningDark"
+                    : "text-text-muted"
+              }`}
+            >
+              {formatCategoryBudgetUsageLabel(
+                categoryOptions.find((category) => category.id === form.categoryId)?.name ??
+                  "Category",
+                selectedCategoryUsage,
+              )}
+            </p>
 
             <Select
               label="Transaction type"

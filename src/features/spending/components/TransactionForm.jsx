@@ -5,6 +5,11 @@ import Input from "../../../components/ui/Input.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { buildCashAccountOptions } from "../../accounts/accountsService.js";
 import {
+  buildCategoryBudgetUsageMap,
+  formatCategoryBudgetUsageLabel,
+  getCategoryBudgetUsageTone,
+} from "../categoryBudgetUsage.js";
+import {
   getSplitTotal,
   LIQUID_ACCOUNT_TYPES,
   SPENDING_OUTSIDE_ACCOUNT,
@@ -76,6 +81,7 @@ export default function TransactionForm({
   cards,
   cashAccounts = [],
   categories,
+  transactions = [],
   editingTransaction,
   onCancel,
   onSaved,
@@ -88,6 +94,10 @@ export default function TransactionForm({
   const categoryOptions = useMemo(
     () => [{ id: UNCATEGORIZED_ID, name: "Uncategorized" }, ...categories],
     [categories],
+  );
+  const categoryUsageById = useMemo(
+    () => buildCategoryBudgetUsageMap(categories, transactions),
+    [categories, transactions],
   );
   const showCardOwner = useMemo(
     () => new Set(cards.map((card) => card.owner).filter(Boolean)).size >= 2,
@@ -105,6 +115,8 @@ export default function TransactionForm({
     () => roundMoney(Number(form.amount || 0) - splitTotal),
     [form.amount, splitTotal],
   );
+  const selectedCategoryUsage = categoryUsageById.get(form.categoryId) ?? null;
+  const selectedCategoryTone = getCategoryBudgetUsageTone(selectedCategoryUsage);
   const isEditingRecurring = editingTransaction?.source === "recurring";
 
   useEffect(() => {
@@ -346,10 +358,27 @@ export default function TransactionForm({
         >
           {categoryOptions.map((category) => (
             <option key={category.id} value={category.id}>
-              {category.name}
+              {formatCategoryBudgetUsageLabel(category.name, categoryUsageById.get(category.id))}
             </option>
           ))}
         </Select>
+        {!form.splitMode ? (
+          <p
+            className={`text-xs sm:col-span-2 ${
+              selectedCategoryTone === "over"
+                ? "text-status-dangerDark"
+                : selectedCategoryTone === "near"
+                  ? "text-status-warningDark"
+                  : "text-text-muted"
+            }`}
+          >
+            {formatCategoryBudgetUsageLabel(
+              categoryOptions.find((category) => category.id === form.categoryId)?.name ??
+                "Category",
+              selectedCategoryUsage,
+            )}
+          </p>
+        ) : null}
       </div>
 
       <label className="inline-flex items-center gap-2 rounded-xl border border-app-border bg-app-background px-3 py-2 text-sm font-medium text-text-soft">
@@ -393,7 +422,10 @@ export default function TransactionForm({
               >
                 {categoryOptions.map((category) => (
                   <option key={category.id} value={category.id}>
-                    {category.name}
+                    {formatCategoryBudgetUsageLabel(
+                      category.name,
+                      categoryUsageById.get(category.id),
+                    )}
                   </option>
                 ))}
               </Select>
