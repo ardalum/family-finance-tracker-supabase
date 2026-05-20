@@ -69,6 +69,7 @@ describe("recurring service", () => {
       transactionId: null,
       actualAmount: null,
       paidDate: null,
+      paidFromAccount: "",
     });
   });
 
@@ -93,6 +94,7 @@ describe("recurring service", () => {
       transactionId: "txn-1",
       actualAmount: 1400,
       paidDate: "2026-05-01",
+      paidFromAccount: "",
     });
   });
 

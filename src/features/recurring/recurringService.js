@@ -100,6 +100,7 @@ export function normalizeRecurringInstance(instance) {
       transactionId: null,
       actualAmount: null,
       paidDate: null,
+      paidFromAccount: "",
     };
   }
 
@@ -111,6 +112,7 @@ export function normalizeRecurringInstance(instance) {
         ? null
         : Number(instance.actualAmount),
     paidDate: instance.paidDate ?? null,
+    paidFromAccount: instance.paidFromAccount ?? "",
   };
 }
 
