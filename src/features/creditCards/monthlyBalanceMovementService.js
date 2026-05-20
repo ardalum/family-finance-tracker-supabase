@@ -8,6 +8,16 @@ function getSupabaseCardId(card) {
   return card?.supabaseId ?? card?.id;
 }
 
+export function getStatementMovementSourceIds(balanceRows = []) {
+  return Array.from(
+    new Set(
+      (balanceRows ?? [])
+        .map((row) => getCreditCardPaymentMovementSourceId(row?.credit_card_id, row?.month_key))
+        .filter(Boolean),
+    ),
+  );
+}
+
 export function resolveCardPaymentMovementAction({ householdId, monthKey, card, patch }) {
   const creditCardId = getSupabaseCardId(card);
   const sourceId = getCreditCardPaymentMovementSourceId(creditCardId, monthKey);

@@ -5,7 +5,10 @@ import {
   normalizeMonthlyBalancePatchForPersist,
   toLoadedMonthBalanceEntry,
 } from "./monthlyBalancePersistence.js";
-import { resolveCardPaymentMovementAction } from "./monthlyBalanceMovementService.js";
+import {
+  getStatementMovementSourceIds,
+  resolveCardPaymentMovementAction,
+} from "./monthlyBalanceMovementService.js";
 import { CARD_PAYMENT_OUTSIDE_ACCOUNT } from "./statementPaymentUtils.js";
 
 describe("monthly balances supabase service helpers", () => {
@@ -111,5 +114,15 @@ describe("monthly balances supabase service helpers", () => {
 
     assert.equal(result.action, "delete");
     assert.equal(result.sourceId, "card-supa-1:2026-05");
+  });
+
+  it("builds statement movement source ids for lookup across payment months", () => {
+    const sourceIds = getStatementMovementSourceIds([
+      { credit_card_id: "card-1", month_key: "2026-04" },
+      { credit_card_id: "card-2", month_key: "2026-04" },
+      { credit_card_id: "card-1", month_key: "2026-04" },
+    ]);
+
+    assert.deepEqual(sourceIds, ["card-1:2026-04", "card-2:2026-04"]);
   });
 });

@@ -29,6 +29,9 @@ export function buildCreditCardPaymentMovementPayload({
   const normalizedPaymentAccountId = normalizeText(paymentAccountId);
   const normalizedPaidDate = normalizeText(paidDate);
   const movementDate = normalizedPaidDate || `${monthKey}-01`;
+  const movementMonthKey = /^\d{4}-\d{2}-\d{2}$/.test(normalizedPaidDate)
+    ? normalizedPaidDate.slice(0, 7)
+    : monthKey;
   if (!sourceId || amount <= 0 || !normalizedPaymentAccountId) return null;
 
   const isOutside = normalizedPaymentAccountId === CARD_PAYMENT_OUTSIDE_ACCOUNT;
@@ -40,7 +43,7 @@ export function buildCreditCardPaymentMovementPayload({
     direction: "outflow",
     amount,
     movementDate,
-    monthKey,
+    monthKey: movementMonthKey,
     description: `Card payment${cardName ? `: ${cardName}` : ""}`,
     isTracked: !isOutside,
   };

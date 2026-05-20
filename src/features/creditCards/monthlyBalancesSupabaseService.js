@@ -4,7 +4,10 @@ import {
   replaceAccountMoneyMovementBySource,
 } from "../accounts/accountMoneyMovementsSupabaseService.js";
 import { getCreditCardPaymentMovementSourceId } from "./statementPaymentUtils.js";
-import { resolveCardPaymentMovementAction } from "./monthlyBalanceMovementService.js";
+import {
+  getStatementMovementSourceIds,
+  resolveCardPaymentMovementAction,
+} from "./monthlyBalanceMovementService.js";
 import {
   getPaymentDueDateForStatementMonth,
   getStatementCloseDateForStatementMonth,
@@ -92,13 +95,15 @@ async function listCardStatements(client, householdId, monthKey = null) {
   return data ?? [];
 }
 
-async function listCardPaymentMovements(client, householdId, monthKey = null) {
+async function listCardPaymentMovementsBySourceIds(client, householdId, sourceIds = []) {
+  if (!sourceIds.length) return [];
+
   let query = client
     .from("account_money_movements")
     .select("source_id, account_id, is_tracked")
     .eq("household_id", householdId)
-    .eq("source_type", "credit_card_payment");
-  if (monthKey) query = query.eq("month_key", monthKey);
+    .eq("source_type", "credit_card_payment")
+    .in("source_id", sourceIds);
 
   const { data, error } = await query;
   if (error) throw error;
@@ -155,7 +160,12 @@ export async function listMonthlyBalances(householdId, monthKey, cards) {
 
   const cardsBySupabaseId = new Map(cards.map((card) => [getSupabaseCardId(card), card]));
   const statementsByCardMonth = buildStatementLookup(statements);
-  const paymentMovements = await listCardPaymentMovements(client, householdId, monthKey);
+  const movementSourceIds = getStatementMovementSourceIds(balancesResult.data ?? []);
+  const paymentMovements = await listCardPaymentMovementsBySourceIds(
+    client,
+    householdId,
+    movementSourceIds,
+  );
   const paymentMovementsBySourceId = new Map(
     paymentMovements.map((movement) => [movement.source_id, movement]),
   );
@@ -184,7 +194,12 @@ export async function listAllMonthlyBalances(householdId, cards) {
 
   const cardsBySupabaseId = new Map(cards.map((card) => [getSupabaseCardId(card), card]));
   const statementsByCardMonth = buildStatementLookup(statements);
-  const paymentMovements = await listCardPaymentMovements(client, householdId);
+  const movementSourceIds = getStatementMovementSourceIds(balancesResult.data ?? []);
+  const paymentMovements = await listCardPaymentMovementsBySourceIds(
+    client,
+    householdId,
+    movementSourceIds,
+  );
   const paymentMovementsBySourceId = new Map(
     paymentMovements.map((movement) => [movement.source_id, movement]),
   );

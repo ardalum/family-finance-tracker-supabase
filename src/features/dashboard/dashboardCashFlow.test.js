@@ -318,3 +318,50 @@ test("cash position filters card payment movement by movement monthKey, not paid
 
   assert.equal(result.cashPositionTotal, 2600);
 });
+
+test("april statement paid in may reduces may cash position but not april", () => {
+  const cashAccounts = [{ id: "checking", accountType: "checking", isActive: true }];
+  const accountBalanceSnapshots = [
+    {
+      cashAccountId: "checking",
+      monthKey: "2026-04",
+      snapshotDate: "2026-04-30",
+      balanceAmount: 4000,
+    },
+    {
+      cashAccountId: "checking",
+      monthKey: "2026-05",
+      snapshotDate: "2026-05-31",
+      balanceAmount: 3500,
+    },
+  ];
+  const accountMoneyMovements = [
+    {
+      sourceType: "credit_card_payment",
+      sourceId: "card-1:2026-04",
+      movementType: "credit_card_payment",
+      direction: "outflow",
+      amount: 500,
+      movementDate: "2026-05-20",
+      monthKey: "2026-05",
+      accountId: "checking",
+      isTracked: true,
+    },
+  ];
+
+  const april = getDashboardCashFlow({
+    selectedMonth: "2026-04",
+    cashAccounts,
+    accountBalanceSnapshots,
+    accountMoneyMovements,
+  });
+  const may = getDashboardCashFlow({
+    selectedMonth: "2026-05",
+    cashAccounts,
+    accountBalanceSnapshots,
+    accountMoneyMovements,
+  });
+
+  assert.equal(april.cashPositionTotal, 4000);
+  assert.equal(may.cashPositionTotal, 3000);
+});
