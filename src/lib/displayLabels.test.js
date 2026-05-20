@@ -3,7 +3,11 @@ import { describe, it } from "node:test";
 import {
   formatCashAccountTypeLabel,
   formatEnumDisplayLabel,
+  formatIncomeFrequencyLabel,
+  formatIncomeTypeLabel,
   formatLiabilityTypeLabel,
+  formatSavingsContributionTypeLabel,
+  formatSavingsGoalTypeLabel,
 } from "./displayLabels.js";
 
 describe("display label formatters", () => {
@@ -24,6 +28,18 @@ describe("display label formatters", () => {
     assert.equal(formatLiabilityTypeLabel("liability_account"), "Liability Account");
   });
 
+  it("formats income labels professionally", () => {
+    assert.equal(formatIncomeTypeLabel("paycheck"), "Paycheck");
+    assert.equal(formatIncomeTypeLabel("side_hustle"), "Side Hustle");
+    assert.equal(formatIncomeFrequencyLabel("semimonthly"), "Semimonthly");
+  });
+
+  it("formats savings labels professionally", () => {
+    assert.equal(formatSavingsGoalTypeLabel("emergency_fund"), "Emergency Fund");
+    assert.equal(formatSavingsGoalTypeLabel("short_term"), "Short Term");
+    assert.equal(formatSavingsContributionTypeLabel("transfer"), "Transfer");
+  });
+
   it("keeps fallback title-casing for unknown enum values", () => {
     assert.equal(formatEnumDisplayLabel("custom_value"), "Custom Value");
   });
@@ -31,10 +47,16 @@ describe("display label formatters", () => {
   it("formats labels without mutating stored enum values", () => {
     const storedAccountType = "checking";
     const storedLiabilityType = "credit_card";
+    const storedIncomeType = "paycheck";
+    const storedSavingsType = "emergency_fund";
 
     assert.equal(formatCashAccountTypeLabel(storedAccountType), "Checking");
     assert.equal(formatLiabilityTypeLabel(storedLiabilityType), "Credit Card");
+    assert.equal(formatIncomeTypeLabel(storedIncomeType), "Paycheck");
+    assert.equal(formatSavingsGoalTypeLabel(storedSavingsType), "Emergency Fund");
     assert.equal(storedAccountType, "checking");
     assert.equal(storedLiabilityType, "credit_card");
+    assert.equal(storedIncomeType, "paycheck");
+    assert.equal(storedSavingsType, "emergency_fund");
   });
 });

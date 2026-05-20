@@ -7,6 +7,10 @@ import Input from "../../../components/ui/Input.jsx";
 import ProgressBar from "../../../components/ui/ProgressBar.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { buildMonthOptions, formatDateKey, getCurrentMonthKey } from "../../../lib/dates.js";
+import {
+  formatSavingsContributionTypeLabel,
+  formatSavingsGoalTypeLabel,
+} from "../../../lib/displayLabels.js";
 import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
 import {
   buildSavingsGoalOptions,
@@ -247,7 +251,7 @@ export default function Savings({
               >
                 {SAVINGS_GOAL_TYPES.map((goalType) => (
                   <option key={goalType} value={goalType}>
-                    {goalType}
+                    {formatSavingsGoalTypeLabel(goalType)}
                   </option>
                 ))}
               </Select>
@@ -355,7 +359,7 @@ export default function Savings({
               >
                 {SAVINGS_CONTRIBUTION_TYPES.map((contributionType) => (
                   <option key={contributionType} value={contributionType}>
-                    {contributionType}
+                    {formatSavingsContributionTypeLabel(contributionType)}
                   </option>
                 ))}
               </Select>
@@ -412,7 +416,8 @@ export default function Savings({
                     <div>
                       <p className="text-sm font-semibold text-text-main">{goal.name}</p>
                       <p className="text-xs text-text-muted">
-                        {goal.goalType} - {goal.isActive ? "Active" : "Inactive"}
+                        {formatSavingsGoalTypeLabel(goal.goalType)} -{" "}
+                        {goal.isActive ? "Active" : "Inactive"}
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -494,7 +499,8 @@ export default function Savings({
                 >
                   <div>
                     <p className="text-sm font-semibold text-text-main">
-                      {formatCurrency(contribution.amount)} - {contribution.contributionType}
+                      {formatCurrency(contribution.amount)} -{" "}
+                      {formatSavingsContributionTypeLabel(contribution.contributionType)}
                     </p>
                     <p className="text-xs text-text-muted">
                       {contribution.contributionDate} - {goalInfo.name}

@@ -6,6 +6,7 @@ import InlineAlert from "../../../components/ui/InlineAlert.jsx";
 import Input from "../../../components/ui/Input.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { buildMonthOptions, formatDateKey, getCurrentMonthKey } from "../../../lib/dates.js";
+import { formatIncomeFrequencyLabel, formatIncomeTypeLabel } from "../../../lib/displayLabels.js";
 import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
 import { buildCashAccountOptions } from "../../accounts/accountsService.js";
 import {
@@ -280,7 +281,7 @@ export default function Income({
             >
               {INCOME_ENTRY_TYPES.map((type) => (
                 <option key={type} value={type}>
-                  {type}
+                  {formatIncomeTypeLabel(type)}
                 </option>
               ))}
             </Select>
@@ -352,7 +353,7 @@ export default function Income({
             >
               {INCOME_SOURCE_TYPES.map((type) => (
                 <option key={type} value={type}>
-                  {type}
+                  {formatIncomeTypeLabel(type)}
                 </option>
               ))}
             </Select>
@@ -365,7 +366,7 @@ export default function Income({
             >
               {INCOME_FREQUENCIES.map((frequency) => (
                 <option key={frequency} value={frequency}>
-                  {frequency}
+                  {formatIncomeFrequencyLabel(frequency)}
                 </option>
               ))}
             </Select>
@@ -426,7 +427,8 @@ export default function Income({
                   >
                     <p className="text-sm font-semibold text-text-main">{source.name}</p>
                     <p className="text-xs text-text-muted">
-                      {source.sourceType} - {source.frequency} -{" "}
+                      {formatIncomeTypeLabel(source.sourceType)} -{" "}
+                      {formatIncomeFrequencyLabel(source.frequency)} -{" "}
                       {source.isActive ? "Active" : "Inactive"}
                     </p>
                     <p className="mt-1 text-sm text-text-soft">
@@ -505,7 +507,7 @@ export default function Income({
                 >
                   <div>
                     <p className="text-sm font-semibold text-text-main">
-                      {formatCurrency(entry.amount)} - {entry.entryType}
+                      {formatCurrency(entry.amount)} - {formatIncomeTypeLabel(entry.entryType)}
                     </p>
                     <p className="text-xs text-text-muted">
                       {entry.entryDate} - {sourceName}
