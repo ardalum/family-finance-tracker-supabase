@@ -20,7 +20,13 @@ function getCardSearchText(card) {
     .toLowerCase();
 }
 
-export default function CreditCardList({ cards, onEdit, onDelete, isSaving = false }) {
+export default function CreditCardList({
+  cards,
+  recurringPayments = [],
+  onEdit,
+  onDelete,
+  isSaving = false,
+}) {
   const [filters, setFilters] = useState(defaultFilters);
   const [cardPendingDelete, setCardPendingDelete] = useState(null);
   const ownerOptions = useMemo(
@@ -44,9 +50,20 @@ export default function CreditCardList({ cards, onEdit, onDelete, isSaving = fal
 
   async function confirmDelete() {
     if (!cardPendingDelete) return;
-    await onDelete(cardPendingDelete);
+    const linkedTemplates = recurringPayments.filter(
+      (template) =>
+        template.paymentMethod === "Credit Card" && template.cardId === cardPendingDelete.id,
+    );
+    await onDelete(cardPendingDelete, linkedTemplates);
     setCardPendingDelete(null);
   }
+
+  const linkedTemplates = cardPendingDelete
+    ? recurringPayments.filter(
+        (template) =>
+          template.paymentMethod === "Credit Card" && template.cardId === cardPendingDelete.id,
+      )
+    : [];
 
   return (
     <>
@@ -198,6 +215,23 @@ export default function CreditCardList({ cards, onEdit, onDelete, isSaving = fal
                 This action can affect related monthly balances and statement records. Export a
                 backup first if you are not sure.
               </p>
+              {linkedTemplates.length > 0 ? (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                  <p className="font-semibold">
+                    This card is linked to {linkedTemplates.length} recurring bill
+                    {linkedTemplates.length === 1 ? "" : "s"}.
+                  </p>
+                  <p className="mt-1">
+                    Deleting this card will clear those templates from card payment method. Update
+                    them in Recurring Payments.
+                  </p>
+                  <ul className="mt-2 grid gap-1">
+                    {linkedTemplates.map((template) => (
+                      <li key={template.id}>- {template.name}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
               <div className="flex flex-wrap justify-end gap-3">
                 <Button
                   type="button"

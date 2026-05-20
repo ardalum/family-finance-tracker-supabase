@@ -4,7 +4,7 @@ import LinkedCardName from "../../../components/shared/LinkedCardName.jsx";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
-import { getCardName, getCategoryName } from "../../spending/spendingService.js";
+import { getCategoryName } from "../../spending/spendingService.js";
 
 export default function RecurringPaymentTable({
   templates,
@@ -91,11 +91,7 @@ export default function RecurringPaymentTable({
                       <span>{template.paymentMethod}</span>
                       {template.paymentMethod === "Credit Card" ? (
                         <span className="truncate text-xs text-text-muted">
-                          {card ? (
-                            <LinkedCardName card={card} />
-                          ) : (
-                            getCardName(template.cardId, cards)
-                          )}
+                          {card ? <LinkedCardName card={card} /> : "Needs review: deleted card"}
                         </span>
                       ) : null}
                     </TemplateDetail>
