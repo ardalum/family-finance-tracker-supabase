@@ -53,8 +53,6 @@ describe("help/support trust copy", () => {
 
   it("includes practical troubleshooting steps", () => {
     assert.ok(troubleshootingChecklist.length >= 5);
-    assert.ok(
-      troubleshootingChecklist.some((item) => /paid-from account/i.test(item)),
-    );
+    assert.ok(troubleshootingChecklist.some((item) => /paid-from account/i.test(item)));
   });
 });
