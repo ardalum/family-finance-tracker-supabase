@@ -8,6 +8,10 @@ function getSupabaseCardId(card) {
   return card?.supabaseId ?? card?.id;
 }
 
+function normalizeText(value) {
+  return String(value ?? "").trim();
+}
+
 export function getStatementMovementSourceIds(balanceRows = []) {
   return Array.from(
     new Set(
@@ -25,10 +29,14 @@ export function resolveCardPaymentMovementAction({ householdId, monthKey, card, 
   const paidAmount = getStatementPaidAmount({
     paidAmount: patch?.paidAmount ?? (patch?.paid ? normalizedBalance : 0),
   });
-  const isPaid = Boolean(patch?.paid);
+  const paymentAccountId = normalizeText(patch?.paymentAccountId);
 
-  if (!sourceId || !isPaid || paidAmount <= 0) {
+  if (!sourceId || paidAmount <= 0) {
     return { action: "delete", householdId, sourceId };
+  }
+
+  if (!paymentAccountId) {
+    throw new Error("Choose the account used to pay this card.");
   }
 
   const payload = buildCreditCardPaymentMovementPayload({
@@ -36,12 +44,12 @@ export function resolveCardPaymentMovementAction({ householdId, monthKey, card, 
     monthKey,
     paidAmount,
     paidDate: patch?.paidDate ?? null,
-    paymentAccountId: patch?.paymentAccountId,
+    paymentAccountId,
     cardName: card?.name ?? "",
   });
 
   if (!payload) {
-    return { action: "delete", householdId, sourceId };
+    throw new Error("Could not build the card payment money movement.");
   }
 
   return { action: "upsert", householdId, sourceId, payload };
