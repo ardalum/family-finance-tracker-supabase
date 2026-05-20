@@ -1,6 +1,16 @@
 import { useState } from "react";
-import { CalendarDays, CreditCard, Edit, Plus, ReceiptText, Trash2, X } from "lucide-react";
+import {
+  CalendarDays,
+  CreditCard,
+  Edit,
+  ExternalLink,
+  Plus,
+  ReceiptText,
+  Trash2,
+  X,
+} from "lucide-react";
 import LinkedCardName from "../../../components/shared/LinkedCardName.jsx";
+import LinkedRecurringBillName from "../../../components/shared/LinkedRecurringBillName.jsx";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
@@ -50,6 +60,7 @@ export default function RecurringPaymentTable({
           <div className="grid min-w-0 gap-3 p-4">
             {templates.map((template) => {
               const card = cards.find((item) => item.id === template.cardId);
+              const safePortalUrl = getSafeExternalUrl(template.portalUrl);
               return (
                 <article
                   key={template.id}
@@ -59,7 +70,11 @@ export default function RecurringPaymentTable({
                     <div className="grid min-w-0 gap-1">
                       <div className="flex min-w-0 flex-wrap items-center gap-2">
                         <h4 className="min-w-0 text-base font-semibold text-text-main">
-                          {template.name}
+                          <LinkedRecurringBillName
+                            billName={template.name}
+                            portalUrl={template.portalUrl}
+                            onEdit={() => onEdit(template)}
+                          />
                         </h4>
                         <span
                           className={`rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${template.active ? "bg-status-successBg text-status-successDark ring-status-successBg" : "bg-app-muted text-text-muted ring-app-muted"}`}
@@ -109,6 +124,19 @@ export default function RecurringPaymentTable({
                     <p className="rounded-xl bg-app-background px-3 py-2 text-sm text-text-muted">
                       {template.notes}
                     </p>
+                  ) : null}
+                  {safePortalUrl ? (
+                    <div>
+                      <a
+                        className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-700 underline-offset-2 hover:text-blue-800 hover:underline"
+                        href={safePortalUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Open portal
+                        <ExternalLink size={14} aria-hidden="true" />
+                      </a>
+                    </div>
                   ) : null}
 
                   <div className="grid grid-cols-2 gap-2 border-t border-app-border pt-3 sm:flex sm:flex-wrap sm:justify-end">
@@ -219,4 +247,14 @@ function formatMonthRange(startMonth, endMonth) {
   if (!startMonth && !endMonth) return "No schedule set";
   if (!endMonth) return `Starts ${startMonth}`;
   return `${startMonth} to ${endMonth}`;
+}
+
+function getSafeExternalUrl(url) {
+  try {
+    const parsedUrl = new URL(url);
+    if (!["https:", "http:"].includes(parsedUrl.protocol)) return "";
+    return parsedUrl.toString();
+  } catch {
+    return "";
+  }
 }

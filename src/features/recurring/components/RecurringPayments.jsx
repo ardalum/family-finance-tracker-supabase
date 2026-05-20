@@ -176,6 +176,7 @@ export default function RecurringPayments({
           onMarkPaid={onMarkRecurringPaid}
           onMarkUnpaid={onMarkRecurringUnpaid}
           onSkip={onSkipRecurringPayment}
+          onEditTemplate={openEditTemplateModal}
           isSaving={isSaving}
         />
       ) : null}

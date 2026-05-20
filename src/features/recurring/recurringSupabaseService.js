@@ -2,7 +2,10 @@ import { supabase } from "../../lib/supabase/client.js";
 import { getDueDateForMonth } from "../../lib/dates.js";
 import { CARD_PAYMENT_OUTSIDE_ACCOUNT } from "../creditCards/statementPaymentUtils.js";
 import { UNCATEGORIZED_ID } from "../spending/spendingService.js";
-import { isRecurringCashBankPaymentMethod } from "./recurringService.js";
+import {
+  isRecurringCashBankPaymentMethod,
+  normalizeOptionalPortalUrl,
+} from "./recurringService.js";
 
 function requireSupabase() {
   if (!supabase) {
@@ -48,6 +51,7 @@ function toAppTemplate(row, cardsBySupabaseId, categoriesBySupabaseId) {
     startMonth: row.start_month,
     endMonth: row.end_month,
     active: Boolean(row.active),
+    portalUrl: row.portal_url ?? "",
     notes: row.notes ?? "",
     importedLocalId: row.imported_local_id,
     createdAt: row.created_at,
@@ -84,6 +88,7 @@ function normalizeTemplateInput(input, cardsByAppId, categoriesByAppId) {
     start_month: input.startMonth,
     end_month: input.endMonth || null,
     active: Boolean(input.active),
+    portal_url: normalizeOptionalPortalUrl(input.portalUrl) || null,
     notes: input.notes?.trim() ?? "",
   };
 }

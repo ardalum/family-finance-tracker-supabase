@@ -23,6 +23,10 @@ export function isRecurringCashBankPaymentMethod(paymentMethod) {
   return CASH_BANK_PAYMENT_METHODS.has(paymentMethod);
 }
 
+export function normalizeOptionalPortalUrl(value) {
+  return String(value ?? "").trim();
+}
+
 function createId(prefix) {
   return `${prefix}_${crypto.randomUUID()}`;
 }
@@ -52,6 +56,7 @@ function normalizeTemplate(input) {
     startMonth: input.startMonth,
     endMonth: input.endMonth || null,
     active: Boolean(input.active),
+    portalUrl: normalizeOptionalPortalUrl(input.portalUrl),
     notes: input.notes.trim(),
   };
 }
@@ -199,6 +204,7 @@ export function getMonthlyRecurringRows(templates, monthKey, statusByMonth, toda
       const displayStatus = getRecurringDisplayStatus(template, monthKey, instance, today);
 
       return {
+        monthKey,
         template,
         instance,
         dueDate,
@@ -250,4 +256,34 @@ export function getRecurringSummary(templates, monthKey, statusByMonth) {
     pastDueUnpaidCount: rows.filter((row) => row.displayStatus === "Past due").length,
     difference: actualTotal - estimatedTotal,
   };
+}
+
+function getNextMonthKey(monthKey) {
+  const [year, month] = monthKey.split("-").map(Number);
+  const nextMonthDate = new Date(year, month, 1);
+  return `${nextMonthDate.getFullYear()}-${String(nextMonthDate.getMonth() + 1).padStart(2, "0")}`;
+}
+
+export function getUpcomingRecurringRows(
+  templates,
+  selectedMonthKey,
+  statusByMonth,
+  { today = new Date(), windowDays = 14 } = {},
+) {
+  const nextMonthKey = getNextMonthKey(selectedMonthKey);
+  const upcomingRows = getMonthlyRecurringRows(templates, nextMonthKey, statusByMonth, today);
+  const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const msPerDay = 24 * 60 * 60 * 1000;
+
+  return upcomingRows
+    .filter((row) => {
+      const dueDate = new Date(`${row.dueDate}T00:00:00`);
+      const daysUntilDue = Math.round((dueDate - todayDate) / msPerDay);
+      return daysUntilDue >= 0 && daysUntilDue <= windowDays;
+    })
+    .map((row) => ({
+      ...row,
+      monthKey: nextMonthKey,
+      isUpcomingDueSoon: true,
+    }));
 }

@@ -7,7 +7,11 @@ import {
   buildRecurringPaidDraft,
   RECURRING_PAID_FROM_CREDIT_CARD,
 } from "../recurringPaymentFlow.js";
-import { getMonthlyRecurringRows, getRecurringDueDate } from "../recurringService.js";
+import {
+  getMonthlyRecurringRows,
+  getRecurringDueDate,
+  getUpcomingRecurringRows,
+} from "../recurringService.js";
 import RecurringBillRow from "./RecurringBillRow.jsx";
 import RecurringPaymentModal from "./RecurringPaymentModal.jsx";
 
@@ -31,10 +35,15 @@ export default function RecurringGenerationPanel({
   onMarkPaid,
   onMarkUnpaid,
   onSkip,
+  onEditTemplate,
   isSaving = false,
 }) {
   const billRows = useMemo(
     () => getMonthlyRecurringRows(templates, monthKey, recurringStatusByMonth),
+    [monthKey, recurringStatusByMonth, templates],
+  );
+  const upcomingRows = useMemo(
+    () => getUpcomingRecurringRows(templates, monthKey, recurringStatusByMonth, { windowDays: 14 }),
     [monthKey, recurringStatusByMonth, templates],
   );
   const [drafts, setDrafts] = useState({});
@@ -62,9 +71,10 @@ export default function RecurringGenerationPanel({
 
   useEffect(() => {
     setMessage(null);
+    const allRows = [...billRows, ...upcomingRows];
     setDrafts(
       Object.fromEntries(
-        billRows.map((row) => {
+        allRows.map((row) => {
           const actualAmount =
             row.instance?.actualAmount ??
             (row.template.billType === "fixed" ? row.template.estimatedAmount : "");
@@ -78,7 +88,7 @@ export default function RecurringGenerationPanel({
         }),
       ),
     );
-  }, [billRows]);
+  }, [billRows, upcomingRows]);
 
   function updateDraft(templateId, patch) {
     setMessage(null);
@@ -110,7 +120,7 @@ export default function RecurringGenerationPanel({
     setPaymentModalDraft(
       buildRecurringPaidDraft({
         row,
-        monthKey,
+        monthKey: row.monthKey || monthKey,
         existingPaidFromAccount: row.instance?.paidFromAccount || "",
         templateAutopayAccount: row.template?.autopayPaymentAccountId || "",
         todayDate: draft.paidDate,
@@ -132,9 +142,12 @@ export default function RecurringGenerationPanel({
     try {
       await onMarkPaid({
         template: row.template,
+        monthKey: row.monthKey || monthKey,
         actualAmount:
           row.template.billType === "fixed" ? Number(row.template.estimatedAmount || 0) : amount,
-        paidDate: modalDraft?.paidDate || getRecurringDueDate(monthKey, row.template.dueDay),
+        paidDate:
+          modalDraft?.paidDate ||
+          getRecurringDueDate(row.monthKey || monthKey, row.template.dueDay),
         paidFromAccount: modalDraft?.paidFromAccount || CARD_PAYMENT_OUTSIDE_ACCOUNT,
       });
       setPaymentModalRow(null);
@@ -150,7 +163,7 @@ export default function RecurringGenerationPanel({
 
   async function handleMarkUnpaid(row) {
     try {
-      await onMarkUnpaid(row.template);
+      await onMarkUnpaid(row);
       setMessage({
         type: "warning",
         text: `${row.template.name} marked unpaid. This month's linked spending entry was cleared.`,
@@ -162,7 +175,7 @@ export default function RecurringGenerationPanel({
 
   async function handleSkip(row) {
     try {
-      await onSkip(row.template);
+      await onSkip(row);
       setMessage({
         type: "warning",
         text: `${row.template.name} skipped for this month. No spending transaction was created.`,
@@ -244,12 +257,58 @@ export default function RecurringGenerationPanel({
                   onStartMarkPaid={handleStartMarkPaid}
                   onMarkUnpaid={handleMarkUnpaid}
                   onSkip={handleSkip}
+                  onEdit={onEditTemplate}
                 />
               ))}
             </tbody>
           </table>
         </div>
       )}
+
+      {upcomingRows.length > 0 ? (
+        <div className="border-t border-gray-200">
+          <div className="bg-blue-50/60 px-5 py-3 text-sm text-blue-900">
+            <p className="font-semibold">Due soon from next month</p>
+            <p className="text-xs text-blue-800">
+              Bills due within 14 days can be paid early. The due month stays the same, but payment
+              date and account impact follow when and how you pay.
+            </p>
+          </div>
+          <div className="max-w-full overflow-x-auto">
+            <table className="min-w-full border-separate border-spacing-0 text-left text-sm">
+              <thead className="bg-blue-50 text-xs uppercase tracking-normal text-blue-800">
+                <tr>
+                  <th className="px-5 py-3 font-semibold">Bill</th>
+                  <th className="px-5 py-3 font-semibold">Due date</th>
+                  <th className="px-5 py-3 font-semibold">Category</th>
+                  <th className="px-5 py-3 font-semibold">Payment</th>
+                  <th className="px-5 py-3 font-semibold">Estimated</th>
+                  <th className="px-5 py-3 font-semibold">Actual</th>
+                  <th className="px-5 py-3 font-semibold">Status</th>
+                  <th className="px-5 py-3 font-semibold">Paid date</th>
+                  <th className="px-5 py-3 font-semibold">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {upcomingRows.map((row) => (
+                  <RecurringBillRow
+                    key={`upcoming-${row.monthKey}-${row.template.id}`}
+                    row={row}
+                    categories={categories}
+                    draft={drafts[row.template.id] ?? {}}
+                    isSaving={isSaving}
+                    onDraftChange={updateDraft}
+                    onStartMarkPaid={handleStartMarkPaid}
+                    onMarkUnpaid={handleMarkUnpaid}
+                    onSkip={handleSkip}
+                    onEdit={onEditTemplate}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : null}
       <RecurringPaymentModal
         open={Boolean(paymentModalRow)}
         billName={paymentModalRow?.template?.name || ""}

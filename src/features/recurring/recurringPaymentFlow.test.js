@@ -26,6 +26,20 @@ describe("recurring payment flow helpers", () => {
     assert.equal(movement.isTracked, true);
     assert.equal(movement.sourceType, "recurring_payment");
     assert.equal(movement.movementType, "recurring_bill_payment");
+    assert.equal(movement.monthKey, "2026-05");
+  });
+
+  it("uses payment date month for recurring movement month key", () => {
+    const movement = buildRecurringBillMovementPayload({
+      template: { id: "rent-1", name: "Rent", dueDay: 1 },
+      monthKey: "2026-06",
+      amountPaid: 1500,
+      paidDate: "2026-05-28",
+      paidFromAccount: "checking-1",
+    });
+
+    assert.equal(movement.monthKey, "2026-05");
+    assert.equal(movement.sourceId, "rent-1:2026-06");
   });
 
   it("builds outside/untracked recurring payment movement", () => {

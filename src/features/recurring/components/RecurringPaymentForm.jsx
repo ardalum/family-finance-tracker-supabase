@@ -22,6 +22,7 @@ const emptyForm = {
   startMonth: getCurrentMonthKey(),
   endMonth: "",
   active: true,
+  portalUrl: "",
   notes: "",
 };
 
@@ -66,6 +67,7 @@ export default function RecurringPaymentForm({
             startMonth: editingTemplate.startMonth,
             endMonth: editingTemplate.endMonth ?? "",
             active: Boolean(editingTemplate.active),
+            portalUrl: editingTemplate.portalUrl ?? "",
             notes: editingTemplate.notes ?? "",
           }
         : emptyForm,
@@ -246,6 +248,15 @@ export default function RecurringPaymentForm({
           value={form.endMonth}
           onChange={(event) => updateField("endMonth", event.target.value)}
         />
+        <div className="sm:col-span-2">
+          <Input
+            label="Bill portal URL"
+            type="url"
+            value={form.portalUrl}
+            onChange={(event) => updateField("portalUrl", event.target.value)}
+            placeholder="https://www.duke-energy.com"
+          />
+        </div>
       </div>
 
       <label className="inline-flex items-center gap-2 rounded-xl border border-app-border bg-app-background px-3 py-2 text-sm font-medium text-gray-700">
@@ -294,6 +305,7 @@ function getPreparedForm(form) {
     name: form.name.trim(),
     estimatedAmount: Number(form.estimatedAmount),
     dueDay: Number(form.dueDay),
+    portalUrl: form.portalUrl.trim(),
     notes: form.notes.trim(),
   };
 }
@@ -316,6 +328,17 @@ function validateForm(form, cards) {
     return "Choose the account autopay uses, or select Outside / untracked.";
   }
   if (!form.startMonth) return "Start month is required.";
+  if (form.portalUrl.trim()) {
+    const portalUrl = form.portalUrl.trim();
+    try {
+      const parsed = new URL(portalUrl);
+      if (!["http:", "https:"].includes(parsed.protocol)) {
+        return "Bill portal URL must start with http or https.";
+      }
+    } catch {
+      return "Enter a valid Bill portal URL that starts with https://";
+    }
+  }
   if (form.endMonth && form.endMonth < form.startMonth)
     return "End month cannot be before start month.";
   return "";

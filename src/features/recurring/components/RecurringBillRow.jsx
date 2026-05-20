@@ -1,4 +1,5 @@
 import { AlertTriangle, CheckCircle2, Clock, RotateCcw, SkipForward } from "lucide-react";
+import LinkedRecurringBillName from "../../../components/shared/LinkedRecurringBillName.jsx";
 import Button from "../../../components/ui/Button.jsx";
 import Input from "../../../components/ui/Input.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
@@ -27,6 +28,7 @@ export default function RecurringBillRow({
   onStartMarkPaid,
   onMarkUnpaid,
   onSkip,
+  onEdit,
 }) {
   const isPaid = row.instance?.status === "paid";
   const isSkipped = row.instance?.status === "skipped";
@@ -43,10 +45,18 @@ export default function RecurringBillRow({
     <tr className={row.displayStatus === "Past due" ? "bg-red-50/70" : "bg-white"}>
       <td className="px-5 py-4 align-middle font-semibold text-gray-950">
         <div className="grid gap-1">
-          <span>{row.template.name}</span>
+          <LinkedRecurringBillName
+            billName={row.template.name}
+            portalUrl={row.template.portalUrl}
+            onEdit={onEdit ? () => onEdit(row.template) : undefined}
+          />
           {isPaid ? (
             <span className="text-xs font-medium text-gray-500">
               Linked spending transaction is managed by this recurring bill.
+            </span>
+          ) : row.isUpcomingDueSoon ? (
+            <span className="text-xs font-medium text-blue-700">
+              Due {row.dueDate}. Can be paid early for the next due month.
             </span>
           ) : isAutopayReady ? (
             <span className="text-xs font-medium text-blue-700">
