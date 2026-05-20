@@ -5,12 +5,17 @@ import {
   runRefreshSequence,
 } from "../../app/refreshDataUtils.js";
 import {
+  deleteAccountMoneyMovementBySource,
+  replaceAccountMoneyMovementBySource,
+} from "../accounts/accountMoneyMovementsSupabaseService.js";
+import {
   addTransactionToSupabase,
   deleteTransactionFromSupabase,
   importLocalTransactions,
   listTransactions,
   updateTransactionInSupabase,
 } from "./spendingSupabaseService.js";
+import { buildSpendingOutflowMovementPayload } from "./spendingService.js";
 
 export function useSpendingTransactions({
   activeHouseholdId,
@@ -64,12 +69,25 @@ export function useSpendingTransactions({
       setSpendingError("");
 
       try {
-        await addTransactionToSupabase(
+        const transactionId = await addTransactionToSupabase(
           activeHouseholdId,
           input,
           supabaseCreditCards,
           spendingCategories,
         );
+        const movementPayload = buildSpendingOutflowMovementPayload(
+          { ...input, supabaseId: transactionId },
+          input.sourceAccountId,
+        );
+        if (movementPayload) {
+          await replaceAccountMoneyMovementBySource(activeHouseholdId, movementPayload);
+        } else {
+          await deleteAccountMoneyMovementBySource(
+            activeHouseholdId,
+            "spending_transaction",
+            transactionId,
+          );
+        }
         await runRefreshSequence(
           createSpendingDashboardInsightsRefreshers({
             loadSpendingTransactions,
@@ -106,6 +124,19 @@ export function useSpendingTransactions({
           supabaseCreditCards,
           spendingCategories,
         );
+        const movementPayload = buildSpendingOutflowMovementPayload(
+          { ...input, supabaseId: transactionId },
+          input.sourceAccountId,
+        );
+        if (movementPayload) {
+          await replaceAccountMoneyMovementBySource(activeHouseholdId, movementPayload);
+        } else {
+          await deleteAccountMoneyMovementBySource(
+            activeHouseholdId,
+            "spending_transaction",
+            transactionId,
+          );
+        }
         await runRefreshSequence(
           createSpendingDashboardInsightsRefreshers({
             loadSpendingTransactions,
@@ -121,6 +152,7 @@ export function useSpendingTransactions({
       }
     },
     [
+      activeHouseholdId,
       loadDashboardData,
       loadInsightsData,
       loadSpendingTransactions,
@@ -136,6 +168,11 @@ export function useSpendingTransactions({
 
       try {
         await deleteTransactionFromSupabase(transactionId);
+        await deleteAccountMoneyMovementBySource(
+          activeHouseholdId,
+          "spending_transaction",
+          transactionId,
+        );
         setSpendingTransactions((transactions) =>
           transactions.filter(
             (transaction) => (transaction.supabaseId ?? transaction.id) !== transactionId,
@@ -154,7 +191,7 @@ export function useSpendingTransactions({
         setSpendingSaving(false);
       }
     },
-    [loadDashboardData, loadInsightsData],
+    [activeHouseholdId, loadDashboardData, loadInsightsData],
   );
 
   const importSupabaseTransactions = useCallback(

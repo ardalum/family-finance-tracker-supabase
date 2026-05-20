@@ -18,6 +18,7 @@ test("createQuickAddDefaultForm sets fast-entry defaults", () => {
   assert.equal(result.paymentMethod, "Credit Card");
   assert.equal(result.categoryId, "cat-food");
   assert.equal(result.cardId, "card-1");
+  assert.equal(result.sourceAccountId, "outside_untracked");
   assert.match(result.date, /^\d{4}-\d{2}-\d{2}$/);
 });
 
@@ -27,6 +28,7 @@ test("buildRecentMerchantOptions deduplicates merchants and keeps newest order",
       merchant: "Coffee Shop",
       categoryId: "cat-1",
       paymentMethod: "Cash",
+      sourceAccountId: "account-checking",
       transactionType: "expense",
     },
     {
@@ -65,6 +67,7 @@ test("applyRecentMerchantPrefill fills merchant/category/payment fields", () => 
   assert.equal(result.categoryId, "cat-food");
   assert.equal(result.paymentMethod, "Checking Account");
   assert.equal(result.cardId, "");
+  assert.equal(result.sourceAccountId, "outside_untracked");
 });
 
 test("getQuickAddValidationError enforces required amount and card", () => {
@@ -106,6 +109,7 @@ test("getQuickAddValidationError enforces required category", () => {
       transactionType: "expense",
       paymentMethod: "Cash",
       cardId: "",
+      sourceAccountId: "outside_untracked",
       categoryId: "",
     },
     { cards: [{ id: "card-1" }] },
@@ -120,6 +124,7 @@ test("buildQuickAddPayload normalizes values for existing spending create path",
     merchant: "  Grocery  ",
     paymentMethod: "Credit Card",
     cardId: "card-1",
+    sourceAccountId: "outside_untracked",
     transactionType: "expense",
     categoryId: "cat-1",
     amount: "42.85",
@@ -131,6 +136,7 @@ test("buildQuickAddPayload normalizes values for existing spending create path",
     merchant: "Grocery",
     paymentMethod: "Credit Card",
     cardId: "card-1",
+    sourceAccountId: "",
     transactionType: "expense",
     categoryId: "cat-1",
     amount: 42.85,
@@ -141,4 +147,20 @@ test("buildQuickAddPayload normalizes values for existing spending create path",
     recurringPaymentId: null,
     recurringMonth: null,
   });
+});
+
+test("buildQuickAddPayload keeps source account for non-card spending", () => {
+  const payload = buildQuickAddPayload({
+    date: "2026-05-18",
+    merchant: "ATM",
+    paymentMethod: "Cash",
+    cardId: "",
+    sourceAccountId: "cash-wallet",
+    transactionType: "expense",
+    categoryId: "cat-1",
+    amount: "20",
+    notes: "",
+  });
+
+  assert.equal(payload.sourceAccountId, "cash-wallet");
 });

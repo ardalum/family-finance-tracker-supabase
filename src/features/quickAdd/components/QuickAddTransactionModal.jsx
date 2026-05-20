@@ -3,7 +3,9 @@ import { X } from "lucide-react";
 import Button from "../../../components/ui/Button.jsx";
 import Input from "../../../components/ui/Input.jsx";
 import Select from "../../../components/ui/Select.jsx";
+import { buildCashAccountOptions } from "../../accounts/accountsService.js";
 import { TRANSACTION_TYPE_OPTIONS, UNCATEGORIZED_ID } from "../../spending/spendingService.js";
+import { LIQUID_ACCOUNT_TYPES, SPENDING_OUTSIDE_ACCOUNT } from "../../spending/spendingService.js";
 import {
   applyRecentMerchantPrefill,
   buildQuickAddPayload,
@@ -15,6 +17,7 @@ import {
 export default function QuickAddTransactionModal({
   open,
   cards,
+  cashAccounts = [],
   categories,
   transactions,
   isSaving = false,
@@ -32,6 +35,13 @@ export default function QuickAddTransactionModal({
   const categoryOptions = useMemo(
     () => [{ id: UNCATEGORIZED_ID, name: "Uncategorized" }, ...categories],
     [categories],
+  );
+  const sourceAccountOptions = useMemo(
+    () =>
+      buildCashAccountOptions(
+        cashAccounts.filter((account) => LIQUID_ACCOUNT_TYPES.has(account.accountType)),
+      ),
+    [cashAccounts],
   );
 
   useEffect(() => {
@@ -68,7 +78,11 @@ export default function QuickAddTransactionModal({
     setForm((current) => ({
       ...current,
       [field]: value,
-      ...(field === "paymentMethod" && value !== "Credit Card" ? { cardId: "" } : {}),
+      ...(field === "paymentMethod"
+        ? value === "Credit Card"
+          ? { cardId: "", sourceAccountId: "" }
+          : { cardId: "", sourceAccountId: current.sourceAccountId || SPENDING_OUTSIDE_ACCOUNT }
+        : {}),
     }));
   }
 
@@ -251,7 +265,18 @@ export default function QuickAddTransactionModal({
                 ))}
               </Select>
             ) : (
-              <div className="hidden sm:block" aria-hidden="true" />
+              <Select
+                label="Paid from account"
+                value={form.sourceAccountId}
+                onChange={(event) => updateField("sourceAccountId", event.target.value)}
+              >
+                <option value={SPENDING_OUTSIDE_ACCOUNT}>Outside / untracked</option>
+                {sourceAccountOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </Select>
             )}
           </div>
 

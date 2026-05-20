@@ -202,6 +202,7 @@ export function createAppViewProps({
     },
     spendingProps: {
       creditCards: supabaseCreditCards,
+      cashAccounts,
       categories: spendingCategories,
       transactions: spendingTransactions,
       localTransactions: appData?.transactions,

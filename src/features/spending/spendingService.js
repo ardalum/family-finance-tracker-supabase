@@ -2,6 +2,8 @@ import { updateAppData } from "../../lib/storage/appStorage.js";
 
 export const UNCATEGORIZED_ID = "uncategorized";
 export const UNCATEGORIZED_NAME = "Uncategorized";
+export const SPENDING_OUTSIDE_ACCOUNT = "outside_untracked";
+export const LIQUID_ACCOUNT_TYPES = new Set(["checking", "savings", "cash", "money_market"]);
 
 export const TRANSACTION_TYPES = [
   "expense",
@@ -61,6 +63,7 @@ function normalizeTransaction(input) {
     categoryId: input.categoryId || UNCATEGORIZED_ID,
     splitMode: Boolean(input.splitMode),
     source: input.source || "manual",
+    sourceAccountId: input.sourceAccountId || "",
     recurringPaymentId: input.recurringPaymentId || null,
     recurringMonth: input.recurringMonth || null,
     splits: input.splitMode
@@ -70,6 +73,40 @@ function normalizeTransaction(input) {
           amount: Number(split.amount) || 0,
         }))
       : [],
+  };
+}
+
+function normalizeSourceAccountId(value) {
+  return String(value ?? "").trim();
+}
+
+export function getSpendingTransactionSourceId(transaction = {}) {
+  return transaction.supabaseId ?? transaction.id ?? null;
+}
+
+export function buildSpendingOutflowMovementPayload(transaction = {}, sourceAccountId = "") {
+  const paymentMethod = String(transaction.paymentMethod ?? "").trim();
+  const normalizedSourceAccountId = normalizeSourceAccountId(sourceAccountId);
+  const sourceId = getSpendingTransactionSourceId(transaction);
+  if (!sourceId) return null;
+
+  if (paymentMethod === "Credit Card" || !normalizedSourceAccountId) return null;
+
+  const isOutside = normalizedSourceAccountId === SPENDING_OUTSIDE_ACCOUNT;
+  const movementDate = String(transaction.date ?? "").trim();
+  const monthKey = /^\d{4}-\d{2}/.test(movementDate) ? movementDate.slice(0, 7) : "";
+
+  return {
+    accountId: isOutside ? null : normalizedSourceAccountId,
+    sourceType: "spending_transaction",
+    sourceId,
+    movementType: "spending_payment",
+    direction: "outflow",
+    amount: Number(transaction.amount) || 0,
+    movementDate,
+    monthKey,
+    description: `Spending: ${String(transaction.merchant ?? "").trim() || "Transaction"}`,
+    isTracked: !isOutside,
   };
 }
 

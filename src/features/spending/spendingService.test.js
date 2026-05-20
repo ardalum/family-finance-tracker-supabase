@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  buildSpendingOutflowMovementPayload,
   getSplitTotal,
   getTotalSpending,
   getTransactionCategoryRows,
   getTransactionImpactAmount,
   getTransactionTypeLabel,
+  SPENDING_OUTSIDE_ACCOUNT,
   summarizeByCard,
   summarizeByCategory,
   summarizeByMerchant,
@@ -188,5 +190,61 @@ describe("spending service", () => {
         }),
       /must equal the transaction amount/i,
     );
+  });
+
+  it("builds tracked spending outflow movement for non-card spending", () => {
+    const movement = buildSpendingOutflowMovementPayload(
+      {
+        supabaseId: "txn-1",
+        paymentMethod: "Checking Account",
+        amount: 80.5,
+        date: "2026-05-19",
+        merchant: "Grocery",
+      },
+      "checking-1",
+    );
+
+    assert.deepEqual(movement, {
+      accountId: "checking-1",
+      sourceType: "spending_transaction",
+      sourceId: "txn-1",
+      movementType: "spending_payment",
+      direction: "outflow",
+      amount: 80.5,
+      movementDate: "2026-05-19",
+      monthKey: "2026-05",
+      description: "Spending: Grocery",
+      isTracked: true,
+    });
+  });
+
+  it("builds outside/untracked movement when selected", () => {
+    const movement = buildSpendingOutflowMovementPayload(
+      {
+        id: "txn-2",
+        paymentMethod: "Cash",
+        amount: 25,
+        date: "2026-05-19",
+        merchant: "Snacks",
+      },
+      SPENDING_OUTSIDE_ACCOUNT,
+    );
+
+    assert.equal(movement.accountId, null);
+    assert.equal(movement.isTracked, false);
+  });
+
+  it("returns null for credit card spending movement", () => {
+    const movement = buildSpendingOutflowMovementPayload(
+      {
+        id: "txn-3",
+        paymentMethod: "Credit Card",
+        amount: 100,
+        date: "2026-05-19",
+      },
+      "checking-1",
+    );
+
+    assert.equal(movement, null);
   });
 });
