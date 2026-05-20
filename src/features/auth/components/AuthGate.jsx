@@ -4,8 +4,9 @@ import AuthForm from "./AuthForm.jsx";
 import PasswordResetForm from "./PasswordResetForm.jsx";
 
 export default function AuthGate({ children }) {
-  const { session, loading, error } = useAuth();
-  const shouldShowPasswordResetForm = Boolean(session) && hasPasswordResetCallback();
+  const { session, loading, error, isPasswordRecovery } = useAuth();
+  const shouldShowPasswordResetForm =
+    isPasswordRecovery || (Boolean(session) && hasPasswordResetCallback());
 
   if (loading) {
     return (
@@ -15,7 +16,7 @@ export default function AuthGate({ children }) {
     );
   }
 
-  if (!session) {
+  if (!session || shouldShowPasswordResetForm) {
     return (
       <>
         {error ? (
@@ -23,13 +24,9 @@ export default function AuthGate({ children }) {
             {error}
           </div>
         ) : null}
-        <AuthForm />
+        {shouldShowPasswordResetForm ? <PasswordResetForm /> : <AuthForm />}
       </>
     );
-  }
-
-  if (shouldShowPasswordResetForm) {
-    return <PasswordResetForm />;
   }
 
   return children;

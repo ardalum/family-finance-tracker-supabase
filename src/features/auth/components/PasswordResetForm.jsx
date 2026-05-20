@@ -14,8 +14,11 @@ import {
 import { AUTH_RECOVERY_FORM_FEEDBACK_IDS } from "../authRecoveryIds.js";
 import { submitRecoveryForm } from "../authRecoverySubmit.js";
 import { getRecoveryFormValidationError } from "../authRecoveryValidation.js";
+import { signOut } from "../authService.js";
+import { useAuth } from "../AuthProvider.jsx";
 
 export default function PasswordResetForm() {
+  const { finishPasswordRecoveryMode } = useAuth();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -65,11 +68,26 @@ export default function PasswordResetForm() {
     setIsSubmitting(true);
 
     try {
-      const result = await submitRecoveryForm({ password });
+      await submitRecoveryForm({ password });
+      await signOut();
+      finishPasswordRecoveryMode("Password updated. Please sign in with your new password.");
       clearValues();
-      setStatus(result.status);
     } catch (currentError) {
       setError(getFriendlyAuthError(currentError, AUTH_RECOVERY_FORM_ERROR_COPY.submitFailed));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleCancel() {
+    resetFeedback();
+    setIsSubmitting(true);
+    try {
+      await signOut();
+      finishPasswordRecoveryMode("");
+      clearValues();
+    } catch (currentError) {
+      setError(getFriendlyAuthError(currentError, "Could not return to sign in."));
     } finally {
       setIsSubmitting(false);
     }
@@ -189,6 +207,9 @@ export default function PasswordResetForm() {
               {isSubmitting
                 ? AUTH_RECOVERY_FORM_STATUS_COPY.submitting
                 : AUTH_RECOVERY_FORM_COPY.submitLabel}
+            </Button>
+            <Button type="button" variant="ghost" onClick={handleCancel} disabled={isSubmitting}>
+              Back to sign in
             </Button>
           </form>
         </Card>

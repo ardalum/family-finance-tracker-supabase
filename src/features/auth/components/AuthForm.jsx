@@ -1,5 +1,5 @@
 import { Eye, EyeOff, WalletCards } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import Input from "../../../components/ui/Input.jsx";
@@ -20,8 +20,10 @@ import {
   getAuthFormValidationError,
 } from "../authFormValidation.js";
 import { requestPasswordReset, signInWithEmail, signUpWithEmail } from "../authService.js";
+import { useAuth } from "../AuthProvider.jsx";
 
 export default function AuthForm() {
+  const { consumePostAuthMessage, startPasswordRecoveryMode } = useAuth();
   const [mode, setMode] = useState(AUTH_FORM_MODES.signIn);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,6 +45,12 @@ export default function AuthForm() {
   const passwordToggleLabel = showPassword ? "Hide password" : "Show password";
   const hasAuthFormError = Boolean(error);
   const isFormBusy = isSubmitting || isSendingResetLink;
+
+  useEffect(() => {
+    const postAuthStatus = consumePostAuthMessage?.();
+    if (!postAuthStatus) return;
+    setStatus(postAuthStatus);
+  }, [consumePostAuthMessage]);
 
   function resetAuthFormFeedback() {
     setError("");
@@ -75,6 +83,7 @@ export default function AuthForm() {
   }
 
   function handleForgotPasswordView() {
+    startPasswordRecoveryMode?.();
     setMode(AUTH_FORM_MODES.resetRequest);
     setPassword("");
     setShowPassword(false);
