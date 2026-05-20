@@ -1,5 +1,12 @@
+import { CARD_PAYMENT_OUTSIDE_ACCOUNT } from "./statementPaymentUtils.js";
+
 export function normalizeCardFormInput(input) {
   const autopayEnabled = Boolean(input.autopayEnabled);
+  const rawAutopayAccountId = autopayEnabled
+    ? String(input.autopayPaymentAccountId || "").trim()
+    : "";
+  const autopayPaymentAccountId =
+    rawAutopayAccountId === CARD_PAYMENT_OUTSIDE_ACCOUNT ? "" : rawAutopayAccountId;
   return {
     name: input.name.trim(),
     url: input.url.trim(),
@@ -12,9 +19,7 @@ export function normalizeCardFormInput(input) {
     dueDay: Number(input.dueDay) || 1,
     isActive: input.isActive ?? true,
     autopayEnabled,
-    autopayPaymentAccountId: autopayEnabled
-      ? String(input.autopayPaymentAccountId || "").trim()
-      : "",
+    autopayPaymentAccountId,
   };
 }
 

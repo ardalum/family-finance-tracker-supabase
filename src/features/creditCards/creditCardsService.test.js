@@ -233,7 +233,7 @@ describe("credit card service", () => {
       due_day: 22,
       is_active: false,
       autopay_enabled: true,
-      autopay_payment_account_id: "outside_untracked",
+      autopay_payment_account_id: null,
     });
   });
 });

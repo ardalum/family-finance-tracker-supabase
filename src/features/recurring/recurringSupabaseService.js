@@ -1,5 +1,6 @@
 import { supabase } from "../../lib/supabase/client.js";
 import { getDueDateForMonth } from "../../lib/dates.js";
+import { CARD_PAYMENT_OUTSIDE_ACCOUNT } from "../creditCards/statementPaymentUtils.js";
 import { UNCATEGORIZED_ID } from "../spending/spendingService.js";
 import { isRecurringCashBankPaymentMethod } from "./recurringService.js";
 
@@ -38,7 +39,12 @@ function toAppTemplate(row, cardsBySupabaseId, categoriesBySupabaseId) {
     paymentMethod: row.payment_method,
     cardId: card?.id ?? "",
     autopayEnabled: Boolean(row.autopay_enabled),
-    autopayPaymentAccountId: row.autopay_payment_account_id ?? "",
+    autopayPaymentAccountId:
+      Boolean(row.autopay_enabled) &&
+      isRecurringCashBankPaymentMethod(row.payment_method) &&
+      !row.autopay_payment_account_id
+        ? CARD_PAYMENT_OUTSIDE_ACCOUNT
+        : (row.autopay_payment_account_id ?? ""),
     startMonth: row.start_month,
     endMonth: row.end_month,
     active: Boolean(row.active),
@@ -59,9 +65,11 @@ function normalizeTemplateInput(input, cardsByAppId, categoriesByAppId) {
   const autopayEnabled = Boolean(input.autopayEnabled);
   const shouldStoreAutopayAccount =
     autopayEnabled && isRecurringCashBankPaymentMethod(paymentMethod);
-  const autopayPaymentAccountId = shouldStoreAutopayAccount
+  const rawAutopayPaymentAccountId = shouldStoreAutopayAccount
     ? String(input.autopayPaymentAccountId || "").trim()
     : "";
+  const autopayPaymentAccountId =
+    rawAutopayPaymentAccountId === CARD_PAYMENT_OUTSIDE_ACCOUNT ? "" : rawAutopayPaymentAccountId;
 
   return {
     name: input.name.trim(),
