@@ -16,6 +16,7 @@ import {
   TRANSACTION_TYPE_OPTIONS,
   UNCATEGORIZED_ID,
 } from "../spendingService.js";
+import { applyMerchantSuggestionPrefill, getMerchantSuggestions } from "../merchantSuggestions.js";
 
 function todayDate() {
   return new Date().toISOString().slice(0, 10);
@@ -82,6 +83,7 @@ export default function TransactionForm({
   cashAccounts = [],
   categories,
   transactions = [],
+  merchantTransactions = [],
   editingTransaction,
   onCancel,
   onSaved,
@@ -117,6 +119,14 @@ export default function TransactionForm({
   );
   const selectedCategoryUsage = categoryUsageById.get(form.categoryId) ?? null;
   const selectedCategoryTone = getCategoryBudgetUsageTone(selectedCategoryUsage);
+  const merchantSuggestions = useMemo(
+    () => getMerchantSuggestions(merchantTransactions, form.merchant, 8),
+    [form.merchant, merchantTransactions],
+  );
+  const merchantSuggestionByName = useMemo(
+    () => new Map(merchantSuggestions.map((option) => [option.merchant, option])),
+    [merchantSuggestions],
+  );
   const isEditingRecurring = editingTransaction?.source === "recurring";
 
   useEffect(() => {
@@ -154,6 +164,17 @@ export default function TransactionForm({
           : { cardId: "", sourceAccountId: current.sourceAccountId || SPENDING_OUTSIDE_ACCOUNT }
         : {}),
     }));
+  }
+
+  function applyMerchantSuggestionByName(merchantName) {
+    const suggestion = merchantSuggestionByName.get(String(merchantName ?? "").trim());
+    if (!suggestion) return;
+    setForm((current) =>
+      applyMerchantSuggestionPrefill(current, suggestion, {
+        categoryIds: categoryOptions.map((category) => category.id),
+        cardIds: cards.map((card) => card.id),
+      }),
+    );
   }
 
   function updateSplit(splitId, field, value) {
@@ -289,10 +310,23 @@ export default function TransactionForm({
           <Input
             label="Store or merchant"
             value={form.merchant}
-            onChange={(event) => updateField("merchant", event.target.value)}
+            onChange={(event) => {
+              const value = event.target.value;
+              updateField("merchant", value);
+              applyMerchantSuggestionByName(value);
+            }}
+            onBlur={(event) => applyMerchantSuggestionByName(event.target.value)}
+            list="transaction-merchant-suggestions"
             placeholder="Example: Walmart, Duke Energy, Chase payment"
             required
           />
+          {merchantSuggestions.length > 0 ? (
+            <datalist id="transaction-merchant-suggestions">
+              {merchantSuggestions.map((suggestion) => (
+                <option key={suggestion.merchantKey} value={suggestion.merchant} />
+              ))}
+            </datalist>
+          ) : null}
         </div>
         <Select
           label="Payment method"

@@ -12,6 +12,7 @@ import {
   addTransactionToSupabase,
   deleteTransactionFromSupabase,
   importLocalTransactions,
+  listHouseholdMerchantTransactions,
   listTransactions,
   updateTransactionInSupabase,
 } from "./spendingSupabaseService.js";
@@ -26,6 +27,7 @@ export function useSpendingTransactions({
   loadInsightsData,
 }) {
   const [spendingTransactions, setSpendingTransactions] = useState([]);
+  const [householdMerchantTransactions, setHouseholdMerchantTransactions] = useState([]);
   const [selectedSpendingMonth, setSelectedSpendingMonth] = useState(initialSelectedMonth);
   const [spendingLoading, setSpendingLoading] = useState(true);
   const [spendingSaving, setSpendingSaving] = useState(false);
@@ -59,9 +61,33 @@ export function useSpendingTransactions({
     }
   }, [activeHouseholdId, selectedSpendingMonth, spendingCategories, supabaseCreditCards]);
 
+  const loadHouseholdMerchantTransactions = useCallback(async () => {
+    if (!activeHouseholdId) {
+      setHouseholdMerchantTransactions([]);
+      return [];
+    }
+
+    try {
+      const transactions = await listHouseholdMerchantTransactions(
+        activeHouseholdId,
+        supabaseCreditCards,
+        spendingCategories,
+      );
+      setHouseholdMerchantTransactions(transactions);
+      return transactions;
+    } catch {
+      setHouseholdMerchantTransactions([]);
+      return [];
+    }
+  }, [activeHouseholdId, spendingCategories, supabaseCreditCards]);
+
   useEffect(() => {
     loadSpendingTransactions();
   }, [loadSpendingTransactions]);
+
+  useEffect(() => {
+    loadHouseholdMerchantTransactions();
+  }, [loadHouseholdMerchantTransactions]);
 
   const createSupabaseTransaction = useCallback(
     async (input) => {
@@ -95,6 +121,7 @@ export function useSpendingTransactions({
             loadInsightsData,
           }),
         );
+        await loadHouseholdMerchantTransactions();
       } catch (error) {
         setSpendingError(error.message || "Could not add transaction.");
         throw error;
@@ -105,6 +132,7 @@ export function useSpendingTransactions({
     [
       activeHouseholdId,
       loadDashboardData,
+      loadHouseholdMerchantTransactions,
       loadInsightsData,
       loadSpendingTransactions,
       spendingCategories,
@@ -144,6 +172,7 @@ export function useSpendingTransactions({
             loadInsightsData,
           }),
         );
+        await loadHouseholdMerchantTransactions();
       } catch (error) {
         setSpendingError(error.message || "Could not update transaction.");
         throw error;
@@ -154,6 +183,7 @@ export function useSpendingTransactions({
     [
       activeHouseholdId,
       loadDashboardData,
+      loadHouseholdMerchantTransactions,
       loadInsightsData,
       loadSpendingTransactions,
       spendingCategories,
@@ -174,6 +204,11 @@ export function useSpendingTransactions({
           transactionId,
         );
         setSpendingTransactions((transactions) =>
+          transactions.filter(
+            (transaction) => (transaction.supabaseId ?? transaction.id) !== transactionId,
+          ),
+        );
+        setHouseholdMerchantTransactions((transactions) =>
           transactions.filter(
             (transaction) => (transaction.supabaseId ?? transaction.id) !== transactionId,
           ),
@@ -207,6 +242,7 @@ export function useSpendingTransactions({
           spendingCategories,
         );
         await runRefreshSequence([loadSpendingTransactions, loadDashboardData]);
+        await loadHouseholdMerchantTransactions();
         return importedIds;
       } catch (error) {
         setSpendingError(error.message || "Could not import local spending transactions.");
@@ -218,6 +254,7 @@ export function useSpendingTransactions({
     [
       activeHouseholdId,
       loadDashboardData,
+      loadHouseholdMerchantTransactions,
       loadSpendingTransactions,
       spendingCategories,
       supabaseCreditCards,
@@ -226,12 +263,14 @@ export function useSpendingTransactions({
 
   return {
     spendingTransactions,
+    householdMerchantTransactions,
     selectedSpendingMonth,
     setSelectedSpendingMonth,
     spendingLoading,
     spendingSaving,
     spendingError,
     loadSpendingTransactions,
+    loadHouseholdMerchantTransactions,
     createSupabaseTransaction,
     updateSupabaseTransaction,
     deleteSupabaseTransaction,

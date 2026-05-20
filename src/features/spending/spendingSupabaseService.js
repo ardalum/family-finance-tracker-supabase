@@ -140,6 +140,50 @@ export async function listTransactions(householdId, monthKey, cards, categories)
   );
 }
 
+export async function listHouseholdMerchantTransactions(
+  householdId,
+  cards,
+  categories,
+  limit = 1000,
+) {
+  if (!householdId) return [];
+
+  const client = requireSupabase();
+  const { data, error } = await client
+    .from("transactions")
+    .select(
+      "id, imported_local_id, transaction_date, merchant, payment_method, credit_card_id, category_id, transaction_type, source, recurring_payment_id, recurring_month, created_at, updated_at",
+    )
+    .eq("household_id", householdId)
+    .order("transaction_date", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+
+  const cardsBySupabaseId = buildLookup(cards);
+  const categoriesBySupabaseId = buildLookup(categories);
+
+  return (data ?? []).map((row) => ({
+    id: row.imported_local_id ?? row.id,
+    supabaseId: row.id,
+    date: row.transaction_date,
+    merchant: row.merchant,
+    paymentMethod: row.payment_method,
+    cardId: row.credit_card_id ? (cardsBySupabaseId.get(row.credit_card_id)?.id ?? "") : "",
+    categoryId: row.category_id
+      ? (categoriesBySupabaseId.get(row.category_id)?.id ?? row.category_id)
+      : UNCATEGORIZED_ID,
+    transactionType: normalizeTransactionType(row.transaction_type),
+    source: row.source ?? "manual",
+    sourceAccountId: "",
+    recurringPaymentId: row.recurring_payment_id,
+    recurringMonth: row.recurring_month,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }));
+}
+
 export async function addTransactionToSupabase(householdId, input, cards, categories) {
   validateSplitReplacementInput(input);
   const client = requireSupabase();

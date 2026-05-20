@@ -1,4 +1,5 @@
 import { SPENDING_OUTSIDE_ACCOUNT, UNCATEGORIZED_ID } from "../spending/spendingService.js";
+import { applyMerchantSuggestionPrefill } from "../spending/merchantSuggestions.js";
 
 export const QUICK_ADD_DEFAULT_FORM = {
   amount: "",
@@ -54,21 +55,9 @@ export function buildRecentMerchantOptions(transactions = [], limit = 5) {
   return options;
 }
 
-export function applyRecentMerchantPrefill(form, option) {
+export function applyRecentMerchantPrefill(form, option, options = {}) {
   if (!option) return form;
-
-  return {
-    ...form,
-    merchant: option.merchant,
-    categoryId: option.categoryId || form.categoryId,
-    paymentMethod: option.paymentMethod || form.paymentMethod,
-    cardId: option.paymentMethod === "Credit Card" ? option.cardId || form.cardId : "",
-    sourceAccountId:
-      option.paymentMethod === "Credit Card"
-        ? ""
-        : option.sourceAccountId || form.sourceAccountId || SPENDING_OUTSIDE_ACCOUNT,
-    transactionType: option.transactionType || form.transactionType,
-  };
+  return applyMerchantSuggestionPrefill(form, option, options);
 }
 
 export function getQuickAddValidationError(form, { cards = [] } = {}) {

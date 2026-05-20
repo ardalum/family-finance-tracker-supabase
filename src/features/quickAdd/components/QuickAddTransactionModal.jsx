@@ -18,6 +18,7 @@ import {
   createQuickAddDefaultForm,
   getQuickAddValidationError,
 } from "../quickAddTransaction.js";
+import { getMerchantSuggestions } from "../../spending/merchantSuggestions.js";
 
 export default function QuickAddTransactionModal({
   open,
@@ -25,6 +26,7 @@ export default function QuickAddTransactionModal({
   cashAccounts = [],
   categories,
   transactions,
+  merchantTransactions = [],
   isSaving = false,
   onClose,
   onCreateTransaction,
@@ -33,9 +35,19 @@ export default function QuickAddTransactionModal({
   const [form, setForm] = useState(createQuickAddDefaultForm({ categories, cards }));
   const [error, setError] = useState("");
   const [showNotes, setShowNotes] = useState(false);
+  const categoryIds = useMemo(() => categories.map((category) => category.id), [categories]);
+  const cardIds = useMemo(() => cards.map((card) => card.id), [cards]);
   const recentMerchants = useMemo(
-    () => buildRecentMerchantOptions(transactions, 5),
-    [transactions],
+    () => buildRecentMerchantOptions(merchantTransactions, 5),
+    [merchantTransactions],
+  );
+  const merchantSuggestions = useMemo(
+    () => getMerchantSuggestions(merchantTransactions, form.merchant, 8),
+    [form.merchant, merchantTransactions],
+  );
+  const merchantSuggestionByName = useMemo(
+    () => new Map(merchantSuggestions.map((option) => [option.merchant, option])),
+    [merchantSuggestions],
   );
   const categoryOptions = useMemo(
     () => [{ id: UNCATEGORIZED_ID, name: "Uncategorized" }, ...categories],
@@ -99,7 +111,18 @@ export default function QuickAddTransactionModal({
 
   function applyRecent(option) {
     setError("");
-    setForm((current) => applyRecentMerchantPrefill(current, option));
+    setForm((current) =>
+      applyRecentMerchantPrefill(current, option, {
+        categoryIds,
+        cardIds,
+      }),
+    );
+  }
+
+  function applyMerchantSuggestionByName(merchantName) {
+    const suggestion = merchantSuggestionByName.get(String(merchantName ?? "").trim());
+    if (!suggestion) return;
+    applyRecent(suggestion);
   }
 
   async function handleSubmit(event) {
@@ -218,10 +241,23 @@ export default function QuickAddTransactionModal({
               <Input
                 label="Merchant or description"
                 value={form.merchant}
-                onChange={(event) => updateField("merchant", event.target.value)}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  updateField("merchant", value);
+                  applyMerchantSuggestionByName(value);
+                }}
+                onBlur={(event) => applyMerchantSuggestionByName(event.target.value)}
+                list="quick-add-merchant-suggestions"
                 placeholder="Example: Grocery store"
                 required
               />
+              {merchantSuggestions.length > 0 ? (
+                <datalist id="quick-add-merchant-suggestions">
+                  {merchantSuggestions.map((suggestion) => (
+                    <option key={suggestion.merchantKey} value={suggestion.merchant} />
+                  ))}
+                </datalist>
+              ) : null}
             </div>
 
             <Select

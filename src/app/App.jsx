@@ -213,6 +213,7 @@ function FinanceTrackerApp() {
 
   const {
     spendingTransactions,
+    householdMerchantTransactions,
     selectedSpendingMonth,
     setSelectedSpendingMonth,
     spendingLoading,
@@ -636,6 +637,7 @@ function FinanceTrackerApp() {
     budgetsSaving,
     spendingCategories,
     spendingTransactions,
+    householdMerchantTransactions,
     selectedSpendingMonth,
     spendingLoading,
     spendingError,
@@ -821,6 +823,7 @@ function FinanceTrackerApp() {
         cashAccounts={cashAccounts}
         categories={spendingCategories}
         transactions={spendingTransactions}
+        merchantTransactions={householdMerchantTransactions}
         isSaving={spendingSaving}
         onClose={closeQuickAdd}
         onCreateTransaction={createSupabaseTransaction}
