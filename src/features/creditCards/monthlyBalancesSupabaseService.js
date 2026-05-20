@@ -266,14 +266,6 @@ export async function upsertMonthlyBalance(householdId, monthKey, card, patch) {
 
   await upsertCardStatement(client, householdId, monthKey, card, normalizedPatch);
 
-  console.log("CARD PAYMENT SAVE PAYLOAD", {
-    householdId,
-    monthKey,
-    creditCardId,
-    card,
-    normalizedPatch,
-  });
-
   await persistCardPaymentMovement({
     householdId,
     monthKey,
