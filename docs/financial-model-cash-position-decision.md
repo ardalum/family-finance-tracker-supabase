@@ -1,24 +1,26 @@
 # Financial model decision: Cash Position
 
-Fixes #378. This document defines how Spedger treats Cash Position, income, recurring bills, credit card payments, and net worth until the future money movement ledger in #379 is built.
+Fixes #378. Updated for #398 and the merged money movement model (#390, #391, #392, #393, #394). This document defines how Spedger treats Cash Position, income, recurring bills, credit card payments, and net worth.
 
 ## 1. Decision summary
 
-Cash Position is based on account snapshots.
+Cash Position is based on tracked account register balances.
 
-Spedger uses the latest checking, savings, cash, and money market snapshots for the selected month as the source of truth for actual cash balances. Income entries, paid recurring bills, and paid credit card payments explain activity and obligations, but they do not silently change account snapshots.
+Spedger uses the latest tracked cash/bank account snapshots for the selected month as the starting point, then applies linked tracked money movements for that month to reflect account-register activity.
 
 Current rules:
 
-- Income entries do not automatically increase Cash Position.
-- Paid recurring bills do not automatically reduce Cash Position.
-- Paid credit card payments do not automatically reduce Cash Position.
-- Account snapshots remain the source of truth.
-- Explicit linked money movement belongs in #379.
+- Tracked income deposits increase Cash Position.
+- Tracked spending payments decrease Cash Position.
+- Tracked recurring bill payments decrease Cash Position.
+- Tracked credit card payments decrease Cash Position.
+- Outside/untracked payment methods do not change Cash Position.
+- Credit card purchases do not reduce Cash Position until a tracked card payment is recorded.
+- Account snapshots remain the starting balance and are not directly mutated by these flows.
 
 ## 2. Cash Position definition
 
-Cash Position means the actual liquid balance Spedger can support from tracked account snapshots for the selected month.
+Cash Position means the total tracked bank/cash account balance for the selected month.
 
 Included account types:
 
@@ -26,8 +28,9 @@ Included account types:
 - Savings
 - Cash
 - Money market
+- Other tracked cash/bank accounts
 
-Cash Position uses the latest snapshot per included account for the selected month. It is not calculated by adding income and subtracting paid bills unless a future linked-account movement system records those events.
+Cash Position uses the latest snapshot per included account for the selected month, plus tracked account money movements for that month.
 
 ## 3. Income behavior
 

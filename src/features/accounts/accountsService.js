@@ -103,7 +103,14 @@ export function calculateAccountBalanceTotal(accounts = [], snapshots = [], mont
 }
 
 export function summarizeLiquidCashForMonth(accounts = [], snapshots = [], monthKey) {
-  const liquidAccountTypes = new Set(["checking", "savings", "cash", "money_market"]);
+  const liquidAccountTypes = new Set([
+    "checking",
+    "savings",
+    "cash",
+    "money_market",
+    "emergency_fund",
+    "other",
+  ]);
   const liquidAccounts = accounts.filter((account) => liquidAccountTypes.has(account.accountType));
   return calculateAccountBalanceTotal(liquidAccounts, snapshots, monthKey);
 }

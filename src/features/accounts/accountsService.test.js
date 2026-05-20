@@ -58,7 +58,7 @@ test("getLatestSnapshotByAccount returns latest snapshot per account", () => {
   assert.equal(latest.get("acc-2")?.balanceAmount, 20);
 });
 
-test("summarizeLiquidCashForMonth sums only liquid account types", () => {
+test("summarizeLiquidCashForMonth sums liquid account types including other cash/bank accounts", () => {
   const accounts = [
     { id: "a", accountType: "checking" },
     { id: "b", accountType: "savings" },
@@ -70,7 +70,7 @@ test("summarizeLiquidCashForMonth sums only liquid account types", () => {
     { cashAccountId: "c", monthKey: "2026-05", snapshotDate: "2026-05-10", balanceAmount: 999 },
   ];
 
-  assert.equal(summarizeLiquidCashForMonth(accounts, snapshots, "2026-05"), 300);
+  assert.equal(summarizeLiquidCashForMonth(accounts, snapshots, "2026-05"), 1299);
 });
 
 test("getActiveCashAccounts excludes inactive accounts", () => {
