@@ -1,6 +1,9 @@
+import { formatLinkedCardLabel } from "../../features/creditCards/cardDisplayUtils.js";
+
 export default function LinkedCardName({ card, className = "" }) {
   const safeUrl = getSafeExternalUrl(card.url);
   const faviconUrl = getFaviconUrl(safeUrl);
+  const label = formatLinkedCardLabel(card);
   const content = (
     <>
       {faviconUrl ? (
@@ -15,7 +18,7 @@ export default function LinkedCardName({ card, className = "" }) {
           }}
         />
       ) : null}
-      <span className="min-w-0 truncate">{card.name}</span>
+      <span className="min-w-0 truncate">{label}</span>
     </>
   );
 

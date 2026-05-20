@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import Card from "../../../components/ui/Card.jsx";
 import { buildCashAccountOptions } from "../../accounts/accountsService.js";
 import { CARD_PAYMENT_OUTSIDE_ACCOUNT } from "../../creditCards/statementPaymentUtils.js";
+import { formatLinkedCardLabel } from "../../creditCards/cardDisplayUtils.js";
 import { LIQUID_ACCOUNT_TYPES } from "../../spending/spendingService.js";
 import {
   buildRecurringPaidDraft,
@@ -105,9 +106,7 @@ export default function RecurringGenerationPanel({
     const options = [...cashAccountOptions];
     if (row?.template?.paymentMethod === "Credit Card") {
       const card = creditCards.find((current) => current.id === row.template.cardId);
-      const label = card
-        ? `Credit card: ${card.name}${card.lastFour ? ` **** ${card.lastFour}` : ""}`
-        : "Credit card";
+      const label = card ? `Credit card: ${formatLinkedCardLabel(card)}` : "Credit card";
       options.push({ value: RECURRING_PAID_FROM_CREDIT_CARD, label });
     }
     options.push({ value: CARD_PAYMENT_OUTSIDE_ACCOUNT, label: "Outside / untracked account" });

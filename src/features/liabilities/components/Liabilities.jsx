@@ -8,6 +8,7 @@ import Select from "../../../components/ui/Select.jsx";
 import { buildMonthOptions, formatDateKey, getCurrentMonthKey } from "../../../lib/dates.js";
 import { formatLiabilityTypeLabel } from "../../../lib/displayLabels.js";
 import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
+import { formatLinkedCardLabel } from "../../creditCards/cardDisplayUtils.js";
 import { AUTO_SYNC_SNAPSHOT_NOTE } from "../creditCardDebtAutoSync.js";
 import {
   buildLiabilityAccountOptions,
@@ -97,8 +98,18 @@ export default function Liabilities({
     () =>
       (creditCards || []).map((card) => ({
         value: card.supabaseId ?? card.id,
-        label: card.name,
+        label: formatLinkedCardLabel(card),
       })),
+    [creditCards],
+  );
+  const creditCardLabelById = useMemo(
+    () =>
+      new Map(
+        (creditCards || []).map((card) => [
+          card.supabaseId ?? card.id,
+          formatLinkedCardLabel(card),
+        ]),
+      ),
     [creditCards],
   );
 
@@ -420,6 +431,13 @@ export default function Liabilities({
                         ? formatCurrency(latestSnapshot.balanceAmount)
                         : "No snapshot yet"}
                     </p>
+                    {account.linkedCreditCardId ? (
+                      <p className="mt-1 text-xs text-text-muted">
+                        Linked card:{" "}
+                        {creditCardLabelById.get(account.linkedCreditCardId) ??
+                          "Needs review: deleted card"}
+                      </p>
+                    ) : null}
                     <div className="mt-2 flex flex-wrap gap-2">
                       <Button
                         type="button"

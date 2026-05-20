@@ -4,6 +4,7 @@ import Input from "../../../components/ui/Input.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { getCurrentMonthKey } from "../../../lib/dates.js";
 import { buildCashAccountOptions } from "../../accounts/accountsService.js";
+import { formatLinkedCardLabel } from "../../creditCards/cardDisplayUtils.js";
 import { CARD_PAYMENT_OUTSIDE_ACCOUNT } from "../../creditCards/statementPaymentUtils.js";
 import { UNCATEGORIZED_ID } from "../../spending/spendingService.js";
 import { LIQUID_ACCOUNT_TYPES } from "../../spending/spendingService.js";
@@ -207,7 +208,7 @@ export default function RecurringPaymentForm({
               </option>
               {cards.map((card) => (
                 <option key={card.id} value={card.id}>
-                  {card.name}
+                  {formatLinkedCardLabel(card)}
                 </option>
               ))}
             </Select>
