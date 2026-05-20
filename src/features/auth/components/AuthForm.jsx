@@ -11,6 +11,7 @@ import {
   getAuthFormCopy,
   getNextAuthFormMode,
   getPasswordAutocomplete,
+  isResetRequestAuthFormMode,
   isSignUpAuthFormMode,
 } from "../authFormCopy.js";
 import { AUTH_FORM_FEEDBACK_IDS } from "../authFormIds.js";
@@ -31,8 +32,9 @@ export default function AuthForm() {
   const [isSendingResetLink, setIsSendingResetLink] = useState(false);
 
   const isSignUp = isSignUpAuthFormMode(mode);
+  const isResetRequest = isResetRequestAuthFormMode(mode);
   const modeCopy = getAuthFormCopy(mode);
-  const passwordAutocomplete = getPasswordAutocomplete(mode);
+  const passwordAutocomplete = isResetRequest ? "off" : getPasswordAutocomplete(mode);
   const feedbackDescriptionId = error
     ? AUTH_FORM_FEEDBACK_IDS.error
     : status
@@ -67,6 +69,22 @@ export default function AuthForm() {
 
   function handleModeSwitch() {
     setMode((currentMode) => getNextAuthFormMode(currentMode));
+    setPassword("");
+    setShowPassword(false);
+    resetAuthFormFeedback();
+  }
+
+  function handleForgotPasswordView() {
+    setMode(AUTH_FORM_MODES.resetRequest);
+    setPassword("");
+    setShowPassword(false);
+    resetAuthFormFeedback();
+  }
+
+  function handleBackToSignIn() {
+    setMode(AUTH_FORM_MODES.signIn);
+    setPassword("");
+    setShowPassword(false);
     resetAuthFormFeedback();
   }
 
@@ -108,6 +126,12 @@ export default function AuthForm() {
 
   async function handleSubmit(event) {
     event.preventDefault();
+
+    if (isResetRequest) {
+      await handlePasswordResetRequest();
+      return;
+    }
+
     resetAuthFormFeedback();
 
     const { normalizedEmail, validationError } = prepareAuthFormSubmit();
@@ -204,57 +228,79 @@ export default function AuthForm() {
               disabled={isFormBusy}
               required
             />
-            <div className="grid gap-1.5">
-              <Input
-                label="Password"
-                type={showPassword ? "text" : "password"}
-                autoComplete={passwordAutocomplete}
-                value={password}
-                onChange={handlePasswordChange}
-                minLength={6}
-                aria-describedby={feedbackDescriptionId}
-                aria-invalid={hasAuthFormError}
-                disabled={isFormBusy}
-                required
-              />
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <button
-                  type="button"
-                  className="inline-flex w-fit items-center gap-1.5 rounded-lg px-1 text-xs font-semibold text-[#6B7280] transition hover:text-[#111827] disabled:cursor-not-allowed disabled:opacity-50"
-                  onClick={handlePasswordVisibilityToggle}
-                  aria-label={passwordToggleLabel}
-                  aria-pressed={showPassword}
+            {!isResetRequest ? (
+              <div className="grid gap-1.5">
+                <Input
+                  label="Password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete={passwordAutocomplete}
+                  value={password}
+                  onChange={handlePasswordChange}
+                  minLength={6}
+                  aria-describedby={feedbackDescriptionId}
+                  aria-invalid={hasAuthFormError}
                   disabled={isFormBusy}
-                >
-                  {showPassword ? (
-                    <EyeOff size={14} aria-hidden="true" />
-                  ) : (
-                    <Eye size={14} aria-hidden="true" />
-                  )}
-                  {passwordToggleLabel}
-                </button>
-                {!isSignUp ? (
+                  required
+                />
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <button
                     type="button"
-                    className="inline-flex w-fit rounded-lg px-1 text-xs font-semibold text-[#6B7280] transition hover:text-[#111827] disabled:cursor-not-allowed disabled:opacity-50"
-                    onClick={handlePasswordResetRequest}
-                    disabled={isFormBusy || !isSupabaseConfigured}
+                    className="inline-flex w-fit items-center gap-1.5 rounded-lg px-1 text-xs font-semibold text-[#6B7280] transition hover:text-[#111827] disabled:cursor-not-allowed disabled:opacity-50"
+                    onClick={handlePasswordVisibilityToggle}
+                    aria-label={passwordToggleLabel}
+                    aria-pressed={showPassword}
+                    disabled={isFormBusy}
                   >
-                    {isSendingResetLink
-                      ? AUTH_FORM_STATUS_COPY.sendingResetLink
-                      : modeCopy.resetPasswordLabel}
+                    {showPassword ? (
+                      <EyeOff size={14} aria-hidden="true" />
+                    ) : (
+                      <Eye size={14} aria-hidden="true" />
+                    )}
+                    {passwordToggleLabel}
                   </button>
-                ) : null}
+                  {!isSignUp ? (
+                    <button
+                      type="button"
+                      className="inline-flex w-fit rounded-lg px-1 text-xs font-semibold text-[#6B7280] transition hover:text-[#111827] disabled:cursor-not-allowed disabled:opacity-50"
+                      onClick={handleForgotPasswordView}
+                      disabled={isFormBusy || !isSupabaseConfigured}
+                    >
+                      {modeCopy.resetPasswordLabel}
+                    </button>
+                  ) : null}
+                </div>
               </div>
-            </div>
+            ) : null}
 
             <Button type="submit" disabled={isFormBusy || !isSupabaseConfigured}>
-              {isSubmitting ? AUTH_FORM_STATUS_COPY.submitting : modeCopy.submitLabel}
+              {isResetRequest
+                ? isSendingResetLink
+                  ? AUTH_FORM_STATUS_COPY.sendingResetLink
+                  : modeCopy.submitLabel
+                : isSubmitting
+                  ? AUTH_FORM_STATUS_COPY.submitting
+                  : modeCopy.submitLabel}
             </Button>
 
-            <Button type="button" variant="ghost" onClick={handleModeSwitch} disabled={isFormBusy}>
-              {modeCopy.switchModeLabel}
-            </Button>
+            {isResetRequest ? (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleBackToSignIn}
+                disabled={isFormBusy}
+              >
+                {modeCopy.switchModeLabel}
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleModeSwitch}
+                disabled={isFormBusy}
+              >
+                {modeCopy.switchModeLabel}
+              </Button>
+            )}
           </form>
         </Card>
       </div>

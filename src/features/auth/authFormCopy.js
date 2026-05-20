@@ -8,6 +8,7 @@ export const AUTH_FORM_STATUS_COPY = {
 export const AUTH_FORM_MODES = {
   signIn: "sign-in",
   signUp: "sign-up",
+  resetRequest: "reset-request",
 };
 
 const PASSWORD_AUTOCOMPLETE_VALUES = {
@@ -30,6 +31,13 @@ const authFormCopy = {
     switchModeLabel: "Already have an account? Sign in",
     resetPasswordLabel: "",
   },
+  [AUTH_FORM_MODES.resetRequest]: {
+    title: "Reset your password",
+    description: "Enter your email and we will send a password reset link.",
+    submitLabel: "Send reset link",
+    switchModeLabel: "Back to sign in",
+    resetPasswordLabel: "",
+  },
 };
 
 export function getAuthFormCopy(mode) {
@@ -37,7 +45,7 @@ export function getAuthFormCopy(mode) {
 }
 
 export function getNextAuthFormMode(mode) {
-  return isSignUpAuthFormMode(mode) ? AUTH_FORM_MODES.signIn : AUTH_FORM_MODES.signUp;
+  return mode === AUTH_FORM_MODES.signUp ? AUTH_FORM_MODES.signIn : AUTH_FORM_MODES.signUp;
 }
 
 export function getPasswordAutocomplete(mode) {
@@ -48,4 +56,8 @@ export function getPasswordAutocomplete(mode) {
 
 export function isSignUpAuthFormMode(mode) {
   return mode === AUTH_FORM_MODES.signUp;
+}
+
+export function isResetRequestAuthFormMode(mode) {
+  return mode === AUTH_FORM_MODES.resetRequest;
 }
