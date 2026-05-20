@@ -112,6 +112,7 @@ export default function RecurringGenerationPanel({
         row,
         monthKey,
         existingPaidFromAccount: row.instance?.paidFromAccount || "",
+        templateAutopayAccount: row.template?.autopayPaymentAccountId || "",
         todayDate: draft.paidDate,
       }),
     );

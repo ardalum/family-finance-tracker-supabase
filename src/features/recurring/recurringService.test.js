@@ -9,6 +9,7 @@ import {
   getRecurringInstance,
   getRecurringStatus,
   getRecurringSummary,
+  isRecurringCashBankPaymentMethod,
   normalizeRecurringInstance,
 } from "./recurringService.js";
 
@@ -210,5 +211,14 @@ describe("recurring service", () => {
     assert.equal(summary.paidCount, 1);
     assert.equal(summary.unpaidCount, 1);
     assert.equal(summary.difference, 30);
+  });
+
+  it("classifies recurring payment methods that require paid-from account selection", () => {
+    assert.equal(isRecurringCashBankPaymentMethod("Checking Account"), true);
+    assert.equal(isRecurringCashBankPaymentMethod("Savings Account"), true);
+    assert.equal(isRecurringCashBankPaymentMethod("Cash"), true);
+    assert.equal(isRecurringCashBankPaymentMethod("Money Market"), true);
+    assert.equal(isRecurringCashBankPaymentMethod("Other"), true);
+    assert.equal(isRecurringCashBankPaymentMethod("Credit Card"), false);
   });
 });

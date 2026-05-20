@@ -1,4 +1,5 @@
 export function normalizeCardFormInput(input) {
+  const autopayEnabled = Boolean(input.autopayEnabled);
   return {
     name: input.name.trim(),
     url: input.url.trim(),
@@ -10,7 +11,10 @@ export function normalizeCardFormInput(input) {
     statementClosingDay: Number(input.statementClosingDay) || Number(input.dueDay) || 1,
     dueDay: Number(input.dueDay) || 1,
     isActive: input.isActive ?? true,
-    autopayEnabled: Boolean(input.autopayEnabled),
+    autopayEnabled,
+    autopayPaymentAccountId: autopayEnabled
+      ? String(input.autopayPaymentAccountId || "").trim()
+      : "",
   };
 }
 
@@ -29,5 +33,6 @@ export function toSupabaseCardFormInput(input) {
     due_day: normalized.dueDay,
     is_active: normalized.isActive,
     autopay_enabled: normalized.autopayEnabled,
+    autopay_payment_account_id: normalized.autopayPaymentAccountId || null,
   };
 }

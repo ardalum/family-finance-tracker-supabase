@@ -25,6 +25,7 @@ function toAppCreditCard(row) {
     dueDay: row.due_day,
     isActive: row.is_active,
     autopayEnabled: Boolean(row.autopay_enabled),
+    autopayPaymentAccountId: row.autopay_payment_account_id ?? "",
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

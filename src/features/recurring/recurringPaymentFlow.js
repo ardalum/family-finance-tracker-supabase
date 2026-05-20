@@ -48,6 +48,7 @@ export function buildRecurringPaidDraft({
   row,
   monthKey,
   existingPaidFromAccount = "",
+  templateAutopayAccount = "",
   todayDate,
 } = {}) {
   const isFixed = row?.template?.billType === "fixed";
@@ -56,7 +57,9 @@ export function buildRecurringPaidDraft({
     : Number(row?.instance?.actualAmount ?? row?.amount ?? row?.template?.estimatedAmount ?? 0) ||
       0;
   const fallbackPaidFrom =
-    row?.template?.paymentMethod === "Credit Card" ? RECURRING_PAID_FROM_CREDIT_CARD : "";
+    row?.template?.paymentMethod === "Credit Card"
+      ? RECURRING_PAID_FROM_CREDIT_CARD
+      : templateAutopayAccount || "";
 
   return {
     paidAmount: String(defaultAmount),

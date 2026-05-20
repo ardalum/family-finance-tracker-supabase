@@ -7,8 +7,21 @@ export const paymentMethods = [
   "Checking Account",
   "Savings Account",
   "Cash",
+  "Money Market",
   "Other",
 ];
+
+const CASH_BANK_PAYMENT_METHODS = new Set([
+  "Checking Account",
+  "Savings Account",
+  "Cash",
+  "Money Market",
+  "Other",
+]);
+
+export function isRecurringCashBankPaymentMethod(paymentMethod) {
+  return CASH_BANK_PAYMENT_METHODS.has(paymentMethod);
+}
 
 function createId(prefix) {
   return `${prefix}_${crypto.randomUUID()}`;
@@ -20,6 +33,12 @@ function timestamp() {
 
 function normalizeTemplate(input) {
   const paymentMethod = input.paymentMethod || "Other";
+  const autopayEnabled = Boolean(input.autopayEnabled);
+  const shouldStoreAutopayAccount =
+    autopayEnabled && isRecurringCashBankPaymentMethod(paymentMethod);
+  const autopayPaymentAccountId = shouldStoreAutopayAccount
+    ? String(input.autopayPaymentAccountId || "").trim()
+    : "";
   return {
     name: input.name.trim(),
     categoryId: input.categoryId || UNCATEGORIZED_ID,
@@ -28,7 +47,8 @@ function normalizeTemplate(input) {
     dueDay: Number(input.dueDay) || 1,
     paymentMethod,
     cardId: paymentMethod === "Credit Card" ? input.cardId : "",
-    autopayEnabled: Boolean(input.autopayEnabled),
+    autopayEnabled,
+    autopayPaymentAccountId,
     startMonth: input.startMonth,
     endMonth: input.endMonth || null,
     active: Boolean(input.active),
