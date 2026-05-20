@@ -43,7 +43,19 @@ export default function RecurringBillRow({
     <tr className={row.displayStatus === "Past due" ? "bg-red-50/70" : "bg-white"}>
       <td className="px-5 py-4 align-middle font-semibold text-gray-950">
         <div className="grid gap-1">
-          <span>{row.template.name}</span>
+          {hasSafePortalUrl(row.template.portalUrl) ? (
+            <a
+              className="inline-flex items-center gap-1 text-blue-700 underline-offset-2 hover:text-blue-800 hover:underline"
+              href={row.template.portalUrl}
+              target="_blank"
+              rel="noreferrer"
+              title={`Open ${row.template.name} portal`}
+            >
+              {row.template.name}
+            </a>
+          ) : (
+            <span>{row.template.name}</span>
+          )}
           {isPaid ? (
             <span className="text-xs font-medium text-gray-500">
               Linked spending transaction is managed by this recurring bill.
@@ -164,4 +176,9 @@ export default function RecurringBillRow({
       </td>
     </tr>
   );
+}
+
+function hasSafePortalUrl(url) {
+  const normalized = String(url ?? "").trim();
+  return normalized.startsWith("https://") || normalized.startsWith("http://");
 }

@@ -68,7 +68,19 @@ export default function RecurringPaymentTable({
                     <div className="grid min-w-0 gap-1">
                       <div className="flex min-w-0 flex-wrap items-center gap-2">
                         <h4 className="min-w-0 text-base font-semibold text-text-main">
-                          {template.name}
+                          {hasSafePortalUrl(template.portalUrl) ? (
+                            <a
+                              className="inline-flex min-w-0 items-center gap-1 text-blue-700 underline-offset-2 hover:text-blue-800 hover:underline"
+                              href={template.portalUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              title={`Open ${template.name} portal`}
+                            >
+                              <span className="truncate">{template.name}</span>
+                            </a>
+                          ) : (
+                            template.name
+                          )}
                         </h4>
                         <span
                           className={`rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${template.active ? "bg-status-successBg text-status-successDark ring-status-successBg" : "bg-app-muted text-text-muted ring-app-muted"}`}
@@ -241,4 +253,9 @@ function formatMonthRange(startMonth, endMonth) {
   if (!startMonth && !endMonth) return "No schedule set";
   if (!endMonth) return `Starts ${startMonth}`;
   return `${startMonth} to ${endMonth}`;
+}
+
+function hasSafePortalUrl(url) {
+  const normalized = String(url ?? "").trim();
+  return normalized.startsWith("https://") || normalized.startsWith("http://");
 }
