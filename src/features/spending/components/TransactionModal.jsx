@@ -8,6 +8,7 @@ export default function TransactionModal({
   cards,
   cashAccounts = [],
   categories,
+  transactions = [],
   editingTransaction,
   onClose,
   onSaved,
@@ -59,6 +60,7 @@ export default function TransactionModal({
             cards={cards}
             cashAccounts={cashAccounts}
             categories={categories}
+            transactions={transactions}
             editingTransaction={editingTransaction}
             onCancel={onClose}
             onSaved={onSaved}
