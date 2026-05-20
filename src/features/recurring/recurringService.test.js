@@ -11,6 +11,7 @@ import {
   getRecurringSummary,
   getUpcomingRecurringRows,
   isRecurringCashBankPaymentMethod,
+  normalizeOptionalPortalUrl,
   normalizeRecurringInstance,
 } from "./recurringService.js";
 
@@ -291,5 +292,14 @@ describe("recurring service", () => {
     );
 
     assert.equal(rows.length, 0);
+  });
+
+  it("normalizes optional bill portal urls by trimming and allowing blank", () => {
+    assert.equal(
+      normalizeOptionalPortalUrl("  https://example.com/login  "),
+      "https://example.com/login",
+    );
+    assert.equal(normalizeOptionalPortalUrl("   "), "");
+    assert.equal(normalizeOptionalPortalUrl(null), "");
   });
 });

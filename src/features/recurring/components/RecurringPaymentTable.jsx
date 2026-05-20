@@ -1,5 +1,14 @@
 import { useState } from "react";
-import { CalendarDays, CreditCard, Edit, Plus, ReceiptText, Trash2, X } from "lucide-react";
+import {
+  CalendarDays,
+  CreditCard,
+  Edit,
+  ExternalLink,
+  Plus,
+  ReceiptText,
+  Trash2,
+  X,
+} from "lucide-react";
 import LinkedCardName from "../../../components/shared/LinkedCardName.jsx";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
@@ -109,6 +118,19 @@ export default function RecurringPaymentTable({
                     <p className="rounded-xl bg-app-background px-3 py-2 text-sm text-text-muted">
                       {template.notes}
                     </p>
+                  ) : null}
+                  {template.portalUrl ? (
+                    <div>
+                      <a
+                        className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-700 underline-offset-2 hover:text-blue-800 hover:underline"
+                        href={template.portalUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Open portal
+                        <ExternalLink size={14} aria-hidden="true" />
+                      </a>
+                    </div>
                   ) : null}
 
                   <div className="grid grid-cols-2 gap-2 border-t border-app-border pt-3 sm:flex sm:flex-wrap sm:justify-end">

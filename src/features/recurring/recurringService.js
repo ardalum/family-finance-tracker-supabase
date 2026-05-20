@@ -23,6 +23,10 @@ export function isRecurringCashBankPaymentMethod(paymentMethod) {
   return CASH_BANK_PAYMENT_METHODS.has(paymentMethod);
 }
 
+export function normalizeOptionalPortalUrl(value) {
+  return String(value ?? "").trim();
+}
+
 function createId(prefix) {
   return `${prefix}_${crypto.randomUUID()}`;
 }
@@ -52,6 +56,7 @@ function normalizeTemplate(input) {
     startMonth: input.startMonth,
     endMonth: input.endMonth || null,
     active: Boolean(input.active),
+    portalUrl: normalizeOptionalPortalUrl(input.portalUrl),
     notes: input.notes.trim(),
   };
 }
