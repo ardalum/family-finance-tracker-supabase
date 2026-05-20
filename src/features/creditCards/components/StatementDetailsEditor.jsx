@@ -6,6 +6,7 @@ import Select from "../../../components/ui/Select.jsx";
 import { buildCashAccountOptions } from "../../accounts/accountsService.js";
 import { formatCurrency } from "../../../lib/formatters.js";
 import { LIQUID_ACCOUNT_TYPES } from "../../spending/spendingService.js";
+import { formatLinkedCardLabel } from "../cardDisplayUtils.js";
 import { CARD_PAYMENT_OUTSIDE_ACCOUNT, isStatementPaid } from "../statementPaymentUtils.js";
 
 function emptyStatement(entry = {}) {
@@ -126,7 +127,7 @@ export default function StatementDetailsEditor({
           >
             {cards.map((card) => (
               <option key={card.id} value={card.id}>
-                {card.name} {card.lastFour ? `**** ${card.lastFour}` : ""}
+                {formatLinkedCardLabel(card)}
               </option>
             ))}
           </Select>
