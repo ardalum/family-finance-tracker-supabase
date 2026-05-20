@@ -272,7 +272,6 @@ export function getUpcomingRecurringRows(
 
   return upcomingRows
     .filter((row) => {
-      if (["Paid", "Skipped"].includes(row.displayStatus)) return false;
       const dueDate = new Date(`${row.dueDate}T00:00:00`);
       const daysUntilDue = Math.round((dueDate - todayDate) / msPerDay);
       return daysUntilDue >= 0 && daysUntilDue <= windowDays;

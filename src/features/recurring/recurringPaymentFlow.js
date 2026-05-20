@@ -29,6 +29,9 @@ export function buildRecurringBillMovementPayload({
     getDueDateForMonth(monthKey, template?.dueDay ?? 1)
       .toISOString()
       .slice(0, 10);
+  const movementMonthKey = /^\d{4}-\d{2}-\d{2}$/.test(String(movementDate))
+    ? String(movementDate).slice(0, 7)
+    : monthKey;
 
   return {
     accountId: isOutside ? null : paidFromAccount || null,
@@ -38,7 +41,7 @@ export function buildRecurringBillMovementPayload({
     direction: "outflow",
     amount,
     movementDate,
-    monthKey,
+    monthKey: movementMonthKey,
     description: `Recurring bill: ${template?.name ?? "Payment"}`,
     isTracked: !isOutside,
   };

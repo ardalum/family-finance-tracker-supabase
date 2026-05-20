@@ -248,6 +248,29 @@ describe("recurring service", () => {
     assert.equal(rows[0].isUpcomingDueSoon, true);
   });
 
+  it("keeps due-soon next-month bills visible after they are paid", () => {
+    const rows = getUpcomingRecurringRows(
+      [
+        {
+          id: "next-month-rent",
+          name: "Rent",
+          active: true,
+          startMonth: "2026-01",
+          endMonth: null,
+          dueDay: 1,
+          billType: "fixed",
+          estimatedAmount: 1800,
+        },
+      ],
+      "2026-05",
+      { "2026-06": { "next-month-rent": { status: "paid", paidDate: "2026-05-28" } } },
+      { today: new Date(2026, 4, 28), windowDays: 14 },
+    );
+
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0].displayStatus, "Paid");
+  });
+
   it("does not show next-month bills outside due-soon window", () => {
     const rows = getUpcomingRecurringRows(
       [
