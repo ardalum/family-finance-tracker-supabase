@@ -1,5 +1,13 @@
 import { supabase } from "../../lib/supabase/client.js";
+import {
+  deleteAccountMoneyMovementBySource,
+  replaceAccountMoneyMovementBySource,
+} from "../accounts/accountMoneyMovementsSupabaseService.js";
 import { getCreditCardPaymentMovementSourceId } from "./statementPaymentUtils.js";
+import {
+  getStatementMovementSourceIds,
+  resolveCardPaymentMovementAction,
+} from "./monthlyBalanceMovementService.js";
 import {
   getPaymentDueDateForStatementMonth,
   getStatementCloseDateForStatementMonth,
@@ -58,6 +66,26 @@ function getStatementStatus(patch) {
   return "unpaid";
 }
 
+async function persistCardPaymentMovement({ householdId, monthKey, card, patch }) {
+  const movementAction = resolveCardPaymentMovementAction({
+    householdId,
+    monthKey,
+    card,
+    patch,
+  });
+
+  if (movementAction.action === "upsert") {
+    await replaceAccountMoneyMovementBySource(householdId, movementAction.payload);
+    return;
+  }
+
+  await deleteAccountMoneyMovementBySource(
+    householdId,
+    "credit_card_payment",
+    movementAction.sourceId,
+  );
+}
+
 async function listCardStatements(client, householdId, monthKey = null) {
   let query = client.from("card_statements").select("*").eq("household_id", householdId);
   if (monthKey) query = query.eq("month_key", monthKey);
@@ -67,13 +95,15 @@ async function listCardStatements(client, householdId, monthKey = null) {
   return data ?? [];
 }
 
-async function listCardPaymentMovements(client, householdId, monthKey = null) {
+async function listCardPaymentMovementsBySourceIds(client, householdId, sourceIds = []) {
+  if (!sourceIds.length) return [];
+
   let query = client
     .from("account_money_movements")
     .select("source_id, account_id, is_tracked")
     .eq("household_id", householdId)
-    .eq("source_type", "credit_card_payment");
-  if (monthKey) query = query.eq("month_key", monthKey);
+    .eq("source_type", "credit_card_payment")
+    .in("source_id", sourceIds);
 
   const { data, error } = await query;
   if (error) throw error;
@@ -130,7 +160,12 @@ export async function listMonthlyBalances(householdId, monthKey, cards) {
 
   const cardsBySupabaseId = new Map(cards.map((card) => [getSupabaseCardId(card), card]));
   const statementsByCardMonth = buildStatementLookup(statements);
-  const paymentMovements = await listCardPaymentMovements(client, householdId, monthKey);
+  const movementSourceIds = getStatementMovementSourceIds(balancesResult.data ?? []);
+  const paymentMovements = await listCardPaymentMovementsBySourceIds(
+    client,
+    householdId,
+    movementSourceIds,
+  );
   const paymentMovementsBySourceId = new Map(
     paymentMovements.map((movement) => [movement.source_id, movement]),
   );
@@ -159,7 +194,12 @@ export async function listAllMonthlyBalances(householdId, cards) {
 
   const cardsBySupabaseId = new Map(cards.map((card) => [getSupabaseCardId(card), card]));
   const statementsByCardMonth = buildStatementLookup(statements);
-  const paymentMovements = await listCardPaymentMovements(client, householdId);
+  const movementSourceIds = getStatementMovementSourceIds(balancesResult.data ?? []);
+  const paymentMovements = await listCardPaymentMovementsBySourceIds(
+    client,
+    householdId,
+    movementSourceIds,
+  );
   const paymentMovementsBySourceId = new Map(
     paymentMovements.map((movement) => [movement.source_id, movement]),
   );
@@ -197,6 +237,16 @@ export async function upsertMonthlyBalance(householdId, monthKey, card, patch) {
     paidAmount: normalized.paidAmount,
   };
 
+  // Validate movement requirements before any statement/balance write.
+  // A payment amount requires a paid-from account so we don't silently save
+  // paid card state without a linked payment movement.
+  resolveCardPaymentMovementAction({
+    householdId,
+    monthKey,
+    card,
+    patch: normalizedPatch,
+  });
+
   const { data, error } = await client
     .from("monthly_card_balances")
     .upsert(
@@ -215,6 +265,13 @@ export async function upsertMonthlyBalance(householdId, monthKey, card, patch) {
   if (error) throw error;
 
   await upsertCardStatement(client, householdId, monthKey, card, normalizedPatch);
+
+  await persistCardPaymentMovement({
+    householdId,
+    monthKey,
+    card,
+    patch: normalizedPatch,
+  });
   return data;
 }
 
@@ -239,4 +296,10 @@ export async function deleteMonthlyBalance(householdId, monthKey, card) {
     .eq("month_key", monthKey);
 
   if (statementError) throw statementError;
+
+  await deleteAccountMoneyMovementBySource(
+    householdId,
+    "credit_card_payment",
+    getCreditCardPaymentMovementSourceId(creditCardId, monthKey),
+  );
 }

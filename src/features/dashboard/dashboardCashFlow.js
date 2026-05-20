@@ -1,6 +1,7 @@
 import { summarizeIncomeForMonth } from "../income/incomeService.js";
 import { summarizeSavingsForMonth } from "../savings/savingsService.js";
 import { summarizeLiquidCashForMonth } from "../accounts/accountsService.js";
+import { calculateProjectedMovementTotal } from "../accounts/accountMoneyMovementsService.js";
 
 export function getDashboardCashFlow({
   selectedMonth,
@@ -8,6 +9,7 @@ export function getDashboardCashFlow({
   savingsContributions = [],
   cashAccounts = [],
   accountBalanceSnapshots = [],
+  accountMoneyMovements = [],
   budgetTotal = 0,
   remainingBudget = 0,
   spendingTotal = 0,
@@ -20,16 +22,38 @@ export function getDashboardCashFlow({
   const safeAccountBalanceSnapshots = Array.isArray(accountBalanceSnapshots)
     ? accountBalanceSnapshots
     : [];
+  const safeAccountMoneyMovements = Array.isArray(accountMoneyMovements)
+    ? accountMoneyMovements
+    : [];
   const incomeTotal = summarizeIncomeForMonth(safeIncomeEntries, selectedMonth);
   const savingsContributionTotal = summarizeSavingsForMonth(
     safeSavingsContributions,
     selectedMonth,
   );
-  const cashPositionTotal = summarizeLiquidCashForMonth(
+  const liquidAccountTypes = new Set([
+    "checking",
+    "savings",
+    "cash",
+    "money_market",
+    "emergency_fund",
+    "other",
+  ]);
+  const liquidAccountIds = new Set(
+    safeCashAccounts
+      .filter((account) => liquidAccountTypes.has(account?.accountType))
+      .map((account) => account?.supabaseId ?? account?.id)
+      .filter(Boolean),
+  );
+  const snapshotCashPositionTotal = summarizeLiquidCashForMonth(
     safeCashAccounts,
     safeAccountBalanceSnapshots,
     selectedMonth,
   );
+  const trackedMovementTotal = calculateProjectedMovementTotal(
+    safeAccountMoneyMovements.filter((movement) => liquidAccountIds.has(movement?.accountId)),
+    { monthKey: selectedMonth },
+  );
+  const cashPositionTotal = snapshotCashPositionTotal + trackedMovementTotal;
   const normalizedBudgetTotal = Number(budgetTotal) || 0;
   const normalizedRemainingBudget = Number(remainingBudget) || 0;
   const normalizedSpendingTotal = Number(spendingTotal) || 0;

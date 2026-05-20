@@ -1,17 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import {
-  deleteAccountMoneyMovementBySource,
-  replaceAccountMoneyMovementBySource,
-} from "../accounts/accountMoneyMovementsSupabaseService.js";
-import {
-  deleteMonthlyBalance,
-  listAllMonthlyBalances,
-  upsertMonthlyBalance,
-} from "./monthlyBalancesSupabaseService.js";
-import {
-  buildCreditCardPaymentMovementPayload,
-  getCreditCardPaymentMovementSourceId,
-} from "./statementPaymentUtils.js";
+import { listAllMonthlyBalances, upsertMonthlyBalance } from "./monthlyBalancesSupabaseService.js";
 
 export function useMonthlyBalances({
   activeHouseholdId,
@@ -55,7 +43,6 @@ export function useMonthlyBalances({
     async (monthKey, cardId, entry) => {
       const card = supabaseCreditCards.find((currentCard) => currentCard.id === cardId);
       if (!card) return;
-      const cardSourceId = card.supabaseId ?? card.id;
       const normalizedBalance = Number(entry?.balance ?? 0) || 0;
       const shouldDelete = !entry || (normalizedBalance <= 0 && entry.paid !== true);
 
@@ -92,33 +79,7 @@ export function useMonthlyBalances({
       setMonthlyBalancesSaving(true);
 
       try {
-        if (shouldDelete) {
-          await deleteMonthlyBalance(activeHouseholdId, monthKey, card);
-          await deleteAccountMoneyMovementBySource(
-            activeHouseholdId,
-            "credit_card_payment",
-            getCreditCardPaymentMovementSourceId(cardSourceId, monthKey),
-          );
-        } else {
-          await upsertMonthlyBalance(activeHouseholdId, monthKey, card, entry);
-          const movementPayload = buildCreditCardPaymentMovementPayload({
-            creditCardId: cardSourceId,
-            monthKey,
-            paidAmount: entry.paidAmount ?? (entry.paid ? normalizedBalance : 0),
-            paidDate: entry.paidDate ?? null,
-            paymentAccountId: entry.paymentAccountId,
-            cardName: card.name,
-          });
-          if (movementPayload) {
-            await replaceAccountMoneyMovementBySource(activeHouseholdId, movementPayload);
-          } else {
-            await deleteAccountMoneyMovementBySource(
-              activeHouseholdId,
-              "credit_card_payment",
-              getCreditCardPaymentMovementSourceId(cardSourceId, monthKey),
-            );
-          }
-        }
+        await upsertMonthlyBalance(activeHouseholdId, monthKey, card, entry);
       } catch (error) {
         setMonthlyBalancesError(error.message || "Could not save monthly balance.");
         await loadSupabaseMonthlyBalances();

@@ -32,6 +32,7 @@ export default function DashboardCashFlowSummary({
   savingsContributions,
   cashAccounts,
   accountBalanceSnapshots,
+  accountMoneyMovements,
   budgetTotal,
   remainingBudget,
   spendingTotal,
@@ -44,6 +45,7 @@ export default function DashboardCashFlowSummary({
     savingsContributions,
     cashAccounts,
     accountBalanceSnapshots,
+    accountMoneyMovements,
     budgetTotal,
     remainingBudget,
     spendingTotal,
@@ -57,7 +59,7 @@ export default function DashboardCashFlowSummary({
         <h3 className="text-base font-semibold text-text-main">Financial Pulse</h3>
         {/* Legacy copy guard: Card purchases count toward spending and budgets. */}
         <p className="mt-1 text-sm text-text-muted">
-          Account snapshots show current cash. Income and obligations are shown separately.
+          Cash position is your total tracked bank and cash account balance.
         </p>
       </div>
 

@@ -146,6 +146,7 @@ function FinanceTrackerApp() {
     setSelectedDashboardMonth,
     dashboardBudgets,
     dashboardTransactions,
+    dashboardAccountMoneyMovements,
     dashboardLoading,
     dashboardError,
     loadDashboardData,
@@ -427,6 +428,19 @@ function FinanceTrackerApp() {
     loadSupabaseMonthlyBalances,
   ]);
 
+  const saveSupabaseMonthlyBalanceAndRefreshDashboard = useCallback(
+    async (monthKey, cardId, entry) => {
+      await saveSupabaseMonthlyBalance(monthKey, cardId, entry);
+      await runRefreshSequence(
+        createDashboardInsightsRefreshers({
+          loadDashboardData,
+          loadInsightsData,
+        }),
+      );
+    },
+    [loadDashboardData, loadInsightsData, saveSupabaseMonthlyBalance],
+  );
+
   const finishFirstTimeSetup = useCallback(async () => {
     await completeActiveHouseholdSetup();
     setActiveView("dashboard");
@@ -447,6 +461,7 @@ function FinanceTrackerApp() {
         savingsContributions,
         cashAccounts,
         accountBalanceSnapshots,
+        accountMoneyMovements: dashboardAccountMoneyMovements,
         liabilityAccounts,
         liabilityBalanceSnapshots,
       }),
@@ -460,6 +475,7 @@ function FinanceTrackerApp() {
       savingsContributions,
       cashAccounts,
       accountBalanceSnapshots,
+      dashboardAccountMoneyMovements,
       liabilityAccounts,
       liabilityBalanceSnapshots,
       selectedDashboardMonth,
@@ -676,7 +692,7 @@ function FinanceTrackerApp() {
     createSupabaseCreditCard,
     updateSupabaseCreditCard,
     deleteSupabaseCreditCard,
-    saveSupabaseMonthlyBalance,
+    saveSupabaseMonthlyBalance: saveSupabaseMonthlyBalanceAndRefreshDashboard,
     refreshData,
     createSupabaseBudget,
     updateSupabaseBudget,

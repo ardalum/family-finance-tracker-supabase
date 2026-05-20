@@ -180,6 +180,7 @@ export default function Dashboard({
         savingsContributions={appData.savingsContributions}
         cashAccounts={appData.cashAccounts}
         accountBalanceSnapshots={appData.accountBalanceSnapshots}
+        accountMoneyMovements={appData.accountMoneyMovements}
         budgetTotal={data.summary.budgetTotal}
         remainingBudget={data.summary.remainingBudget}
         spendingTotal={data.summary.spendingTotal}

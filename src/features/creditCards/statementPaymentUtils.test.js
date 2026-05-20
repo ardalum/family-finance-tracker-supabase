@@ -42,7 +42,7 @@ describe("statement payment utils", () => {
   it("builds tracked card payment movement payload", () => {
     const movement = buildCreditCardPaymentMovementPayload({
       creditCardId: "card-1",
-      monthKey: "2026-05",
+      monthKey: "2026-04",
       paidAmount: 120,
       paidDate: "2026-05-18",
       paymentAccountId: "checking-1",
@@ -52,7 +52,7 @@ describe("statement payment utils", () => {
     assert.deepEqual(movement, {
       accountId: "checking-1",
       sourceType: "credit_card_payment",
-      sourceId: "card-1:2026-05",
+      sourceId: "card-1:2026-04",
       movementType: "credit_card_payment",
       direction: "outflow",
       amount: 120,
@@ -75,5 +75,6 @@ describe("statement payment utils", () => {
     assert.equal(movement.accountId, null);
     assert.equal(movement.isTracked, false);
     assert.equal(movement.movementDate, "2026-05-01");
+    assert.equal(movement.monthKey, "2026-05");
   });
 });
