@@ -13,9 +13,7 @@ describe("help/support trust copy", () => {
   });
 
   it("includes backup safety reminder before risky changes", () => {
-    const backupCard = supportGuidanceCards.find(
-      (item) => item.title === "Run a manual backup",
-    );
+    const backupCard = supportGuidanceCards.find((item) => item.title === "Run a manual backup");
     assert.ok(backupCard);
     assert.match(backupCard.description, /keep it private/i);
   });
@@ -42,24 +40,19 @@ describe("help/support trust copy", () => {
       cardGroup.items.some(
         (item) =>
           /credit card purchase/i.test(item.question) &&
-          /does not reduce Cash Position|do not reduce Cash Position/i.test(
-            item.answer,
-          ),
+          /does not reduce Cash Position|do not reduce Cash Position/i.test(item.answer),
       ),
     );
     assert.ok(
       cardGroup.items.some(
         (item) =>
-          /pay a credit card/i.test(item.question) &&
-          /Cash Position decreases/i.test(item.answer),
+          /pay a credit card/i.test(item.question) && /Cash Position decreases/i.test(item.answer),
       ),
     );
   });
 
   it("includes practical troubleshooting steps", () => {
     assert.ok(troubleshootingChecklist.length >= 5);
-    assert.ok(
-      troubleshootingChecklist.some((item) => /paid-from account/i.test(item)),
-    );
+    assert.ok(troubleshootingChecklist.some((item) => /paid-from account/i.test(item)));
   });
 });
