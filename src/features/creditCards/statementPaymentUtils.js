@@ -3,6 +3,49 @@ function toAmount(value) {
   return Number.isFinite(amount) ? amount : 0;
 }
 
+export const CARD_PAYMENT_OUTSIDE_ACCOUNT = "outside_untracked";
+
+function normalizeText(value) {
+  return String(value ?? "").trim();
+}
+
+export function getCreditCardPaymentMovementSourceId(creditCardId, monthKey) {
+  const cardId = normalizeText(creditCardId);
+  const statementMonthKey = normalizeText(monthKey);
+  if (!cardId || !statementMonthKey) return "";
+  return `${cardId}:${statementMonthKey}`;
+}
+
+export function buildCreditCardPaymentMovementPayload({
+  creditCardId,
+  monthKey,
+  paidAmount,
+  paidDate,
+  paymentAccountId,
+  cardName = "",
+} = {}) {
+  const sourceId = getCreditCardPaymentMovementSourceId(creditCardId, monthKey);
+  const amount = Math.max(Number(paidAmount) || 0, 0);
+  const normalizedPaymentAccountId = normalizeText(paymentAccountId);
+  const normalizedPaidDate = normalizeText(paidDate);
+  const movementDate = normalizedPaidDate || `${monthKey}-01`;
+  if (!sourceId || amount <= 0 || !normalizedPaymentAccountId) return null;
+
+  const isOutside = normalizedPaymentAccountId === CARD_PAYMENT_OUTSIDE_ACCOUNT;
+  return {
+    accountId: isOutside ? null : normalizedPaymentAccountId,
+    sourceType: "credit_card_payment",
+    sourceId,
+    movementType: "credit_card_payment",
+    direction: "outflow",
+    amount,
+    movementDate,
+    monthKey,
+    description: `Card payment${cardName ? `: ${cardName}` : ""}`,
+    isTracked: !isOutside,
+  };
+}
+
 export function getStatementBalance(entry) {
   return Math.max(toAmount(entry?.balance), 0);
 }

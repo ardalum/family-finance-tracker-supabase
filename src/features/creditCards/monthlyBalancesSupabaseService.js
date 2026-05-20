@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabase/client.js";
+import { getCreditCardPaymentMovementSourceId } from "./statementPaymentUtils.js";
 import {
   getPaymentDueDateForStatementMonth,
   getStatementCloseDateForStatementMonth,
@@ -32,12 +33,19 @@ function buildStatementLookup(statements) {
   );
 }
 
-function toMonthBalanceEntry(row, cardsBySupabaseId, statementsByCardMonth = new Map()) {
+function toMonthBalanceEntry(
+  row,
+  cardsBySupabaseId,
+  statementsByCardMonth = new Map(),
+  paymentMovementsBySourceId = new Map(),
+) {
   const card = cardsBySupabaseId.get(row.credit_card_id);
   const cardId = card?.id ?? row.credit_card_id;
   const statement = statementsByCardMonth.get(`${row.credit_card_id}:${row.month_key}`);
+  const movementSourceId = getCreditCardPaymentMovementSourceId(row.credit_card_id, row.month_key);
+  const paymentMovement = paymentMovementsBySourceId.get(movementSourceId) ?? null;
 
-  return [cardId, toLoadedMonthBalanceEntry(row, statement)];
+  return [cardId, toLoadedMonthBalanceEntry(row, statement, paymentMovement)];
 }
 
 function getStatementStatus(patch) {
@@ -52,6 +60,19 @@ function getStatementStatus(patch) {
 
 async function listCardStatements(client, householdId, monthKey = null) {
   let query = client.from("card_statements").select("*").eq("household_id", householdId);
+  if (monthKey) query = query.eq("month_key", monthKey);
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return data ?? [];
+}
+
+async function listCardPaymentMovements(client, householdId, monthKey = null) {
+  let query = client
+    .from("account_money_movements")
+    .select("source_id, account_id, is_tracked")
+    .eq("household_id", householdId)
+    .eq("source_type", "credit_card_payment");
   if (monthKey) query = query.eq("month_key", monthKey);
 
   const { data, error } = await query;
@@ -109,9 +130,18 @@ export async function listMonthlyBalances(householdId, monthKey, cards) {
 
   const cardsBySupabaseId = new Map(cards.map((card) => [getSupabaseCardId(card), card]));
   const statementsByCardMonth = buildStatementLookup(statements);
+  const paymentMovements = await listCardPaymentMovements(client, householdId, monthKey);
+  const paymentMovementsBySourceId = new Map(
+    paymentMovements.map((movement) => [movement.source_id, movement]),
+  );
   return Object.fromEntries(
     (balancesResult.data ?? []).map((row) =>
-      toMonthBalanceEntry(row, cardsBySupabaseId, statementsByCardMonth),
+      toMonthBalanceEntry(
+        row,
+        cardsBySupabaseId,
+        statementsByCardMonth,
+        paymentMovementsBySourceId,
+      ),
     ),
   );
 }
@@ -129,8 +159,17 @@ export async function listAllMonthlyBalances(householdId, cards) {
 
   const cardsBySupabaseId = new Map(cards.map((card) => [getSupabaseCardId(card), card]));
   const statementsByCardMonth = buildStatementLookup(statements);
+  const paymentMovements = await listCardPaymentMovements(client, householdId);
+  const paymentMovementsBySourceId = new Map(
+    paymentMovements.map((movement) => [movement.source_id, movement]),
+  );
   return (balancesResult.data ?? []).reduce((result, row) => {
-    const [cardId, entry] = toMonthBalanceEntry(row, cardsBySupabaseId, statementsByCardMonth);
+    const [cardId, entry] = toMonthBalanceEntry(
+      row,
+      cardsBySupabaseId,
+      statementsByCardMonth,
+      paymentMovementsBySourceId,
+    );
     return {
       ...result,
       [row.month_key]: {
