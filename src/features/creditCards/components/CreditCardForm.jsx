@@ -14,6 +14,7 @@ const emptyForm = {
   statementClosingDay: "",
   dueDay: "",
   isActive: true,
+  autopayEnabled: false,
 };
 
 const networks = ["Visa", "Mastercard", "American Express", "Discover", "Other"];
@@ -53,6 +54,7 @@ export default function CreditCardForm({
             statementClosingDay: String(editingCard.statementClosingDay ?? editingCard.dueDay),
             dueDay: String(editingCard.dueDay),
             isActive: editingCard.isActive ?? true,
+            autopayEnabled: Boolean(editingCard.autopayEnabled),
           }
         : emptyForm,
     );
@@ -240,6 +242,15 @@ export default function CreditCardForm({
           onChange={(event) => updateField("isActive", event.target.checked)}
         />
         Active card
+      </label>
+      <label className="flex items-center gap-3 rounded-md border border-app-border bg-app-background px-3 py-2 text-sm font-medium text-text-soft">
+        <input
+          className="h-4 w-4 rounded border-app-border text-brand-primary focus:ring-brand-primary"
+          type="checkbox"
+          checked={Boolean(form.autopayEnabled)}
+          onChange={(event) => updateField("autopayEnabled", event.target.checked)}
+        />
+        Autopay enabled
       </label>
 
       <div className="flex flex-wrap justify-end gap-3">

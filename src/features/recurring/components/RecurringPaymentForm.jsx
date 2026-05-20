@@ -14,6 +14,7 @@ const emptyForm = {
   dueDay: "",
   paymentMethod: "",
   cardId: "",
+  autopayEnabled: false,
   startMonth: getCurrentMonthKey(),
   endMonth: "",
   active: true,
@@ -48,6 +49,7 @@ export default function RecurringPaymentForm({
             dueDay: String(editingTemplate.dueDay),
             paymentMethod: editingTemplate.paymentMethod,
             cardId: editingTemplate.cardId ?? "",
+            autopayEnabled: Boolean(editingTemplate.autopayEnabled),
             startMonth: editingTemplate.startMonth,
             endMonth: editingTemplate.endMonth ?? "",
             active: Boolean(editingTemplate.active),
@@ -213,6 +215,14 @@ export default function RecurringPaymentForm({
           onChange={(event) => updateField("active", event.target.checked)}
         />
         Active
+      </label>
+      <label className="inline-flex items-center gap-2 rounded-xl border border-app-border bg-app-background px-3 py-2 text-sm font-medium text-gray-700">
+        <input
+          type="checkbox"
+          checked={Boolean(form.autopayEnabled)}
+          onChange={(event) => updateField("autopayEnabled", event.target.checked)}
+        />
+        Autopay enabled
       </label>
       <label className="grid min-w-0 gap-1.5 text-sm font-medium text-gray-700">
         Notes

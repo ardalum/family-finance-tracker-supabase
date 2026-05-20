@@ -28,6 +28,7 @@ function normalizeTemplate(input) {
     dueDay: Number(input.dueDay) || 1,
     paymentMethod,
     cardId: paymentMethod === "Credit Card" ? input.cardId : "",
+    autopayEnabled: Boolean(input.autopayEnabled),
     startMonth: input.startMonth,
     endMonth: input.endMonth || null,
     active: Boolean(input.active),

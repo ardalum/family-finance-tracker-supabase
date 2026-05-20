@@ -24,6 +24,7 @@ function toAppCreditCard(row) {
     statementClosingDay: row.statement_closing_day,
     dueDay: row.due_day,
     isActive: row.is_active,
+    autopayEnabled: Boolean(row.autopay_enabled),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

@@ -10,6 +10,7 @@ export function normalizeCardFormInput(input) {
     statementClosingDay: Number(input.statementClosingDay) || Number(input.dueDay) || 1,
     dueDay: Number(input.dueDay) || 1,
     isActive: input.isActive ?? true,
+    autopayEnabled: Boolean(input.autopayEnabled),
   };
 }
 
@@ -27,5 +28,6 @@ export function toSupabaseCardFormInput(input) {
     statement_closing_day: normalized.statementClosingDay,
     due_day: normalized.dueDay,
     is_active: normalized.isActive,
+    autopay_enabled: normalized.autopayEnabled,
   };
 }
