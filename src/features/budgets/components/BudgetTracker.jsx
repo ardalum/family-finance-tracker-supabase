@@ -16,6 +16,11 @@ import BudgetMigrationPanel from "./BudgetMigrationPanel.jsx";
 import BudgetModal from "./BudgetModal.jsx";
 import BudgetTable from "./BudgetTable.jsx";
 import { getTotalMonthlyBudget } from "../budgetsService.js";
+import {
+  getBudgetDelta,
+  getCategorySharePercent,
+  getSpentPercent,
+} from "../budgetCategoryMetrics.js";
 
 export default function BudgetTracker({
   budgets,
@@ -43,8 +48,8 @@ export default function BudgetTracker({
   const totalBudget = getTotalMonthlyBudget(budgets);
   const transactionsForBudget = transactions ?? budgetTransactions;
   const budgetRows = useMemo(
-    () => buildBudgetRows(budgets, transactionsForBudget),
-    [budgets, transactionsForBudget],
+    () => buildBudgetRows(budgets, transactionsForBudget, totalBudget),
+    [budgets, totalBudget, transactionsForBudget],
   );
   const summary = useMemo(() => getBudgetSummary(budgetRows), [budgetRows]);
 
@@ -184,6 +189,7 @@ export default function BudgetTracker({
       <BudgetTable
         rows={budgetRows}
         budgets={budgets}
+        totalBudget={totalBudget}
         onEdit={handleEditCategory}
         onDelete={handleDelete}
         onAddDefaults={onAddDefaultBudgets}
@@ -260,7 +266,7 @@ function BudgetSummaryCards({ summary, totalBudget }) {
   );
 }
 
-function buildBudgetRows(budgets, transactions) {
+function buildBudgetRows(budgets, transactions, totalBudget) {
   const spentByCategory = new Map();
 
   transactions.forEach((transaction) => {
@@ -280,15 +286,20 @@ function buildBudgetRows(budgets, transactions) {
   return budgets.map((budget) => {
     const spent = spentByCategory.get(budget.id) ?? spentByCategory.get(budget.supabaseId) ?? 0;
     const monthlyAmount = Number(budget.monthlyAmount || 0);
-    const remaining = monthlyAmount - spent;
-    const percentUsed = monthlyAmount > 0 ? (spent / monthlyAmount) * 100 : spent > 0 ? 100 : 0;
+    const { remaining, hasBudget, isOverBudget, overAmount } = getBudgetDelta(monthlyAmount, spent);
+    const percentUsed = getSpentPercent(spent, monthlyAmount);
+    const shareOfTotalPercent = getCategorySharePercent(monthlyAmount, totalBudget);
 
     return {
       ...budget,
       spent,
       remaining,
+      hasBudget,
+      isOverBudget,
+      overAmount,
       percentUsed,
-      status: remaining < 0 ? "over" : percentUsed >= 90 ? "near" : spent > 0 ? "active" : "unused",
+      shareOfTotalPercent,
+      status: isOverBudget ? "over" : percentUsed >= 90 ? "near" : spent > 0 ? "active" : "unused",
     };
   });
 }

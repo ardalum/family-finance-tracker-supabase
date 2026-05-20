@@ -15,6 +15,7 @@ const budgetFilters = [
 export default function BudgetTable({
   rows,
   budgets,
+  totalBudget = 0,
   onEdit,
   onDelete,
   onAddDefaults,
@@ -193,6 +194,7 @@ export default function BudgetTable({
                     <BudgetCard
                       key={budget.id}
                       budget={budget}
+                      totalBudget={totalBudget}
                       selected={selectedBudgetIds.has(budgetId)}
                       onEdit={onEdit}
                       onRequestDelete={setBudgetPendingDelete}
@@ -327,11 +329,29 @@ export default function BudgetTable({
   );
 }
 
-function BudgetCard({ budget, selected, onEdit, onRequestDelete, onToggleSelected, isSaving }) {
+function BudgetCard({
+  budget,
+  totalBudget,
+  selected,
+  onEdit,
+  onRequestDelete,
+  onToggleSelected,
+  isSaving,
+}) {
   const over = budget.status === "over";
   const near = budget.status === "near";
+  const spent = Number(budget.spent || 0);
+  const monthlyAmount = Number(budget.monthlyAmount || 0);
+  const hasBudget = Number.isFinite(monthlyAmount) && monthlyAmount > 0;
+  const categorySharePercent = Number.isFinite(Number(budget.shareOfTotalPercent))
+    ? Number(budget.shareOfTotalPercent)
+    : 0;
   const percentUsed = Number.isFinite(Number(budget.percentUsed)) ? Number(budget.percentUsed) : 0;
   const progressWidth = Math.min(Math.max(percentUsed, 0), 100);
+  const overAmount =
+    Number.isFinite(Number(budget.overAmount)) && Number(budget.overAmount) > 0
+      ? Number(budget.overAmount)
+      : Math.max(spent - monthlyAmount, 0);
 
   return (
     <article className="grid gap-4 rounded-2xl border border-app-border bg-app-surface p-4 shadow-sm transition hover:border-brand-primary/30 hover:bg-app-background">
@@ -382,12 +402,20 @@ function BudgetCard({ budget, selected, onEdit, onRequestDelete, onToggleSelecte
       </div>
 
       <div className="grid gap-2 rounded-xl bg-app-background px-3 py-2 text-sm sm:grid-cols-3">
-        <Metric label="Spent" value={budget.spent} />
+        <Metric label="Spent" value={spent} />
         <Metric label="Remaining" value={budget.remaining} danger={budget.remaining < 0} />
         <Metric label="Used" value={`${percentUsed.toFixed(0)}%`} isText danger={over} />
       </div>
 
       <div className="grid gap-1">
+        <p className="text-xs text-text-muted">
+          {hasBudget
+            ? `${formatCurrency(spent)} / ${formatCurrency(monthlyAmount)} used`
+            : `${formatCurrency(spent)} / ${formatCurrency(monthlyAmount)} - No budget set`}
+        </p>
+        {hasBudget && totalBudget > 0 ? (
+          <p className="text-xs text-text-muted">{`${categorySharePercent.toFixed(0)}% of total budget`}</p>
+        ) : null}
         <div className="h-2 overflow-hidden rounded-full bg-app-muted">
           <div
             className={`h-full rounded-full ${over ? "bg-status-danger" : near ? "bg-status-warning" : "bg-status-success"}`}
@@ -396,9 +424,11 @@ function BudgetCard({ budget, selected, onEdit, onRequestDelete, onToggleSelecte
           />
         </div>
         <p className="text-xs text-text-muted">
-          {over
-            ? `${formatCurrency(Math.abs(budget.remaining))} over budget`
-            : `${formatCurrency(budget.remaining)} remaining`}
+          {!hasBudget
+            ? "No budget set"
+            : over
+              ? `Over by ${formatCurrency(overAmount)}`
+              : `${formatCurrency(budget.remaining)} remaining`}
         </p>
       </div>
 
