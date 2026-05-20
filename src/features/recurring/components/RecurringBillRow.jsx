@@ -48,6 +48,10 @@ export default function RecurringBillRow({
             <span className="text-xs font-medium text-gray-500">
               Linked spending transaction is managed by this recurring bill.
             </span>
+          ) : row.isUpcomingDueSoon ? (
+            <span className="text-xs font-medium text-blue-700">
+              Due {row.dueDate}. Can be paid early for the next due month.
+            </span>
           ) : isAutopayReady ? (
             <span className="text-xs font-medium text-blue-700">
               Autopay ready. Confirm paid-from account before marking paid.

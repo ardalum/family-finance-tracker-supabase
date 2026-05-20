@@ -228,23 +228,24 @@ export function useRecurringPayments({
       setRecurringError("");
 
       try {
+        const targetMonthKey = row.monthKey || selectedRecurringMonth;
         const instance = await markRecurringPaymentPaidInSupabase({
           householdId: activeHouseholdId,
-          monthKey: selectedRecurringMonth,
+          monthKey: targetMonthKey,
           row,
           cards: supabaseCreditCards,
           categories: recurringCategories,
         });
         const movementPayload = buildRecurringBillMovementPayload({
           template: row.template,
-          monthKey: selectedRecurringMonth,
+          monthKey: targetMonthKey,
           amountPaid: row.actualAmount,
           paidDate: row.paidDate,
           paidFromAccount: row.paidFromAccount,
         });
         const sourceId = getRecurringMovementSourceId(
           row.template.supabaseId ?? row.template.id,
-          selectedRecurringMonth,
+          targetMonthKey,
         );
         if (movementPayload) {
           await replaceAccountMoneyMovementBySource(activeHouseholdId, movementPayload);
@@ -284,20 +285,22 @@ export function useRecurringPayments({
   );
 
   const markSupabaseRecurringUnpaid = useCallback(
-    async (template) => {
+    async (templateOrRow) => {
       setRecurringSaving(true);
       setRecurringError("");
 
       try {
+        const template = templateOrRow.template ?? templateOrRow;
+        const targetMonthKey = templateOrRow.monthKey || selectedRecurringMonth;
         const instance = await markRecurringPaymentUnpaidInSupabase({
           householdId: activeHouseholdId,
-          monthKey: selectedRecurringMonth,
+          monthKey: targetMonthKey,
           template,
         });
         await deleteAccountMoneyMovementBySource(
           activeHouseholdId,
           "recurring_payment",
-          getRecurringMovementSourceId(template.supabaseId ?? template.id, selectedRecurringMonth),
+          getRecurringMovementSourceId(template.supabaseId ?? template.id, targetMonthKey),
         );
         await runRefreshSequence(
           createRecurringSpendingDashboardInsightsRefreshers({
@@ -326,20 +329,22 @@ export function useRecurringPayments({
   );
 
   const skipSupabaseRecurringPayment = useCallback(
-    async (template) => {
+    async (templateOrRow) => {
       setRecurringSaving(true);
       setRecurringError("");
 
       try {
+        const template = templateOrRow.template ?? templateOrRow;
+        const targetMonthKey = templateOrRow.monthKey || selectedRecurringMonth;
         const instance = await skipRecurringPaymentInSupabase({
           householdId: activeHouseholdId,
-          monthKey: selectedRecurringMonth,
+          monthKey: targetMonthKey,
           template,
         });
         await deleteAccountMoneyMovementBySource(
           activeHouseholdId,
           "recurring_payment",
-          getRecurringMovementSourceId(template.supabaseId ?? template.id, selectedRecurringMonth),
+          getRecurringMovementSourceId(template.supabaseId ?? template.id, targetMonthKey),
         );
         await runRefreshSequence(
           createRecurringSpendingDashboardInsightsRefreshers({

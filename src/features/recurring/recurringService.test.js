@@ -9,6 +9,7 @@ import {
   getRecurringInstance,
   getRecurringStatus,
   getRecurringSummary,
+  getUpcomingRecurringRows,
   isRecurringCashBankPaymentMethod,
   normalizeRecurringInstance,
 } from "./recurringService.js";
@@ -220,5 +221,52 @@ describe("recurring service", () => {
     assert.equal(isRecurringCashBankPaymentMethod("Money Market"), true);
     assert.equal(isRecurringCashBankPaymentMethod("Other"), true);
     assert.equal(isRecurringCashBankPaymentMethod("Credit Card"), false);
+  });
+
+  it("shows next-month bills in due-soon window", () => {
+    const rows = getUpcomingRecurringRows(
+      [
+        {
+          id: "next-month-rent",
+          name: "Rent",
+          active: true,
+          startMonth: "2026-01",
+          endMonth: null,
+          dueDay: 1,
+          billType: "fixed",
+          estimatedAmount: 1800,
+        },
+      ],
+      "2026-05",
+      {},
+      { today: new Date(2026, 4, 28), windowDays: 14 },
+    );
+
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0].monthKey, "2026-06");
+    assert.equal(rows[0].dueDate, "2026-06-01");
+    assert.equal(rows[0].isUpcomingDueSoon, true);
+  });
+
+  it("does not show next-month bills outside due-soon window", () => {
+    const rows = getUpcomingRecurringRows(
+      [
+        {
+          id: "next-month-late",
+          name: "Late bill",
+          active: true,
+          startMonth: "2026-01",
+          endMonth: null,
+          dueDay: 25,
+          billType: "fixed",
+          estimatedAmount: 75,
+        },
+      ],
+      "2026-05",
+      {},
+      { today: new Date(2026, 4, 20), windowDays: 7 },
+    );
+
+    assert.equal(rows.length, 0);
   });
 });
