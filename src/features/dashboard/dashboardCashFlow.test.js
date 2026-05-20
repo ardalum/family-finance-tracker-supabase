@@ -277,3 +277,44 @@ test("non-liquid, liability, and other-month movements are excluded", () => {
 
   assert.equal(result.cashPositionTotal, 2100);
 });
+
+test("cash position filters card payment movement by movement monthKey, not paid date month", () => {
+  const result = getDashboardCashFlow({
+    selectedMonth: "2026-05",
+    cashAccounts: [{ id: "checking", accountType: "checking", isActive: true }],
+    accountBalanceSnapshots: [
+      {
+        cashAccountId: "checking",
+        monthKey: "2026-05",
+        snapshotDate: "2026-05-31",
+        balanceAmount: 3000,
+      },
+    ],
+    accountMoneyMovements: [
+      {
+        sourceType: "credit_card_payment",
+        sourceId: "card-1:2026-05",
+        movementType: "credit_card_payment",
+        direction: "outflow",
+        amount: 400,
+        monthKey: "2026-05",
+        movementDate: "2026-06-02",
+        accountId: "checking",
+        isTracked: true,
+      },
+      {
+        sourceType: "credit_card_payment",
+        sourceId: "card-1:2026-04",
+        movementType: "credit_card_payment",
+        direction: "outflow",
+        amount: 999,
+        monthKey: "2026-04",
+        movementDate: "2026-05-02",
+        accountId: "checking",
+        isTracked: true,
+      },
+    ],
+  });
+
+  assert.equal(result.cashPositionTotal, 2600);
+});

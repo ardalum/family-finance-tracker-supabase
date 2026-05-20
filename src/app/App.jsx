@@ -428,6 +428,19 @@ function FinanceTrackerApp() {
     loadSupabaseMonthlyBalances,
   ]);
 
+  const saveSupabaseMonthlyBalanceAndRefreshDashboard = useCallback(
+    async (monthKey, cardId, entry) => {
+      await saveSupabaseMonthlyBalance(monthKey, cardId, entry);
+      await runRefreshSequence(
+        createDashboardInsightsRefreshers({
+          loadDashboardData,
+          loadInsightsData,
+        }),
+      );
+    },
+    [loadDashboardData, loadInsightsData, saveSupabaseMonthlyBalance],
+  );
+
   const finishFirstTimeSetup = useCallback(async () => {
     await completeActiveHouseholdSetup();
     setActiveView("dashboard");
@@ -679,7 +692,7 @@ function FinanceTrackerApp() {
     createSupabaseCreditCard,
     updateSupabaseCreditCard,
     deleteSupabaseCreditCard,
-    saveSupabaseMonthlyBalance,
+    saveSupabaseMonthlyBalance: saveSupabaseMonthlyBalanceAndRefreshDashboard,
     refreshData,
     createSupabaseBudget,
     updateSupabaseBudget,
