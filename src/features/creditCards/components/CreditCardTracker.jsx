@@ -82,7 +82,6 @@ export default function CreditCardTracker({
 }) {
   const [editingCard, setEditingCard] = useState(null);
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
-  const [editingBalanceCardId, setEditingBalanceCardId] = useState("");
   const [paymentModalDraft, setPaymentModalDraft] = useState(null);
   const [extraPayment, setExtraPayment] = useState("50");
   const [sortMode, setSortMode] = useState("default");
@@ -302,9 +301,18 @@ export default function CreditCardTracker({
     }
     const currentEntry = monthBalances[cardId] ?? { balance: 0, paid: false };
     const balance = Number.parseFloat(value);
+    const parsedBalance = Number.isFinite(balance) ? balance : 0;
     onMonthlyBalanceChange(selectedBalanceMonth, cardId, {
       ...currentEntry,
-      balance: Number.isFinite(balance) ? balance : 0,
+      balance: parsedBalance,
+      ...(parsedBalance > 0
+        ? {
+            paid: false,
+            paidAmount: 0,
+            paidDate: null,
+            paymentAccountId: "",
+          }
+        : {}),
     });
   }
   function handlePaidChange(cardId, paid) {
@@ -487,25 +495,24 @@ export default function CreditCardTracker({
               <table className="w-full table-fixed border-collapse text-sm">
                 <thead>
                   <tr className="border-b border-app-border text-left text-xs font-semibold uppercase tracking-wide text-text-muted">
-                    <th className="w-[30%] px-5 py-3">Account</th>
-                    <th className="w-[10%] px-3 py-3">Balance</th>
-                    <th className="w-[9%] px-3 py-3">Limit</th>
-                    <th className="w-[8%] px-3 py-3">Utilization</th>
-                    <th className="w-[13%] px-3 py-3">Statement closes</th>
-                    <th className="w-[10%] px-3 py-3">Payment due</th>
-                    <th className="w-[8%] px-3 py-3">Minimum</th>
-                    <th className="w-[9%] px-3 py-3">Status</th>
-                    <th className="w-[3%] px-3 py-3 text-right">Actions</th>
+                    <th className="w-[28%] px-2 py-3">Account</th>
+                    <th className="w-[10%] px-2 py-3">Balance</th>
+                    <th className="w-[9%] px-2 py-3">Limit</th>
+                    <th className="w-[8%] px-2 py-3">Utilization</th>
+                    <th className="w-[13%] px-2 py-3">Statement closes</th>
+                    <th className="w-[10%] px-2 py-3">Payment due</th>
+                    <th className="w-[8%] px-2 py-3">Minimum</th>
+                    <th className="w-[10%] px-2 py-3">Status</th>
+                    <th className="w-[4%] px-2 py-3 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {pagination.rows.map((row) => {
                     const utilization = row.creditLimit > 0 ? (row.balance / row.creditLimit) * 100 : 0;
-                    const rowEntry = monthBalances[row.card.id] ?? { balance: 0, paid: false };
                     const detailLine = buildAccountDetailLine(row.card);
                     return (
                       <tr key={row.card.id} className="border-b border-app-border align-middle last:border-b-0">
-                        <td className="px-5 py-3">
+                        <td className="px-2 py-3">
                           <div className="flex min-w-0 items-center gap-2">
                             <NetworkBadge network={row.card.network} />
                             <div className="min-w-0">
@@ -519,31 +526,30 @@ export default function CreditCardTracker({
                             </div>
                           </div>
                         </td>
-                        <td className="px-3 py-3">
-                          {editingBalanceCardId === row.card.id ? (
+                        <td className="px-2 py-3">
+                          <label className="sr-only" htmlFor={`balance-${row.card.id}`}>
+                            Balance for {row.card.name}
+                          </label>
+                          <div className="flex max-w-[110px] items-center gap-1 rounded-lg border border-app-border bg-app-surface px-2">
+                            <span className="text-xs font-semibold text-text-muted">$</span>
                             <input
+                              id={`balance-${row.card.id}`}
                               type="number"
                               min="0"
                               step="0.01"
-                              value={rowEntry.balance || 0}
+                              value={monthBalances[row.card.id]?.balance ?? ""}
                               onChange={(event) => handleBalanceChange(row.card.id, event.target.value)}
-                              onBlur={() => setEditingBalanceCardId("")}
-                              autoFocus
-                              className="h-9 w-full min-w-0 rounded-xl border border-app-border bg-app-surface px-2.5 text-sm font-semibold text-text-main outline-none focus:border-brand-primary"
+                              className="h-8 min-w-0 flex-1 bg-transparent text-sm font-semibold text-text-main outline-none"
                             />
-                          ) : (
-                            <p className="truncate text-sm font-semibold text-text-main">
-                              {formatCurrency(row.balance, { cents: true })}
-                            </p>
-                          )}
+                          </div>
                         </td>
-                        <td className="truncate px-3 py-3 text-sm text-text-main">
+                        <td className="truncate px-2 py-3 text-sm text-text-main">
                           {formatCurrency(row.creditLimit, { cents: false })}
                         </td>
-                        <td className="px-3 py-3">
+                        <td className="px-2 py-3">
                           <UtilizationCompact utilization={utilization} />
                         </td>
-                        <td className="px-3 py-3 text-sm text-text-soft">
+                        <td className="px-2 py-3 text-sm text-text-soft">
                           <div className="grid gap-1">
                             <p className="truncate">{row.closingDateText}</p>
                             <span
@@ -557,14 +563,14 @@ export default function CreditCardTracker({
                             </span>
                           </div>
                         </td>
-                        <td className="truncate px-3 py-3 text-sm text-text-main">{row.dueDateText}</td>
-                        <td className="truncate px-3 py-3 text-sm text-text-main">
+                        <td className="truncate px-2 py-3 text-sm text-text-main">{row.dueDateText}</td>
+                        <td className="truncate px-2 py-3 text-sm text-text-main">
                           {row.minPayment > 0 ? formatCurrency(row.minPayment, { cents: true }) : "--"}
                         </td>
-                        <td className="px-3 py-3">
+                        <td className="px-2 py-3">
                           <StatusPill status={row.status} />
                         </td>
-                        <td className="px-3 py-3 text-right">
+                        <td className="px-2 py-3 text-right">
                           <button
                             type="button"
                             className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-text-soft hover:text-text-main"
@@ -611,7 +617,23 @@ export default function CreditCardTracker({
                     </div>
 
                     <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-                      <Metric label="Balance" value={formatCurrency(row.balance, { cents: true })} />
+                      <Metric
+                        label="Balance"
+                        value={
+                          <div className="mt-0.5 flex max-w-[130px] items-center gap-1 rounded-lg border border-app-border bg-app-surface px-2">
+                            <span className="text-xs font-semibold text-text-muted">$</span>
+                            <input
+                              id={`mobile-balance-${row.card.id}`}
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={monthBalances[row.card.id]?.balance ?? ""}
+                              onChange={(event) => handleBalanceChange(row.card.id, event.target.value)}
+                              className="h-8 min-w-0 flex-1 bg-transparent text-sm font-semibold text-text-main outline-none"
+                            />
+                          </div>
+                        }
+                      />
                       <Metric label="Limit" value={formatCurrency(row.creditLimit, { cents: false })} />
                       <Metric label="Utilization" value={<UtilizationCompact utilization={utilization} compact />} />
                       <Metric label="Minimum" value={row.minPayment > 0 ? formatCurrency(row.minPayment, { cents: true }) : "--"} />
@@ -624,21 +646,6 @@ export default function CreditCardTracker({
                       />
                     </div>
 
-                    {editingBalanceCardId === row.card.id ? (
-                      <div className="mt-3">
-                        <label className="text-xs font-medium text-text-muted">Edit balance</label>
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          value={monthBalances[row.card.id]?.balance || 0}
-                          onChange={(event) => handleBalanceChange(row.card.id, event.target.value)}
-                          onBlur={() => setEditingBalanceCardId("")}
-                          autoFocus
-                          className="mt-1 h-10 w-full rounded-xl border border-app-border bg-app-surface px-3 text-sm font-semibold text-text-main outline-none"
-                        />
-                      </div>
-                    ) : null}
                     <div className="mt-3">
                       <StatusPill status={row.status} />
                     </div>
@@ -792,14 +799,6 @@ export default function CreditCardTracker({
               setMenuState(null);
             }}
             disabled={isSaving}
-          />
-          <MenuButton
-            label="Edit balance"
-            onClick={() => {
-              setEditingBalanceCardId(menuRow.card.id);
-              setMenuState(null);
-            }}
-            disabled={monthlyBalancesSaving}
           />
           <MenuButton
             label={menuEntry?.paid ? "Mark unpaid" : "Mark paid"}
