@@ -29,16 +29,16 @@ export default function AppShellV2({
           <div className="sticky top-0 grid h-screen grid-rows-[auto_minmax(0,1fr)_auto] gap-4 p-4">
             <div className="grid gap-3 rounded-2xl border border-app-border bg-white p-3 shadow-[0_8px_22px_-18px_rgba(15,42,74,0.55)]">
               <div
-                className={`flex min-w-0 items-center ${sidebarCollapsed ? "justify-center" : "gap-3"}`}
+                className={`flex min-w-0 items-center overflow-hidden ${sidebarCollapsed ? "justify-center" : "gap-3"}`}
               >
                 <AppBrandMark variant="sm" />
                 {!sidebarCollapsed ? (
-                  <div className="min-w-0 flex-1">
-                    <h1 className="truncate text-[0.98rem] font-semibold leading-tight text-text-main">
-                      Family Finance Tracker
+                  <div className="min-w-0 flex-1 overflow-hidden">
+                    <h1 className="truncate text-[1rem] font-semibold leading-tight text-text-main">
+                      Spedger
                     </h1>
-                    <p className="mt-0.5 truncate text-[0.72rem] font-medium text-text-muted">
-                      Household money center
+                    <p className="mt-0.5 truncate text-[0.72rem] font-medium leading-tight text-text-muted">
+                      Family money center
                     </p>
                   </div>
                 ) : null}
