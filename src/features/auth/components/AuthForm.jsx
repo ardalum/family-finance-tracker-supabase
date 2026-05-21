@@ -22,9 +22,12 @@ import {
 import { requestPasswordReset, signInWithEmail, signUpWithEmail } from "../authService.js";
 import { useAuth } from "../AuthProvider.jsx";
 
-export default function AuthForm() {
-  const { consumePostAuthMessage, startPasswordRecoveryMode } = useAuth();
-  const [mode, setMode] = useState(AUTH_FORM_MODES.signIn);
+export default function AuthForm({
+  initialMode = AUTH_FORM_MODES.signIn,
+  recoveryLinkError = false,
+} = {}) {
+  const { consumePostAuthMessage } = useAuth();
+  const [mode, setMode] = useState(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -51,6 +54,13 @@ export default function AuthForm() {
     if (!postAuthStatus) return;
     setStatus(postAuthStatus);
   }, [consumePostAuthMessage]);
+
+  useEffect(() => {
+    if (!recoveryLinkError) return;
+    setMode(AUTH_FORM_MODES.resetRequest);
+    setStatus("");
+    setError("This reset link is missing or expired. Request a new password reset link.");
+  }, [recoveryLinkError]);
 
   function resetAuthFormFeedback() {
     setError("");
@@ -83,7 +93,6 @@ export default function AuthForm() {
   }
 
   function handleForgotPasswordView() {
-    startPasswordRecoveryMode?.();
     setMode(AUTH_FORM_MODES.resetRequest);
     setPassword("");
     setShowPassword(false);

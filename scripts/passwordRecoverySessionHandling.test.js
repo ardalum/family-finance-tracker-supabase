@@ -13,19 +13,17 @@ const recoveryModeUtils = readFileSync("src/features/auth/authRecoveryMode.js", 
 
 test("auth provider tracks password recovery mode separately from regular session", () => {
   assert.match(authProvider, /const \[isPasswordRecovery, setIsPasswordRecovery\]/);
-  assert.match(authProvider, /setStoredRecoveryMode\(true\)/);
+  assert.match(authProvider, /const \[hasInvalidRecoveryLink, setHasInvalidRecoveryLink\]/);
   assert.match(authProvider, /finishPasswordRecoveryMode\(message = ""\)/);
   assert.match(authProvider, /consumePostAuthMessage\(\)/);
-  assert.match(recoveryModeUtils, /RECOVERY_MODE_STORAGE_KEY/);
+  assert.match(recoveryModeUtils, /hasRecoveryFlowIndicator/);
 });
 
 test("auth gate blocks app shell when recovery mode is active", () => {
   assert.match(authGate, /isPasswordRecovery/);
   assert.match(authGate, /shouldShowPasswordResetForm/);
-  assert.match(
-    authGate,
-    /\{shouldShowPasswordResetForm \? <PasswordResetForm \/> : <AuthForm \/>\}/,
-  );
+  assert.match(authGate, /hasInvalidRecoveryLink/);
+  assert.match(authGate, /<AuthForm initialMode="reset-request" recoveryLinkError \/>/);
 });
 
 test("password recovery completion signs out and routes user back to sign in with success message", () => {
@@ -37,8 +35,11 @@ test("password recovery completion signs out and routes user back to sign in wit
   assert.match(passwordResetForm, /Back to sign in/);
 });
 
-test("auth form can show post-recovery success message and enter recovery mode from forgot password", () => {
+test("auth form can show post-recovery success message and route forgot password to reset request", () => {
   assert.match(authForm, /consumePostAuthMessage/);
-  assert.match(authForm, /startPasswordRecoveryMode\?\.\(\);/);
   assert.match(authForm, /setMode\(AUTH_FORM_MODES\.resetRequest\);/);
+  assert.match(
+    authForm,
+    /This reset link is missing or expired\. Request a new password reset link\./,
+  );
 });

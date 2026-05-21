@@ -1,41 +1,33 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { getFriendlyAuthError } from "./authErrors.js";
 import { getCurrentSession, onAuthStateChange } from "./authService.js";
-import {
-  getStoredRecoveryMode,
-  isRecoveryAuthEvent,
-  RECOVERY_MODE_STORAGE_KEY,
-  setStoredRecoveryMode,
-  shouldEnterRecoveryMode,
-} from "./authRecoveryMode.js";
+import { hasRecoveryFlowIndicator, isRecoveryAuthEvent } from "./authRecoveryMode.js";
+import { hasPasswordResetTokens } from "./authStatusUtils.js";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
   const [authEvent, setAuthEvent] = useState("INITIAL_SESSION");
-  const [isPasswordRecovery, setIsPasswordRecovery] = useState(shouldEnterRecoveryMode());
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
+  const [hasInvalidRecoveryLink, setHasInvalidRecoveryLink] = useState(false);
   const [postAuthMessage, setPostAuthMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     let isMounted = true;
-    const enteredFromResetLink = shouldEnterRecoveryMode();
-    if (enteredFromResetLink) {
-      setStoredRecoveryMode(true);
-      setIsPasswordRecovery(true);
-    }
+    const enteredFromResetLink = hasRecoveryFlowIndicator();
+    const hasRecoveryTokens = hasPasswordResetTokens();
 
     getCurrentSession()
       .then((currentSession) => {
         if (!isMounted) return;
         setSession(currentSession);
         setAuthEvent("INITIAL_SESSION");
-        if (!currentSession && !enteredFromResetLink) {
-          setStoredRecoveryMode(false);
-          setIsPasswordRecovery(false);
-        }
+        const canRecoverPassword = Boolean(currentSession) && hasRecoveryTokens;
+        setIsPasswordRecovery(canRecoverPassword);
+        setHasInvalidRecoveryLink(Boolean(enteredFromResetLink) && !canRecoverPassword);
         setError("");
       })
       .catch((currentError) => {
@@ -50,15 +42,21 @@ export function AuthProvider({ children }) {
 
     try {
       unsubscribe = onAuthStateChange((nextSession, nextEvent) => {
-        const enteredRecovery = isRecoveryAuthEvent(nextEvent) || shouldEnterRecoveryMode();
+        const enteredFromLink = hasRecoveryFlowIndicator();
+        const hasRecoveryTokensInUrl = hasPasswordResetTokens();
+        const enteredRecovery =
+          isRecoveryAuthEvent(nextEvent) || (Boolean(nextSession) && hasRecoveryTokensInUrl);
         setSession(nextSession);
         setAuthEvent(nextEvent || "AUTH_STATE_CHANGED");
         if (enteredRecovery) {
-          setStoredRecoveryMode(true);
           setIsPasswordRecovery(true);
-        } else if (!nextSession) {
-          setStoredRecoveryMode(false);
+          setHasInvalidRecoveryLink(false);
+        } else if (enteredFromLink && !nextSession) {
           setIsPasswordRecovery(false);
+          setHasInvalidRecoveryLink(true);
+        } else if (!nextSession) {
+          setIsPasswordRecovery(false);
+          setHasInvalidRecoveryLink(false);
         }
         setError("");
         setLoading(false);
@@ -74,26 +72,9 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return undefined;
-
-    function handleStorage(event) {
-      if (event.key !== RECOVERY_MODE_STORAGE_KEY) return;
-      setIsPasswordRecovery(getStoredRecoveryMode());
-    }
-
-    window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
-  }, []);
-
-  function startPasswordRecoveryMode() {
-    setStoredRecoveryMode(true);
-    setIsPasswordRecovery(true);
-  }
-
   function finishPasswordRecoveryMode(message = "") {
-    setStoredRecoveryMode(false);
     setIsPasswordRecovery(false);
+    setHasInvalidRecoveryLink(false);
     setPostAuthMessage(message);
   }
 
@@ -112,11 +93,19 @@ export function AuthProvider({ children }) {
       loading,
       error,
       setError,
-      startPasswordRecoveryMode,
+      hasInvalidRecoveryLink,
       finishPasswordRecoveryMode,
       consumePostAuthMessage,
     }),
-    [authEvent, error, isPasswordRecovery, loading, postAuthMessage, session],
+    [
+      authEvent,
+      error,
+      hasInvalidRecoveryLink,
+      isPasswordRecovery,
+      loading,
+      postAuthMessage,
+      session,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
