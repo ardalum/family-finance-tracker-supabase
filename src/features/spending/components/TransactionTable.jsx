@@ -28,6 +28,7 @@ export default function TransactionTable({
   transactions,
   cards,
   categories,
+  selectedMonthLabel,
   filters,
   onFiltersChange,
   onEdit,
@@ -150,6 +151,7 @@ export default function TransactionTable({
           activeFilterChips={activeFilterChips}
           onClearChip={clearChip}
           onClearQuickFilterForManualControl={() => setQuickFilter("all")}
+          selectedMonthLabel={selectedMonthLabel}
         />
 
         <div className="grid gap-2 border-b border-app-border bg-app-background px-4 py-3 text-xs font-medium text-text-muted md:px-5">
@@ -189,7 +191,7 @@ export default function TransactionTable({
           </div>
         ) : (
           <>
-            <div className="hidden border-b border-app-border bg-app-background/40 px-5 py-2 text-xs font-semibold uppercase tracking-normal text-text-muted lg:grid lg:grid-cols-[120px_minmax(180px,1.2fr)_minmax(120px,0.9fr)_minmax(120px,0.9fr)_120px_104px] lg:items-center lg:gap-3">
+            <div className="hidden border-b border-app-border bg-app-background/40 px-5 py-2 text-xs font-semibold uppercase tracking-normal text-text-muted lg:grid lg:grid-cols-[120px_minmax(240px,1.3fr)_minmax(130px,0.8fr)_minmax(130px,0.8fr)_120px_84px] lg:items-center lg:gap-3">
               <span>Date</span>
               <span>Merchant</span>
               <span>Category</span>
@@ -210,7 +212,7 @@ export default function TransactionTable({
                       {formatCurrency(group.impactTotal)} impact
                     </span>
                   </div>
-                  <div className="hidden gap-2 rounded-2xl border border-app-border bg-app-surface p-2 lg:grid">
+                  <div className="hidden gap-1 rounded-2xl border border-app-border bg-app-surface p-2 lg:grid">
                     {group.transactions.map((transaction) => {
                       const isRecurring = transaction.source === "recurring";
                       const primaryCategory = getCategoryName(
@@ -219,20 +221,31 @@ export default function TransactionTable({
                       );
                       const amountValue = Number(transaction.amount || 0);
                       const isIncome = (transaction.transactionType || "expense") === "income";
+                      const merchantInitials = String(transaction.merchant || "T")
+                        .trim()
+                        .split(/\s+/)
+                        .slice(0, 2)
+                        .map((part) => part[0]?.toUpperCase() ?? "")
+                        .join("");
 
                       return (
                         <article
                           key={transaction.id}
-                          className="grid items-center gap-3 rounded-xl border border-transparent px-3 py-2 transition hover:border-brand-primary/20 hover:bg-app-background lg:grid-cols-[120px_minmax(180px,1.2fr)_minmax(120px,0.9fr)_minmax(120px,0.9fr)_120px_104px]"
+                          className="grid items-center gap-3 rounded-xl border border-transparent px-3 py-2 transition hover:border-brand-primary/20 hover:bg-app-background lg:grid-cols-[120px_minmax(240px,1.3fr)_minmax(130px,0.8fr)_minmax(130px,0.8fr)_120px_84px]"
                         >
                           <p className="text-sm font-medium text-text-soft">{transaction.date}</p>
-                          <div className="min-w-0">
-                            <p className="truncate text-sm font-semibold text-text-main">
-                              {transaction.merchant}
-                            </p>
-                            <p className="truncate text-xs text-text-muted">
-                              {transaction.notes || "No note"}
-                            </p>
+                          <div className="min-w-0 flex items-center gap-2.5">
+                            <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-app-background text-xs font-semibold text-text-soft ring-1 ring-inset ring-app-border">
+                              {merchantInitials || "T"}
+                            </span>
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-semibold text-text-main">
+                                {transaction.merchant}
+                              </p>
+                              <p className="truncate text-xs text-text-muted">
+                                {transaction.notes || "No note"}
+                              </p>
+                            </div>
                           </div>
                           <div className="min-w-0">
                             <span className="inline-flex max-w-full items-center truncate rounded-full bg-app-background px-2.5 py-1 text-xs font-semibold text-text-soft ring-1 ring-inset ring-app-border">
@@ -253,20 +266,21 @@ export default function TransactionTable({
                             <Button
                               type="button"
                               variant="secondary"
-                              className="min-h-8 px-2.5 py-1.5 text-xs"
+                              className="min-h-8 min-w-8 px-2 py-1.5 text-xs"
                               onClick={() => onEdit(transaction)}
                               disabled={isSaving || isRecurring}
+                              aria-label={`Edit ${transaction.merchant}`}
                               title={isRecurring ? "Manage from Recurring Payments" : "Edit transaction"}
                             >
                               <Edit size={14} aria-hidden="true" />
-                              Edit
                             </Button>
                             <Button
                               type="button"
                               variant="danger"
-                              className="min-h-8 px-2.5 py-1.5 text-xs"
+                              className="min-h-8 min-w-8 px-2 py-1.5 text-xs"
                               onClick={() => requestDelete(transaction)}
                               disabled={isSaving || isRecurring}
+                              aria-label={`Delete ${transaction.merchant}`}
                               title={
                                 isRecurring
                                   ? "Mark unpaid from Recurring Payments"
@@ -274,7 +288,6 @@ export default function TransactionTable({
                               }
                             >
                               <Trash2 size={14} aria-hidden="true" />
-                              Delete
                             </Button>
                           </div>
                         </article>

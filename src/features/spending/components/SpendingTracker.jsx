@@ -1,9 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { Plus } from "lucide-react";
-import Button from "../../../components/ui/Button.jsx";
-import Card from "../../../components/ui/Card.jsx";
-import Select from "../../../components/ui/Select.jsx";
-import { buildMonthOptions, getCurrentMonthKey } from "../../../lib/dates.js";
+import { useEffect, useState } from "react";
+import { getCurrentMonthKey } from "../../../lib/dates.js";
 import { formatMonthLabel } from "../../../lib/formatters.js";
 import { consumeNavigationTarget } from "../../../lib/navigationTargets.js";
 import SpendingMigrationPanel from "./SpendingMigrationPanel.jsx";
@@ -33,7 +29,6 @@ export default function SpendingTracker({
   isSaving = false,
   categoriesLoading = false,
   categoriesError = "",
-  onMonthChange,
   onCreateTransaction,
   onUpdateTransaction,
   onDeleteTransaction,
@@ -42,7 +37,6 @@ export default function SpendingTracker({
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [filters, setFilters] = useState(emptyFilters);
-  const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const activeCards = creditCards.filter((card) => card.isActive);
 
   useEffect(() => {
@@ -75,11 +69,6 @@ export default function SpendingTracker({
     if (editingTransaction?.id === transaction.id) setEditingTransaction(null);
   }
 
-  function openAddModal() {
-    setEditingTransaction(null);
-    setIsTransactionModalOpen(true);
-  }
-
   function openEditModal(transaction) {
     setEditingTransaction(transaction);
     setIsTransactionModalOpen(true);
@@ -91,7 +80,7 @@ export default function SpendingTracker({
   }
 
   return (
-    <section className="mx-auto grid w-full max-w-7xl gap-6">
+    <section className="grid w-full gap-6">
       {error ? (
         <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B]">
           {error}
@@ -112,55 +101,21 @@ export default function SpendingTracker({
         disabled={loading || isSaving || categoriesLoading}
       />
 
-      <Card className="border border-app-border bg-app-surface p-5 shadow-sm">
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto_220px] lg:items-end">
-          <div>
-            <p className="text-sm font-medium text-text-muted">Transactions</p>
-            <h2 className="mt-1 text-2xl font-semibold tracking-normal text-text-main">Transactions</h2>
-            <p className="mt-1 text-sm text-text-soft">
-              All income and expenses for {formatMonthLabel(selectedMonth)}.
-            </p>
-            {loading ? (
-              <p className="mt-2 text-sm text-text-muted">Loading transactions...</p>
-            ) : null}
-            {categoriesLoading ? (
-              <p className="mt-2 text-sm text-text-muted">Loading categories...</p>
-            ) : null}
-            {isSaving ? <p className="mt-2 text-sm text-text-muted">Saving transaction...</p> : null}
-          </div>
-          <Button
-            type="button"
-            onClick={openAddModal}
-            disabled={loading || isSaving || categoriesLoading}
-          >
-            <Plus size={16} aria-hidden="true" />
-            Add Transaction
-          </Button>
-          <Select
-            label="Spending month"
-            value={selectedMonth}
-            onChange={(event) => {
-              setEditingTransaction(null);
-              setIsTransactionModalOpen(false);
-              setFilters(emptyFilters);
-              onMonthChange(event.target.value);
-            }}
-          >
-            {monthOptions.map((month) => (
-              <option key={month} value={month}>
-                {formatMonthLabel(month)}
-              </option>
-            ))}
-          </Select>
-        </div>
-      </Card>
+      <header className="grid gap-1">
+        <h2 className="text-2xl font-semibold tracking-tight text-text-main">Transactions</h2>
+        <p className="text-sm text-text-soft">All income and expenses for {formatMonthLabel(selectedMonth)}</p>
+        {loading ? <p className="text-xs text-text-muted">Loading transactions...</p> : null}
+        {categoriesLoading ? <p className="text-xs text-text-muted">Loading categories...</p> : null}
+        {isSaving ? <p className="text-xs text-text-muted">Saving transaction...</p> : null}
+      </header>
 
-      <SpendingSummary transactions={transactions} cards={activeCards} categories={categories} />
+      <SpendingSummary transactions={transactions} categories={categories} />
 
       <TransactionTable
         transactions={transactions}
         cards={activeCards}
         categories={categories}
+        selectedMonthLabel={formatMonthLabel(selectedMonth)}
         filters={filters}
         onFiltersChange={setFilters}
         onEdit={openEditModal}
