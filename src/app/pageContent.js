@@ -16,8 +16,8 @@ export const pageContent = {
     description: "",
   },
   recurring: {
-    title: "Recurring Payments",
-    description: "Manage monthly bills, subscriptions, and mandatory payments.",
+    title: "Bills",
+    description: "Stay on top of what's due and never miss a payment.",
   },
   insights: {
     title: "Insights",

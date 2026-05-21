@@ -248,6 +248,11 @@ export function createAppViewProps({
       onMarkRecurringUnpaid: markSupabaseRecurringUnpaid,
       onSkipRecurringPayment: skipSupabaseRecurringPayment,
       onImportLocalRecurringPayments: importLocalRecurringToSupabase,
+      monthlyBalances: supabaseMonthlyBalances,
+      monthlyBalancesLoading,
+      monthlyBalancesSaving,
+      monthlyBalancesError,
+      onMonthlyBalanceChange: saveSupabaseMonthlyBalance,
     },
     insightsProps: {
       appData: insightsAppData,
@@ -386,3 +391,4 @@ export function createAppViewProps({
     },
   };
 }
+

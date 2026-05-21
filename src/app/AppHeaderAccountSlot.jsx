@@ -18,11 +18,14 @@ export default function AppHeaderAccountSlot({
   onBudgetMonthChange,
   balanceMonth,
   onBalanceMonthChange,
+  recurringMonth,
+  onRecurringMonthChange,
 }) {
   const isDashboard = activeView === "dashboard";
   const isSpending = activeView === "spending";
   const isBudgets = activeView === "budgets";
   const isCreditCards = activeView === "credit-cards";
+  const isRecurring = activeView === "recurring";
   const activeMonth = isDashboard
     ? dashboardMonth
     : isSpending
@@ -31,7 +34,9 @@ export default function AppHeaderAccountSlot({
         ? budgetMonth
         : isCreditCards
           ? balanceMonth
-          : "";
+          : isRecurring
+            ? recurringMonth
+            : "";
   const onMonthChange = isDashboard
     ? onDashboardMonthChange
     : isSpending
@@ -40,8 +45,10 @@ export default function AppHeaderAccountSlot({
         ? onBudgetMonthChange
         : isCreditCards
           ? onBalanceMonthChange
-          : null;
-  const actionLabel = isBudgets ? "Add budget" : isCreditCards ? "Add card" : "Add transaction";
+          : isRecurring
+            ? onRecurringMonthChange
+            : null;
+  const actionLabel = isBudgets ? "Add budget" : isCreditCards ? "Add card" : isRecurring ? "Add bill" : "Add transaction";
   const showMonthControls = Boolean(activeMonth && onMonthChange);
   const monthOptions = showMonthControls ? buildMonthOptions(activeMonth) : [];
 
@@ -75,7 +82,9 @@ export default function AppHeaderAccountSlot({
                     ? "Transactions month"
                     : isBudgets
                       ? "Budget month"
-                      : "Cards and debt month"
+                      : isRecurring
+                        ? "Bills month"
+                        : "Cards and debt month"
               }
             >
               {monthOptions.map((month) => (
@@ -141,3 +150,4 @@ export default function AppHeaderAccountSlot({
     </div>
   );
 }
+

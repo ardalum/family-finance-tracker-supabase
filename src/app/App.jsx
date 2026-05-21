@@ -788,6 +788,10 @@ function FinanceTrackerApp() {
       dispatchNavigation("credit-cards", "add-card");
       return;
     }
+    if (activeView === "recurring") {
+      dispatchNavigation("recurring", "add-bill");
+      return;
+    }
 
     openQuickAdd();
   }
@@ -835,6 +839,8 @@ function FinanceTrackerApp() {
       onBudgetMonthChange={setSelectedBudgetMonth}
       selectedBalanceMonth={selectedBalanceMonth}
       onBalanceMonthChange={setSelectedBalanceMonth}
+      selectedRecurringMonth={selectedRecurringMonth}
+      onRecurringMonthChange={setSelectedRecurringMonth}
       onViewChange={setActiveView}
       onQuickAdd={handlePrimaryHeaderAction}
     >
@@ -853,3 +859,4 @@ function FinanceTrackerApp() {
     </AppShellFrame>
   );
 }
+

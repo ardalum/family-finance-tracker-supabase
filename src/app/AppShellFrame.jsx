@@ -20,6 +20,8 @@ export default function AppShellFrame({
   onBudgetMonthChange,
   selectedBalanceMonth,
   onBalanceMonthChange,
+  selectedRecurringMonth,
+  onRecurringMonthChange,
   onViewChange,
   onQuickAdd,
   children,
@@ -44,6 +46,8 @@ export default function AppShellFrame({
         onBudgetMonthChange={onBudgetMonthChange}
         balanceMonth={selectedBalanceMonth}
         onBalanceMonthChange={onBalanceMonthChange}
+        recurringMonth={selectedRecurringMonth}
+        onRecurringMonthChange={onRecurringMonthChange}
       />
     ),
   };
@@ -57,3 +61,4 @@ export default function AppShellFrame({
     </ShellComponent>
   );
 }
+
