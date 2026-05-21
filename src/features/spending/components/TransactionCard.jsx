@@ -23,6 +23,7 @@ export default function TransactionCard({
   const categoryRows = getTransactionCategoryRows(transaction);
   const impactAmount = getTransactionImpactAmount(transaction);
   const hasDifferentImpact = impactAmount !== Number(transaction.amount || 0);
+  const isIncome = (transaction.transactionType || "expense") === "income";
 
   return (
     <article className="grid min-w-0 gap-3 rounded-2xl border border-app-border bg-app-surface p-4 shadow-sm transition hover:border-brand-primary/30 hover:bg-app-background">
@@ -47,7 +48,8 @@ export default function TransactionCard({
           <p className="text-xs font-medium text-text-muted">{transaction.date}</p>
         </div>
         <div className="shrink-0 text-right">
-          <p className="text-lg font-semibold text-text-main">
+          <p className={`text-lg font-semibold ${isIncome ? "text-status-successDark" : "text-text-main"}`}>
+            {isIncome ? "+" : ""}
             {formatCurrency(transaction.amount)}
           </p>
           {hasDifferentImpact ? (

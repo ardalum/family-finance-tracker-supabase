@@ -2,50 +2,49 @@ import Card from "../../../components/ui/Card.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
 import {
   getTotalSpending,
-  summarizeByCard,
   summarizeByCategory,
-  summarizeByMerchant,
 } from "../spendingService.js";
 
-export default function SpendingSummary({ transactions, cards, categories }) {
-  const total = getTotalSpending(transactions);
+export default function SpendingSummary({ transactions, categories }) {
+  const totalSpent = getTotalSpending(transactions);
+  const transactionCount = transactions.length;
+  const topCategory = summarizeByCategory(transactions, categories)[0] ?? null;
+  const largestTransaction = transactions.reduce(
+    (largest, transaction) =>
+      Number(transaction.amount || 0) > largest ? Number(transaction.amount || 0) : largest,
+    0,
+  );
 
   return (
     <section className="grid gap-4 lg:grid-cols-4">
-      <Card className="p-5">
-        <p className="text-sm font-medium text-gray-500">Total spending</p>
-        <p className="mt-2 text-2xl font-semibold tracking-normal break-words text-gray-950 sm:text-3xl">
-          {formatCurrency(total)}
+      <Card className="border border-app-border bg-app-surface p-5 shadow-sm">
+        <p className="text-sm font-medium text-text-muted">Total spent this month</p>
+        <p className="mt-2 text-2xl font-semibold tracking-normal break-words text-text-main sm:text-3xl">
+          {formatCurrency(totalSpent)}
         </p>
       </Card>
-      <SummaryList title="By category" items={summarizeByCategory(transactions, categories)} />
-      <SummaryList title="By card" items={summarizeByCard(transactions, cards)} />
-      <SummaryList title="By store" items={summarizeByMerchant(transactions)} />
+      <SummaryMetric title="Transaction count" value={`${transactionCount}`} />
+      <SummaryMetric
+        title="Top category"
+        value={topCategory ? topCategory.name : "No category yet"}
+        helper={topCategory ? formatCurrency(topCategory.amount) : ""}
+      />
+      <SummaryMetric title="Largest transaction" value={formatCurrency(largestTransaction)} />
     </section>
   );
 }
 
-function SummaryList({ title, items }) {
+function SummaryMetric({ title, value, helper = "" }) {
   return (
-    <Card className="p-5">
-      <p className="text-sm font-semibold text-gray-950">{title}</p>
-      {items.length === 0 ? (
-        <p className="mt-3 text-sm text-gray-500">No spending yet.</p>
-      ) : (
-        <div className="mt-3 grid gap-2">
-          {items.slice(0, 5).map((item) => (
-            <div key={item.name} className="grid grid-cols-[1fr_auto] gap-3 text-sm">
-              <span className="min-w-0 truncate text-gray-600">{item.name}</span>
-              <span
-                className="text-right font-semibold text-gray-950"
-                style={{ fontVariantNumeric: "tabular-nums" }}
-              >
-                {formatCurrency(item.amount)}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
+    <Card className="border border-app-border bg-app-surface p-5 shadow-sm">
+      <p className="text-sm font-medium text-text-muted">{title}</p>
+      <p
+        className="mt-2 truncate text-2xl font-semibold tracking-normal text-text-main sm:text-3xl"
+        style={{ fontVariantNumeric: "tabular-nums" }}
+      >
+        {value}
+      </p>
+      {helper ? <p className="mt-1 text-sm text-text-soft">{helper}</p> : null}
     </Card>
   );
 }

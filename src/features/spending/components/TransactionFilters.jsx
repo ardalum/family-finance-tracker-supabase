@@ -27,7 +27,7 @@ export default function TransactionFilters({
   onClearQuickFilterForManualControl,
 }) {
   return (
-    <div className="grid gap-4 border-b border-app-border p-4">
+    <div className="grid gap-4 border-b border-app-border bg-app-surface p-4 md:p-5">
       <div className="grid min-w-0 gap-3 lg:grid-cols-[minmax(260px,1fr)_180px_auto] lg:items-end">
         <Input
           label="Search transactions"
@@ -58,7 +58,7 @@ export default function TransactionFilters({
             aria-expanded={showMobileFilters}
           >
             <SlidersHorizontal size={16} aria-hidden="true" />
-            Filters
+            More filters
             <ChevronDown
               size={16}
               aria-hidden="true"

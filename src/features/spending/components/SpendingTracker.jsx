@@ -112,23 +112,21 @@ export default function SpendingTracker({
         disabled={loading || isSaving || categoriesLoading}
       />
 
-      <Card className="p-5">
+      <Card className="border border-app-border bg-app-surface p-5 shadow-sm">
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto_220px] lg:items-end">
           <div>
-            <p className="text-sm font-medium text-[#6B7280]">Transactions</p>
-            <h2 className="mt-1 text-2xl font-semibold tracking-normal text-[#111827]">
-              {formatMonthLabel(selectedMonth)}
-            </h2>
-            <p className="mt-1 text-sm text-[#6B7280]">
-              Track spending, refunds, payments, and recurring-linked transactions for this month.
+            <p className="text-sm font-medium text-text-muted">Transactions</p>
+            <h2 className="mt-1 text-2xl font-semibold tracking-normal text-text-main">Transactions</h2>
+            <p className="mt-1 text-sm text-text-soft">
+              All income and expenses for {formatMonthLabel(selectedMonth)}.
             </p>
             {loading ? (
-              <p className="mt-2 text-sm text-[#6B7280]">Loading transactions...</p>
+              <p className="mt-2 text-sm text-text-muted">Loading transactions...</p>
             ) : null}
             {categoriesLoading ? (
-              <p className="mt-2 text-sm text-[#6B7280]">Loading categories...</p>
+              <p className="mt-2 text-sm text-text-muted">Loading categories...</p>
             ) : null}
-            {isSaving ? <p className="mt-2 text-sm text-[#6B7280]">Saving transaction...</p> : null}
+            {isSaving ? <p className="mt-2 text-sm text-text-muted">Saving transaction...</p> : null}
           </div>
           <Button
             type="button"
