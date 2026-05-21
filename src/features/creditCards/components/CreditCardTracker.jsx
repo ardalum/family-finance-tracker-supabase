@@ -405,7 +405,7 @@ export default function CreditCardTracker({
           </p>
         </div>
 
-        <div className="grid gap-3 border-b border-app-border px-4 py-4 sm:px-5 lg:grid-cols-[minmax(0,1.2fr)_180px_200px_170px_170px_auto] lg:items-end">
+        <div className="grid gap-3 border-b border-app-border px-4 py-4 sm:grid-cols-2 sm:px-5 xl:grid-cols-3 2xl:grid-cols-[minmax(0,1.2fr)_180px_200px_170px_170px_auto] 2xl:items-end">
           <label className="grid gap-1 text-sm font-medium text-text-soft">
             Search
             <input
@@ -491,19 +491,19 @@ export default function CreditCardTracker({
           <p className="px-5 py-6 text-sm text-text-muted">Add your first card to start tracking debt.</p>
         ) : (
           <>
-            <div className="hidden min-w-0 lg:block">
+            <div className="hidden min-w-0 2xl:block">
               <table className="w-full table-fixed border-collapse text-sm">
                 <thead>
                   <tr className="border-b border-app-border text-left text-xs font-semibold uppercase tracking-wide text-text-muted">
-                    <th className="w-[28%] px-2 py-3">Account</th>
-                    <th className="w-[10%] px-2 py-3">Balance</th>
+                    <th className="w-[23%] px-2 py-3">Account</th>
+                    <th className="w-[9%] px-2 py-3">Balance</th>
                     <th className="w-[9%] px-2 py-3">Limit</th>
                     <th className="w-[8%] px-2 py-3">Utilization</th>
                     <th className="w-[13%] px-2 py-3">Statement closes</th>
                     <th className="w-[10%] px-2 py-3">Payment due</th>
                     <th className="w-[8%] px-2 py-3">Minimum</th>
-                    <th className="w-[10%] px-2 py-3">Status</th>
-                    <th className="w-[4%] px-2 py-3 text-right">Actions</th>
+                    <th className="w-[12%] px-2 py-3">Status</th>
+                    <th className="w-[8%] px-2 py-3 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -527,21 +527,14 @@ export default function CreditCardTracker({
                           </div>
                         </td>
                         <td className="px-2 py-3">
-                          <label className="sr-only" htmlFor={`balance-${row.card.id}`}>
-                            Balance for {row.card.name}
-                          </label>
-                          <div className="flex max-w-[110px] items-center gap-1 rounded-lg border border-app-border bg-app-surface px-2">
-                            <span className="text-xs font-semibold text-text-muted">$</span>
-                            <input
-                              id={`balance-${row.card.id}`}
-                              type="number"
-                              min="0"
-                              step="0.01"
-                              value={monthBalances[row.card.id]?.balance ?? ""}
-                              onChange={(event) => handleBalanceChange(row.card.id, event.target.value)}
-                              className="h-8 min-w-0 flex-1 bg-transparent text-sm font-semibold text-text-main outline-none"
-                            />
-                          </div>
+                          <BalanceInput
+                            cardId={row.card.id}
+                            cardName={row.card.name}
+                            value={monthBalances[row.card.id]?.balance}
+                            onChange={handleBalanceChange}
+                            className="max-w-[96px]"
+                            inputIdPrefix="balance"
+                          />
                         </td>
                         <td className="truncate px-2 py-3 text-sm text-text-main">
                           {formatCurrency(row.creditLimit, { cents: false })}
@@ -587,7 +580,7 @@ export default function CreditCardTracker({
               </table>
             </div>
 
-            <div className="grid gap-3 p-4 lg:hidden">
+            <div className="grid gap-3 p-4 2xl:hidden">
               {pagination.rows.map((row) => {
                 const utilization = row.creditLimit > 0 ? (row.balance / row.creditLimit) * 100 : 0;
                 const detailLine = buildAccountDetailLine(row.card);
@@ -620,18 +613,14 @@ export default function CreditCardTracker({
                       <Metric
                         label="Balance"
                         value={
-                          <div className="mt-0.5 flex max-w-[130px] items-center gap-1 rounded-lg border border-app-border bg-app-surface px-2">
-                            <span className="text-xs font-semibold text-text-muted">$</span>
-                            <input
-                              id={`mobile-balance-${row.card.id}`}
-                              type="number"
-                              min="0"
-                              step="0.01"
-                              value={monthBalances[row.card.id]?.balance ?? ""}
-                              onChange={(event) => handleBalanceChange(row.card.id, event.target.value)}
-                              className="h-8 min-w-0 flex-1 bg-transparent text-sm font-semibold text-text-main outline-none"
-                            />
-                          </div>
+                          <BalanceInput
+                            cardId={row.card.id}
+                            cardName={row.card.name}
+                            value={monthBalances[row.card.id]?.balance}
+                            onChange={handleBalanceChange}
+                            className="mt-0.5 max-w-[130px]"
+                            inputIdPrefix="mobile-balance"
+                          />
                         }
                       />
                       <Metric label="Limit" value={formatCurrency(row.creditLimit, { cents: false })} />
@@ -890,6 +879,48 @@ function SummaryCard({
         <p className="mt-0.5 text-sm text-text-muted">{helper}</p>
       </div>
       {rightAdornment ? <div className="shrink-0">{rightAdornment}</div> : null}
+    </div>
+  );
+}
+
+function BalanceInput({
+  cardId,
+  cardName,
+  value,
+  onChange,
+  className = "",
+  inputIdPrefix = "balance",
+}) {
+  const [draftValue, setDraftValue] = useState(null);
+  const parsedValue = Number(value);
+  const savedValue = Number.isFinite(parsedValue) ? parsedValue : 0;
+  const displayValue = draftValue ?? String(savedValue);
+
+  return (
+    <div
+      className={`flex items-center gap-1 rounded-lg border border-app-border bg-app-surface px-2 ${className}`}
+    >
+      <span className="text-xs font-semibold text-text-muted">$</span>
+      <input
+        id={`${inputIdPrefix}-${cardId}`}
+        type="number"
+        min="0"
+        step="0.01"
+        inputMode="decimal"
+        value={displayValue}
+        onFocus={(event) => {
+          setDraftValue(String(savedValue));
+          requestAnimationFrame(() => event.currentTarget.select());
+        }}
+        onChange={(event) => {
+          const nextValue = event.target.value;
+          setDraftValue(nextValue);
+          onChange(cardId, nextValue);
+        }}
+        onBlur={() => setDraftValue(null)}
+        className="h-8 min-w-0 flex-1 bg-transparent text-sm font-semibold text-text-main outline-none"
+        aria-label={`Balance for ${cardName}`}
+      />
     </div>
   );
 }
