@@ -70,6 +70,12 @@ function toDateKey(date) {
 function parseDateKey(dateKey) {
   return new Date(`${dateKey}T00:00:00`);
 }
+function daysUntil(date) {
+  const today = new Date();
+  const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  return Math.round((target.getTime() - startOfToday.getTime()) / 86400000);
+}
 function statusGroup(label) {
   if (label === "Past due") return "Past due";
   if (label === "Due soon" || label === "Due now") return "Due soon";
@@ -557,9 +563,9 @@ export default function RecurringPayments({
         </div>
       </section>
       <aside className="grid gap-4">
-        <section className="rounded-2xl border border-app-border bg-white p-4 shadow-sm sm:p-5">
+        <section className="rounded-2xl border border-app-border bg-white p-4 shadow-sm sm:p-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-[1.7rem] font-semibold tracking-tight text-[#071F42]">Upcoming calendar</h3>
+            <h3 className="whitespace-nowrap text-lg font-semibold leading-tight tracking-tight text-[#071F42]">Upcoming calendar</h3>
             <div className="inline-flex items-center gap-1 text-[#071F42]">
               <button type="button" disabled className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-[#071F42]/70 disabled:opacity-70">
                 <ChevronLeft size={15} />
@@ -569,10 +575,10 @@ export default function RecurringPayments({
               </button>
             </div>
           </div>
-          <p className="mt-1 text-2xl font-medium text-[#071F42]">{formatMonthLabel(selectedMonth)}</p>
-          <div className="mt-3 grid grid-cols-7 gap-y-1 text-center text-xs text-text-muted">
+          <p className="mt-1 text-sm font-medium text-[#667085]">{formatMonthLabel(selectedMonth)}</p>
+          <div className="mt-2 grid grid-cols-7 gap-y-0.5 text-center text-[11px] text-text-muted">
             {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map((day) => (
-              <span key={day} className="py-1 font-semibold">
+              <span key={day} className="py-0.5 font-semibold">
                 {day}
               </span>
             ))}
@@ -595,7 +601,7 @@ export default function RecurringPayments({
                       ? "ring-[#86EFAC] text-[#1D8E4B]"
                       : "";
               return (
-                <div key={`${cell.dateKey}-${index}`} className="grid place-items-center py-1">
+                <div key={`${cell.dateKey}-${index}`} className="grid place-items-center py-0.5">
                   <span
                     className={`grid h-9 w-9 place-items-center rounded-full text-sm ${
                       cell.muted ? "text-text-muted/60" : `text-[#071F42] ${ringClass ? `ring-1 ${ringClass}` : ""}`
@@ -608,20 +614,20 @@ export default function RecurringPayments({
               );
             })}
           </div>
-          <div className="mt-3 flex items-center gap-5 text-sm">
+          <div className="mt-2.5 flex items-center gap-4 text-xs">
             <LegendDot color="bg-[#DC2626]" label="Past due" />
             <LegendDot color="bg-[#EA7A0A]" label="Due soon" />
             <LegendDot color="bg-[#1D8E4B]" label="Paid" />
           </div>
         </section>
-        <section className="rounded-2xl border border-app-border bg-white p-4 shadow-sm sm:p-5">
-          <h3 className="text-[1.7rem] font-semibold tracking-tight text-[#071F42]">Coming up next</h3>
-          <div className="mt-3 grid gap-2">
+        <section className="rounded-2xl border border-app-border bg-white p-4 shadow-sm sm:p-4">
+          <h3 className="whitespace-nowrap text-lg font-semibold leading-tight tracking-tight text-[#071F42]">Coming up next</h3>
+          <div className="mt-2.5 grid gap-2">
             {upcomingRows.length === 0 ? (
               <p className="text-sm text-text-muted">No upcoming unpaid bills.</p>
             ) : (
               upcomingRows.map((row) => (
-                <div key={`next-${row.id}`} className="rounded-xl border border-app-border bg-app-background px-3 py-2">
+                <div key={`next-${row.id}`} className="rounded-xl border border-app-border bg-app-background px-2.5 py-2">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex min-w-0 items-start gap-2">
                       <BillDatePill dueDate={row.dueDate} statusGroup={row.statusGroup} compact />
@@ -630,9 +636,14 @@ export default function RecurringPayments({
                         <p className="truncate text-xs text-text-muted">{row.category}</p>
                       </div>
                     </div>
-                    <p className="text-sm font-semibold text-text-main">
-                      {formatCurrency(row.amount, { cents: true })}
-                    </p>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold text-text-main">{formatCurrency(row.amount, { cents: true })}</p>
+                      <p className="text-xs text-[#EA7A0A]">
+                        {daysUntil(row.dueDate) <= 0
+                          ? "due now"
+                          : `in ${daysUntil(row.dueDate)} day${daysUntil(row.dueDate) === 1 ? "" : "s"}`}
+                      </p>
+                    </div>
                   </div>
                 </div>
               ))
@@ -738,7 +749,7 @@ function BillDatePill({ dueDate, statusGroup, compact = false }) {
 
 function LegendDot({ color, label }) {
   return (
-    <p className="inline-flex items-center gap-1.5 text-[#667085]">
+    <p className="inline-flex items-center gap-1.5 text-xs text-[#667085]">
       <span className={`h-2.5 w-2.5 rounded-full ${color}`} />
       {label}
     </p>
