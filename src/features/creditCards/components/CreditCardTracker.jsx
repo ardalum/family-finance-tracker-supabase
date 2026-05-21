@@ -4,11 +4,15 @@ import {
   Banknote,
   CalendarClock,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   CreditCard,
   Landmark,
   MoreHorizontal,
   Pencil,
+  RotateCcw,
 } from "lucide-react";
+import LinkedCardName from "../../../components/shared/LinkedCardName.jsx";
 import InlineAlert from "../../../components/ui/InlineAlert.jsx";
 import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
 import { consumeNavigationTarget, NAVIGATE_EVENT } from "../../../lib/navigationTargets.js";
@@ -20,6 +24,7 @@ import {
   shouldOpenCardPaymentModal,
 } from "../cardPaymentModalState.js";
 import { getRowStatus } from "../creditCardStatus.js";
+import { getSortedCards } from "../creditCardSort.js";
 import { getRecurringTemplatesLinkedToCard } from "../linkedRecurringCardUtils.js";
 import { getMonthlyBalanceDisplayRow } from "../monthlyBalanceDisplay.js";
 import {
@@ -30,6 +35,17 @@ import CardPaymentModal from "./CardPaymentModal.jsx";
 import CreditCardModal from "./CreditCardModal.jsx";
 
 const UTILIZATION_COLORS = ["#2F9E44", "#3B82F6", "#F59E0B", "#EF4444", "#94A3B8"];
+const DEFAULT_FILTERS = { search: "", owner: "", status: "" };
+const PAGE_SIZE_OPTIONS = ["10", "25", "50", "all"];
+
+function getStatusFilterValue(status) {
+  if (status.isNotChecked) return "not-checked";
+  if (status.isCheckedNoBalance) return "checked-no-balance";
+  if (status.label === "Paid") return "paid";
+  if (status.label === "Past due") return "past-due";
+  if (status.label === "Due soon") return "due-soon";
+  return "unpaid";
+}
 
 export default function CreditCardTracker({
   creditCards,
@@ -52,10 +68,14 @@ export default function CreditCardTracker({
 }) {
   const [editingCard, setEditingCard] = useState(null);
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
-  const [openMenuCardId, setOpenMenuCardId] = useState("");
   const [editingBalanceCardId, setEditingBalanceCardId] = useState("");
   const [paymentModalDraft, setPaymentModalDraft] = useState(null);
   const [extraPayment, setExtraPayment] = useState("50");
+  const [sortMode, setSortMode] = useState("default");
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [pageSize, setPageSize] = useState("10");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [menuState, setMenuState] = useState(null);
 
   const activeCards = useMemo(() => creditCards.filter((card) => card.isActive), [creditCards]);
   const monthBalances = monthlyBalances[selectedBalanceMonth] ?? {};
@@ -65,6 +85,11 @@ export default function CreditCardTracker({
         cashAccounts.filter((account) => LIQUID_ACCOUNT_TYPES.has(account.accountType)),
       ),
     [cashAccounts],
+  );
+
+  const ownerOptions = useMemo(
+    () => Array.from(new Set(activeCards.map((card) => card.owner).filter(Boolean))).sort(),
+    [activeCards],
   );
 
   const openAddModal = useCallback(() => {
@@ -99,13 +124,20 @@ export default function CreditCardTracker({
 
   useEffect(() => {
     function closeMenu() {
-      setOpenMenuCardId("");
+      setMenuState(null);
     }
+
     window.addEventListener("click", closeMenu);
-    return () => window.removeEventListener("click", closeMenu);
+    window.addEventListener("scroll", closeMenu, true);
+    window.addEventListener("resize", closeMenu);
+    return () => {
+      window.removeEventListener("click", closeMenu);
+      window.removeEventListener("scroll", closeMenu, true);
+      window.removeEventListener("resize", closeMenu);
+    };
   }, []);
 
-  const tableRows = useMemo(
+  const summaryRows = useMemo(
     () =>
       activeCards.map((card) => ({
         ...getMonthlyBalanceDisplayRow(card, monthBalances[card.id], selectedBalanceMonth),
@@ -118,17 +150,20 @@ export default function CreditCardTracker({
   );
 
   const summary = useMemo(() => {
-    const totalBalance = tableRows.reduce((sum, row) => sum + Math.max(row.balance, 0), 0);
-    const totalLimit = tableRows.reduce((sum, row) => sum + Math.max(row.creditLimit, 0), 0);
+    const totalBalance = summaryRows.reduce((sum, row) => sum + Math.max(row.balance, 0), 0);
+    const totalLimit = summaryRows.reduce((sum, row) => sum + Math.max(row.creditLimit, 0), 0);
     const utilizationPercent = totalLimit > 0 ? (totalBalance / totalLimit) * 100 : 0;
-    const dueSoonAmount = tableRows.reduce((sum, row) => {
+    const dueSoonAmount = summaryRows.reduce((sum, row) => {
       const status = getRowStatus(row.card, selectedBalanceMonth, monthBalances[row.card.id]);
       if (status.label === "Due soon" || status.label === "Due now") {
         return sum + getStatementUnpaidAmount(monthBalances[row.card.id]);
       }
       return sum;
     }, 0);
-    const totalMinimumPayment = tableRows.reduce((sum, row) => sum + Math.max(row.minPayment, 0), 0);
+    const totalMinimumPayment = summaryRows.reduce(
+      (sum, row) => sum + Math.max(row.minPayment, 0),
+      0,
+    );
     return {
       totalBalance,
       totalLimit,
@@ -137,13 +172,58 @@ export default function CreditCardTracker({
       totalMinimumPayment,
       activeCardCount: activeCards.length,
     };
-  }, [activeCards.length, monthBalances, selectedBalanceMonth, tableRows]);
+  }, [activeCards.length, monthBalances, selectedBalanceMonth, summaryRows]);
+
+  const sortedCards = useMemo(
+    () => getSortedCards(activeCards, monthBalances, selectedBalanceMonth, sortMode),
+    [activeCards, monthBalances, selectedBalanceMonth, sortMode],
+  );
+
+  const filteredRows = useMemo(() => {
+    const searchTerm = filters.search.trim().toLowerCase();
+    return sortedCards
+      .map((card) => {
+        const entry = monthBalances[card.id];
+        const status = getRowStatus(card, selectedBalanceMonth, entry);
+        return {
+          ...getMonthlyBalanceDisplayRow(card, entry, selectedBalanceMonth),
+          balance: Number(entry?.balance || 0),
+          minPayment: Number(entry?.minimumPayment || 0) || Number(card.minimumPayment || 0),
+          creditLimit: Number(card.creditLimit || 0),
+          statusValue: getStatusFilterValue(status),
+          searchText: [card.name, card.network, card.owner, card.lastFour]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase(),
+        };
+      })
+      .filter((row) => {
+        const matchesSearch = !searchTerm || row.searchText.includes(searchTerm);
+        const matchesOwner = !filters.owner || row.card.owner === filters.owner;
+        const matchesStatus = !filters.status || row.statusValue === filters.status;
+        return matchesSearch && matchesOwner && matchesStatus;
+      });
+  }, [filters.owner, filters.search, filters.status, monthBalances, selectedBalanceMonth, sortedCards]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters.search, filters.owner, filters.status, sortMode, pageSize]);
+
+  const pagination = useMemo(() => {
+    const total = filteredRows.length;
+    const perPage = pageSize === "all" ? total || 1 : Number(pageSize);
+    const totalPages = pageSize === "all" ? 1 : Math.max(Math.ceil(total / perPage), 1);
+    const safePage = Math.min(currentPage, totalPages);
+    const startIndex = pageSize === "all" ? 0 : (safePage - 1) * perPage;
+    const endExclusive = pageSize === "all" ? total : Math.min(startIndex + perPage, total);
+    const rows = filteredRows.slice(startIndex, endExclusive);
+    return { rows, total, totalPages, safePage, startIndex, endExclusive };
+  }, [currentPage, filteredRows, pageSize]);
 
   const utilizationSegments = useMemo(() => {
-    const rowsWithLimits = tableRows.filter((row) => row.creditLimit > 0);
+    const rowsWithLimits = summaryRows.filter((row) => row.creditLimit > 0);
     const totalLimit = rowsWithLimits.reduce((sum, row) => sum + row.creditLimit, 0);
     if (totalLimit <= 0) return [];
-
     let cursor = 0;
     return rowsWithLimits.map((row, index) => {
       const size = (row.creditLimit / totalLimit) * 100;
@@ -161,7 +241,7 @@ export default function CreditCardTracker({
         limit: row.creditLimit,
       };
     });
-  }, [tableRows]);
+  }, [summaryRows]);
 
   const utilizationGradient =
     utilizationSegments.length > 0
@@ -171,7 +251,7 @@ export default function CreditCardTracker({
       : "conic-gradient(#E2E8F0 0% 100%)";
 
   const hasPayoffInputs =
-    summary.totalMinimumPayment > 0 && tableRows.some((row) => Number(row.card.apr) > 0);
+    summary.totalMinimumPayment > 0 && summaryRows.some((row) => Number(row.card.apr) > 0);
 
   const payoffEstimate = useMemo(() => {
     if (!hasPayoffInputs) return null;
@@ -204,7 +284,7 @@ export default function CreditCardTracker({
       const linkedRecurringTemplates = getRecurringTemplatesLinkedToCard(recurringPayments, card.id);
       await onDeleteCard(card, linkedRecurringTemplates);
       setEditingCard((current) => (current?.id === card.id ? null : current));
-      setOpenMenuCardId("");
+      setMenuState(null);
     },
     [onDeleteCard, recurringPayments],
   );
@@ -214,7 +294,6 @@ export default function CreditCardTracker({
       onMonthlyBalanceChange(selectedBalanceMonth, cardId, null);
       return;
     }
-
     const currentEntry = monthBalances[cardId] ?? { balance: 0, paid: false };
     const balance = Number.parseFloat(value);
     onMonthlyBalanceChange(selectedBalanceMonth, cardId, {
@@ -230,12 +309,10 @@ export default function CreditCardTracker({
       setPaymentModalDraft(buildCardPaymentDraft(currentEntry, card));
       return;
     }
-
     if (paid) {
       onMonthlyBalanceChange(selectedBalanceMonth, cardId, { ...currentEntry, paid: true });
       return;
     }
-
     onMonthlyBalanceChange(selectedBalanceMonth, cardId, {
       ...currentEntry,
       paid: false,
@@ -253,6 +330,25 @@ export default function CreditCardTracker({
   function handleResetNoBalance(cardId) {
     onMonthlyBalanceChange(selectedBalanceMonth, cardId, null);
   }
+
+  function resetControls() {
+    setFilters(DEFAULT_FILTERS);
+    setSortMode("default");
+    setPageSize("10");
+  }
+
+  function openMenu(event, cardId) {
+    event.stopPropagation();
+    const rect = event.currentTarget.getBoundingClientRect();
+    setMenuState({
+      cardId,
+      x: Math.max(rect.right - 170, 12),
+      y: rect.bottom + 6,
+    });
+  }
+
+  const menuRow = pagination.rows.find((row) => row.card.id === menuState?.cardId) ?? null;
+  const menuEntry = menuRow ? monthBalances[menuRow.card.id] ?? { balance: 0, paid: false } : null;
 
   return (
     <section className="grid min-w-0 gap-5">
@@ -304,44 +400,127 @@ export default function CreditCardTracker({
           </p>
         </div>
 
+        <div className="grid gap-3 border-b border-app-border px-4 py-4 sm:px-5 lg:grid-cols-[minmax(0,1.2fr)_180px_200px_170px_170px_auto] lg:items-end">
+          <label className="grid gap-1 text-sm font-medium text-text-soft">
+            Search
+            <input
+              type="text"
+              value={filters.search}
+              onChange={(event) => setFilters((current) => ({ ...current, search: event.target.value }))}
+              placeholder="Search cards"
+              className="h-10 rounded-xl border border-app-border bg-app-surface px-3 text-sm text-text-main outline-none focus:border-brand-primary"
+            />
+          </label>
+          <label className="grid gap-1 text-sm font-medium text-text-soft">
+            Owner
+            <select
+              value={filters.owner}
+              onChange={(event) => setFilters((current) => ({ ...current, owner: event.target.value }))}
+              className="h-10 rounded-xl border border-app-border bg-app-surface px-3 text-sm text-text-main outline-none focus:border-brand-primary"
+            >
+              <option value="">All owners</option>
+              {ownerOptions.map((owner) => (
+                <option key={owner} value={owner}>
+                  {owner}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="grid gap-1 text-sm font-medium text-text-soft">
+            Status
+            <select
+              value={filters.status}
+              onChange={(event) => setFilters((current) => ({ ...current, status: event.target.value }))}
+              className="h-10 rounded-xl border border-app-border bg-app-surface px-3 text-sm text-text-main outline-none focus:border-brand-primary"
+            >
+              <option value="">All statuses</option>
+              <option value="not-checked">Not checked</option>
+              <option value="checked-no-balance">Confirmed $0 balance</option>
+              <option value="paid">Paid</option>
+              <option value="unpaid">Unpaid</option>
+              <option value="due-soon">Due soon</option>
+              <option value="past-due">Past due</option>
+            </select>
+          </label>
+          <label className="grid gap-1 text-sm font-medium text-text-soft">
+            Sort
+            <select
+              value={sortMode}
+              onChange={(event) => setSortMode(event.target.value)}
+              className="h-10 rounded-xl border border-app-border bg-app-surface px-3 text-sm text-text-main outline-none focus:border-brand-primary"
+            >
+              <option value="default">Default</option>
+              <option value="name">Card name</option>
+              <option value="owner">Owner</option>
+              <option value="limit-desc">Highest limit</option>
+              <option value="balance-desc">Highest balance</option>
+            </select>
+          </label>
+          <label className="grid gap-1 text-sm font-medium text-text-soft">
+            Rows per page
+            <select
+              value={pageSize}
+              onChange={(event) => setPageSize(event.target.value)}
+              className="h-10 rounded-xl border border-app-border bg-app-surface px-3 text-sm text-text-main outline-none focus:border-brand-primary"
+            >
+              {PAGE_SIZE_OPTIONS.map((option) => (
+                <option key={option} value={option}>
+                  {option === "all" ? "All" : option}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            type="button"
+            onClick={resetControls}
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-app-border bg-white px-3 text-sm font-semibold text-text-main hover:bg-app-muted"
+          >
+            <RotateCcw size={14} />
+            Reset
+          </button>
+        </div>
+
         {loading || monthlyBalancesLoading ? (
           <p className="px-5 py-6 text-sm text-text-muted">Loading cards and balances...</p>
         ) : activeCards.length === 0 ? (
           <p className="px-5 py-6 text-sm text-text-muted">Add your first card to start tracking debt.</p>
         ) : (
           <>
-            <div className="hidden min-w-0 overflow-x-auto lg:block">
-              <table className="w-full min-w-[980px] border-collapse text-sm">
+            <div className="hidden min-w-0 lg:block">
+              <table className="w-full table-fixed border-collapse text-sm">
                 <thead>
                   <tr className="border-b border-app-border text-left text-xs font-semibold uppercase tracking-wide text-text-muted">
-                    <th className="px-5 py-3">Account</th>
-                    <th className="px-4 py-3">Current balance</th>
-                    <th className="px-4 py-3">Credit limit</th>
-                    <th className="px-4 py-3">Utilization</th>
-                    <th className="px-4 py-3">Payment due</th>
-                    <th className="px-4 py-3">Min. payment</th>
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3 text-right">Actions</th>
+                    <th className="w-[21%] px-5 py-3">Account</th>
+                    <th className="w-[10%] px-3 py-3">Owner</th>
+                    <th className="w-[10%] px-3 py-3">Current balance</th>
+                    <th className="w-[10%] px-3 py-3">Credit limit</th>
+                    <th className="w-[11%] px-3 py-3">Utilization</th>
+                    <th className="w-[11%] px-3 py-3">Statement closes</th>
+                    <th className="w-[9%] px-3 py-3">Payment due</th>
+                    <th className="w-[8%] px-3 py-3">Min. payment</th>
+                    <th className="w-[7%] px-3 py-3">Status</th>
+                    <th className="w-[3%] px-3 py-3 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {tableRows.map((row) => {
+                  {pagination.rows.map((row) => {
                     const utilization = row.creditLimit > 0 ? (row.balance / row.creditLimit) * 100 : 0;
-                    const utilizationLabel = utilization >= 999 ? "999%+" : `${Math.max(utilization, 0).toFixed(0)}%`;
+                    const utilizationLabel =
+                      utilization >= 999 ? "999%+" : `${Math.max(utilization, 0).toFixed(0)}%`;
                     const rowEntry = monthBalances[row.card.id] ?? { balance: 0, paid: false };
-                    const openMenu = openMenuCardId === row.card.id;
                     return (
                       <tr key={row.card.id} className="border-b border-app-border align-middle last:border-b-0">
                         <td className="px-5 py-3">
-                          <div className="flex min-w-0 items-center gap-3">
+                          <div className="flex min-w-0 items-center gap-2">
                             <NetworkBadge network={row.card.network} />
                             <div className="min-w-0">
-                              <p className="truncate text-sm font-semibold text-text-main">{row.card.name}</p>
+                              <LinkedCardName card={row.card} />
                               <p className="truncate text-xs text-text-muted">**** {row.card.lastFour || "0000"}</p>
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="truncate px-3 py-3 text-sm text-text-soft">{row.card.owner || "--"}</td>
+                        <td className="px-3 py-3">
                           {editingBalanceCardId === row.card.id ? (
                             <input
                               type="number"
@@ -359,10 +538,10 @@ export default function CreditCardTracker({
                             </p>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-sm text-text-main">
+                        <td className="truncate px-3 py-3 text-sm text-text-main">
                           {formatCurrency(row.creditLimit, { cents: false })}
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-3 py-3">
                           <div className="flex min-w-0 items-center gap-2">
                             <span className="shrink-0 text-sm font-semibold text-text-main">{utilizationLabel}</span>
                             <div className="h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-app-muted">
@@ -373,74 +552,36 @@ export default function CreditCardTracker({
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-sm text-text-main">{row.dueDateText}</td>
-                        <td className="px-4 py-3 text-sm text-text-main">
+                        <td className="px-3 py-3 text-sm text-text-soft">
+                          <div className="grid gap-1">
+                            <span className="truncate">{row.closingDateText}</span>
+                            <span
+                              className={`w-fit rounded-md px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ${
+                                row.statementGenerated
+                                  ? "bg-status-infoBg text-status-infoDark ring-status-infoBg"
+                                  : "bg-app-muted text-text-muted ring-app-muted"
+                              }`}
+                            >
+                              {row.statementGenerated ? "Generated" : "Not yet"}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="truncate px-3 py-3 text-sm text-text-main">{row.dueDateText}</td>
+                        <td className="truncate px-3 py-3 text-sm text-text-main">
                           {row.minPayment > 0 ? formatCurrency(row.minPayment, { cents: true }) : "--"}
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-3 py-3">
                           <StatusPill status={row.status} />
                         </td>
-                        <td className="relative px-4 py-3 text-right">
+                        <td className="px-3 py-3 text-right">
                           <button
                             type="button"
                             className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-text-soft hover:text-text-main"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              setOpenMenuCardId((current) => (current === row.card.id ? "" : row.card.id));
-                            }}
+                            onClick={(event) => openMenu(event, row.card.id)}
                             aria-label={`Actions for ${row.card.name}`}
                           >
                             <MoreHorizontal size={16} />
                           </button>
-                          {openMenu ? (
-                            <div
-                              className="absolute right-4 z-20 mt-1 grid min-w-[170px] gap-1 rounded-xl border border-app-border bg-white p-1 text-left shadow-lg"
-                              onClick={(event) => event.stopPropagation()}
-                            >
-                              <MenuButton
-                                label="Edit card"
-                                onClick={() => {
-                                  openEditModal(row.card);
-                                  setOpenMenuCardId("");
-                                }}
-                                disabled={isSaving}
-                              />
-                              <MenuButton
-                                label="Edit balance"
-                                onClick={() => {
-                                  setEditingBalanceCardId(row.card.id);
-                                  setOpenMenuCardId("");
-                                }}
-                                disabled={monthlyBalancesSaving}
-                              />
-                              <MenuButton
-                                label={rowEntry.paid ? "Mark unpaid" : "Mark paid"}
-                                onClick={() => {
-                                  handlePaidChange(row.card.id, !Boolean(rowEntry.paid));
-                                  setOpenMenuCardId("");
-                                }}
-                                disabled={row.status.isNoBalance || row.status.isNotChecked || monthlyBalancesSaving}
-                              />
-                              <MenuButton
-                                label={row.status.isCheckedNoBalance ? "Reset no balance" : "Mark no balance"}
-                                onClick={() => {
-                                  if (row.status.isCheckedNoBalance) {
-                                    handleResetNoBalance(row.card.id);
-                                  } else {
-                                    handleCheckedNoBalance(row.card.id);
-                                  }
-                                  setOpenMenuCardId("");
-                                }}
-                                disabled={monthlyBalancesSaving}
-                              />
-                              <MenuButton
-                                label="Delete card"
-                                danger
-                                onClick={() => handleDelete(row.card)}
-                                disabled={isSaving}
-                              />
-                            </div>
-                          ) : null}
                         </td>
                       </tr>
                     );
@@ -450,62 +591,42 @@ export default function CreditCardTracker({
             </div>
 
             <div className="grid gap-3 p-4 lg:hidden">
-              {tableRows.map((row) => {
+              {pagination.rows.map((row) => {
                 const utilization = row.creditLimit > 0 ? (row.balance / row.creditLimit) * 100 : 0;
-                const rowEntry = monthBalances[row.card.id] ?? { balance: 0, paid: false };
-                const openMenu = openMenuCardId === row.card.id;
                 return (
                   <article key={row.card.id} className="rounded-2xl border border-app-border bg-white p-3">
                     <div className="flex min-w-0 items-start justify-between gap-2">
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
                           <NetworkBadge network={row.card.network} />
-                          <p className="truncate text-sm font-semibold text-text-main">{row.card.name}</p>
+                          <LinkedCardName card={row.card} />
                         </div>
                         <p className="mt-1 truncate text-xs text-text-muted">**** {row.card.lastFour || "0000"}</p>
+                        <p className="truncate text-xs text-text-muted">Owner: {row.card.owner || "--"}</p>
                       </div>
-                      <div className="relative">
-                        <button
-                          type="button"
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-text-soft"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            setOpenMenuCardId((current) => (current === row.card.id ? "" : row.card.id));
-                          }}
-                          aria-label={`Actions for ${row.card.name}`}
-                        >
-                          <MoreHorizontal size={16} />
-                        </button>
-                        {openMenu ? (
-                          <div
-                            className="absolute right-0 z-20 mt-1 grid min-w-[160px] gap-1 rounded-xl border border-app-border bg-white p-1 shadow-lg"
-                            onClick={(event) => event.stopPropagation()}
-                          >
-                            <MenuButton
-                              label="Edit card"
-                              onClick={() => {
-                                openEditModal(row.card);
-                                setOpenMenuCardId("");
-                              }}
-                            />
-                            <MenuButton
-                              label="Edit balance"
-                              onClick={() => {
-                                setEditingBalanceCardId((current) => (current === row.card.id ? "" : row.card.id));
-                                setOpenMenuCardId("");
-                              }}
-                            />
-                            <MenuButton label="Delete card" danger onClick={() => handleDelete(row.card)} />
-                          </div>
-                        ) : null}
-                      </div>
+                      <button
+                        type="button"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-text-soft"
+                        onClick={(event) => openMenu(event, row.card.id)}
+                        aria-label={`Actions for ${row.card.name}`}
+                      >
+                        <MoreHorizontal size={16} />
+                      </button>
                     </div>
+
                     <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
                       <Metric label="Current balance" value={formatCurrency(row.balance, { cents: true })} />
                       <Metric label="Credit limit" value={formatCurrency(row.creditLimit, { cents: false })} />
                       <Metric label="Utilization" value={`${Math.max(utilization, 0).toFixed(0)}%`} />
                       <Metric label="Payment due" value={row.dueDateText} />
+                      <Metric label="Statement closes" value={row.closingDateText} />
+                      <Metric
+                        label="Cycle"
+                        value={row.statementGenerated ? "Generated" : "Not yet"}
+                        badge={row.statementGenerated ? "success" : "muted"}
+                      />
                     </div>
+
                     {editingBalanceCardId === row.card.id ? (
                       <div className="mt-3">
                         <label className="text-xs font-medium text-text-muted">Edit balance</label>
@@ -513,7 +634,7 @@ export default function CreditCardTracker({
                           type="number"
                           min="0"
                           step="0.01"
-                          value={rowEntry.balance || 0}
+                          value={monthBalances[row.card.id]?.balance || 0}
                           onChange={(event) => handleBalanceChange(row.card.id, event.target.value)}
                           onBlur={() => setEditingBalanceCardId("")}
                           autoFocus
@@ -521,21 +642,45 @@ export default function CreditCardTracker({
                         />
                       </div>
                     ) : null}
-                    <div className="mt-3 flex items-center justify-between gap-2">
+
+                    <div className="mt-3">
                       <StatusPill status={row.status} />
-                      <button
-                        type="button"
-                        className="inline-flex items-center gap-1 rounded-lg border border-app-border px-2.5 py-1.5 text-xs font-semibold text-text-main"
-                        onClick={() => handlePaidChange(row.card.id, !Boolean(rowEntry.paid))}
-                        disabled={row.status.isNoBalance || row.status.isNotChecked || monthlyBalancesSaving}
-                      >
-                        <CheckCircle2 size={13} />
-                        {rowEntry.paid ? "Paid" : "Mark paid"}
-                      </button>
                     </div>
                   </article>
                 );
               })}
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-app-border px-4 py-4 text-sm text-text-muted sm:px-5">
+              <p>
+                Showing {pagination.total === 0 ? 0 : pagination.startIndex + 1}-
+                {pagination.endExclusive} of {pagination.total} cards
+              </p>
+              <div className="inline-flex items-center gap-2">
+                <button
+                  type="button"
+                  className="inline-flex h-9 items-center gap-1 rounded-lg border border-app-border bg-white px-2.5 text-text-main disabled:opacity-50"
+                  disabled={pagination.safePage <= 1}
+                  onClick={() => setCurrentPage((page) => Math.max(page - 1, 1))}
+                >
+                  <ChevronLeft size={14} />
+                  Previous
+                </button>
+                <span className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+                  Page {pagination.safePage} of {pagination.totalPages}
+                </span>
+                <button
+                  type="button"
+                  className="inline-flex h-9 items-center gap-1 rounded-lg border border-app-border bg-white px-2.5 text-text-main disabled:opacity-50"
+                  disabled={pagination.safePage >= pagination.totalPages}
+                  onClick={() =>
+                    setCurrentPage((page) => Math.min(page + 1, pagination.totalPages))
+                  }
+                >
+                  Next
+                  <ChevronRight size={14} />
+                </button>
+              </div>
             </div>
           </>
         )}
@@ -640,6 +785,57 @@ export default function CreditCardTracker({
         </section>
       </div>
 
+      {menuRow && menuState ? (
+        <div
+          className="fixed z-50 grid min-w-[170px] gap-1 rounded-xl border border-app-border bg-white p-1 text-left shadow-lg"
+          style={{ left: menuState.x, top: menuState.y }}
+          onClick={(event) => event.stopPropagation()}
+        >
+          <MenuButton
+            label="Edit card"
+            onClick={() => {
+              openEditModal(menuRow.card);
+              setMenuState(null);
+            }}
+            disabled={isSaving}
+          />
+          <MenuButton
+            label="Edit balance"
+            onClick={() => {
+              setEditingBalanceCardId(menuRow.card.id);
+              setMenuState(null);
+            }}
+            disabled={monthlyBalancesSaving}
+          />
+          <MenuButton
+            label={menuEntry?.paid ? "Mark unpaid" : "Mark paid"}
+            onClick={() => {
+              handlePaidChange(menuRow.card.id, !Boolean(menuEntry?.paid));
+              setMenuState(null);
+            }}
+            disabled={menuRow.status.isNoBalance || menuRow.status.isNotChecked || monthlyBalancesSaving}
+          />
+          <MenuButton
+            label={menuRow.status.isCheckedNoBalance ? "Reset no balance" : "Mark no balance"}
+            onClick={() => {
+              if (menuRow.status.isCheckedNoBalance) {
+                handleResetNoBalance(menuRow.card.id);
+              } else {
+                handleCheckedNoBalance(menuRow.card.id);
+              }
+              setMenuState(null);
+            }}
+            disabled={monthlyBalancesSaving}
+          />
+          <MenuButton
+            label="Delete card"
+            danger
+            onClick={() => handleDelete(menuRow.card)}
+            disabled={isSaving}
+          />
+        </div>
+      ) : null}
+
       {monthlyBalancesSaving ? <p className="text-sm text-text-muted">Saving monthly balance...</p> : null}
 
       <CardPaymentModal
@@ -719,7 +915,6 @@ function StatusPill({ status }) {
       : label === "Due soon"
         ? CalendarClock
         : CheckCircle2;
-
   return (
     <span
       className={`inline-flex min-w-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${status.badgeClass}`}
@@ -789,11 +984,23 @@ function MenuButton({ label, onClick, disabled = false, danger = false }) {
   );
 }
 
-function Metric({ label, value }) {
+function Metric({ label, value, badge = "" }) {
   return (
     <div className="min-w-0 rounded-lg border border-app-border bg-app-background px-2.5 py-2">
       <p className="truncate text-[11px] font-semibold uppercase tracking-wide text-text-muted">{label}</p>
-      <p className="truncate text-sm font-semibold text-text-main">{value}</p>
+      {badge ? (
+        <span
+          className={`mt-0.5 inline-flex rounded-md px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ${
+            badge === "success"
+              ? "bg-status-infoBg text-status-infoDark ring-status-infoBg"
+              : "bg-app-muted text-text-muted ring-app-muted"
+          }`}
+        >
+          {value}
+        </span>
+      ) : (
+        <p className="truncate text-sm font-semibold text-text-main">{value}</p>
+      )}
     </div>
   );
 }
