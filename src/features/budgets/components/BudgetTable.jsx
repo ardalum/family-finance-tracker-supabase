@@ -37,7 +37,7 @@ export default function BudgetTable({
 
   return (
     <>
-      <Card className="overflow-hidden rounded-2xl border border-app-border bg-white">
+      <Card className="min-w-0 overflow-hidden rounded-2xl border border-app-border bg-white">
         {fullRows.length === 0 ? (
           <div className="grid justify-items-center gap-4 p-8 text-center">
             <div>
@@ -66,8 +66,8 @@ export default function BudgetTable({
               <p className="text-sm text-text-muted">{displayRows.length} visible</p>
             </div>
 
-            <div className="hidden overflow-x-auto md:block">
-              <table className="w-full min-w-[920px] border-collapse">
+            <div className="hidden w-full min-w-0 overflow-x-auto md:block">
+              <table className="w-full min-w-[820px] border-collapse">
                 <thead>
                   <tr className="border-b border-app-border text-left text-sm text-text-muted">
                     <th className="px-5 py-3 font-medium">Category</th>
@@ -179,47 +179,15 @@ function BudgetRow({ budget, isSaving, menuOpen, onToggleMenu, onEdit, onDelete 
         <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${status.pill}`}>{status.label}</span>
       </td>
       <td className="relative px-3 py-3 text-right" ref={menuRef}>
-        <button
-          type="button"
-          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-text-soft hover:text-text-main"
-          onClick={(event) => {
-            event.stopPropagation();
-            onToggleMenu();
-          }}
-          disabled={isSaving}
-          aria-label={`Actions for ${budget.name}`}
-        >
-          <MoreHorizontal size={16} />
-        </button>
-        {menuOpen ? (
-          <div
-            className="absolute right-3 top-12 z-20 grid min-w-[144px] gap-1 rounded-xl border border-app-border bg-white p-1 shadow-lg"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <button
-              type="button"
-              className="rounded-lg px-2 py-1.5 text-left text-sm font-medium text-text-main hover:bg-app-muted"
-              onClick={() => {
-                onEdit(budget);
-                onToggleMenu();
-              }}
-              disabled={isSaving}
-            >
-              Edit budget
-            </button>
-            <button
-              type="button"
-              className="rounded-lg px-2 py-1.5 text-left text-sm font-medium text-status-danger hover:bg-red-50"
-              onClick={() => {
-                onDelete(budget);
-                onToggleMenu();
-              }}
-              disabled={isSaving}
-            >
-              Delete budget
-            </button>
-          </div>
-        ) : null}
+        <BudgetActionMenu
+          budget={budget}
+          isSaving={isSaving}
+          menuOpen={menuOpen}
+          onToggleMenu={onToggleMenu}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          align="right"
+        />
       </td>
     </tr>
   );
@@ -229,14 +197,40 @@ function BudgetMobileCard({ budget, onEdit, onDelete, isSaving }) {
   const status = getStatusDisplay(budget);
   const percentUsed = Number.isFinite(Number(budget.percentUsed)) ? Number(budget.percentUsed) : 0;
   const progressWidth = Math.min(Math.max(percentUsed, 0), 100);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const cardRef = useRef(null);
+
+  useEffect(() => {
+    function handleOutsideClick(event) {
+      if (!cardRef.current?.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    }
+
+    window.addEventListener("click", handleOutsideClick);
+    return () => window.removeEventListener("click", handleOutsideClick);
+  }, []);
 
   return (
-    <article className="rounded-2xl border border-app-border bg-white p-4">
-      <div className="flex items-center justify-between">
-        <h4 className="text-base font-semibold text-text-main">{budget.name}</h4>
-        <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${status.pill}`}>{status.label}</span>
+    <article ref={cardRef} className="rounded-2xl border border-app-border bg-white p-4">
+      <div className="flex min-w-0 items-start justify-between gap-2">
+        <div className="min-w-0">
+          <h4 className="truncate text-base font-semibold text-text-main">{budget.name}</h4>
+          <p className="mt-1 truncate text-xs text-text-muted">{budget.notes || "Monthly budget category"}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${status.pill}`}>{status.label}</span>
+          <BudgetActionMenu
+            budget={budget}
+            isSaving={isSaving}
+            menuOpen={menuOpen}
+            onToggleMenu={() => setMenuOpen((current) => !current)}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            align="left"
+          />
+        </div>
       </div>
-      <p className="mt-1 text-xs text-text-muted">{budget.notes || "Monthly budget category"}</p>
       <div className="mt-3 grid grid-cols-3 gap-2 text-sm">
         <Metric label="Budget" value={formatCurrency(budget.monthlyAmount || 0)} />
         <Metric label="Spent" value={formatCurrency(budget.spent || 0)} />
@@ -245,15 +239,65 @@ function BudgetMobileCard({ budget, onEdit, onDelete, isSaving }) {
       <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-app-muted">
         <div className={`h-full rounded-full ${status.progress}`} style={{ width: `${progressWidth}%` }} />
       </div>
-      <div className="mt-3 grid grid-cols-2 gap-2">
-        <Button type="button" variant="secondary" className="min-h-9 px-2 text-sm" onClick={() => onEdit(budget)} disabled={isSaving}>
-          Edit
-        </Button>
-        <Button type="button" variant="danger" className="min-h-9 px-2 text-sm" onClick={() => onDelete(budget)} disabled={isSaving}>
-          Delete
-        </Button>
-      </div>
     </article>
+  );
+}
+
+function BudgetActionMenu({
+  budget,
+  isSaving,
+  menuOpen,
+  onToggleMenu,
+  onEdit,
+  onDelete,
+  align = "right",
+}) {
+  const alignmentClass = align === "left" ? "left-0 top-9" : "right-3 top-12";
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-text-soft hover:text-text-main"
+        onClick={(event) => {
+          event.stopPropagation();
+          onToggleMenu();
+        }}
+        disabled={isSaving}
+        aria-label={`Actions for ${budget.name}`}
+      >
+        <MoreHorizontal size={16} />
+      </button>
+      {menuOpen ? (
+        <div
+          className={`absolute z-20 grid min-w-[144px] gap-1 rounded-xl border border-app-border bg-white p-1 shadow-lg ${alignmentClass}`}
+          onClick={(event) => event.stopPropagation()}
+        >
+          <button
+            type="button"
+            className="rounded-lg px-2 py-1.5 text-left text-sm font-medium text-text-main hover:bg-app-muted"
+            onClick={() => {
+              onEdit(budget);
+              onToggleMenu();
+            }}
+            disabled={isSaving}
+          >
+            Edit budget
+          </button>
+          <button
+            type="button"
+            className="rounded-lg px-2 py-1.5 text-left text-sm font-medium text-status-danger hover:bg-red-50"
+            onClick={() => {
+              onDelete(budget);
+              onToggleMenu();
+            }}
+            disabled={isSaving}
+          >
+            Delete budget
+          </button>
+        </div>
+      ) : null}
+    </div>
   );
 }
 

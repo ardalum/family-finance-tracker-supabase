@@ -162,13 +162,13 @@ export default function BudgetTracker({
         </div>
       ) : null}
 
-      <div className="grid gap-4">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <header className="grid gap-1">
+      <div className="grid min-w-0 gap-4">
+        <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
+          <header className="grid min-w-0 gap-1">
             <h1 className="text-4xl font-semibold tracking-tight text-text-main">Budgets</h1>
             <p className="text-sm text-text-soft">Track spending against your monthly budgets.</p>
           </header>
-          <div className="flex flex-wrap items-center justify-end gap-2">
+          <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
             <FilterChip icon={Calendar} label={formatMonthLabel(selectedMonth)}>
               <select
                 value={selectedMonth}
@@ -213,8 +213,8 @@ export default function BudgetTracker({
         ) : null}
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="grid gap-5">
+      <div className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="grid min-w-0 gap-5">
           <BudgetSummaryCards summary={summary} />
 
           <BudgetTable
@@ -251,7 +251,7 @@ export default function BudgetTracker({
           </Card>
         </div>
 
-        <aside className="grid gap-4">
+        <aside className="grid min-w-0 gap-4">
           <Card className="border border-app-border p-4">
             <div className="flex items-start gap-3">
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF5DF] text-[#D38A15]">

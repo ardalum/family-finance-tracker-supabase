@@ -133,7 +133,7 @@ export default function AppShellV2({
             </div>
           </header>
 
-          <div className="grid w-full min-w-0 max-w-none gap-6 px-3 py-6 sm:px-6 lg:px-8">
+          <div className="grid w-full min-w-0 max-w-none gap-6 overflow-x-hidden px-3 py-6 sm:px-6 lg:px-8">
             {children}
           </div>
 
