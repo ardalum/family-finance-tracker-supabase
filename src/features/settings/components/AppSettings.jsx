@@ -113,11 +113,6 @@ export default function AppSettings() {
     window.setTimeout(() => setSaveMessage(""), 1600);
   }
 
-  function handleResetDefaults() {
-    setDraftSettings(normalizeSettings(defaultAppSettings));
-    setSaveMessage("");
-  }
-
   const membersForDisplay = [...memberships].sort((a, b) => {
     const aRole = String(a.role || "").toLowerCase();
     const bRole = String(b.role || "").toLowerCase();
@@ -126,15 +121,17 @@ export default function AppSettings() {
   });
 
   return (
-    <section className="grid gap-5">
-      <div className="flex flex-wrap items-center justify-end gap-3">
+    <section className="grid gap-4">
+      <div className="flex flex-wrap items-center justify-end gap-2">
         {saveMessage ? (
-          <p className="text-sm font-medium text-status-successDark">{saveMessage}</p>
+          <p className="text-xs font-medium text-status-successDark/90">{saveMessage}</p>
         ) : null}
-        <Button type="button" variant="secondary" onClick={handleResetDefaults}>
-          Reset defaults
-        </Button>
-        <Button type="button" onClick={handleSave} disabled={!hasChanges}>
+        <Button
+          type="button"
+          onClick={handleSave}
+          disabled={!hasChanges}
+          className={!hasChanges ? "opacity-65" : ""}
+        >
           <Save size={16} aria-hidden="true" />
           Save changes
         </Button>
@@ -142,28 +139,28 @@ export default function AppSettings() {
 
       <section className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-4">
         <SummaryCard
-          icon={<Home size={22} />}
+          icon={<Home size={27} />}
           iconClassName="bg-[#ECF3FF] text-[#2158B6]"
           label="Household"
           value={householdLabel}
           helper={`${memberCount} members`}
         />
         <SummaryCard
-          icon={<Bell size={22} />}
+          icon={<Bell size={27} />}
           iconClassName="bg-[#FFF4E5] text-[#EA7A0A]"
           label="Notifications"
           value={`${notificationEnabledCount} enabled`}
           helper="Bills, cards, budgets"
         />
         <SummaryCard
-          icon={<ShieldCheck size={22} />}
+          icon={<ShieldCheck size={27} />}
           iconClassName="bg-[#EAF8EF] text-[#1D8E4B]"
           label="Data & security"
           value="Protected"
           helper="Account settings"
         />
         <SummaryCard
-          icon={<SlidersHorizontal size={22} />}
+          icon={<SlidersHorizontal size={27} />}
           iconClassName="bg-[#ECF3FF] text-[#2158B6]"
           label="Preferences"
           value={preferenceValue}
@@ -171,7 +168,7 @@ export default function AppSettings() {
         />
       </section>
 
-      <div className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_390px]">
+      <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_390px]">
         <div className="grid min-w-0 gap-4">
           <Card className="rounded-2xl border border-app-border bg-white p-5">
             <div className="mb-4 flex items-center justify-between">
@@ -231,12 +228,23 @@ export default function AppSettings() {
                 Invite member
               </button>
             </div>
-            <div className="grid gap-2">
+            <div className="overflow-hidden rounded-xl border border-app-border">
+              <div className="hidden grid-cols-[minmax(0,1fr)_110px_220px_58px] gap-2 border-b border-app-border bg-app-surface px-3 py-2 text-xs font-semibold uppercase tracking-wide text-text-muted md:grid">
+                <span>Member</span>
+                <span>Role</span>
+                <span>Permissions</span>
+                <span className="text-right">Actions</span>
+              </div>
               {membersForDisplay.length === 0 ? (
-                <p className="text-sm text-text-muted">No household members yet.</p>
+                <p className="px-3 py-4 text-sm text-text-muted">No household members yet.</p>
               ) : (
                 membersForDisplay.map((membership, index) => (
-                  <MemberRow key={membership.membershipId || membership.householdId || index} membership={membership} />
+                  <MemberRow
+                    key={membership.membershipId || membership.householdId || index}
+                    membership={membership}
+                    fallbackEmail={accountEmail}
+                    isFirst={index === 0}
+                  />
                 ))
               )}
             </div>
@@ -279,7 +287,7 @@ export default function AppSettings() {
           </Card>
         </div>
 
-        <aside className="grid content-start gap-4">
+        <aside className="grid content-start gap-3">
           <Card className="rounded-2xl border border-app-border bg-white p-5">
             <h3 className="mb-2 text-2xl font-semibold tracking-tight text-[#071F42]">
               Account status
@@ -392,14 +400,16 @@ export default function AppSettings() {
 function SummaryCard({ icon, iconClassName, label, value, helper }) {
   return (
     <Card className="rounded-2xl border border-app-border bg-white p-4 shadow-sm">
-      <div className="flex items-center gap-3">
-        <span className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${iconClassName}`}>
+      <div className="flex items-center gap-3.5">
+        <span className={`inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-full ${iconClassName}`}>
           {icon}
         </span>
         <div className="min-w-0">
-          <p className="text-sm font-medium text-[#071F42]">{label}</p>
-          <p className="truncate text-3xl font-semibold tracking-tight text-[#071F42]">{value}</p>
-          <p className="text-sm text-text-muted">{helper}</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-text-muted">{label}</p>
+          <p className="truncate text-xl font-semibold tracking-tight text-[#071F42] sm:text-2xl">
+            {value}
+          </p>
+          <p className="truncate text-sm text-text-muted">{helper}</p>
         </div>
       </div>
     </Card>
@@ -441,11 +451,16 @@ function LabeledSelect({ label, value, options, onChange }) {
   );
 }
 
-function MemberRow({ membership }) {
+function MemberRow({ membership, fallbackEmail, isFirst }) {
   const role = String(membership.role || "member");
   const roleLabel = role.charAt(0).toUpperCase() + role.slice(1);
-  const name = membership.userProfile?.name || membership.user?.email || "Household member";
-  const email = membership.user?.email || membership.userProfile?.email || "Member access";
+  const baseEmail = membership.user?.email || membership.userProfile?.email || "";
+  const resolvedEmail = baseEmail || (isFirst ? fallbackEmail : "") || "Member access";
+  const name =
+    membership.userProfile?.name ||
+    membership.user?.name ||
+    (resolvedEmail.includes("@") ? resolvedEmail.split("@")[0] : "Household member");
+  const initial = (name || "H").trim().charAt(0).toUpperCase();
   const roleClass =
     role === "owner"
       ? "bg-[#ECF3FF] text-[#2158B6]"
@@ -454,12 +469,17 @@ function MemberRow({ membership }) {
         : "bg-app-muted text-text-muted";
 
   return (
-    <article className="grid gap-2 rounded-xl border border-app-border bg-app-background px-3 py-2 sm:grid-cols-[minmax(0,1fr)_auto_minmax(180px,220px)_auto] sm:items-center">
-      <div className="min-w-0">
-        <p className="truncate text-sm font-semibold text-text-main">{name}</p>
-        <p className="truncate text-xs text-text-muted">{email}</p>
+    <article className="grid gap-2 border-b border-app-border bg-white px-3 py-3 last:border-b-0 md:grid-cols-[minmax(0,1fr)_110px_220px_58px] md:items-center">
+      <div className="flex min-w-0 items-center gap-2.5">
+        <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#ECF3FF] text-sm font-semibold text-[#2158B6]">
+          {initial}
+        </span>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-text-main">{name || "Household member"}</p>
+          <p className="truncate text-xs text-text-muted">{resolvedEmail || "Member access"}</p>
+        </div>
       </div>
-      <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${roleClass}`}>
+      <span className={`inline-flex w-fit rounded-full px-2 py-1 text-xs font-semibold ${roleClass}`}>
         {roleLabel}
       </span>
       <div className="flex items-center gap-1.5">
@@ -469,7 +489,7 @@ function MemberRow({ membership }) {
         <PermissionIcon icon={<Home size={12} />} title="Goals" />
         <PermissionIcon icon={<Settings size={12} />} title="Settings" />
       </div>
-      <button type="button" className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-text-muted">
+      <button type="button" className="inline-flex h-8 w-8 items-center justify-center justify-self-end rounded-lg border border-app-border bg-white text-text-muted">
         <MoreVertical size={14} />
       </button>
     </article>
@@ -554,7 +574,7 @@ function ActionRow({ icon, title, helper, badge, danger = false, disabled = fals
       disabled={disabled}
       className={`flex w-full items-start justify-between gap-3 border-b px-0 py-2.5 text-left last:border-b-0 ${
         danger
-          ? "border-status-danger/25 text-status-danger"
+          ? "mt-2 rounded-xl border border-status-danger/30 bg-red-50/50 px-3 text-status-danger first:mt-3 last:mb-0"
           : "border-app-border text-text-main"
       } ${disabled ? "cursor-not-allowed opacity-90" : ""}`}
     >
