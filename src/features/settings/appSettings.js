@@ -25,10 +25,36 @@ export const defaultAppSettings = {
   currency: currencies[0],
   showCents: true,
   defaultMonthBehavior: "current",
+  timeZone:
+    typeof Intl !== "undefined"
+      ? Intl.DateTimeFormat().resolvedOptions().timeZone || "America/New_York"
+      : "America/New_York",
+  theme: "light",
+  accentColor: "navy",
+  sidebarBehavior: "expanded",
+  reduceMotion: false,
   dateFormat: "MM/DD/YYYY",
   tableDensity: "comfortable",
   showZeroBalanceWarning: true,
+  notificationPreferences: {
+    billDueReminders: true,
+    budgetWarnings: true,
+    cardPaymentReminders: true,
+    goalMilestoneUpdates: true,
+  },
 };
+
+function mergeSettingsWithDefaults(parsed = {}) {
+  return {
+    ...defaultAppSettings,
+    ...parsed,
+    currency: parsed.currency ?? defaultAppSettings.currency,
+    notificationPreferences: {
+      ...defaultAppSettings.notificationPreferences,
+      ...(parsed.notificationPreferences ?? {}),
+    },
+  };
+}
 
 export function readAppSettings() {
   try {
@@ -40,11 +66,10 @@ export function readAppSettings() {
       ? currencies.find((currency) => currency.code === parsed.currency.code)
       : currencies.find((currency) => currency.symbol === legacySymbol);
 
-    return {
-      ...defaultAppSettings,
+    return mergeSettingsWithDefaults({
       ...parsed,
       currency: matchedCurrency ?? parsed.currency ?? defaultAppSettings.currency,
-    };
+    });
   } catch {
     return defaultAppSettings;
   }

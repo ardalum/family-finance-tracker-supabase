@@ -64,8 +64,8 @@ export const pageContent = {
     description: "Create households, review membership, and choose the active household.",
   },
   "app-settings": {
-    title: "App Settings",
-    description: "Customize display and app preferences.",
+    title: "Settings",
+    description: "Manage your household, preferences, notifications, and app setup.",
   },
   "account-settings": {
     title: "Account Settings",
