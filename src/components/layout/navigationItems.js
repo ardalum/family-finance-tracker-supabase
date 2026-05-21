@@ -20,26 +20,26 @@ import { primaryFinanceViewIds } from "../../app/secondaryViews.js";
 
 const navigationItemByView = {
   dashboard: {
-    label: "Dashboard",
-    shortLabel: "Dashboard",
+    label: "Overview",
+    shortLabel: "Overview",
     icon: LayoutDashboard,
     iconVariant: "blue",
   },
   "credit-cards": {
     label: "Cards & Debt",
-    shortlabel: "Cards & Debt",
+    shortLabel: "Cards & Debt",
     icon: CreditCard,
     iconVariant: "violet",
   },
   budgets: {
-    label: "Budget",
-    shortLabel: "Budget",
+    label: "Budgets",
+    shortLabel: "Budgets",
     icon: WalletCards,
     iconVariant: "emerald",
   },
   spending: {
-    label: "Spending",
-    shortLabel: "Spending",
+    label: "Transactions",
+    shortLabel: "Transactions",
     icon: ReceiptText,
     iconVariant: "orange",
   },
@@ -126,25 +126,25 @@ const navigationItemByView = {
 const sectionConfig = [
   {
     id: "main",
-    label: "Main",
+    label: "MAIN",
     defaultExpanded: true,
     views: ["dashboard", "credit-cards", "budgets", "spending", "recurring", "insights"],
   },
   {
     id: "planning",
-    label: "Planning",
+    label: "PLANNING",
     defaultExpanded: false,
     views: ["calendar", "financial-position", "net-worth"],
   },
   {
     id: "money-setup",
-    label: "Money Setup",
+    label: "MONEY SETUP",
     defaultExpanded: false,
     views: ["income", "savings", "accounts", "liabilities"],
   },
   {
     id: "system",
-    label: "System",
+    label: "SYSTEM",
     defaultExpanded: false,
     views: ["backup", "app-settings", "privacy-policy", "help-support"],
   },

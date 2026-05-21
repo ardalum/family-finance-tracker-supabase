@@ -43,13 +43,13 @@ export default function Navigation({
   }, [onChange, onItemSelected]);
 
   return (
-    <nav className="grid gap-3 overflow-y-auto" aria-label={ariaLabel}>
+    <nav className="grid gap-4 overflow-y-auto pr-1" aria-label={ariaLabel}>
       {groupedNavigationSections.map((section) => (
         <div key={section.id} className="grid gap-1.5">
           {!collapsed ? (
             <button
               type="button"
-              className="inline-flex min-h-8 w-full items-center justify-between gap-2 rounded-lg px-2 py-1 text-left text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-text-muted transition hover:bg-app-muted"
+              className="inline-flex min-h-8 w-full items-center justify-between gap-2 rounded-lg px-2 py-1 text-left text-[0.67rem] font-semibold tracking-[0.1em] text-text-muted transition hover:bg-app-muted"
               onClick={() =>
                 setExpandedGroups((previous) => ({
                   ...previous,
@@ -73,9 +73,9 @@ export default function Navigation({
                 <button
                   key={item.id}
                   type="button"
-                  className={`group inline-flex min-h-11 w-full items-center rounded-xl px-3 py-2 text-sm font-medium transition ${
+                  className={`group inline-flex min-h-11 w-full items-center rounded-xl px-3 py-2.5 text-sm font-medium transition ${
                     isActive
-                      ? "bg-brand-primary text-white shadow-sm"
+                      ? "bg-brand-primary text-white shadow-[0_8px_18px_-12px_rgba(10,31,54,0.9)]"
                       : "text-text-soft hover:bg-app-muted hover:text-text-main"
                   } ${collapsed ? "justify-center" : "justify-start gap-2"}`}
                   onClick={() => {
@@ -90,7 +90,7 @@ export default function Navigation({
                     icon={item.icon}
                     variant={isActive ? "neutral" : item.iconVariant}
                     mode="plain"
-                    size={17}
+                    size={16}
                     active={isActive}
                     iconClassName={!isActive ? "group-hover:text-text-main" : "text-white"}
                   />

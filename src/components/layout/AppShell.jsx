@@ -22,12 +22,12 @@ export default function AppShell({
     <div className="min-h-screen overflow-x-hidden bg-app-background text-text-main">
       <div className="flex min-h-screen min-w-0 max-w-full">
         <aside
-          className={`hidden border-r border-app-border bg-app-surface/95 backdrop-blur md:block ${
+          className={`hidden border-r border-app-border bg-[#F3EEE3]/95 backdrop-blur md:block ${
             sidebarCollapsed ? "w-[88px]" : "w-[272px]"
           }`}
         >
           <div className="sticky top-0 grid h-screen grid-rows-[auto_1fr_auto] gap-4 p-4">
-            <div className="grid gap-3 rounded-2xl border border-app-border bg-white p-3 shadow-sm">
+            <div className="grid gap-3 rounded-2xl border border-app-border bg-white p-3 shadow-[0_8px_24px_-20px_rgba(15,42,74,0.5)]">
               <div className="flex items-center gap-3">
                 <AppBrandMark />
                 {!sidebarCollapsed ? (
@@ -66,16 +66,12 @@ export default function AppShell({
               </div>
             </div>
 
-            <Navigation
-              activeView={activeView}
-              onChange={onViewChange}
-              collapsed={sidebarCollapsed}
-            />
+            <Navigation activeView={activeView} onChange={onViewChange} collapsed={sidebarCollapsed} />
 
-            <div className="grid gap-2 rounded-2xl border border-app-border bg-white p-3 text-xs text-text-muted">
+            <div className="grid gap-2 rounded-2xl border border-app-border bg-white p-3 text-xs text-text-muted shadow-[0_8px_24px_-20px_rgba(15,42,74,0.45)]">
               {!sidebarCollapsed ? (
                 <>
-                  <p className="font-semibold text-text-soft">Help and settings</p>
+                  <p className="font-semibold uppercase tracking-[0.08em] text-text-muted">Help & settings</p>
                   <button
                     type="button"
                     className="text-left font-medium text-brand-primary hover:text-brand-dark"
@@ -120,8 +116,7 @@ export default function AppShell({
             <div className="grid gap-4 px-4 py-5 text-xs text-text-muted sm:px-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-center lg:px-8">
               <div className="grid gap-1">
                 <p>
-                  <span className="font-semibold text-brand-primary">{appMetadata.name}</span> © {" "}
-                  {appMetadata.copyrightYear} {appMetadata.creatorName}.
+                  <span className="font-semibold text-brand-primary">{appMetadata.name}</span> (c) {appMetadata.copyrightYear} {appMetadata.creatorName}.
                 </p>
                 <p className="max-w-2xl leading-5">{appMetadata.trackingDisclaimer}</p>
               </div>
