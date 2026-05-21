@@ -4,32 +4,32 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+        sans: ["Manrope", "ui-sans-serif", "system-ui", "sans-serif"],
       },
       colors: {
         brand: {
-          primary: "#1F2937",
-          dark: "#111827",
-          accent: "#10B981",
-          secondary: "#4F46E5",
-          info: "#06B6D4",
+          primary: "#0F2A4A",
+          dark: "#0A1F36",
+          accent: "#22A06B",
+          secondary: "#1E3A5F",
+          info: "#0EA5E9",
         },
         app: {
-          background: "#F9FAFB",
+          background: "#F5F2EB",
           surface: "#FFFFFF",
-          muted: "#F3F4F6",
-          border: "#E5E7EB",
+          muted: "#EEE8DD",
+          border: "#E4DDD0",
         },
         text: {
-          main: "#111827",
+          main: "#0E2238",
           muted: "#6B7280",
-          soft: "#374151",
+          soft: "#314259",
         },
         status: {
-          success: "#22C55E",
+          success: "#16A34A",
           successDark: "#166534",
           successBg: "#DCFCE7",
-          warning: "#F97316",
+          warning: "#D97706",
           warningDark: "#92400E",
           warningBg: "#FEF3C7",
           danger: "#DC2626",

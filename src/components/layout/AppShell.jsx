@@ -1,7 +1,7 @@
 import { Menu, PanelLeftClose, PanelLeftOpen, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { appMetadata } from "../../app/appMetadata.js";
-import { AppBrandMark, AppBrandName } from "../branding/index.js";
+import { AppBrandMark } from "../branding/index.js";
 import Button from "../ui/Button.jsx";
 import { footerLinks } from "./footerLinks.js";
 import Navigation from "./Navigation.jsx";
@@ -20,104 +20,114 @@ export default function AppShell({
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-app-background text-text-main">
-      <header className="border-b border-app-border bg-app-surface">
-        <div className="flex min-w-0 items-center justify-between gap-2 px-3 py-3 sm:px-6 lg:px-8">
-          <div className="flex min-w-0 items-center gap-3">
-            <button
-              type="button"
-              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-app-border bg-white text-text-main md:hidden"
-              onClick={() => setMobileDrawerOpen(true)}
-              aria-label="Open navigation menu"
-            >
-              <Menu size={17} />
-            </button>
-            <AppBrandMark />
-            <div className="hidden min-w-0 leading-tight sm:block">
-              <h1 className="truncate text-base font-semibold tracking-normal sm:text-lg">
-                <AppBrandName />
-              </h1>
-              <p className="mt-0.5 hidden truncate text-xs text-text-muted sm:block">
-                {appMetadata.tagline}
-              </p>
-            </div>
-          </div>
-          <div className="flex shrink-0 items-center justify-end gap-2">{accountSlot}</div>
-        </div>
-      </header>
-
-      <div className="flex min-h-[calc(100vh-73px)] min-w-0 max-w-full">
+      <div className="flex min-h-screen min-w-0 max-w-full">
         <aside
-          className={`hidden border-r border-app-border bg-app-surface md:block ${
-            sidebarCollapsed ? "w-[76px]" : "w-[260px]"
+          className={`hidden border-r border-app-border bg-app-surface/95 backdrop-blur md:block ${
+            sidebarCollapsed ? "w-[88px]" : "w-[272px]"
           }`}
         >
-          <div className="sticky top-0 grid gap-3 p-3">
-            <div className="flex items-center justify-between">
-              {!sidebarCollapsed ? (
-                <Button type="button" className="h-9 px-3 text-xs" onClick={onQuickAdd}>
-                  <Plus size={14} />
-                  Quick Add
-                </Button>
-              ) : (
+          <div className="sticky top-0 grid h-screen grid-rows-[auto_1fr_auto] gap-4 p-4">
+            <div className="grid gap-3 rounded-2xl border border-app-border bg-white p-3 shadow-sm">
+              <div className="flex items-center gap-3">
+                <AppBrandMark />
+                {!sidebarCollapsed ? (
+                  <div className="min-w-0">
+                    <h1 className="truncate text-base font-semibold text-text-main">Family Finance Tracker</h1>
+                    <p className="text-xs text-text-muted">Household money command center</p>
+                  </div>
+                ) : null}
+              </div>
+              <div className="flex items-center gap-2">
+                {!sidebarCollapsed ? (
+                  <Button type="button" className="h-10 flex-1 px-3 text-sm" onClick={onQuickAdd}>
+                    <Plus size={14} />
+                    Quick add
+                  </Button>
+                ) : (
+                  <button
+                    type="button"
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-app-border bg-white text-text-main"
+                    onClick={onQuickAdd}
+                    title="Quick Add"
+                    aria-label="Quick Add"
+                  >
+                    <Plus size={16} />
+                  </button>
+                )}
                 <button
                   type="button"
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-app-border bg-white text-text-main"
-                  onClick={onQuickAdd}
-                  title="Quick Add"
-                  aria-label="Quick Add"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-app-border bg-white text-text-main"
+                  onClick={() => setSidebarCollapsed((value) => !value)}
+                  aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                  title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
                 >
-                  <Plus size={16} />
+                  {sidebarCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
                 </button>
-              )}
-              <button
-                type="button"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-app-border bg-white text-text-main"
-                onClick={() => setSidebarCollapsed((value) => !value)}
-                aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-                title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-              >
-                {sidebarCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
-              </button>
+              </div>
             </div>
+
             <Navigation
               activeView={activeView}
               onChange={onViewChange}
               collapsed={sidebarCollapsed}
             />
+
+            <div className="grid gap-2 rounded-2xl border border-app-border bg-white p-3 text-xs text-text-muted">
+              {!sidebarCollapsed ? (
+                <>
+                  <p className="font-semibold text-text-soft">Help and settings</p>
+                  <button
+                    type="button"
+                    className="text-left font-medium text-brand-primary hover:text-brand-dark"
+                    onClick={() => onViewChange("help-support")}
+                  >
+                    Open help and support
+                  </button>
+                </>
+              ) : (
+                <span className="text-center font-semibold">?</span>
+              )}
+            </div>
           </div>
         </aside>
 
         <main className="min-w-0 max-w-full flex-1 overflow-x-hidden">
-          <div className="grid min-w-0 max-w-full gap-6 px-4 py-6 sm:px-6 lg:px-8">
-            <div className="min-w-0">
-              <div className="min-w-0">
-                <h2 className="break-words text-2xl font-semibold tracking-normal text-text-main">
-                  {pageTitle}
-                </h2>
-                <p className="mt-1 text-sm text-text-muted">{pageDescription}</p>
+          <header className="sticky top-0 z-20 border-b border-app-border bg-app-background/95 backdrop-blur">
+            <div className="grid min-w-0 gap-3 px-3 py-3 sm:px-6 lg:px-8">
+              <div className="flex min-w-0 items-center justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  <button
+                    type="button"
+                    className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-app-border bg-white text-text-main md:hidden"
+                    onClick={() => setMobileDrawerOpen(true)}
+                    aria-label="Open navigation menu"
+                  >
+                    <Menu size={17} />
+                  </button>
+                  <div className="min-w-0">
+                    <h2 className="truncate text-xl font-semibold tracking-tight text-text-main">{pageTitle}</h2>
+                    <p className="truncate text-sm text-text-muted">{pageDescription}</p>
+                  </div>
+                </div>
+                <div className="min-w-0 flex-1">{accountSlot}</div>
               </div>
             </div>
-            {children}
-          </div>
-          <footer className="border-t border-app-border bg-app-background">
+          </header>
+
+          <div className="grid min-w-0 max-w-full gap-6 px-3 py-6 sm:px-6 lg:px-8">{children}</div>
+
+          <footer className="border-t border-app-border bg-app-background/75">
             <div className="grid gap-4 px-4 py-5 text-xs text-text-muted sm:px-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-center lg:px-8">
               <div className="grid gap-1">
                 <p>
-                  <span className="font-semibold text-brand-primary">{appMetadata.name}</span> Â©{" "}
+                  <span className="font-semibold text-brand-primary">{appMetadata.name}</span> © {" "}
                   {appMetadata.copyrightYear} {appMetadata.creatorName}.
                 </p>
                 <p className="max-w-2xl leading-5">{appMetadata.trackingDisclaimer}</p>
               </div>
-              <nav
-                className="flex flex-wrap gap-2 md:max-w-md md:justify-end"
-                aria-label="Footer links"
-              >
+              <nav className="flex flex-wrap gap-2 md:max-w-md md:justify-end" aria-label="Footer links">
                 {footerLinks.map((link) => (
-                  <FooterLink
-                    key={link.targetView}
-                    targetView={link.targetView}
-                    onNavigate={onViewChange}
-                  >
+                  <FooterLink key={link.targetView} targetView={link.targetView} onNavigate={onViewChange}>
                     {link.label}
                   </FooterLink>
                 ))}

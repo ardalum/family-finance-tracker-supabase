@@ -26,8 +26,8 @@ const navigationItemByView = {
     iconVariant: "blue",
   },
   "credit-cards": {
-    label: "Cards",
-    shortLabel: "Cards",
+    label: "Cards & Debt",
+    shortlabel: "Cards & Debt",
     icon: CreditCard,
     iconVariant: "violet",
   },
@@ -182,3 +182,4 @@ export function createInitialExpandedGroupState(activeView) {
 export function getNavigationItemIds(items = navItems) {
   return items.map((item) => item.id);
 }
+

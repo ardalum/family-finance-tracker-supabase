@@ -813,6 +813,8 @@ function FinanceTrackerApp() {
       currentPage={currentPage}
       headerAlerts={headerAlerts}
       setupCheckError={setupCheckError}
+      selectedDashboardMonth={selectedDashboardMonth}
+      onDashboardMonthChange={setSelectedDashboardMonth}
       onViewChange={setActiveView}
       onQuickAdd={openQuickAdd}
     >
@@ -831,3 +833,4 @@ function FinanceTrackerApp() {
     </AppShellFrame>
   );
 }
+

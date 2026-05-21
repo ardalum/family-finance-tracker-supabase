@@ -1,25 +1,27 @@
 import { useMemo, useState } from "react";
 import {
   AlertTriangle,
+  ArrowRight,
   BarChart3,
+  Bell,
   CalendarDays,
   CheckCircle2,
   Clock3,
   CreditCard,
+  Goal,
   ReceiptText,
   Repeat,
+  Search,
   Wrench,
   WalletCards,
 } from "lucide-react";
 import Card from "../../../components/ui/Card.jsx";
 import FeatureIcon from "../../../components/ui/FeatureIcon.jsx";
-import Select from "../../../components/ui/Select.jsx";
-import { buildMonthOptions, getCurrentMonthKey } from "../../../lib/dates.js";
+import { getCurrentMonthKey } from "../../../lib/dates.js";
 import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
 import { dispatchNavigation } from "../../../lib/navigationTargets.js";
 import BudgetVsSpendingTable from "./BudgetVsSpendingTable.jsx";
 import CreditCardPaymentOverview from "./CreditCardPaymentOverview.jsx";
-import DashboardActionCards from "./DashboardActionCards.jsx";
 import DashboardCashFlowSummary from "./DashboardCashFlowSummary.jsx";
 import MonthlyCloseChecklist from "./MonthlyCloseChecklist.jsx";
 import RecentTransactionsTable from "./RecentTransactionsTable.jsx";
@@ -32,19 +34,19 @@ const ACTIVE_VIEW_KEY = "personalFinanceApp:activeView:v1";
 const dashboardSections = [
   {
     id: "attention",
-    label: "Attention",
+    label: "Focus",
     description: "Cards, budgets, and bills that need action soon.",
     icon: AlertTriangle,
   },
   {
     id: "activity",
     label: "Activity",
-    description: "Recent transactions and current month movement.",
+    description: "Recent spending and this month's movement.",
     icon: ReceiptText,
   },
   {
     id: "all-sections",
-    label: "Full View",
+    label: "All",
     description: "Show attention items and recent activity together.",
     icon: BarChart3,
   },
@@ -52,59 +54,58 @@ const dashboardSections = [
 
 const quickActions = [
   {
-    label: "Update card balances",
-    description: "Go straight to monthly balances.",
-    view: "credit-cards",
-    target: "monthly-balances",
-    icon: CreditCard,
-    iconVariant: "violet",
-  },
-  {
-    label: "Add transactions",
-    description: "Open the add transaction form.",
+    label: "Add transaction",
+    description: "Record a new expense or income item.",
     view: "spending",
     target: "add-transaction",
     icon: ReceiptText,
     iconVariant: "orange",
   },
   {
-    label: "Open recurring bills",
-    description: "Go straight to this month's bills.",
-    view: "recurring",
-    target: "this-month",
-    icon: Repeat,
-    iconVariant: "rose",
-  },
-  {
-    label: "Tools",
-    description: "Open planning, setup, and maintenance tools.",
-    view: "tools",
-    target: "tools-home",
-    icon: Wrench,
-    iconVariant: "indigo",
-  },
-  {
-    label: "Review budget",
-    description: "Open the monthly budget workspace.",
+    label: "Review budgets",
+    description: "Check category usage and monthly limits.",
     view: "budgets",
     target: "budget-table",
     icon: WalletCards,
     iconVariant: "emerald",
   },
   {
-    label: "Calendar",
-    description: "Review upcoming card, bill, income, and close dates.",
-    view: "calendar",
-    target: "monthly-calendar",
-    icon: CalendarDays,
+    label: "Manage cards",
+    description: "Update balances and upcoming payments.",
+    view: "credit-cards",
+    target: "monthly-balances",
+    icon: CreditCard,
+    iconVariant: "violet",
+  },
+  {
+    label: "Review bills",
+    description: "Open recurring bills for this month.",
+    view: "recurring",
+    target: "this-month",
+    icon: Repeat,
+    iconVariant: "rose",
+  },
+  {
+    label: "Manage goals",
+    description: "Track progress toward savings goals.",
+    view: "savings",
+    target: "monthly-savings",
+    icon: Goal,
     iconVariant: "teal",
+  },
+  {
+    label: "Tools",
+    description: "Planning, setup, and maintenance tools.",
+    view: "tools",
+    target: "tools-home",
+    icon: Wrench,
+    iconVariant: "indigo",
   },
 ];
 
 export default function Dashboard({
   appData,
   selectedMonth = getCurrentMonthKey(),
-  onMonthChange,
   loading = false,
   error = "",
   monthlyCloseReview,
@@ -116,7 +117,6 @@ export default function Dashboard({
   onReopenMonthlyCloseReview,
 }) {
   const [activeSection, setActiveSection] = useState("attention");
-  const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const data = useMemo(() => getDashboardData(appData, selectedMonth), [appData, selectedMonth]);
   const alerts = useMemo(() => getAlerts(data), [data]);
   const monthlyCloseChecklist = useMemo(
@@ -135,73 +135,112 @@ export default function Dashboard({
   const recurringAttentionRows = data.recurringRows.filter((row) =>
     ["Past due", "Due now", "Due soon"].includes(row.displayStatus),
   );
+  const activeGoals = (appData?.savingsGoals ?? []).filter((goal) => goal.isActive !== false);
 
   const showAttention = activeSection === "attention" || activeSection === "all-sections";
   const showActivity = activeSection === "activity" || activeSection === "all-sections";
 
   return (
     <section className="grid gap-6">
-      <Card className="p-5">
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-end">
-          <div>
-            <p className="text-sm font-medium text-text-muted">Dashboard month</p>
-            <h2 className="mt-1 text-2xl font-semibold tracking-normal text-text-main">
-              {formatMonthLabel(selectedMonth)}
-            </h2>
-            <p className="mt-1 text-sm text-text-muted">What needs your attention right now.</p>
-            {loading ? (
-              <p className="mt-2 text-sm text-text-muted">Loading dashboard data...</p>
-            ) : null}
-            {error ? <p className="mt-2 text-sm font-medium text-status-danger">{error}</p> : null}
+      <Card className="overflow-hidden border-slate-200 bg-gradient-to-br from-white via-white to-blue-50/50">
+        <div className="grid gap-4 p-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-app-border bg-white px-3 py-1 text-xs font-semibold text-text-muted">
+              <WalletCards size={14} aria-hidden="true" />
+              Family dashboard workspace
+            </div>
+            <div>
+              <h2 className="text-2xl font-semibold tracking-tight text-text-main sm:text-3xl">
+                {formatMonthLabel(selectedMonth)}
+              </h2>
+              <p className="mt-1 text-sm text-text-muted">Cash flow, budgets, bills, and goals in one view.</p>
+            </div>
+            {loading ? <p className="text-sm text-text-muted">Loading dashboard data...</p> : null}
+            {error ? <p className="text-sm font-medium text-status-danger">{error}</p> : null}
           </div>
-          <Select
-            label="Month"
-            value={selectedMonth}
-            onChange={(event) => onMonthChange(event.target.value)}
-          >
-            {monthOptions.map((month) => (
-              <option key={month} value={month}>
-                {formatMonthLabel(month)}
-              </option>
-            ))}
-          </Select>
+          <div className="grid gap-2 text-sm text-text-muted sm:text-right">
+            <p>
+              Active month: <span className="font-semibold text-text-main">{formatMonthLabel(selectedMonth)}</span>
+            </p>
+            <p>Use the top toolbar to switch month, search, and add transactions.</p>
+          </div>
+        </div>
+
+        <div className="grid gap-3 border-t border-app-border/80 bg-white/60 p-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+          <label className="flex min-h-11 items-center gap-3 rounded-xl border border-app-border bg-white px-3 text-sm text-text-muted">
+            <Search size={16} aria-hidden="true" />
+            <span className="truncate">Search (mockup preview only)</span>
+            <span className="ml-auto rounded-md bg-app-muted px-2 py-0.5 text-xs font-semibold">Soon</span>
+          </label>
+          <div className="inline-flex items-center gap-2 rounded-xl border border-app-border bg-white px-3 py-2 text-sm text-text-muted">
+            <Bell size={16} aria-hidden="true" />
+            Alerts: {alerts.length}
+          </div>
         </div>
       </Card>
 
-      <DashboardActionCards
-        summary={data.summary}
-        cardRows={data.cardRows}
-        recurringRows={data.recurringRows}
-        budgetRows={data.budgetRows}
-      />
-      <DashboardCashFlowSummary
-        selectedMonth={selectedMonth}
-        incomeEntries={appData.incomeEntries}
-        savingsContributions={appData.savingsContributions}
-        cashAccounts={appData.cashAccounts}
-        accountBalanceSnapshots={appData.accountBalanceSnapshots}
-        accountMoneyMovements={appData.accountMoneyMovements}
-        budgetTotal={data.summary.budgetTotal}
-        remainingBudget={data.summary.remainingBudget}
-        spendingTotal={data.summary.spendingTotal}
-        recurringRemaining={data.summary.recurringRemaining}
-        unpaidCardBalanceTotal={data.summary.unpaidBalanceTotal}
-      />
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <div className="grid gap-6">
+          <DashboardCashFlowSummary
+            selectedMonth={selectedMonth}
+            incomeEntries={appData.incomeEntries}
+            savingsContributions={appData.savingsContributions}
+            cashAccounts={appData.cashAccounts}
+            accountBalanceSnapshots={appData.accountBalanceSnapshots}
+            accountMoneyMovements={appData.accountMoneyMovements}
+            budgetTotal={data.summary.budgetTotal}
+            remainingBudget={data.summary.remainingBudget}
+            spendingTotal={data.summary.spendingTotal}
+            recurringRemaining={data.summary.recurringRemaining}
+            unpaidCardBalanceTotal={data.summary.unpaidBalanceTotal}
+          />
 
-      <DashboardQuickActions />
-      <MonthlyCloseChecklist
-        monthKey={selectedMonth}
-        checklist={monthlyCloseChecklist}
-        onNavigate={navigateToView}
-        reviewLoading={monthlyCloseReviewLoading}
-        reviewSaving={monthlyCloseReviewSaving}
-        reviewError={monthlyCloseReviewError}
-        onToggleManualCheck={onToggleMonthlyCloseManualCheck}
-        onMarkReviewed={onMarkMonthlyCloseReviewed}
-        onReopenReview={onReopenMonthlyCloseReview}
-      />
+          <div className="grid gap-6 lg:grid-cols-2">
+            <BudgetVsSpendingTable
+              rows={data.budgetRows}
+              title="Budget health"
+              emptyMessage="No budget categories yet for this month."
+            />
+            <CreditCardPaymentOverview
+              rows={data.cardRows}
+              totalUnpaid={data.summary.unpaidBalanceTotal}
+              title="Cards and debt"
+              emptyMessage="No active credit cards available."
+            />
+          </div>
 
-      <DashboardPriorityPanel alerts={priorityAlerts} totalAlertCount={alerts.length} />
+          <RecurringOverview
+            rows={data.recurringRows}
+            summary={data.recurringSummary}
+            title="Upcoming bills"
+            emptyMessage="No recurring bills for this month."
+          />
+
+          <MonthlyCloseChecklist
+            monthKey={selectedMonth}
+            checklist={monthlyCloseChecklist}
+            onNavigate={navigateToView}
+            reviewLoading={monthlyCloseReviewLoading}
+            reviewSaving={monthlyCloseReviewSaving}
+            reviewError={monthlyCloseReviewError}
+            onToggleManualCheck={onToggleMonthlyCloseManualCheck}
+            onMarkReviewed={onMarkMonthlyCloseReviewed}
+            onReopenReview={onReopenMonthlyCloseReview}
+          />
+        </div>
+
+        <div className="grid gap-6">
+          <RecentTransactionsTable
+            transactions={data.recentTransactions}
+            cards={data.cards}
+            categories={data.budgets}
+          />
+          <SavingsGoalsPanel goals={activeGoals} />
+          <DashboardPriorityPanel alerts={priorityAlerts} totalAlertCount={alerts.length} />
+          <FamilyNotePlaceholder />
+          <DashboardQuickActions />
+        </div>
+      </div>
 
       <div className="grid gap-1">
         <h2 className="text-lg font-semibold text-text-main">Dashboard workspace</h2>
@@ -234,17 +273,17 @@ export default function Dashboard({
 
       {showAttention ? (
         <div>
-          <h3 className="mb-3 text-lg font-semibold text-text-main">Needs Attention</h3>
+          <h3 className="mb-3 text-lg font-semibold text-text-main">Needs attention</h3>
           <div className="grid gap-6 xl:grid-cols-2">
             <CreditCardPaymentOverview
               rows={cardAttentionRows}
               totalUnpaid={data.summary.unpaidBalanceTotal}
-              title="Credit Cards To Pay"
+              title="Credit cards to pay"
               emptyMessage="No credit cards are due soon or past due."
             />
             <BudgetVsSpendingTable
               rows={budgetAttentionRows}
-              title="Budget Attention"
+              title="Budget attention"
               emptyMessage="No categories are over budget or near the limit."
             />
           </div>
@@ -252,7 +291,7 @@ export default function Dashboard({
             <RecurringOverview
               rows={recurringAttentionRows}
               summary={data.recurringSummary}
-              title="Recurring Bills To Pay"
+              title="Recurring bills to pay"
               emptyMessage="No recurring bills are due soon or past due."
             />
           </div>
@@ -278,15 +317,12 @@ function DashboardQuickActions() {
     <Card className="overflow-hidden">
       <div className="border-b border-app-border p-5">
         <h3 className="text-base font-semibold text-text-main">Quick actions</h3>
-        <p className="mt-1 text-sm text-text-muted">
-          Jump to the main workspaces that need regular updates.
-        </p>
       </div>
-      <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-3 p-4 sm:grid-cols-2">
         {quickActions.map((action) => {
           return (
             <button
-              key={action.view}
+              key={`${action.view}-${action.target}`}
               type="button"
               className="grid gap-2 rounded-2xl border border-app-border bg-app-surface p-4 text-left transition hover:border-brand-primary/40 hover:bg-app-background focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
               onClick={() => navigateToView(action.view, action.target)}
@@ -312,9 +348,7 @@ function DashboardPriorityPanel({ alerts, totalAlertCount }) {
           </span>
           <div>
             <h3 className="text-base font-semibold text-text-main">No urgent dashboard alerts</h3>
-            <p className="mt-1 text-sm text-text-muted">
-              Cards, budgets, and recurring bills look clear for this month.
-            </p>
+            <p className="mt-1 text-sm text-text-muted">Cards, budgets, and recurring bills look clear.</p>
           </div>
         </div>
       </Card>
@@ -327,8 +361,7 @@ function DashboardPriorityPanel({ alerts, totalAlertCount }) {
         <div>
           <h3 className="text-base font-semibold text-text-main">Top alerts</h3>
           <p className="mt-1 text-sm text-text-muted">
-            Showing {alerts.length} of {totalAlertCount} item{totalAlertCount === 1 ? "" : "s"} that
-            need attention.
+            Showing {alerts.length} of {totalAlertCount} item{totalAlertCount === 1 ? "" : "s"}.
           </p>
         </div>
         <span className="inline-flex w-fit items-center gap-2 rounded-full bg-status-warningBg px-3 py-1 text-sm font-semibold text-status-warningDark">
@@ -360,6 +393,70 @@ function DashboardPriorityPanel({ alerts, totalAlertCount }) {
   );
 }
 
+function SavingsGoalsPanel({ goals }) {
+  return (
+    <Card className="overflow-hidden">
+      <div className="border-b border-app-border p-5">
+        <div className="flex items-center justify-between gap-3">
+          <h3 className="text-base font-semibold text-text-main">Savings goals</h3>
+          <button
+            type="button"
+            className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary hover:text-brand-dark"
+            onClick={() => navigateToView("savings", "monthly-savings")}
+          >
+            View goals <ArrowRight size={14} aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+      {goals.length === 0 ? (
+        <div className="p-5 text-sm text-text-muted">No savings goals added yet.</div>
+      ) : (
+        <div className="grid gap-4 p-4">
+          {goals.slice(0, 3).map((goal) => {
+            const target = Number(goal.targetAmount || 0);
+            const current = Number(goal.currentAmount || 0);
+            const progress = target > 0 ? Math.min(100, (current / target) * 100) : 0;
+            return (
+              <article key={goal.id} className="grid gap-2 rounded-xl border border-app-border bg-app-background p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-semibold text-text-main">{goal.name}</p>
+                  <p className="text-xs font-semibold text-text-muted">{Math.round(progress)}%</p>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-app-muted">
+                  <div className="h-full rounded-full bg-status-success" style={{ width: `${progress}%` }} />
+                </div>
+                <p className="text-xs text-text-muted">
+                  {formatCurrency(current)} / {target > 0 ? formatCurrency(target) : "No target"}
+                </p>
+              </article>
+            );
+          })}
+        </div>
+      )}
+    </Card>
+  );
+}
+
+function FamilyNotePlaceholder() {
+  return (
+    <Card className="overflow-hidden border-dashed">
+      <div className="border-b border-app-border p-5">
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="text-base font-semibold text-text-main">Family note</h3>
+          <span className="rounded-full bg-app-muted px-2 py-0.5 text-xs font-semibold text-text-muted">
+            Placeholder
+          </span>
+        </div>
+      </div>
+      <div className="p-5">
+        <p className="text-sm text-text-muted">
+          Motivational notes and shared comments are UI-only placeholders for now.
+        </p>
+      </div>
+    </Card>
+  );
+}
+
 function DashboardActivitySummary({ data }) {
   return (
     <Card className="p-5">
@@ -370,8 +467,7 @@ function DashboardActivitySummary({ data }) {
         <div>
           <h3 className="text-base font-semibold text-text-main">Month activity snapshot</h3>
           <p className="mt-1 text-sm text-text-muted">
-            Current month totals based on budget, spending, recurring bills, and unpaid card
-            balances.
+            Current month totals based on budget, spending, recurring bills, and unpaid card balances.
           </p>
         </div>
       </div>

@@ -1,18 +1,20 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
   color-scheme: light;
-  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-  background: #f9fafb;
-  color: #111827;
+  font-family: Manrope, ui-sans-serif, system-ui, sans-serif;
+  background: #f5f2eb;
+  color: #0e2238;
 }
 
 body {
   margin: 0;
   min-width: 320px;
-  background: #f9fafb;
+  background: radial-gradient(circle at top right, #fdf8ef 0%, #f5f2eb 45%, #f2eee5 100%);
   overflow-x: hidden;
 }
 

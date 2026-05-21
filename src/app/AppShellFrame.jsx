@@ -7,6 +7,8 @@ export default function AppShellFrame({
   currentPage,
   headerAlerts,
   setupCheckError,
+  selectedDashboardMonth,
+  onDashboardMonthChange,
   onViewChange,
   onQuickAdd,
   children,
@@ -23,6 +25,9 @@ export default function AppShellFrame({
           alerts={headerAlerts}
           onNavigate={onViewChange}
           onQuickAdd={onQuickAdd}
+          activeView={activeView}
+          dashboardMonth={selectedDashboardMonth}
+          onDashboardMonthChange={onDashboardMonthChange}
         />
       }
     >
