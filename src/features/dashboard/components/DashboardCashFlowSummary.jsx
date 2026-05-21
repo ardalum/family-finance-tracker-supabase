@@ -35,15 +35,25 @@ export default function DashboardCashFlowSummary({
     cashFlow.budgetTotal > 0
       ? Math.min(100, Math.max(0, (cashFlow.spendingTotal / cashFlow.budgetTotal) * 100))
       : 0;
-
+  const netVsBudget = netCashFlow - cashFlow.remainingBudget;
+  const netVsBudgetPositive = netVsBudget >= 0;
   const trendPoints = [
     Math.max(0, cashFlow.incomeTotal),
     Math.max(0, cashFlow.spendingTotal),
     Math.max(0, cashFlow.recurringRemaining),
     Math.max(0, cashFlow.unpaidCardBalanceTotal),
     Math.max(0, Math.abs(cashFlow.plannedCashCushion)),
+    Math.max(0, cashFlow.cashPositionTotal),
   ];
   const trendMax = Math.max(...trendPoints, 1);
+  const chartPoints = trendPoints
+    .map((point, index) => {
+      const x = (index / (trendPoints.length - 1)) * 100;
+      const y = 100 - (point / trendMax) * 100;
+      return `${x},${Math.max(6, Math.min(94, y))}`;
+    })
+    .join(" ");
+  const chartAreaPoints = `${chartPoints} 100,30 0,30`;
 
   return (
     <Card className="overflow-hidden">
@@ -58,6 +68,10 @@ export default function DashboardCashFlowSummary({
           {formatCurrency(netCashFlow)}
         </p>
         <p className="mt-1 text-sm text-text-muted">Income minus spending this month</p>
+        <p className={`mt-1 text-xs font-semibold ${netVsBudgetPositive ? "text-status-successDark" : "text-status-warningDark"}`}>
+          {netVsBudgetPositive ? "+" : ""}
+          {formatCurrency(netVsBudget)} vs budget remaining
+        </p>
       </div>
 
       <div className="grid gap-3 p-4 sm:grid-cols-2">
@@ -76,15 +90,24 @@ export default function DashboardCashFlowSummary({
           <span>Month trend</span>
           <span>{Math.round(budgetUsagePct)}% budget used</span>
         </div>
-        <div className="grid h-14 grid-cols-5 items-end gap-2 rounded-xl border border-app-border bg-app-background p-2">
-          {trendPoints.map((point, index) => (
-            <div key={index} className="h-full rounded-md bg-app-muted/80">
-              <div
-                className={`h-full w-full origin-bottom rounded-md ${index === 0 ? "bg-status-success/70" : index === 1 ? "bg-brand-primary/75" : "bg-status-warning/70"}`}
-                style={{ transform: `scaleY(${Math.max(0.12, point / trendMax)})` }}
-              />
-            </div>
-          ))}
+        <div className="rounded-xl border border-app-border bg-app-background px-2 py-1.5">
+          <svg viewBox="0 0 100 30" className="h-14 w-full" aria-hidden="true">
+            <defs>
+              <linearGradient id="cashflowLine" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#1E3A5F" />
+                <stop offset="100%" stopColor="#16A34A" />
+              </linearGradient>
+            </defs>
+            <polyline
+              points={chartPoints}
+              fill="none"
+              stroke="url(#cashflowLine)"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <polygon points={chartAreaPoints} fill="rgba(30,58,95,0.08)" stroke="none" />
+          </svg>
         </div>
       </div>
     </Card>

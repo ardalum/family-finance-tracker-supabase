@@ -12,7 +12,10 @@ export default function RecentTransactionsTable({ transactions, cards, categorie
   return (
     <Card className="overflow-hidden">
       <div className="border-b border-app-border p-5">
-        <h3 className="text-base font-semibold text-text-main">Recent transactions</h3>
+        <div className="flex items-center justify-between gap-3">
+          <h3 className="text-base font-semibold text-text-main">Recent transactions</h3>
+          <span className="text-xs font-semibold text-brand-primary">View all</span>
+        </div>
         <p className="mt-1 text-sm text-text-muted">Latest spending activity for the selected month.</p>
       </div>
       {transactions.length === 0 ? (

@@ -114,7 +114,7 @@ export default function Dashboard({
           />
         </div>
 
-        <div className="grid gap-5 self-start xl:sticky xl:top-24">
+        <div className="grid gap-4 self-start xl:sticky xl:top-24">
           <RecentTransactionsTable transactions={data.recentTransactions} cards={data.cards} categories={data.budgets} />
           <FamilyNotePlaceholder />
           <DashboardQuickActions />
@@ -127,8 +127,9 @@ export default function Dashboard({
 function DashboardQuickActions() {
   return (
     <Card className="overflow-hidden">
-      <div className="border-b border-app-border p-5">
+      <div className="border-b border-app-border px-5 py-4">
         <h3 className="text-base font-semibold text-text-main">Quick actions</h3>
+        <p className="mt-0.5 text-xs text-text-muted">Shortcuts to common workflows</p>
       </div>
       <div className="grid gap-3 p-4 sm:grid-cols-2">
         {quickActions.map((action) => (
@@ -241,7 +242,10 @@ function FamilyNotePlaceholder() {
         </div>
       </div>
       <div className="p-5">
-        <p className="text-sm text-text-muted">Static placeholder. Shared notes backend is not implemented yet.</p>
+        <blockquote className="rounded-xl border border-[#EADFCF] bg-[#FBF5EA] px-4 py-3 text-sm italic text-text-soft">
+          “Let’s keep up the momentum. Great job staying on budget this month.”
+          <footer className="mt-2 text-xs font-semibold not-italic text-text-muted">— Family note (static)</footer>
+        </blockquote>
       </div>
     </Card>
   );
