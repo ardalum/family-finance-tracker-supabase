@@ -213,7 +213,7 @@ export default function BudgetTracker({
         ) : null}
       </div>
 
-      <div className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="grid min-w-0 gap-5 2xl:grid-cols-[minmax(0,1fr)_320px]">
         <div className="grid min-w-0 gap-5">
           <BudgetSummaryCards summary={summary} />
 
@@ -229,14 +229,14 @@ export default function BudgetTracker({
             isSaving={isSaving}
           />
 
-          <Card className="border border-[#D8E8FF] bg-[#F7FBFF] p-4">
+          <Card className="min-w-0 border border-[#D8E8FF] bg-[#F7FBFF] p-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-start gap-3">
+              <div className="flex min-w-0 items-start gap-3">
                 <span className="mt-0.5 inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#DCEBFF] text-[#245DA8]">
                   <DollarSign size={16} />
                 </span>
-                <div>
-                  <p className="text-base font-semibold text-text-main">{insightText}</p>
+                <div className="min-w-0">
+                  <p className="truncate text-base font-semibold text-text-main">{insightText}</p>
                   <p className="text-sm text-text-muted">Great job staying on top of your budgets.</p>
                 </div>
               </div>
@@ -252,17 +252,17 @@ export default function BudgetTracker({
         </div>
 
         <aside className="grid min-w-0 gap-4">
-          <Card className="border border-app-border p-4">
+          <Card className="min-w-0 border border-app-border p-4">
             <div className="flex items-start gap-3">
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF5DF] text-[#D38A15]">
                 <Lightbulb size={18} />
               </span>
-              <div className="grid gap-2">
+              <div className="grid min-w-0 gap-2">
                 <h3 className="text-xl font-semibold text-text-main">Budget tip</h3>
                 <p className="text-sm text-text-main">
                   You're doing great: {summary.onTrackCount} of {summary.categoryCount} categories are on track.
                 </p>
-                <p className="text-sm text-text-muted">
+                <p className="truncate text-sm text-text-muted">
                   {summary.watchCategoryName
                     ? `Keep an eye on ${summary.watchCategoryName}.`
                     : "Keep monitoring categories near the monthly limit."}
@@ -271,13 +271,13 @@ export default function BudgetTracker({
             </div>
           </Card>
 
-          <Card className="border border-app-border p-4">
+          <Card className="min-w-0 border border-app-border p-4">
             <div className="grid gap-3">
               <div className="flex items-start gap-3">
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#EAF2FF] text-[#275EAB]">
                   <ArrowRightLeft size={16} />
                 </span>
-                <div>
+                <div className="min-w-0">
                   <h3 className="text-xl font-semibold text-text-main">Reallocate suggestions</h3>
                   <p className="text-sm text-text-muted">
                     Move money from underused categories to cover overspending.
@@ -290,7 +290,7 @@ export default function BudgetTracker({
                 </p>
               ) : (
                 suggestionRows.map((suggestion, index) => (
-                  <div key={`${suggestion.from.id}-${suggestion.to.id}-${index}`} className="rounded-xl border border-app-border bg-app-background p-3">
+                  <div key={`${suggestion.from.id}-${suggestion.to.id}-${index}`} className="min-w-0 rounded-xl border border-app-border bg-app-background p-3">
                     <p className="text-sm text-text-main">
                       From: <span className="font-semibold">{suggestion.from.name}</span>
                     </p>
@@ -376,12 +376,12 @@ function BudgetSummaryCards({ summary }) {
       {cards.map((card) => {
         const Icon = card.icon;
         return (
-          <Card key={card.label} className="rounded-2xl border border-app-border bg-white p-4">
+          <Card key={card.label} className="min-w-0 rounded-2xl border border-app-border bg-white p-4">
             <div className="flex items-start justify-between gap-3">
-              <div>
+              <div className="min-w-0">
                 <p className="text-base font-medium text-text-main">{card.label}</p>
-                <p className={`mt-1 text-[2rem] font-semibold leading-none ${card.valueTone}`}>{card.value}</p>
-                <p className="mt-2 text-sm text-text-muted">{card.helper}</p>
+                <p className={`mt-1 truncate text-[2rem] font-semibold leading-none ${card.valueTone}`}>{card.value}</p>
+                <p className="mt-2 truncate text-sm text-text-muted">{card.helper}</p>
               </div>
               <span className={`inline-flex h-14 w-14 items-center justify-center rounded-full ${card.iconTone}`}>
                 <Icon size={24} aria-hidden="true" />

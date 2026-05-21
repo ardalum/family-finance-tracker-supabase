@@ -50,7 +50,7 @@ export default function AppHeaderAccountSlot({
   }
 
   return (
-    <div className="flex w-full min-w-0 items-center justify-end gap-2 lg:gap-3">
+    <div className="flex w-full min-w-0 flex-wrap items-center justify-end gap-2 lg:gap-3">
       <HouseholdSwitcher />
 
       {showMonthControls ? (
@@ -93,7 +93,7 @@ export default function AppHeaderAccountSlot({
         </div>
       ) : null}
 
-      <label className="hidden min-h-11 items-center gap-2 rounded-xl border border-app-border bg-app-surface px-3 text-sm text-text-muted xl:inline-flex">
+      <label className="hidden min-h-11 items-center gap-2 rounded-xl border border-app-border bg-app-surface px-3 text-sm text-text-muted 2xl:inline-flex">
         <Search size={16} aria-hidden="true" />
         <span className="truncate">Search transactions, bills, goals...</span>
         <span className="rounded-md bg-app-muted px-2 py-0.5 text-xs font-semibold">Soon</span>

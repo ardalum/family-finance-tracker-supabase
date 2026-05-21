@@ -67,7 +67,7 @@ export default function BudgetTable({
             </div>
 
             <div className="hidden w-full min-w-0 overflow-x-auto md:block">
-              <table className="w-full min-w-[820px] border-collapse">
+              <table className="w-full min-w-[780px] border-collapse">
                 <thead>
                   <tr className="border-b border-app-border text-left text-sm text-text-muted">
                     <th className="px-5 py-3 font-medium">Category</th>
@@ -148,13 +148,13 @@ function BudgetRow({ budget, isSaving, menuOpen, onToggleMenu, onEdit, onDelete 
   return (
     <tr className="border-b border-app-border last:border-b-0">
       <td className="px-5 py-3">
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           <span className={`inline-flex h-10 w-10 items-center justify-center rounded-full ${status.iconBg}`}>
             <Icon size={17} className={status.iconText} />
           </span>
-          <div>
-            <p className="font-semibold text-text-main">{budget.name}</p>
-            <p className="text-xs text-text-muted">{budget.notes || "Monthly budget category"}</p>
+          <div className="min-w-0">
+            <p className="truncate font-semibold text-text-main">{budget.name}</p>
+            <p className="truncate text-xs text-text-muted">{budget.notes || "Monthly budget category"}</p>
           </div>
         </div>
       </td>
@@ -170,13 +170,11 @@ function BudgetRow({ budget, isSaving, menuOpen, onToggleMenu, onEdit, onDelete 
           <div className="h-2 w-full overflow-hidden rounded-full bg-app-muted">
             <div className={`h-full rounded-full ${status.progress}`} style={{ width: `${progressWidth}%` }} />
           </div>
-          <p className="text-xs text-text-muted">
-            {showOverText ? `${percentUsed.toFixed(0)}% used` : `${Math.max(percentUsed, 0).toFixed(0)}%`}
-          </p>
+          <p className="text-xs text-text-muted">{formatUsedPercentLabel(percentUsed, showOverText)}</p>
         </div>
       </td>
       <td className="px-4 py-3">
-        <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${status.pill}`}>{status.label}</span>
+        <span className={`inline-flex max-w-[88px] truncate rounded-full px-2.5 py-1 text-xs font-semibold ${status.pill}`}>{status.label}</span>
       </td>
       <td className="relative px-3 py-3 text-right" ref={menuRef}>
         <BudgetActionMenu
@@ -219,7 +217,7 @@ function BudgetMobileCard({ budget, onEdit, onDelete, isSaving }) {
           <p className="mt-1 truncate text-xs text-text-muted">{budget.notes || "Monthly budget category"}</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${status.pill}`}>{status.label}</span>
+          <span className={`inline-flex max-w-[88px] truncate rounded-full px-2.5 py-1 text-xs font-semibold ${status.pill}`}>{status.label}</span>
           <BudgetActionMenu
             budget={budget}
             isSaving={isSaving}
@@ -331,6 +329,13 @@ function Metric({ label, value }) {
       <p className="text-sm font-semibold text-text-main">{value}</p>
     </div>
   );
+}
+
+function formatUsedPercentLabel(percentUsed, showOverText) {
+  if (!Number.isFinite(percentUsed)) return "0%";
+  const cappedValue = Math.max(percentUsed, 0);
+  if (cappedValue >= 999) return "999%+ used";
+  return showOverText ? `${cappedValue.toFixed(0)}% used` : `${cappedValue.toFixed(0)}%`;
 }
 
 function getStatusDisplay(budget) {
