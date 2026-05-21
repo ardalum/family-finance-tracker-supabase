@@ -12,48 +12,30 @@ export default function RecentTransactionsTable({ transactions, cards, categorie
   return (
     <Card className="overflow-hidden">
       <div className="border-b border-app-border p-5">
-        <h3 className="text-lg font-semibold text-text-main">Recent Transactions</h3>
-        <p className="mt-1 text-sm text-text-muted">
-          Latest spending activity for the selected month.
-        </p>
+        <h3 className="text-base font-semibold text-text-main">Recent transactions</h3>
+        <p className="mt-1 text-sm text-text-muted">Latest spending activity for the selected month.</p>
       </div>
       {transactions.length === 0 ? (
-        <div className="p-8 text-center text-sm text-text-muted">
-          No transactions for this month.
-        </div>
+        <div className="p-8 text-center text-sm text-text-muted">No transactions for this month.</div>
       ) : (
-        <div className="grid gap-3 p-4">
+        <div className="grid gap-2 p-4">
           {previewTransactions.map((transaction) => {
             const card = cards.find((item) => item.id === transaction.cardId);
             const categoryLabel = transaction.splits
               .map((split) => getCategoryName(split.categoryId, categories))
               .join(", ");
+            const amountPositive = Number(transaction.amount || 0) < 0;
             return (
-              <article
-                key={transaction.id}
-                className="rounded-2xl border border-app-border bg-app-surface px-4 py-3"
-              >
-                <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
+              <article key={transaction.id} className="rounded-xl border border-app-border bg-app-background px-3 py-2.5">
+                <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="flex min-w-0 flex-wrap items-center gap-2">
-                      <h4 className="truncate text-sm font-semibold text-text-main">
-                        {transaction.merchant}
-                      </h4>
-                      {transaction.source === "recurring" ? (
-                        <span className="rounded-full bg-status-infoBg px-2 py-0.5 text-xs font-semibold text-status-infoDark">
-                          Recurring
-                        </span>
-                      ) : null}
-                    </div>
-                    <p className="mt-1 text-xs text-text-muted">
-                      {transaction.date} · {categoryLabel || "Uncategorized"}
-                    </p>
-                    <p className="mt-1 text-xs text-text-muted">
+                    <h4 className="truncate text-sm font-semibold text-text-main">{transaction.merchant}</h4>
+                    <p className="mt-0.5 truncate text-xs text-text-muted">{categoryLabel || "Uncategorized"} · {transaction.date}</p>
+                    <p className="mt-0.5 truncate text-xs text-text-muted">
                       {transaction.paymentMethod || "Credit Card"}
                       {card ? (
                         <>
-                          {" "}
-                          · <LinkedCardName card={card} />
+                          {" "}· <LinkedCardName card={card} />
                         </>
                       ) : transaction.cardId ? (
                         ` · ${getCardName(transaction.cardId, cards)}`
@@ -62,7 +44,7 @@ export default function RecentTransactionsTable({ transactions, cards, categorie
                       )}
                     </p>
                   </div>
-                  <p className="text-sm font-semibold text-text-main">
+                  <p className={`text-sm font-semibold ${amountPositive ? "text-status-successDark" : "text-text-main"}`}>
                     {formatCurrency(transaction.amount)}
                   </p>
                 </div>
@@ -71,8 +53,7 @@ export default function RecentTransactionsTable({ transactions, cards, categorie
           })}
           {hiddenCount > 0 ? (
             <p className="px-1 text-xs font-medium text-text-muted">
-              Showing {previewTransactions.length} of {transactions.length}. Open Transactions to
-              review the rest.
+              Showing {previewTransactions.length} of {transactions.length}. Open Transactions to review the rest.
             </p>
           ) : null}
         </div>
@@ -80,4 +61,3 @@ export default function RecentTransactionsTable({ transactions, cards, categorie
     </Card>
   );
 }
-

@@ -1,17 +1,13 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   AlertTriangle,
   ArrowRight,
-  BarChart3,
-  Bell,
-  CalendarDays,
   CheckCircle2,
   Clock3,
   CreditCard,
   Goal,
   ReceiptText,
   Repeat,
-  Search,
   Wrench,
   WalletCards,
 } from "lucide-react";
@@ -30,27 +26,6 @@ import { getAlerts, getDashboardData } from "../dashboardUtils.js";
 import { getMonthlyCloseChecklist } from "../monthlyCloseChecklist.js";
 
 const ACTIVE_VIEW_KEY = "personalFinanceApp:activeView:v1";
-
-const dashboardSections = [
-  {
-    id: "attention",
-    label: "Focus",
-    description: "Cards, budgets, and bills that need action soon.",
-    icon: AlertTriangle,
-  },
-  {
-    id: "activity",
-    label: "Activity",
-    description: "Recent spending and this month's movement.",
-    icon: ReceiptText,
-  },
-  {
-    id: "all-sections",
-    label: "All",
-    description: "Show attention items and recent activity together.",
-    icon: BarChart3,
-  },
-];
 
 const quickActions = [
   {
@@ -116,105 +91,71 @@ export default function Dashboard({
   onMarkMonthlyCloseReviewed,
   onReopenMonthlyCloseReview,
 }) {
-  const [activeSection, setActiveSection] = useState("attention");
   const data = useMemo(() => getDashboardData(appData, selectedMonth), [appData, selectedMonth]);
   const alerts = useMemo(() => getAlerts(data), [data]);
   const monthlyCloseChecklist = useMemo(
     () => getMonthlyCloseChecklist(data, selectedMonth, monthlyCloseReview),
     [data, monthlyCloseReview, selectedMonth],
   );
-  const priorityAlerts = alerts.slice(0, 5);
-  const currentSection =
-    dashboardSections.find((section) => section.id === activeSection) ?? dashboardSections[0];
-  const cardAttentionRows = data.cardRows.filter(
-    (row) => row.hasPaymentDue && row.daysUntilDue <= 7,
-  );
-  const budgetAttentionRows = data.budgetRows.filter(
-    (row) => row.remaining < 0 || row.percentUsed >= 90,
-  );
-  const recurringAttentionRows = data.recurringRows.filter((row) =>
-    ["Past due", "Due now", "Due soon"].includes(row.displayStatus),
-  );
   const activeGoals = (appData?.savingsGoals ?? []).filter((goal) => goal.isActive !== false);
 
-  const showAttention = activeSection === "attention" || activeSection === "all-sections";
-  const showActivity = activeSection === "activity" || activeSection === "all-sections";
-
   return (
-    <section className="grid gap-6">
-      <Card className="overflow-hidden border-slate-200 bg-gradient-to-br from-white via-white to-blue-50/50">
-        <div className="grid gap-4 p-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-full border border-app-border bg-white px-3 py-1 text-xs font-semibold text-text-muted">
-              <WalletCards size={14} aria-hidden="true" />
-              Family dashboard workspace
-            </div>
-            <div>
-              <h2 className="text-2xl font-semibold tracking-tight text-text-main sm:text-3xl">
-                {formatMonthLabel(selectedMonth)}
-              </h2>
-              <p className="mt-1 text-sm text-text-muted">Cash flow, budgets, bills, and goals in one view.</p>
-            </div>
-            {loading ? <p className="text-sm text-text-muted">Loading dashboard data...</p> : null}
-            {error ? <p className="text-sm font-medium text-status-danger">{error}</p> : null}
+    <section className="grid gap-5 lg:gap-6">
+      <Card className="border-app-border/80 bg-white/90 px-4 py-4 sm:px-5 sm:py-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.06em] text-text-muted">Overview</p>
+            <h2 className="text-xl font-semibold tracking-tight text-text-main sm:text-2xl">
+              {formatMonthLabel(selectedMonth)} dashboard
+            </h2>
           </div>
-          <div className="grid gap-2 text-sm text-text-muted sm:text-right">
-            <p>
-              Active month: <span className="font-semibold text-text-main">{formatMonthLabel(selectedMonth)}</span>
-            </p>
-            <p>Use the top toolbar to switch month, search, and add transactions.</p>
+          <div className="flex items-center gap-2 rounded-full bg-app-muted px-3 py-1.5 text-xs font-semibold text-text-soft">
+            <Clock3 size={14} aria-hidden="true" />
+            {loading ? "Refreshing data..." : "Live household snapshot"}
           </div>
         </div>
-
-        <div className="grid gap-3 border-t border-app-border/80 bg-white/60 p-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
-          <label className="flex min-h-11 items-center gap-3 rounded-xl border border-app-border bg-white px-3 text-sm text-text-muted">
-            <Search size={16} aria-hidden="true" />
-            <span className="truncate">Search (mockup preview only)</span>
-            <span className="ml-auto rounded-md bg-app-muted px-2 py-0.5 text-xs font-semibold">Soon</span>
-          </label>
-          <div className="inline-flex items-center gap-2 rounded-xl border border-app-border bg-white px-3 py-2 text-sm text-text-muted">
-            <Bell size={16} aria-hidden="true" />
-            Alerts: {alerts.length}
-          </div>
-        </div>
+        {error ? <p className="mt-2 text-sm font-medium text-status-danger">{error}</p> : null}
       </Card>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="grid gap-6">
-          <DashboardCashFlowSummary
-            selectedMonth={selectedMonth}
-            incomeEntries={appData.incomeEntries}
-            savingsContributions={appData.savingsContributions}
-            cashAccounts={appData.cashAccounts}
-            accountBalanceSnapshots={appData.accountBalanceSnapshots}
-            accountMoneyMovements={appData.accountMoneyMovements}
-            budgetTotal={data.summary.budgetTotal}
-            remainingBudget={data.summary.remainingBudget}
-            spendingTotal={data.summary.spendingTotal}
-            recurringRemaining={data.summary.recurringRemaining}
-            unpaidCardBalanceTotal={data.summary.unpaidBalanceTotal}
-          />
-
           <div className="grid gap-6 lg:grid-cols-2">
+            <DashboardCashFlowSummary
+              selectedMonth={selectedMonth}
+              incomeEntries={appData.incomeEntries}
+              savingsContributions={appData.savingsContributions}
+              cashAccounts={appData.cashAccounts}
+              accountBalanceSnapshots={appData.accountBalanceSnapshots}
+              accountMoneyMovements={appData.accountMoneyMovements}
+              budgetTotal={data.summary.budgetTotal}
+              remainingBudget={data.summary.remainingBudget}
+              spendingTotal={data.summary.spendingTotal}
+              recurringRemaining={data.summary.recurringRemaining}
+              unpaidCardBalanceTotal={data.summary.unpaidBalanceTotal}
+            />
             <BudgetVsSpendingTable
               rows={data.budgetRows}
               title="Budget health"
               emptyMessage="No budget categories yet for this month."
             />
+            <RecurringOverview
+              rows={data.recurringRows}
+              summary={data.recurringSummary}
+              title="Upcoming bills"
+              emptyMessage="No recurring bills for this month."
+            />
             <CreditCardPaymentOverview
               rows={data.cardRows}
               totalUnpaid={data.summary.unpaidBalanceTotal}
-              title="Cards and debt"
+              title="Cards & debt"
               emptyMessage="No active credit cards available."
             />
           </div>
 
-          <RecurringOverview
-            rows={data.recurringRows}
-            summary={data.recurringSummary}
-            title="Upcoming bills"
-            emptyMessage="No recurring bills for this month."
-          />
+          <div className="grid gap-6 lg:grid-cols-2">
+            <SavingsGoalsPanel goals={activeGoals} />
+            <DashboardPriorityPanel alerts={alerts.slice(0, 6)} totalAlertCount={alerts.length} />
+          </div>
 
           <MonthlyCloseChecklist
             monthKey={selectedMonth}
@@ -229,85 +170,16 @@ export default function Dashboard({
           />
         </div>
 
-        <div className="grid gap-6">
+        <div className="grid gap-6 self-start">
           <RecentTransactionsTable
             transactions={data.recentTransactions}
             cards={data.cards}
             categories={data.budgets}
           />
-          <SavingsGoalsPanel goals={activeGoals} />
-          <DashboardPriorityPanel alerts={priorityAlerts} totalAlertCount={alerts.length} />
           <FamilyNotePlaceholder />
           <DashboardQuickActions />
         </div>
       </div>
-
-      <div className="grid gap-1">
-        <h2 className="text-lg font-semibold text-text-main">Dashboard workspace</h2>
-        <p className="text-sm text-text-muted">{currentSection.description}</p>
-      </div>
-
-      <div className="overflow-x-auto rounded-2xl border border-app-border bg-app-surface p-2">
-        <div className="flex min-w-max gap-2">
-          {dashboardSections.map((section) => {
-            const Icon = section.icon;
-            const isActive = activeSection === section.id;
-            return (
-              <button
-                key={section.id}
-                type="button"
-                className={`inline-flex min-h-11 items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition ${
-                  isActive
-                    ? "bg-text-main text-white shadow-sm"
-                    : "text-text-soft hover:bg-app-muted hover:text-text-main"
-                }`}
-                onClick={() => setActiveSection(section.id)}
-              >
-                <Icon size={16} aria-hidden="true" />
-                {section.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {showAttention ? (
-        <div>
-          <h3 className="mb-3 text-lg font-semibold text-text-main">Needs attention</h3>
-          <div className="grid gap-6 xl:grid-cols-2">
-            <CreditCardPaymentOverview
-              rows={cardAttentionRows}
-              totalUnpaid={data.summary.unpaidBalanceTotal}
-              title="Credit cards to pay"
-              emptyMessage="No credit cards are due soon or past due."
-            />
-            <BudgetVsSpendingTable
-              rows={budgetAttentionRows}
-              title="Budget attention"
-              emptyMessage="No categories are over budget or near the limit."
-            />
-          </div>
-          <div className="mt-6">
-            <RecurringOverview
-              rows={recurringAttentionRows}
-              summary={data.recurringSummary}
-              title="Recurring bills to pay"
-              emptyMessage="No recurring bills are due soon or past due."
-            />
-          </div>
-        </div>
-      ) : null}
-
-      {showActivity ? (
-        <div className="grid gap-6 xl:grid-cols-2">
-          <RecentTransactionsTable
-            transactions={data.recentTransactions}
-            cards={data.cards}
-            categories={data.budgets}
-          />
-          <DashboardActivitySummary data={data} />
-        </div>
-      ) : null}
     </section>
   );
 }
@@ -318,7 +190,7 @@ function DashboardQuickActions() {
       <div className="border-b border-app-border p-5">
         <h3 className="text-base font-semibold text-text-main">Quick actions</h3>
       </div>
-      <div className="grid gap-3 p-4 sm:grid-cols-2">
+      <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-1">
         {quickActions.map((action) => {
           return (
             <button
@@ -341,13 +213,13 @@ function DashboardQuickActions() {
 function DashboardPriorityPanel({ alerts, totalAlertCount }) {
   if (totalAlertCount === 0) {
     return (
-      <Card className="border-status-successBg bg-status-successBg/40 p-5">
+      <Card className="border-status-successBg bg-status-successBg/30 p-5">
         <div className="flex items-start gap-3">
           <span className="mt-0.5 rounded-full bg-white p-2 text-status-successDark shadow-sm">
             <CheckCircle2 size={18} aria-hidden="true" />
           </span>
           <div>
-            <h3 className="text-base font-semibold text-text-main">No urgent dashboard alerts</h3>
+            <h3 className="text-base font-semibold text-text-main">No urgent alerts</h3>
             <p className="mt-1 text-sm text-text-muted">Cards, budgets, and recurring bills look clear.</p>
           </div>
         </div>
@@ -359,14 +231,14 @@ function DashboardPriorityPanel({ alerts, totalAlertCount }) {
     <Card className="overflow-hidden border-status-warningBg">
       <div className="grid gap-3 border-b border-app-border p-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
         <div>
-          <h3 className="text-base font-semibold text-text-main">Top alerts</h3>
+          <h3 className="text-base font-semibold text-text-main">Needs attention</h3>
           <p className="mt-1 text-sm text-text-muted">
-            Showing {alerts.length} of {totalAlertCount} item{totalAlertCount === 1 ? "" : "s"}.
+            Showing {alerts.length} of {totalAlertCount} active item{totalAlertCount === 1 ? "" : "s"}.
           </p>
         </div>
         <span className="inline-flex w-fit items-center gap-2 rounded-full bg-status-warningBg px-3 py-1 text-sm font-semibold text-status-warningDark">
           <AlertTriangle size={16} aria-hidden="true" />
-          {totalAlertCount} alert{totalAlertCount === 1 ? "" : "s"}
+          {totalAlertCount}
         </span>
       </div>
       <div className="grid gap-2 p-4">
@@ -450,48 +322,10 @@ function FamilyNotePlaceholder() {
       </div>
       <div className="p-5">
         <p className="text-sm text-text-muted">
-          Motivational notes and shared comments are UI-only placeholders for now.
+          Shared notes and encouragement are UI-only placeholders for now.
         </p>
       </div>
     </Card>
-  );
-}
-
-function DashboardActivitySummary({ data }) {
-  return (
-    <Card className="p-5">
-      <div className="flex items-start gap-3">
-        <span className="rounded-full bg-app-background p-2 text-text-muted ring-1 ring-inset ring-app-border">
-          <Clock3 size={18} aria-hidden="true" />
-        </span>
-        <div>
-          <h3 className="text-base font-semibold text-text-main">Month activity snapshot</h3>
-          <p className="mt-1 text-sm text-text-muted">
-            Current month totals based on budget, spending, recurring bills, and unpaid card balances.
-          </p>
-        </div>
-      </div>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <ActivityMetric label="Budget remaining" value={data.summary.remainingBudget} />
-        <ActivityMetric label="Recurring remaining" value={data.summary.recurringRemaining} />
-        <ActivityMetric label="Unpaid card balance" value={data.summary.unpaidBalanceTotal} />
-        <ActivityMetric label="Transactions shown" value={data.recentTransactions.length} isCount />
-      </div>
-    </Card>
-  );
-}
-
-function ActivityMetric({ label, value, isCount = false }) {
-  const isNegativeMoney = !isCount && Number(value) < 0;
-  return (
-    <div className="rounded-xl border border-app-border bg-app-background px-3 py-2">
-      <p className="text-xs font-semibold uppercase tracking-normal text-text-muted">{label}</p>
-      <p
-        className={`mt-1 text-lg font-semibold ${isNegativeMoney ? "text-status-danger" : "text-text-main"}`}
-      >
-        {isCount ? value : formatCurrency(value)}
-      </p>
-    </div>
   );
 }
 
