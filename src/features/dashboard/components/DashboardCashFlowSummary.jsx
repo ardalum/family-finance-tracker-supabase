@@ -36,6 +36,15 @@ export default function DashboardCashFlowSummary({
       ? Math.min(100, Math.max(0, (cashFlow.spendingTotal / cashFlow.budgetTotal) * 100))
       : 0;
 
+  const trendPoints = [
+    Math.max(0, cashFlow.incomeTotal),
+    Math.max(0, cashFlow.spendingTotal),
+    Math.max(0, cashFlow.recurringRemaining),
+    Math.max(0, cashFlow.unpaidCardBalanceTotal),
+    Math.max(0, Math.abs(cashFlow.plannedCashCushion)),
+  ];
+  const trendMax = Math.max(...trendPoints, 1);
+
   return (
     <Card className="overflow-hidden">
       <div className="border-b border-app-border p-5">
@@ -55,19 +64,27 @@ export default function DashboardCashFlowSummary({
         <Metric label="Income" value={formatCurrency(cashFlow.incomeTotal)} tone="good" />
         <Metric label="Spending" value={formatCurrency(cashFlow.spendingTotal)} tone="warn" />
         <Metric label="Cash position" value={formatCurrency(cashFlow.cashPositionTotal)} />
-        <Metric label="Planned cushion" value={formatCurrency(cashFlow.plannedCashCushion)} tone={cashFlow.plannedCashCushion < 0 ? "danger" : "good"} />
+        <Metric
+          label="Planned cushion"
+          value={formatCurrency(cashFlow.plannedCashCushion)}
+          tone={cashFlow.plannedCashCushion < 0 ? "danger" : "good"}
+        />
       </div>
 
       <div className="px-4 pb-4">
         <div className="mb-2 flex items-center justify-between text-xs font-semibold text-text-muted">
-          <span>Budget usage</span>
-          <span>{Math.round(budgetUsagePct)}%</span>
+          <span>Month trend</span>
+          <span>{Math.round(budgetUsagePct)}% budget used</span>
         </div>
-        <div className="h-2 overflow-hidden rounded-full bg-app-muted">
-          <div
-            className={`h-full rounded-full ${budgetUsagePct >= 100 ? "bg-status-danger" : budgetUsagePct >= 85 ? "bg-status-warning" : "bg-status-success"}`}
-            style={{ width: `${budgetUsagePct}%` }}
-          />
+        <div className="grid h-14 grid-cols-5 items-end gap-2 rounded-xl border border-app-border bg-app-background p-2">
+          {trendPoints.map((point, index) => (
+            <div key={index} className="h-full rounded-md bg-app-muted/80">
+              <div
+                className={`h-full w-full origin-bottom rounded-md ${index === 0 ? "bg-status-success/70" : index === 1 ? "bg-brand-primary/75" : "bg-status-warning/70"}`}
+                style={{ transform: `scaleY(${Math.max(0.12, point / trendMax)})` }}
+              />
+            </div>
+          ))}
         </div>
       </div>
     </Card>

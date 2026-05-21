@@ -12,13 +12,24 @@ export default function CreditCardPaymentOverview({
 }) {
   const previewRows = rows.slice(0, MAX_PREVIEW_ROWS);
   const dueSoonCount = rows.filter((row) => row.hasPaymentDue && row.daysUntilDue <= 7).length;
+  const totalBalance = rows.reduce((sum, row) => sum + Number(row.balance || 0), 0);
+  const totalLimit = rows.reduce((sum, row) => sum + Number(row.card.creditLimit || 0), 0);
+  const utilization = totalLimit > 0 ? (totalBalance / totalLimit) * 100 : 0;
+  const safeUtilization = Math.min(100, Math.max(0, utilization));
 
   return (
     <Card className="overflow-hidden">
       <div className="border-b border-app-border p-5">
         <h3 className="text-base font-semibold text-text-main">{title}</h3>
-        <p className="mt-2 text-2xl font-semibold tracking-tight text-text-main">{formatCurrency(totalUnpaid, { cents: true })}</p>
-        <p className="text-sm text-text-muted">{dueSoonCount} card{dueSoonCount === 1 ? "" : "s"} due within 7 days</p>
+        <p className="mt-2 text-2xl font-semibold tracking-tight text-text-main">{Math.round(utilization)}%</p>
+        <p className="text-sm text-text-muted">Utilization · {formatCurrency(totalUnpaid, { cents: true })} unpaid</p>
+        <div className="mt-3 h-2 overflow-hidden rounded-full bg-app-muted">
+          <div
+            className={`h-full rounded-full ${safeUtilization >= 80 ? "bg-status-danger" : safeUtilization >= 50 ? "bg-status-warning" : "bg-status-success"}`}
+            style={{ width: `${safeUtilization}%` }}
+          />
+        </div>
+        <p className="mt-1 text-xs text-text-muted">{dueSoonCount} card{dueSoonCount === 1 ? "" : "s"} due within 7 days</p>
       </div>
       {rows.length === 0 ? (
         <div className="p-8 text-center text-sm text-text-muted">{emptyMessage}</div>

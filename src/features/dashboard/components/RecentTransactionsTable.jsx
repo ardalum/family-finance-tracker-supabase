@@ -24,12 +24,22 @@ export default function RecentTransactionsTable({ transactions, cards, categorie
             const categoryLabel = transaction.splits
               .map((split) => getCategoryName(split.categoryId, categories))
               .join(", ");
-            const amountPositive = Number(transaction.amount || 0) < 0;
+            const numericAmount = Number(transaction.amount || 0);
+            const isPositive = numericAmount < 0;
+            const initial = (transaction.merchant || "?").slice(0, 1).toUpperCase();
             return (
               <article key={transaction.id} className="rounded-xl border border-app-border bg-app-background px-3 py-2.5">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <h4 className="truncate text-sm font-semibold text-text-main">{transaction.merchant}</h4>
+                <div className="flex items-start gap-3">
+                  <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-app-surface text-xs font-semibold text-text-soft ring-1 ring-app-border">
+                    {initial}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-3">
+                      <h4 className="truncate text-sm font-semibold text-text-main">{transaction.merchant}</h4>
+                      <p className={`text-sm font-semibold ${isPositive ? "text-status-successDark" : "text-text-main"}`}>
+                        {formatCurrency(transaction.amount)}
+                      </p>
+                    </div>
                     <p className="mt-0.5 truncate text-xs text-text-muted">{categoryLabel || "Uncategorized"} · {transaction.date}</p>
                     <p className="mt-0.5 truncate text-xs text-text-muted">
                       {transaction.paymentMethod || "Credit Card"}
@@ -44,9 +54,6 @@ export default function RecentTransactionsTable({ transactions, cards, categorie
                       )}
                     </p>
                   </div>
-                  <p className={`text-sm font-semibold ${amountPositive ? "text-status-successDark" : "text-text-main"}`}>
-                    {formatCurrency(transaction.amount)}
-                  </p>
                 </div>
               </article>
             );
