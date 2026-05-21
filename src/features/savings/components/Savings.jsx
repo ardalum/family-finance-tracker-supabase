@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Baby,
   Car,
-  CircleDollarSign,
   GraduationCap,
   Heart,
   HeartPulse,
@@ -196,7 +195,30 @@ function formatCompactMoney(value) {
   return `$${Math.round(value)}`;
 }
 
-function SummaryCard({ label, value, helper, icon, tone = "green" }) {
+function formatShortTrendMonth(monthKey) {
+  const [year, month] = String(monthKey).split("-").map(Number);
+  const parsed = new Date(year, month - 1, 1);
+  if (Number.isNaN(parsed.getTime())) return monthKey;
+  const formatted = parsed.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
+  return formatted.replace(" ", " '");
+}
+
+function ProgressRing({ percent }) {
+  const safePercent = Math.max(0, Math.min(Number(percent || 0), 100));
+  return (
+    <span
+      className="relative inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full"
+      style={{
+        background: `conic-gradient(#1D8E4B ${safePercent * 3.6}deg, #EEEAE2 0deg)`,
+      }}
+      aria-label={`${safePercent}% complete`}
+    >
+      <span className="absolute h-8 w-8 rounded-full bg-white" />
+    </span>
+  );
+}
+
+function SummaryCard({ label, value, helper, icon, customVisual, tone = "green" }) {
   const toneClasses =
     tone === "blue"
       ? "bg-[#ECF3FF] text-[#2158B6]"
@@ -207,14 +229,20 @@ function SummaryCard({ label, value, helper, icon, tone = "green" }) {
   return (
     <Card className="rounded-2xl border border-[#E6E1D8] bg-white p-4 shadow-[0_1px_2px_rgba(16,24,40,0.06)]">
       <div className="flex items-center gap-3">
-        <span
-          className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${toneClasses}`}
-        >
-          {icon}
-        </span>
+        {customVisual ? (
+          customVisual
+        ) : (
+          <span
+            className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${toneClasses}`}
+          >
+            {icon}
+          </span>
+        )}
         <div className="min-w-0">
           <p className="text-sm font-medium text-[#071F42]">{label}</p>
-          <p className="mt-0.5 truncate text-[2rem] font-semibold tracking-tight text-[#071F42]">{value}</p>
+          <p className="mt-0.5 truncate text-[1.75rem] font-semibold tracking-tight text-[#071F42]">
+            {value}
+          </p>
           <p className="mt-1 text-sm text-[#667085]">{helper}</p>
         </div>
       </div>
@@ -561,37 +589,6 @@ export default function Savings({
         </Button>
       </div>
 
-      <div className="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <SummaryCard
-          label="Total saved"
-          value={formatCurrency(totalSaved, { cents: true })}
-          helper="Across all goals"
-          icon={<PiggyBank size={18} />}
-          tone="green"
-        />
-        <SummaryCard
-          label="Active goals"
-          value={String(activeGoals.length)}
-          helper={activeGoals.length ? "All on track" : "No active goals"}
-          icon={<Target size={18} />}
-          tone="blue"
-        />
-        <SummaryCard
-          label="Monthly contributions"
-          value={formatCurrency(monthSavingsTotal, { cents: true })}
-          helper={formatMonthLabel(selectedMonth)}
-          icon={<TrendingUp size={18} />}
-          tone="orange"
-        />
-        <SummaryCard
-          label="Goal progress"
-          value={`${averageProgress}%`}
-          helper="Average completion"
-          icon={<CircleDollarSign size={18} />}
-          tone="green"
-        />
-      </div>
-
       {(showGoalForm || editingGoalId) ? (
         <Card ref={addGoalRef} className="rounded-2xl border border-app-border bg-white p-5">
           <h3 className="text-base font-semibold text-text-main">
@@ -834,7 +831,38 @@ export default function Savings({
       ) : null}
 
       <div className="grid min-w-0 gap-4 2xl:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="grid min-w-0 gap-4">
+        <div className="grid min-w-0 content-start gap-4">
+          <div className="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-4">
+            <SummaryCard
+              label="Total saved"
+              value={formatCurrency(totalSaved, { cents: true })}
+              helper="Across all goals"
+              icon={<PiggyBank size={20} />}
+              tone="green"
+            />
+            <SummaryCard
+              label="Active goals"
+              value={String(activeGoals.length)}
+              helper={activeGoals.length ? "All on track" : "No active goals"}
+              icon={<Target size={20} />}
+              tone="blue"
+            />
+            <SummaryCard
+              label="Monthly contributions"
+              value={formatCurrency(monthSavingsTotal, { cents: true })}
+              helper={formatMonthLabel(selectedMonth)}
+              icon={<TrendingUp size={20} />}
+              tone="orange"
+            />
+            <SummaryCard
+              label="Goal progress"
+              value={`${averageProgress}%`}
+              helper="Average completion"
+              customVisual={<ProgressRing percent={averageProgress} />}
+              tone="green"
+            />
+          </div>
+
           <Card className="rounded-2xl border border-app-border bg-white p-0 shadow-sm">
             <div className="flex items-center justify-between border-b border-app-border px-4 py-4">
               <h3 className="text-2xl font-semibold tracking-tight text-[#071F42]">Your goals</h3>
@@ -1071,21 +1099,19 @@ export default function Savings({
                 Monthly contributions trend <Info size={14} className="text-text-muted" />
               </h3>
             </div>
-            <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_170px]">
-              <div className="min-w-0">
-                <div className="grid grid-cols-[42px_minmax(0,1fr)] gap-2">
-                  <div className="relative h-44">
-                    {trendTicks.map((tick) => (
-                      <span
-                        key={`tick-label-${tick.value}`}
-                        className="absolute right-0 -translate-y-1/2 text-[11px] text-text-muted"
-                        style={{ bottom: `${tick.percent}%` }}
-                      >
+            <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_155px]">
+              <div className="grid min-w-0 grid-cols-[46px_minmax(0,1fr)] gap-3">
+                <div className="flex h-40 flex-col justify-between pb-1 text-[11px] text-text-muted">
+                  {[...trendTicks]
+                    .sort((a, b) => b.value - a.value)
+                    .map((tick) => (
+                      <span key={`tick-label-${tick.value}`} className="text-right leading-none">
                         {formatCompactMoney(tick.value)}
                       </span>
                     ))}
-                  </div>
-                  <div className="relative h-44">
+                </div>
+                <div className="min-w-0">
+                  <div className="relative h-40">
                     {trendTicks.map((tick) => (
                       <span
                         key={`gridline-${tick.value}`}
@@ -1117,29 +1143,26 @@ export default function Savings({
                       })}
                     </div>
                   </div>
-                </div>
-                <div className="mt-2 grid grid-cols-[42px_minmax(0,1fr)] gap-2">
-                  <span />
-                  <div className="grid grid-cols-12 gap-2">
+                  <div className="mt-2 grid grid-cols-12 gap-2">
                     {trendRows.rows.map((row) => (
                       <span
                         key={`month-label-${row.monthKey}`}
                         className="truncate text-center text-[10px] text-text-muted"
                         title={formatMonthLabel(row.monthKey)}
                       >
-                        {row.monthKey.slice(5, 7)}/{row.monthKey.slice(2, 4)}
+                        {formatShortTrendMonth(row.monthKey)}
                       </span>
                     ))}
                   </div>
                 </div>
               </div>
-              <div className="rounded-xl border border-app-border bg-app-background p-3">
+              <div className="rounded-xl border border-app-border bg-app-background p-3 lg:max-w-[155px]">
                 <p className="text-sm font-medium text-text-muted">{formatMonthLabel(selectedMonth)}</p>
-                <p className="mt-1 text-4xl font-semibold tracking-tight text-[#1D8E4B]">
+                <p className="mt-1 text-2xl font-semibold tracking-tight text-[#1D8E4B]">
                   {formatCurrency(monthSavingsTotal)}
                 </p>
-                <p className="mt-1 text-sm text-text-muted">Total contributed</p>
-                <p className={`mt-3 text-sm font-semibold ${monthComparison.tone}`}>
+                <p className="mt-1 text-xs text-text-muted">Total contributed</p>
+                <p className={`mt-3 text-xs font-semibold ${monthComparison.tone}`}>
                   {monthComparison.text}
                 </p>
               </div>
