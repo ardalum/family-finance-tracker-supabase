@@ -66,7 +66,7 @@ export default function BudgetTable({
               <p className="text-sm text-text-muted">{displayRows.length} visible</p>
             </div>
 
-            <div className="hidden overflow-x-auto lg:block">
+            <div className="hidden overflow-x-auto md:block">
               <table className="w-full min-w-[920px] border-collapse">
                 <thead>
                   <tr className="border-b border-app-border text-left text-sm text-text-muted">
@@ -97,7 +97,7 @@ export default function BudgetTable({
               </table>
             </div>
 
-            <div className="grid gap-3 p-4 lg:hidden">
+            <div className="grid gap-3 p-4 md:hidden">
               {displayRows.map((budget) => (
                 <BudgetMobileCard
                   key={budget.id}

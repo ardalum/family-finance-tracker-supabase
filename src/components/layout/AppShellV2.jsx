@@ -21,8 +21,8 @@ export default function AppShellV2({
     <div className="min-h-screen overflow-x-hidden bg-app-background text-text-main">
       <div className="flex min-h-screen min-w-0 max-w-full">
         <aside
-          className={`hidden shrink-0 overflow-hidden border-r border-app-border bg-app-sidebar md:block ${
-            sidebarCollapsed ? "w-[104px]" : "w-[278px]"
+          className={`hidden shrink-0 overflow-hidden border-r border-app-border bg-app-sidebar lg:block ${
+            sidebarCollapsed ? "w-[88px] xl:w-[104px]" : "w-[220px] xl:w-[278px]"
           }`}
         >
           <div
@@ -113,7 +113,7 @@ export default function AppShellV2({
                 <div className="flex min-w-0 items-center gap-3">
                   <button
                     type="button"
-                    className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-app-border bg-app-surface text-text-main md:hidden"
+                    className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-app-border bg-app-surface text-text-main lg:hidden"
                     onClick={() => setMobileDrawerOpen(true)}
                     aria-label="Open navigation menu"
                   >
@@ -166,7 +166,7 @@ export default function AppShellV2({
       </div>
 
       {mobileDrawerOpen ? (
-        <div className="fixed inset-0 z-40 md:hidden" role="dialog" aria-modal="true">
+        <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true">
           <button
             type="button"
             className="absolute inset-0 bg-black/35"
