@@ -796,6 +796,10 @@ function FinanceTrackerApp() {
       dispatchNavigation("savings", "add-goal");
       return;
     }
+    if (activeView === "insights") {
+      dispatchNavigation("insights");
+      return;
+    }
 
     openQuickAdd();
   }
@@ -847,6 +851,8 @@ function FinanceTrackerApp() {
       onRecurringMonthChange={setSelectedRecurringMonth}
       selectedSavingsMonth={selectedSavingsMonth}
       onSavingsMonthChange={setSelectedSavingsMonth}
+      selectedInsightsMonth={selectedInsightsMonth}
+      onInsightsMonthChange={setSelectedInsightsMonth}
       onViewChange={setActiveView}
       onQuickAdd={handlePrimaryHeaderAction}
     >

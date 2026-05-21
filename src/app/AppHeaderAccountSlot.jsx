@@ -1,4 +1,4 @@
-import { Bell, Calendar, ChevronLeft, ChevronRight, Plus, Search } from "lucide-react";
+import { BarChart3, Bell, Calendar, ChevronLeft, ChevronRight, Plus, Search } from "lucide-react";
 import AlertsMenu from "../features/dashboard/components/AlertsMenu.jsx";
 import AccountMenu from "../features/auth/components/AccountMenu.jsx";
 import HouseholdSwitcher from "../features/households/components/HouseholdSwitcher.jsx";
@@ -22,6 +22,8 @@ export default function AppHeaderAccountSlot({
   onRecurringMonthChange,
   savingsMonth,
   onSavingsMonthChange,
+  insightsMonth,
+  onInsightsMonthChange,
 }) {
   const isDashboard = activeView === "dashboard";
   const isSpending = activeView === "spending";
@@ -29,6 +31,7 @@ export default function AppHeaderAccountSlot({
   const isCreditCards = activeView === "credit-cards";
   const isRecurring = activeView === "recurring";
   const isSavings = activeView === "savings";
+  const isInsights = activeView === "insights";
   const activeMonth = isDashboard
     ? dashboardMonth
     : isSpending
@@ -41,6 +44,8 @@ export default function AppHeaderAccountSlot({
             ? recurringMonth
             : isSavings
               ? savingsMonth
+              : isInsights
+                ? insightsMonth
               : "";
   const onMonthChange = isDashboard
     ? onDashboardMonthChange
@@ -54,8 +59,21 @@ export default function AppHeaderAccountSlot({
             ? onRecurringMonthChange
             : isSavings
               ? onSavingsMonthChange
+              : isInsights
+                ? onInsightsMonthChange
               : null;
-  const actionLabel = isBudgets ? "Add budget" : isCreditCards ? "Add card" : isRecurring ? "Add bill" : isSavings ? "Add goal" : "Add transaction";
+  const actionLabel = isInsights
+    ? "View reports"
+    : isBudgets
+      ? "Add budget"
+      : isCreditCards
+        ? "Add card"
+        : isRecurring
+          ? "Add bill"
+          : isSavings
+            ? "Add goal"
+            : "Add transaction";
+  const ActionIcon = isInsights ? BarChart3 : Plus;
   const showMonthControls = Boolean(activeMonth && onMonthChange);
   const monthOptions = showMonthControls ? buildMonthOptions(activeMonth) : [];
 
@@ -93,6 +111,8 @@ export default function AppHeaderAccountSlot({
                         ? "Bills month"
                         : isSavings
                           ? "Savings goals month"
+                          : isInsights
+                            ? "Insights month"
                           : "Cards and debt month"
               }
             >
@@ -140,7 +160,7 @@ export default function AppHeaderAccountSlot({
         onClick={onQuickAdd}
         aria-label={actionLabel}
       >
-        <Plus size={16} aria-hidden="true" />
+        <ActionIcon size={16} aria-hidden="true" />
         <span className="hidden sm:inline">{actionLabel}</span>
       </button>
 

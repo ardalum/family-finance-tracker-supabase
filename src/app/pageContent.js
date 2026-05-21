@@ -21,7 +21,7 @@ export const pageContent = {
   },
   insights: {
     title: "Insights",
-    description: "Review spending trends, budget performance, and payment patterns.",
+    description: "Understand your money, spot opportunities, and build better habits.",
   },
   tools: {
     title: "Tools",
