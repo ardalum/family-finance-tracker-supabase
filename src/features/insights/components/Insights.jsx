@@ -2,11 +2,13 @@ import { useMemo, useState } from "react";
 import {
   AlertTriangle,
   ArrowDown,
+  ArrowRight,
   ArrowUp,
   BarChart3,
   CheckCircle2,
   CircleAlert,
   CircleDollarSign,
+  ChevronDown,
   Info,
   Sparkles,
   TrendingDown,
@@ -586,12 +588,12 @@ export default function Insights({
             Month-over-month comparison <Info size={15} className="text-text-muted" />
           </h3>
           <div className="mt-4 rounded-xl border border-app-border">
-            <table className="w-full table-fixed text-sm">
+            <table className="w-full table-fixed text-[13px]">
               <colgroup>
-                <col style={{ width: "34%" }} />
+                <col style={{ width: "32%" }} />
                 <col style={{ width: "22%" }} />
-                <col style={{ width: "22%" }} />
-                <col style={{ width: "22%" }} />
+                <col style={{ width: "23%" }} />
+                <col style={{ width: "23%" }} />
               </colgroup>
               <thead className="bg-app-background text-text-muted">
                 <tr>
@@ -634,9 +636,10 @@ export default function Insights({
                 <div className="max-w-[210px]">
                   <button
                     type="button"
-                    className="w-full rounded-xl border border-app-border bg-app-background px-3 py-2 text-left text-sm text-text-main"
+                    className="inline-flex w-full items-center justify-between rounded-xl border border-app-border bg-app-background px-3 py-2 text-left text-sm text-text-main"
                   >
-                    {spendingBreakdownRows[0]?.label || "Category"} ?
+                    <span className="truncate">{spendingBreakdownRows[0]?.label || "Category"}</span>
+                    <ChevronDown size={15} className="shrink-0 text-text-muted" />
                   </button>
                 </div>
                 <div className="mt-3 grid gap-2 sm:grid-cols-3 xl:grid-cols-1">
@@ -1154,8 +1157,12 @@ function DualLineMiniChart({ currentRows = [], previousRows = [] }) {
   if (!hasCurrentData && !hasPreviousData) {
     return (
       <div className="mt-4">
-        <div className="h-40 rounded-lg border border-dashed border-app-border bg-app-background" />
-        <p className="mt-2 text-xs text-text-muted">No monthly trend data yet.</p>
+        <div className="flex h-36 items-center justify-center rounded-lg border border-dashed border-app-border bg-app-background text-xs text-text-muted">
+          <span className="inline-flex items-center gap-1">
+            <BarChart3 size={13} />
+            No monthly trend data yet.
+          </span>
+        </div>
       </div>
     );
   }
@@ -1164,8 +1171,12 @@ function DualLineMiniChart({ currentRows = [], previousRows = [] }) {
   if (meaningfulCurrentPoints < 2) {
     return (
       <div className="mt-4">
-        <div className="h-40 rounded-lg border border-dashed border-app-border bg-app-background" />
-        <p className="mt-2 text-xs text-text-muted">Need at least two months of spending data.</p>
+        <div className="flex h-36 items-center justify-center rounded-lg border border-dashed border-app-border bg-app-background">
+          <span className="inline-flex items-center gap-1 text-xs text-text-muted">
+            <BarChart3 size={13} />
+            Need at least two months of spending data.
+          </span>
+        </div>
       </div>
     );
   }
@@ -1220,6 +1231,27 @@ function DualLineMiniChart({ currentRows = [], previousRows = [] }) {
   );
 }
 
+function formatCompactCurrencyForTable(value) {
+  const amount = Number(value || 0);
+  const abs = Math.abs(amount);
+
+  if (abs >= 1_000_000) {
+    return `${amount < 0 ? "-" : ""}$${(abs / 1_000_000).toFixed(abs >= 10_000_000 ? 1 : 2)}M`;
+  }
+  if (abs >= 100_000) {
+    return `${amount < 0 ? "-" : ""}$${Math.round(abs / 1_000)}K`;
+  }
+  return formatCurrency(amount);
+}
+
+function formatSignedCompactCurrencyForTable(value) {
+  const amount = Number(value || 0);
+  if (amount === 0) return formatCurrency(0);
+  const prefix = amount > 0 ? "+" : "-";
+  const compactAbs = formatCompactCurrencyForTable(Math.abs(amount));
+  return `${prefix}${compactAbs}`;
+}
+
 function ComparisonRow({ label, previous, current, trend = "lower-better" }) {
   const delta = Number(current || 0) - Number(previous || 0);
   const isPositive = delta > 0;
@@ -1233,14 +1265,28 @@ function ComparisonRow({ label, previous, current, trend = "lower-better" }) {
         : isPositive
           ? "text-status-danger"
           : "text-status-success";
-  const deltaLabel = `${delta > 0 ? "+" : ""}${formatCurrency(delta)}`;
+  const deltaLabel = formatSignedCompactCurrencyForTable(delta);
 
   return (
     <tr className="border-t border-app-border">
-      <td className="px-2 py-2 text-text-main truncate" title={label}>{label}</td>
-      <td className="px-2 py-2 text-right font-medium text-[#071F42] whitespace-nowrap">{formatCurrency(previous || 0)}</td>
-      <td className="px-2 py-2 text-right font-medium text-[#071F42] whitespace-nowrap">{formatCurrency(current || 0)}</td>
-      <td className={`px-2 py-2 text-right font-semibold whitespace-nowrap ${toneClass}`}>{deltaLabel}</td>
+      <td className="px-2 py-2 text-text-main" title={label}>
+        <span className="block truncate">{label}</span>
+      </td>
+      <td className="px-2 py-2 text-right font-medium text-[#071F42]">
+        <span className="block max-w-full truncate tabular-nums" title={formatCurrency(previous || 0)}>
+          {formatCompactCurrencyForTable(previous)}
+        </span>
+      </td>
+      <td className="px-2 py-2 text-right font-medium text-[#071F42]">
+        <span className="block max-w-full truncate tabular-nums" title={formatCurrency(current || 0)}>
+          {formatCompactCurrencyForTable(current)}
+        </span>
+      </td>
+      <td className={`px-2 py-2 text-right font-semibold ${toneClass}`}>
+        <span className="block max-w-full truncate tabular-nums" title={formatCurrency(delta)}>
+          {deltaLabel}
+        </span>
+      </td>
     </tr>
   );
 }
@@ -1283,10 +1329,11 @@ function TopInsightCard({ card, tone = "positive" }) {
           <p className="mt-1 text-sm text-text-main">{card.explanation}</p>
           <button
             type="button"
-            className={`mt-3 text-sm font-semibold ${style.linkClass}`}
+            className={`mt-3 inline-flex items-center gap-1 text-sm font-semibold ${style.linkClass}`}
             onClick={() => dispatchNavigation(card.targetView || "insights")}
           >
-            {style.actionText} ?
+            <span>{style.actionText}</span>
+            <ArrowRight size={14} />
           </button>
         </div>
       </div>
