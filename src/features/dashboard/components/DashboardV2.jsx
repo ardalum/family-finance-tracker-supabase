@@ -1,6 +1,7 @@
 import {
   AlertTriangle,
   ArrowRight,
+  CalendarClock,
   Calendar,
   Camera,
   ChevronRight,
@@ -8,6 +9,8 @@ import {
   CreditCard,
   FileText,
   Goal,
+  Heart,
+  Quote,
   Split,
   BarChart3,
   Wallet,
@@ -67,11 +70,14 @@ export default function DashboardV2({
     })
     .join(" ");
 
+  const visibleAlerts = data.alerts.slice(0, 3);
+  const remainingAlertCount = Math.max(0, data.alerts.length - visibleAlerts.length);
+
   return (
-    <section className="grid gap-5">
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="grid gap-5">
-          <div className="grid gap-5 lg:grid-cols-2">
+    <section className="grid gap-4">
+      <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="grid min-w-0 gap-4">
+          <div className="grid gap-4 lg:grid-cols-2">
             <Card className="overflow-hidden">
               <div className="flex items-center justify-between border-b border-app-border p-5">
                 <div className="inline-flex items-center gap-2 text-base font-semibold text-text-main">
@@ -93,18 +99,26 @@ export default function DashboardV2({
                   </p>
                 ) : null}
                 <div>
-                  <p className="text-5xl font-semibold tracking-tight text-text-main">
+                  <p
+                    className="truncate text-4xl font-semibold tracking-tight tabular-nums text-text-main xl:text-[2.6rem]"
+                    title={formatCurrency(data.netCashFlow.amount)}
+                  >
                     {formatCurrency(data.netCashFlow.amount)}
                   </p>
                   <p className="mt-1 text-sm text-text-muted">{data.netCashFlow.monthLabel}</p>
-                  <p className="mt-1 text-sm font-semibold text-status-successDark">
-                    +{data.netCashFlow.deltaPct}% {data.netCashFlow.comparisonLabel}
+                  <p
+                    className={`mt-1 text-sm font-semibold ${
+                      data.netCashFlow.deltaPct >= 0 ? "text-status-successDark" : "text-status-danger"
+                    }`}
+                  >
+                    {data.netCashFlow.deltaPct > 0 ? "+" : ""}
+                    {data.netCashFlow.deltaPct}% {data.netCashFlow.comparisonLabel}
                   </p>
                 </div>
                 <div className="rounded-xl border border-app-border bg-app-surfaceSoft p-3">
                   {hasMonthlyTrend ? (
                     <>
-                      <svg viewBox="0 0 100 34" className="h-28 w-full" aria-hidden="true">
+                      <svg viewBox="0 0 100 34" className="h-24 w-full" aria-hidden="true">
                         <defs>
                           <linearGradient id="v2trend" x1="0%" y1="0%" x2="0%" y2="100%">
                             <stop offset="0%" stopColor="rgba(11,27,59,0.18)" />
@@ -127,7 +141,7 @@ export default function DashboardV2({
                       </div>
                     </>
                   ) : (
-                    <div className="grid h-28 place-items-center rounded-lg border border-app-border bg-app-surface text-xs text-text-muted">
+                    <div className="grid h-20 place-items-center rounded-lg border border-app-border bg-app-surface text-xs text-text-muted">
                       Not enough monthly trend data yet.
                     </div>
                   )}
@@ -148,11 +162,11 @@ export default function DashboardV2({
                   <ChevronRight size={14} aria-hidden="true" />
                 </button>
               </div>
-              <div className="grid gap-5 p-5 sm:grid-cols-[170px_minmax(0,1fr)] sm:items-center">
+              <div className="grid gap-4 p-5 sm:grid-cols-[160px_minmax(0,1fr)] sm:items-center">
                 <div
                   className="mx-auto grid h-40 w-40 place-items-center rounded-full"
                   style={{
-                    background: `conic-gradient(#22A06B ${(data.budgetHealth.onTrackPct / 100) * 360}deg, #F3F1EA 0deg)`,
+                    background: `conic-gradient(${getBudgetHealthRingTone(data.budgetHealth.onTrackPct)} ${(data.budgetHealth.onTrackPct / 100) * 360}deg, #F3F1EA 0deg)`,
                   }}
                 >
                   <div className="grid h-28 w-28 place-items-center rounded-full bg-white text-center">
@@ -168,7 +182,7 @@ export default function DashboardV2({
                       No budget data for this month.
                     </p>
                   ) : null}
-                  {data.budgetHealth.categories.map((category) => {
+                  {data.budgetHealth.categories.slice(0, 6).map((category) => {
                     const pctRaw =
                       category.budget > 0 ? (category.spent / category.budget) * 100 : 0;
                     const pct = Math.min(100, Math.max(0, pctRaw));
@@ -176,9 +190,12 @@ export default function DashboardV2({
                     return (
                       <div key={category.name} className="grid gap-1.5">
                         <div className="flex items-center justify-between gap-2 text-sm">
-                          <span className="font-medium text-text-main">{category.name}</span>
-                          <span className="text-text-muted">
-                            {formatCurrency(category.spent)} / {formatCurrency(category.budget)}
+                          <span className="truncate font-medium text-text-main">{category.name}</span>
+                          <span
+                            className="shrink-0 text-text-muted"
+                            title={`${formatCurrency(category.spent)} / ${formatCurrency(category.budget)}`}
+                          >
+                            {formatCompactCurrency(category.spent)} / {formatCompactCurrency(category.budget)}
                           </span>
                         </div>
                         <div className="h-1.5 overflow-hidden rounded-full bg-app-muted">
@@ -200,13 +217,13 @@ export default function DashboardV2({
             </Card>
           </div>
 
-          <div className="grid gap-5 lg:grid-cols-3">
+          <div className="grid gap-4 lg:grid-cols-3">
             <Card className="overflow-hidden">
               <div className="flex items-center justify-between border-b border-app-border p-5">
                 <h3 className="text-base font-semibold text-text-main">Upcoming Bills</h3>
                 <span className="text-sm text-text-muted">Next 14 days</span>
               </div>
-              <div className="grid gap-3 p-5">
+              <div className="grid gap-2.5 p-5">
                 {data.upcomingBills.length === 0 ? (
                   <p className="rounded-xl border border-app-border bg-app-surfaceSoft px-3 py-2 text-sm text-text-muted">
                     No upcoming bills in this snapshot.
@@ -229,7 +246,7 @@ export default function DashboardV2({
                         {bill.dueText}
                       </p>
                     </div>
-                    <p className="text-sm font-semibold text-text-main">
+                    <p className="text-sm font-semibold text-text-main tabular-nums">
                       {formatCurrency(bill.amount)}
                     </p>
                   </article>
@@ -281,12 +298,12 @@ export default function DashboardV2({
                       className="flex items-center justify-between gap-2"
                     >
                       <div>
-                        <p className="text-sm font-semibold text-text-main">{payment.name}</p>
+                        <p className="text-sm font-semibold text-text-main truncate">{payment.name}</p>
                         <p className="text-xs text-text-muted">
                           ... {payment.last4} - {payment.dueText}
                         </p>
                       </div>
-                      <p className="text-sm font-semibold text-text-main">
+                      <p className="text-sm font-semibold text-text-main tabular-nums">
                         {formatCurrency(payment.amount)}
                       </p>
                     </div>
@@ -306,7 +323,7 @@ export default function DashboardV2({
                   <ChevronRight size={14} aria-hidden="true" />
                 </button>
               </div>
-              <div className="grid gap-3 p-5">
+              <div className="grid gap-2.5 p-5">
                 {data.savingsGoals.length === 0 ? (
                   <p className="rounded-xl border border-app-border bg-app-surfaceSoft px-3 py-2 text-sm text-text-muted">
                     No active savings goals yet.
@@ -315,21 +332,29 @@ export default function DashboardV2({
                 {data.savingsGoals.map((goal) => (
                   <article
                     key={goal.name}
-                    className="grid gap-2 rounded-xl border border-app-border bg-app-surfaceSoft p-3"
+                    className="grid grid-cols-[32px_minmax(0,1fr)] gap-2 rounded-xl border border-app-border bg-app-surfaceSoft p-3"
                   >
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm font-semibold text-text-main">{goal.name}</p>
-                      <p className="text-xs font-semibold text-text-muted">{goal.progress}%</p>
+                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#EAF8EF] text-xs font-semibold text-[#1D8E4B]">
+                      {getInitials(goal.name)}
+                    </span>
+                    <div className="min-w-0 grid gap-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="truncate text-sm font-semibold text-text-main">{goal.name}</p>
+                        <p className="text-xs font-semibold text-text-muted">{goal.progress}%</p>
+                      </div>
+                      <div className="h-2 overflow-hidden rounded-full bg-app-muted">
+                        <div
+                          className="h-full rounded-full bg-status-success"
+                          style={{ width: `${goal.progress}%` }}
+                        />
+                      </div>
+                      <p
+                        className="text-xs text-text-muted tabular-nums"
+                        title={`${formatCurrency(goal.current)} / ${formatCurrency(goal.target)}`}
+                      >
+                        {formatCompactCurrency(goal.current)} / {formatCompactCurrency(goal.target)}
+                      </p>
                     </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-app-muted">
-                      <div
-                        className="h-full rounded-full bg-status-success"
-                        style={{ width: `${goal.progress}%` }}
-                      />
-                    </div>
-                    <p className="text-xs text-text-muted">
-                      {formatCurrency(goal.current)} / {formatCurrency(goal.target)}
-                    </p>
                   </article>
                 ))}
               </div>
@@ -352,16 +377,28 @@ export default function DashboardV2({
                   No alerts right now.
                 </p>
               ) : null}
-              {data.alerts.map((alert) => (
+              <div className="grid gap-3 md:grid-cols-3">
+              {visibleAlerts.map((alert) => (
                 <article
                   key={alert.title}
                   className="rounded-xl border border-app-border bg-app-surfaceSoft p-3"
                 >
-                  <p
-                    className={`text-sm font-semibold ${alert.tone === "danger" ? "text-status-danger" : "text-status-warningDark"}`}
-                  >
-                    {alert.title}
-                  </p>
+                  <div className="flex items-start gap-2">
+                    <span
+                      className={`mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-full ${
+                        alert.tone === "danger"
+                          ? "bg-status-dangerBg text-status-danger"
+                          : "bg-status-warningBg text-status-warningDark"
+                      }`}
+                    >
+                      {alert.tone === "danger" ? <AlertTriangle size={16} /> : <CalendarClock size={16} />}
+                    </span>
+                    <div className="min-w-0">
+                      <p
+                        className={`text-sm font-semibold ${alert.tone === "danger" ? "text-status-danger" : "text-status-warningDark"}`}
+                      >
+                        {alert.title}
+                      </p>
                   <p className="mt-1 text-xs text-text-muted">{alert.description}</p>
                   <button
                     type="button"
@@ -370,13 +407,21 @@ export default function DashboardV2({
                     {alert.action}
                     <ChevronRight size={12} aria-hidden="true" />
                   </button>
+                    </div>
+                  </div>
                 </article>
               ))}
+              </div>
+              {remainingAlertCount > 0 ? (
+                <p className="text-xs font-medium text-text-muted">
+                  +{remainingAlertCount} more items need attention
+                </p>
+              ) : null}
             </div>
           </Card>
         </div>
 
-        <aside className="grid gap-5 self-start xl:sticky xl:top-24">
+        <aside className="grid gap-4 self-start xl:sticky xl:top-24">
           <Card className="overflow-hidden">
             <div className="flex items-center justify-between border-b border-app-border p-5">
               <h3 className="text-base font-semibold text-text-main">Recent transactions</h3>
@@ -388,7 +433,7 @@ export default function DashboardV2({
                 View all
               </button>
             </div>
-            <div className="grid gap-2 p-4">
+            <div className="grid gap-0 p-4">
               {data.recentTransactions.length === 0 ? (
                 <p className="rounded-xl border border-app-border bg-app-surfaceSoft px-3 py-2 text-sm text-text-muted">
                   No recent transactions for this month.
@@ -399,7 +444,7 @@ export default function DashboardV2({
                 return (
                   <article
                     key={`${tx.merchant}-${tx.dateLabel}`}
-                    className="grid grid-cols-[34px_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-app-border bg-app-surfaceSoft px-3 py-2.5"
+                    className="grid grid-cols-[34px_minmax(0,1fr)_auto] items-center gap-3 border-b border-app-border px-1 py-2.5 last:border-b-0"
                   >
                     <span className="grid h-8 w-8 place-items-center rounded-full bg-app-surface text-[11px] font-semibold text-text-soft ring-1 ring-app-border">
                       {tx.icon}
@@ -410,9 +455,10 @@ export default function DashboardV2({
                     </div>
                     <div className="text-right">
                       <p
-                        className={`text-sm font-semibold ${positive ? "text-status-successDark" : "text-text-main"}`}
+                        className={`text-sm font-semibold tabular-nums ${positive ? "text-status-successDark" : "text-text-main"}`}
+                        title={formatCurrency(tx.amount)}
                       >
-                        {formatCurrency(tx.amount)}
+                        {formatCompactCurrency(tx.amount)}
                       </p>
                       <p className="text-xs text-text-muted">{tx.dateLabel}</p>
                     </div>
@@ -425,16 +471,20 @@ export default function DashboardV2({
           <Card className="overflow-hidden">
             <div className="flex items-center justify-between border-b border-app-border p-5">
               <h3 className="text-base font-semibold text-text-main">Family Note</h3>
-              <span className="rounded-full bg-app-muted px-2 py-0.5 text-xs font-semibold text-text-muted">
-                Static
-              </span>
+              <button type="button" className="text-sm font-semibold text-brand-primary">Edit</button>
             </div>
             <div className="p-5">
-              <blockquote className="rounded-xl border border-app-border bg-app-surfaceSoft px-4 py-3 text-sm italic text-text-soft">
+              <blockquote className="rounded-xl border border-[#F2DFC2] bg-[#FFF9F1] px-4 py-3 text-sm italic text-text-soft">
+                <Quote size={16} className="mb-2 text-[#D29B3D]" />
                 "{data.familyNote.quote}"
                 <footer className="mt-2 text-xs font-semibold not-italic text-text-muted">
                   - {data.familyNote.author}
                 </footer>
+                <div className="mt-2 flex justify-end">
+                  <button type="button" className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[#E9D4AD] text-[#9A7A3A]">
+                    <Heart size={14} />
+                  </button>
+                </div>
               </blockquote>
             </div>
           </Card>
@@ -443,7 +493,7 @@ export default function DashboardV2({
             <div className="border-b border-app-border p-5">
               <h3 className="text-base font-semibold text-text-main">Quick Actions</h3>
             </div>
-            <div className="grid grid-cols-2 gap-3 p-4">
+            <div className="grid grid-cols-2 gap-2.5 p-4">
               {data.quickActions.map((action) => {
                 const Icon = actionIcons[action.icon] ?? Calendar;
                 return (
@@ -464,6 +514,27 @@ export default function DashboardV2({
       </div>
     </section>
   );
+}
+
+function getBudgetHealthRingTone(onTrackPct) {
+  if (onTrackPct >= 70) return "#22A06B";
+  if (onTrackPct >= 45) return "#EA7A0A";
+  return "#DC2626";
+}
+
+function formatCompactCurrency(value) {
+  const amount = Number(value || 0);
+  const abs = Math.abs(amount);
+  if (abs >= 1_000_000) return `${amount < 0 ? "-" : ""}$${(abs / 1_000_000).toFixed(2)}M`;
+  if (abs >= 100_000) return `${amount < 0 ? "-" : ""}$${Math.round(abs / 1_000)}K`;
+  return formatCurrency(amount);
+}
+
+function getInitials(name = "") {
+  const parts = String(name).trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "SG";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
 }
 
 function runAction(label) {

@@ -1,7 +1,7 @@
 export const pageContent = {
   dashboard: {
-    title: "Dashboard",
-    description: "A clear view of cards, budget, spending, and bills.",
+    title: "Overview",
+    description: "Your family finance snapshot for the selected month.",
   },
   "credit-cards": {
     title: "Cards & Debt",

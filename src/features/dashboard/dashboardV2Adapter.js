@@ -73,7 +73,7 @@ export function createDashboardV2Data({ appData, selectedMonth = getCurrentMonth
   const trendLabels = monthlyTrend.map((row) => row.label);
 
   const selectedMonthRecentTransactions = dashboardData.recentTransactions
-    .slice(0, 8)
+    .slice(0, 5)
     .map((tx) => ({
       merchant: tx.merchant || "Transaction",
       category: tx.categoryName || "Uncategorized",
@@ -81,6 +81,88 @@ export function createDashboardV2Data({ appData, selectedMonth = getCurrentMonth
       dateLabel: formatDateLabel(tx.date),
       icon: getMerchantInitials(tx.merchant),
     }));
+
+  const recurringUpcomingBills = dashboardData.recurringRows
+    .filter((row) => Number(row.unpaidAmount || 0) > 0)
+    .map((row) => {
+      const dueDate = row.dueDate;
+      const dueDateObj = parseDateString(dueDate);
+      const daysUntilDue = Number(row.daysUntilDue ?? 999);
+      return {
+        id: `recurring-${row.template?.id || row.template?.name || dueDate || Math.random()}`,
+        type: "recurring",
+        dueDate: dueDateObj,
+        day: dueDateObj ? String(dueDateObj.getDate()).padStart(2, "0") : "--",
+        month: dueDateObj
+          ? dueDateObj.toLocaleString("en-US", { month: "short" }).toUpperCase()
+          : "N/A",
+        name: row.template?.name || "Recurring bill",
+        amount: Number(row.unpaidAmount || row.amount || 0),
+        dueText: getBillDueText(daysUntilDue),
+        tone: daysUntilDue < 0 ? "danger" : daysUntilDue <= 7 ? "warn" : "neutral",
+        sortOrder: dueDateObj ? dueDateObj.getTime() : Number.MAX_SAFE_INTEGER,
+      };
+    });
+
+  const cardPaymentUpcomingBills = dashboardData.cardRows
+    .filter((row) => row.hasPaymentDue)
+    .map((row) => {
+      const dueDateObj = parseDateString(row.paymentDueDate);
+      const daysUntilDue = Number(row.daysUntilDue ?? 999);
+      const last4 = getCardLastFour(row.card);
+      return {
+        id: `card-${row.card?.id || row.card?.name || last4}`,
+        type: "card",
+        dueDate: dueDateObj,
+        day: dueDateObj ? String(dueDateObj.getDate()).padStart(2, "0") : "--",
+        month: dueDateObj
+          ? dueDateObj.toLocaleString("en-US", { month: "short" }).toUpperCase()
+          : "N/A",
+        name: row.card?.name || "Card payment",
+        amount: Number(row.balance || 0),
+        dueText:
+          daysUntilDue < 0
+            ? `Card payment past due by ${Math.abs(daysUntilDue)} day${Math.abs(daysUntilDue) === 1 ? "" : "s"}`
+            : daysUntilDue === 0
+              ? "Card payment due today"
+              : `Card payment due in ${daysUntilDue} day${daysUntilDue === 1 ? "" : "s"} · •••• ${last4}`,
+        tone: daysUntilDue < 0 ? "danger" : daysUntilDue <= 7 ? "warn" : "neutral",
+        sortOrder: dueDateObj ? dueDateObj.getTime() : Number.MAX_SAFE_INTEGER,
+      };
+    });
+
+  const savingsGoalsSource = Array.isArray(appData.savingsGoals) ? appData.savingsGoals : [];
+  const normalizedSavingsGoals = savingsGoalsSource
+    .map((goal) => {
+      const current = Number(
+        goal.currentAmount ??
+          goal.current_amount ??
+          goal.current ??
+          goal.savedAmount ??
+          goal.saved_amount ??
+          goal.startingAmount ??
+          0,
+      );
+      const target = Number(goal.targetAmount ?? goal.target_amount ?? goal.target ?? 0);
+      const name = goal.name || goal.title || "Savings goal";
+      const isActiveValue = goal.isActive ?? goal.is_active ?? goal.status;
+      const isActive =
+        typeof isActiveValue === "string"
+          ? !["inactive", "archived", "closed"].includes(isActiveValue.toLowerCase())
+          : isActiveValue !== false;
+      const progress = target > 0 ? Math.round(Math.min(100, (current / target) * 100)) : 0;
+      return {
+        name,
+        current,
+        target,
+        progress,
+        isActive,
+      };
+    })
+    .filter((goal) => goal.isActive)
+    .slice(0, 3);
+
+  const mappedAlerts = alerts.map((alert) => mapDashboardAlert(alert)).slice(0, 8);
 
   return {
     ...EMPTY_DASHBOARD_V2_DATA,
@@ -100,26 +182,9 @@ export function createDashboardV2Data({ appData, selectedMonth = getCurrentMonth
         budget: Number(row.budget || 0),
       })),
     },
-    upcomingBills: dashboardData.recurringRows
-      .filter((row) => row.unpaidAmount > 0)
-      .slice(0, 6)
-      .map((row) => {
-        const dueDate = row.dueDate;
-        const dueDateObj = dueDate ? new Date(`${dueDate}T00:00:00`) : null;
-        const month = dueDateObj
-          ? dueDateObj.toLocaleString("en-US", { month: "short" }).toUpperCase()
-          : "N/A";
-        const day = dueDateObj ? String(dueDateObj.getDate()).padStart(2, "0") : "--";
-        const daysUntilDue = Number(row.daysUntilDue ?? 999);
-        return {
-          day,
-          month,
-          name: row.template?.name || "Recurring bill",
-          amount: Number(row.unpaidAmount || row.amount || 0),
-          dueText: getBillDueText(daysUntilDue),
-          tone: daysUntilDue < 0 ? "danger" : daysUntilDue <= 7 ? "warn" : "neutral",
-        };
-      }),
+    upcomingBills: [...recurringUpcomingBills, ...cardPaymentUpcomingBills]
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .slice(0, 4),
     cardsDebt: {
       utilizationPct: calculateUtilizationPct(
         dashboardData.summary.statementBalanceTotal,
@@ -129,7 +194,7 @@ export function createDashboardV2Data({ appData, selectedMonth = getCurrentMonth
       unpaidAmount: Number(dashboardData.summary.unpaidBalanceTotal || 0),
       paymentDue: dashboardData.cardRows
         .filter((row) => row.hasPaymentDue)
-        .slice(0, 4)
+        .slice(0, 3)
         .map((row) => ({
           name: row.card?.name || "Card",
           last4: getCardLastFour(row.card),
@@ -137,29 +202,49 @@ export function createDashboardV2Data({ appData, selectedMonth = getCurrentMonth
           dueText: getCardDueText(row.paymentDueDate),
         })),
     },
-    savingsGoals: (appData.savingsGoals ?? [])
-      .filter((goal) => goal.isActive !== false)
-      .slice(0, 4)
-      .map((goal) => {
-        const current = Number(goal.currentAmount || 0);
-        const target = Number(goal.targetAmount || 0);
-        const progress = target > 0 ? Math.round(Math.min(100, (current / target) * 100)) : 0;
-        return {
-          name: goal.name || "Savings goal",
-          current,
-          target,
-          progress,
-        };
-      }),
-    alerts: alerts.slice(0, 6).map((alert) => ({
-      title: alert.text,
-      description: alert.category,
-      action: "Review",
-      tone: alert.type === "danger" ? "danger" : "warn",
-    })),
+    savingsGoals: normalizedSavingsGoals,
+    alerts: mappedAlerts,
     recentTransactions: selectedMonthRecentTransactions,
     // TODO: Add explicit liability account trend rows when DashboardV2 includes a dedicated debt
     // breakdown card. Current cards & debt panel uses existing credit-card summary data only.
+  };
+}
+
+function mapDashboardAlert(alert = {}) {
+  const tone = alert.type === "danger" ? "danger" : "warn";
+  const text = String(alert.text || "").trim();
+  const category = String(alert.category || "").trim();
+  const currencyMatch = text.match(/over budget by ([\d.]+)/i);
+
+  if (currencyMatch) {
+    const amount = Number(currencyMatch[1] || 0);
+    const categoryName = text.split(" is over budget")[0] || "Category";
+    return {
+      title: `Over budget: ${categoryName}`,
+      description: `${Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+        amount,
+      )} over budget`,
+      action: "View budget",
+      tone,
+    };
+  }
+
+  if (/due within 7 days/i.test(text) || /due soon/i.test(text)) {
+    return {
+      title: text.includes("is due within 7 days")
+        ? text.replace(" is due within 7 days.", " due soon")
+        : text,
+      description: category || "Upcoming due date",
+      action: category === "Recurring Payments" ? "View bills" : "View cards",
+      tone,
+    };
+  }
+
+  return {
+    title: text || "Attention needed",
+    description: category || "Review details",
+    action: "Review",
+    tone,
   };
 }
 
@@ -218,6 +303,12 @@ function getMerchantInitials(merchant = "") {
   if (parts.length === 0) return "TX";
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+}
+
+function parseDateString(value) {
+  if (!value) return null;
+  const parsed = new Date(`${value}T00:00:00`);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
 function parseMonthKey(monthKey) {
