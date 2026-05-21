@@ -32,7 +32,9 @@ export default function AppShell({
                 <AppBrandMark />
                 {!sidebarCollapsed ? (
                   <div className="min-w-0">
-                    <h1 className="truncate text-base font-semibold text-text-main">Family Finance Tracker</h1>
+                    <h1 className="truncate text-base font-semibold text-text-main">
+                      Family Finance Tracker
+                    </h1>
                     <p className="text-xs text-text-muted">Household money command center</p>
                   </div>
                 ) : null}
@@ -66,12 +68,18 @@ export default function AppShell({
               </div>
             </div>
 
-            <Navigation activeView={activeView} onChange={onViewChange} collapsed={sidebarCollapsed} />
+            <Navigation
+              activeView={activeView}
+              onChange={onViewChange}
+              collapsed={sidebarCollapsed}
+            />
 
             <div className="grid gap-2 rounded-2xl border border-app-border bg-white p-3 text-xs text-text-muted shadow-[0_8px_24px_-20px_rgba(15,42,74,0.45)]">
               {!sidebarCollapsed ? (
                 <>
-                  <p className="font-semibold uppercase tracking-[0.08em] text-text-muted">Help & settings</p>
+                  <p className="font-semibold uppercase tracking-[0.08em] text-text-muted">
+                    Help & settings
+                  </p>
                   <button
                     type="button"
                     className="text-left font-medium text-brand-primary hover:text-brand-dark"
@@ -101,7 +109,9 @@ export default function AppShell({
                     <Menu size={17} />
                   </button>
                   <div className="min-w-0">
-                    <h2 className="truncate text-xl font-semibold tracking-tight text-text-main">{pageTitle}</h2>
+                    <h2 className="truncate text-xl font-semibold tracking-tight text-text-main">
+                      {pageTitle}
+                    </h2>
                     <p className="truncate text-sm text-text-muted">{pageDescription}</p>
                   </div>
                 </div>
@@ -116,13 +126,21 @@ export default function AppShell({
             <div className="grid gap-4 px-4 py-5 text-xs text-text-muted sm:px-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-center lg:px-8">
               <div className="grid gap-1">
                 <p>
-                  <span className="font-semibold text-brand-primary">{appMetadata.name}</span> (c) {appMetadata.copyrightYear} {appMetadata.creatorName}.
+                  <span className="font-semibold text-brand-primary">{appMetadata.name}</span> (c){" "}
+                  {appMetadata.copyrightYear} {appMetadata.creatorName}.
                 </p>
                 <p className="max-w-2xl leading-5">{appMetadata.trackingDisclaimer}</p>
               </div>
-              <nav className="flex flex-wrap gap-2 md:max-w-md md:justify-end" aria-label="Footer links">
+              <nav
+                className="flex flex-wrap gap-2 md:max-w-md md:justify-end"
+                aria-label="Footer links"
+              >
                 {footerLinks.map((link) => (
-                  <FooterLink key={link.targetView} targetView={link.targetView} onNavigate={onViewChange}>
+                  <FooterLink
+                    key={link.targetView}
+                    targetView={link.targetView}
+                    onNavigate={onViewChange}
+                  >
                     {link.label}
                   </FooterLink>
                 ))}

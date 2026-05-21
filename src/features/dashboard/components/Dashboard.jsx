@@ -28,12 +28,54 @@ import { getMonthlyCloseChecklist } from "../monthlyCloseChecklist.js";
 const ACTIVE_VIEW_KEY = "personalFinanceApp:activeView:v1";
 
 const quickActions = [
-  { label: "Add transaction", description: "Record new activity", view: "spending", target: "add-transaction", icon: ReceiptText, iconVariant: "orange" },
-  { label: "Review budgets", description: "Check category usage", view: "budgets", target: "budget-table", icon: WalletCards, iconVariant: "emerald" },
-  { label: "Manage cards", description: "Update balances", view: "credit-cards", target: "monthly-balances", icon: CreditCard, iconVariant: "violet" },
-  { label: "Review bills", description: "Open recurring bills", view: "recurring", target: "this-month", icon: Repeat, iconVariant: "rose" },
-  { label: "Manage goals", description: "Track savings", view: "savings", target: "monthly-savings", icon: Goal, iconVariant: "teal" },
-  { label: "Tools", description: "More workflows", view: "tools", target: "tools-home", icon: Wrench, iconVariant: "indigo" },
+  {
+    label: "Add transaction",
+    description: "Record new activity",
+    view: "spending",
+    target: "add-transaction",
+    icon: ReceiptText,
+    iconVariant: "orange",
+  },
+  {
+    label: "Review budgets",
+    description: "Check category usage",
+    view: "budgets",
+    target: "budget-table",
+    icon: WalletCards,
+    iconVariant: "emerald",
+  },
+  {
+    label: "Manage cards",
+    description: "Update balances",
+    view: "credit-cards",
+    target: "monthly-balances",
+    icon: CreditCard,
+    iconVariant: "violet",
+  },
+  {
+    label: "Review bills",
+    description: "Open recurring bills",
+    view: "recurring",
+    target: "this-month",
+    icon: Repeat,
+    iconVariant: "rose",
+  },
+  {
+    label: "Manage goals",
+    description: "Track savings",
+    view: "savings",
+    target: "monthly-savings",
+    icon: Goal,
+    iconVariant: "teal",
+  },
+  {
+    label: "Tools",
+    description: "More workflows",
+    view: "tools",
+    target: "tools-home",
+    icon: Wrench,
+    iconVariant: "indigo",
+  },
 ];
 
 export default function Dashboard({
@@ -62,7 +104,9 @@ export default function Dashboard({
       <Card className="border-app-border/80 bg-white/90 px-4 py-3.5 sm:px-5">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.06em] text-text-muted">Overview</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.06em] text-text-muted">
+              Overview
+            </p>
             <h2 className="text-xl font-semibold tracking-tight text-text-main sm:text-2xl">
               {formatMonthLabel(selectedMonth)} dashboard
             </h2>
@@ -91,9 +135,23 @@ export default function Dashboard({
               recurringRemaining={data.summary.recurringRemaining}
               unpaidCardBalanceTotal={data.summary.unpaidBalanceTotal}
             />
-            <BudgetVsSpendingTable rows={data.budgetRows} title="Budget health" emptyMessage="No budget categories yet for this month." />
-            <RecurringOverview rows={data.recurringRows} summary={data.recurringSummary} title="Upcoming bills" emptyMessage="No recurring bills for this month." />
-            <CreditCardPaymentOverview rows={data.cardRows} totalUnpaid={data.summary.unpaidBalanceTotal} title="Cards & debt" emptyMessage="No active credit cards available." />
+            <BudgetVsSpendingTable
+              rows={data.budgetRows}
+              title="Budget health"
+              emptyMessage="No budget categories yet for this month."
+            />
+            <RecurringOverview
+              rows={data.recurringRows}
+              summary={data.recurringSummary}
+              title="Upcoming bills"
+              emptyMessage="No recurring bills for this month."
+            />
+            <CreditCardPaymentOverview
+              rows={data.cardRows}
+              totalUnpaid={data.summary.unpaidBalanceTotal}
+              title="Cards & debt"
+              emptyMessage="No active credit cards available."
+            />
           </div>
 
           <div className="grid gap-5 lg:grid-cols-2">
@@ -115,7 +173,11 @@ export default function Dashboard({
         </div>
 
         <div className="grid gap-4 self-start xl:sticky xl:top-24">
-          <RecentTransactionsTable transactions={data.recentTransactions} cards={data.cards} categories={data.budgets} />
+          <RecentTransactionsTable
+            transactions={data.recentTransactions}
+            cards={data.cards}
+            categories={data.budgets}
+          />
           <FamilyNotePlaceholder />
           <DashboardQuickActions />
         </div>
@@ -159,7 +221,9 @@ function DashboardPriorityPanel({ alerts, totalAlertCount }) {
           </span>
           <div>
             <h3 className="text-base font-semibold text-text-main">No urgent alerts</h3>
-            <p className="mt-1 text-sm text-text-muted">Cards, budgets, and recurring bills look clear.</p>
+            <p className="mt-1 text-sm text-text-muted">
+              Cards, budgets, and recurring bills look clear.
+            </p>
           </div>
         </div>
       </Card>
@@ -171,7 +235,9 @@ function DashboardPriorityPanel({ alerts, totalAlertCount }) {
       <div className="grid gap-3 border-b border-app-border p-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
         <div>
           <h3 className="text-base font-semibold text-text-main">Needs attention</h3>
-          <p className="mt-1 text-sm text-text-muted">Showing {alerts.length} of {totalAlertCount} active items.</p>
+          <p className="mt-1 text-sm text-text-muted">
+            Showing {alerts.length} of {totalAlertCount} active items.
+          </p>
         </div>
         <span className="inline-flex w-fit items-center gap-2 rounded-full bg-status-warningBg px-3 py-1 text-sm font-semibold text-status-warningDark">
           <AlertTriangle size={16} aria-hidden="true" />
@@ -180,12 +246,19 @@ function DashboardPriorityPanel({ alerts, totalAlertCount }) {
       </div>
       <div className="grid gap-2 p-4">
         {alerts.map((alert, index) => (
-          <div key={`${alert.category}-${alert.text}-${index}`} className="rounded-xl border border-app-border bg-app-background px-3 py-2">
+          <div
+            key={`${alert.category}-${alert.text}-${index}`}
+            className="rounded-xl border border-app-border bg-app-background px-3 py-2"
+          >
             <div className="flex flex-wrap items-center gap-2">
-              <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${alert.type === "danger" ? "bg-status-dangerBg text-status-danger" : "bg-status-warningBg text-status-warningDark"}`}>
+              <span
+                className={`rounded-full px-2 py-0.5 text-xs font-semibold ${alert.type === "danger" ? "bg-status-dangerBg text-status-danger" : "bg-status-warningBg text-status-warningDark"}`}
+              >
                 {alert.type === "danger" ? "Urgent" : "Warning"}
               </span>
-              <span className="text-xs font-semibold uppercase tracking-normal text-text-muted">{alert.category}</span>
+              <span className="text-xs font-semibold uppercase tracking-normal text-text-muted">
+                {alert.category}
+              </span>
             </div>
             <p className="mt-1 text-sm font-medium text-text-main">{alert.text}</p>
           </div>
@@ -201,7 +274,11 @@ function SavingsGoalsPanel({ goals }) {
       <div className="border-b border-app-border p-5">
         <div className="flex items-center justify-between gap-3">
           <h3 className="text-base font-semibold text-text-main">Savings goals</h3>
-          <button type="button" className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary hover:text-brand-dark" onClick={() => navigateToView("savings", "monthly-savings")}>
+          <button
+            type="button"
+            className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary hover:text-brand-dark"
+            onClick={() => navigateToView("savings", "monthly-savings")}
+          >
             View goals <ArrowRight size={14} aria-hidden="true" />
           </button>
         </div>
@@ -215,13 +292,19 @@ function SavingsGoalsPanel({ goals }) {
             const current = Number(goal.currentAmount || 0);
             const progress = target > 0 ? Math.min(100, (current / target) * 100) : 0;
             return (
-              <article key={goal.id} className="grid gap-2 rounded-xl border border-app-border bg-app-background p-3">
+              <article
+                key={goal.id}
+                className="grid gap-2 rounded-xl border border-app-border bg-app-background p-3"
+              >
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-sm font-semibold text-text-main">{goal.name}</p>
                   <p className="text-xs font-semibold text-text-muted">{Math.round(progress)}%</p>
                 </div>
                 <div className="h-2 overflow-hidden rounded-full bg-app-muted">
-                  <div className="h-full rounded-full bg-status-success" style={{ width: `${progress}%` }} />
+                  <div
+                    className="h-full rounded-full bg-status-success"
+                    style={{ width: `${progress}%` }}
+                  />
                 </div>
               </article>
             );
@@ -238,13 +321,17 @@ function FamilyNotePlaceholder() {
       <div className="border-b border-app-border p-5">
         <div className="flex items-center justify-between gap-2">
           <h3 className="text-base font-semibold text-text-main">Family note</h3>
-          <span className="rounded-full bg-app-muted px-2 py-0.5 text-xs font-semibold text-text-muted">Placeholder</span>
+          <span className="rounded-full bg-app-muted px-2 py-0.5 text-xs font-semibold text-text-muted">
+            Placeholder
+          </span>
         </div>
       </div>
       <div className="p-5">
         <blockquote className="rounded-xl border border-[#EADFCF] bg-[#FBF5EA] px-4 py-3 text-sm italic text-text-soft">
           “Let’s keep up the momentum. Great job staying on budget this month.”
-          <footer className="mt-2 text-xs font-semibold not-italic text-text-muted">— Family note (static)</footer>
+          <footer className="mt-2 text-xs font-semibold not-italic text-text-muted">
+            — Family note (static)
+          </footer>
         </blockquote>
       </div>
     </Card>

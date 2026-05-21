@@ -22,7 +22,9 @@ export default function AppHeaderAccountSlot({
 
       {showDashboardMonth ? (
         <label className="hidden min-h-11 items-center gap-2 rounded-xl border border-app-border bg-app-surface px-3 text-sm text-text-main lg:inline-flex">
-          <span className="text-xs font-semibold uppercase tracking-wide text-text-muted">Month</span>
+          <span className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+            Month
+          </span>
           <select
             value={dashboardMonth}
             onChange={(event) => onDashboardMonthChange?.(event.target.value)}

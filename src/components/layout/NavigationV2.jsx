@@ -16,7 +16,8 @@ export default function NavigationV2({
     createInitialExpandedGroupState(activeView),
   );
   const activeSectionId = useMemo(
-    () => groupedNavigationSections.find((section) => section.views.includes(activeView))?.id ?? null,
+    () =>
+      groupedNavigationSections.find((section) => section.views.includes(activeView))?.id ?? null,
     [activeView],
   );
 

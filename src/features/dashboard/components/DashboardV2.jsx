@@ -12,10 +12,11 @@ import {
   BarChart3,
   Wallet,
 } from "lucide-react";
+import { getCurrentMonthKey } from "../../../lib/dates.js";
 import Card from "../../../components/ui/Card.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
 import { dispatchNavigation } from "../../../lib/navigationTargets.js";
-import { dashboardV2MockData } from "../dashboardV2MockData.js";
+import { createDashboardV2Data } from "../dashboardV2Adapter.js";
 
 const ACTIVE_VIEW_KEY = "personalFinanceApp:activeView:v1";
 
@@ -37,15 +38,30 @@ const actionIcons = {
   report: BarChart3,
 };
 
-export default function DashboardV2() {
-  const data = dashboardV2MockData;
+export default function DashboardV2({
+  appData,
+  selectedMonth = getCurrentMonthKey(),
+  loading = false,
+  error = "",
+}) {
+  const data = createDashboardV2Data({ appData, selectedMonth });
 
-  const trendMin = Math.min(...data.netCashFlow.trendValues);
-  const trendMax = Math.max(...data.netCashFlow.trendValues);
+  if (loading) {
+    return (
+      <section className="grid gap-5">
+        <Card className="p-5 text-sm text-text-muted">Loading dashboard...</Card>
+      </section>
+    );
+  }
+
+  const trendValues =
+    data.netCashFlow.trendValues.length > 0 ? data.netCashFlow.trendValues : [0, 0];
+  const trendMin = Math.min(...trendValues);
+  const trendMax = Math.max(...trendValues);
   const trendSpread = Math.max(trendMax - trendMin, 1);
-  const trendPoints = data.netCashFlow.trendValues
+  const trendPoints = trendValues
     .map((value, index) => {
-      const x = (index / (data.netCashFlow.trendValues.length - 1)) * 100;
+      const x = trendValues.length <= 1 ? 0 : (index / (trendValues.length - 1)) * 100;
       const y = 100 - ((value - trendMin) / trendSpread) * 100;
       return `${x},${Math.max(6, Math.min(94, y))}`;
     })
@@ -62,12 +78,20 @@ export default function DashboardV2() {
                   <CircleDollarSign size={18} aria-hidden="true" />
                   Net Cash Flow
                 </div>
-                <button className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary" type="button">
+                <button
+                  className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary"
+                  type="button"
+                >
                   View cash flow
                   <ChevronRight size={14} aria-hidden="true" />
                 </button>
               </div>
               <div className="grid gap-4 p-5">
+                {error ? (
+                  <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B]">
+                    {error}
+                  </p>
+                ) : null}
                 <div>
                   <p className="text-5xl font-semibold tracking-tight text-text-main">
                     {formatCurrency(data.netCashFlow.amount)}
@@ -85,10 +109,20 @@ export default function DashboardV2() {
                         <stop offset="100%" stopColor="rgba(30,58,95,0.00)" />
                       </linearGradient>
                     </defs>
-                    <polyline points={trendPoints} fill="none" stroke="#0F2A4A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    <polyline
+                      points={trendPoints}
+                      fill="none"
+                      stroke="#0F2A4A"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   </svg>
                   <div className="mt-2 grid grid-cols-6 text-xs text-text-muted">
-                    {data.netCashFlow.trendLabels.map((label) => (
+                    {(data.netCashFlow.trendLabels.length > 0
+                      ? data.netCashFlow.trendLabels
+                      : ["-", "-", "-", "-", "-", "-"]
+                    ).map((label) => (
                       <span key={label}>{label}</span>
                     ))}
                   </div>
@@ -102,27 +136,45 @@ export default function DashboardV2() {
                   <Wallet size={18} aria-hidden="true" />
                   Budget Health
                 </div>
-                <button className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary" type="button">
+                <button
+                  className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary"
+                  type="button"
+                >
                   View budgets
                   <ChevronRight size={14} aria-hidden="true" />
                 </button>
               </div>
               <div className="grid gap-5 p-5 sm:grid-cols-[170px_minmax(0,1fr)] sm:items-center">
-                <div className="mx-auto grid h-40 w-40 place-items-center rounded-full" style={{ background: `conic-gradient(#22A06B ${(data.budgetHealth.onTrackPct / 100) * 360}deg, #EEE8DD 0deg)` }}>
+                <div
+                  className="mx-auto grid h-40 w-40 place-items-center rounded-full"
+                  style={{
+                    background: `conic-gradient(#22A06B ${(data.budgetHealth.onTrackPct / 100) * 360}deg, #EEE8DD 0deg)`,
+                  }}
+                >
                   <div className="grid h-28 w-28 place-items-center rounded-full bg-white text-center">
-                    <p className="text-4xl font-semibold leading-none text-text-main">{data.budgetHealth.onTrackPct}%</p>
+                    <p className="text-4xl font-semibold leading-none text-text-main">
+                      {data.budgetHealth.onTrackPct}%
+                    </p>
                     <p className="mt-1 text-sm text-text-muted">On track</p>
                   </div>
                 </div>
                 <div className="grid gap-2.5">
+                  {data.budgetHealth.categories.length === 0 ? (
+                    <p className="rounded-xl border border-app-border bg-app-background px-3 py-2 text-sm text-text-muted">
+                      No budget data for this month.
+                    </p>
+                  ) : null}
                   {data.budgetHealth.categories.map((category) => {
-                    const pctRaw = category.budget > 0 ? (category.spent / category.budget) * 100 : 0;
+                    const pctRaw =
+                      category.budget > 0 ? (category.spent / category.budget) * 100 : 0;
                     const pct = Math.min(100, Math.max(0, pctRaw));
                     return (
                       <div key={category.name} className="grid gap-1.5">
                         <div className="flex items-center justify-between gap-2 text-sm">
                           <span className="font-medium text-text-main">{category.name}</span>
-                          <span className="text-text-muted">{formatCurrency(category.spent)} / {formatCurrency(category.budget)}</span>
+                          <span className="text-text-muted">
+                            {formatCurrency(category.spent)} / {formatCurrency(category.budget)}
+                          </span>
                         </div>
                         <div className="h-1.5 overflow-hidden rounded-full bg-app-muted">
                           <div
@@ -143,17 +195,31 @@ export default function DashboardV2() {
                 <span className="text-sm text-text-muted">Next 14 days</span>
               </div>
               <div className="grid gap-3 p-5">
+                {data.upcomingBills.length === 0 ? (
+                  <p className="rounded-xl border border-app-border bg-app-background px-3 py-2 text-sm text-text-muted">
+                    No upcoming bills in this snapshot.
+                  </p>
+                ) : null}
                 {data.upcomingBills.map((bill) => (
-                  <article key={`${bill.month}-${bill.day}-${bill.name}`} className="grid grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-app-border bg-app-background px-3 py-2.5">
+                  <article
+                    key={`${bill.month}-${bill.day}-${bill.name}`}
+                    className="grid grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-app-border bg-app-background px-3 py-2.5"
+                  >
                     <div className="grid h-10 w-10 place-items-center rounded-lg bg-app-surface text-center text-xs font-semibold text-text-soft ring-1 ring-app-border">
                       <span>{bill.month}</span>
                       <span>{bill.day}</span>
                     </div>
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold text-text-main">{bill.name}</p>
-                      <p className={`text-xs ${bill.tone === "danger" ? "text-status-danger" : bill.tone === "warn" ? "text-status-warningDark" : "text-text-muted"}`}>{bill.dueText}</p>
+                      <p
+                        className={`text-xs ${bill.tone === "danger" ? "text-status-danger" : bill.tone === "warn" ? "text-status-warningDark" : "text-text-muted"}`}
+                      >
+                        {bill.dueText}
+                      </p>
                     </div>
-                    <p className="text-sm font-semibold text-text-main">{formatCurrency(bill.amount)}</p>
+                    <p className="text-sm font-semibold text-text-main">
+                      {formatCurrency(bill.amount)}
+                    </p>
                   </article>
                 ))}
               </div>
@@ -162,7 +228,10 @@ export default function DashboardV2() {
             <Card className="overflow-hidden">
               <div className="flex items-center justify-between border-b border-app-border p-5">
                 <h3 className="text-base font-semibold text-text-main">Cards & Debt</h3>
-                <button type="button" className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary">
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary"
+                >
                   View all
                   <ChevronRight size={14} aria-hidden="true" />
                 </button>
@@ -171,24 +240,43 @@ export default function DashboardV2() {
                 <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_100px] sm:items-center">
                   <div>
                     <p className="text-sm text-text-muted">Credit card utilization</p>
-                    <p className="text-4xl font-semibold tracking-tight text-text-main">{data.cardsDebt.utilizationPct}%</p>
+                    <p className="text-4xl font-semibold tracking-tight text-text-main">
+                      {data.cardsDebt.utilizationPct}%
+                    </p>
                     <p className="text-xs text-status-successDark">4% down vs Apr 2025</p>
                   </div>
-                  <div className="mx-auto grid h-24 w-24 place-items-center rounded-full" style={{ background: `conic-gradient(#22A06B ${(data.cardsDebt.utilizationPct / 100) * 360}deg, #EEE8DD 0deg)` }}>
+                  <div
+                    className="mx-auto grid h-24 w-24 place-items-center rounded-full"
+                    style={{
+                      background: `conic-gradient(#22A06B ${(data.cardsDebt.utilizationPct / 100) * 360}deg, #EEE8DD 0deg)`,
+                    }}
+                  >
                     <div className="grid h-16 w-16 place-items-center rounded-full bg-white text-sm font-semibold text-text-main">
                       {data.cardsDebt.utilizationPct}%
                     </div>
                   </div>
                 </div>
                 <div className="grid gap-2 rounded-xl border border-app-border bg-app-background p-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">Payment due</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+                    Payment due
+                  </p>
+                  {data.cardsDebt.paymentDue.length === 0 ? (
+                    <p className="text-xs text-text-muted">No unpaid statement balances due.</p>
+                  ) : null}
                   {data.cardsDebt.paymentDue.map((payment) => (
-                    <div key={`${payment.name}-${payment.last4}`} className="flex items-center justify-between gap-2">
+                    <div
+                      key={`${payment.name}-${payment.last4}`}
+                      className="flex items-center justify-between gap-2"
+                    >
                       <div>
                         <p className="text-sm font-semibold text-text-main">{payment.name}</p>
-                        <p className="text-xs text-text-muted">... {payment.last4} · {payment.dueText}</p>
+                        <p className="text-xs text-text-muted">
+                          ... {payment.last4} - {payment.dueText}
+                        </p>
                       </div>
-                      <p className="text-sm font-semibold text-text-main">{formatCurrency(payment.amount)}</p>
+                      <p className="text-sm font-semibold text-text-main">
+                        {formatCurrency(payment.amount)}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -198,22 +286,38 @@ export default function DashboardV2() {
             <Card className="overflow-hidden">
               <div className="flex items-center justify-between border-b border-app-border p-5">
                 <h3 className="text-base font-semibold text-text-main">Savings Goals</h3>
-                <button type="button" className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary">
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary"
+                >
                   View goals
                   <ChevronRight size={14} aria-hidden="true" />
                 </button>
               </div>
               <div className="grid gap-3 p-5">
+                {data.savingsGoals.length === 0 ? (
+                  <p className="rounded-xl border border-app-border bg-app-background px-3 py-2 text-sm text-text-muted">
+                    No active savings goals yet.
+                  </p>
+                ) : null}
                 {data.savingsGoals.map((goal) => (
-                  <article key={goal.name} className="grid gap-2 rounded-xl border border-app-border bg-app-background p-3">
+                  <article
+                    key={goal.name}
+                    className="grid gap-2 rounded-xl border border-app-border bg-app-background p-3"
+                  >
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-sm font-semibold text-text-main">{goal.name}</p>
                       <p className="text-xs font-semibold text-text-muted">{goal.progress}%</p>
                     </div>
                     <div className="h-2 overflow-hidden rounded-full bg-app-muted">
-                      <div className="h-full rounded-full bg-status-success" style={{ width: `${goal.progress}%` }} />
+                      <div
+                        className="h-full rounded-full bg-status-success"
+                        style={{ width: `${goal.progress}%` }}
+                      />
                     </div>
-                    <p className="text-xs text-text-muted">{formatCurrency(goal.current)} / {formatCurrency(goal.target)}</p>
+                    <p className="text-xs text-text-muted">
+                      {formatCurrency(goal.current)} / {formatCurrency(goal.target)}
+                    </p>
                   </article>
                 ))}
               </div>
@@ -230,11 +334,26 @@ export default function DashboardV2() {
                 </span>
               </div>
               <div className="grid gap-3 p-5">
+                {data.alerts.length === 0 ? (
+                  <p className="rounded-xl border border-app-border bg-app-background px-3 py-2 text-sm text-text-muted">
+                    No alerts right now.
+                  </p>
+                ) : null}
                 {data.alerts.map((alert) => (
-                  <article key={alert.title} className="rounded-xl border border-app-border bg-app-background p-3">
-                    <p className={`text-sm font-semibold ${alert.tone === "danger" ? "text-status-danger" : "text-status-warningDark"}`}>{alert.title}</p>
+                  <article
+                    key={alert.title}
+                    className="rounded-xl border border-app-border bg-app-background p-3"
+                  >
+                    <p
+                      className={`text-sm font-semibold ${alert.tone === "danger" ? "text-status-danger" : "text-status-warningDark"}`}
+                    >
+                      {alert.title}
+                    </p>
                     <p className="mt-1 text-xs text-text-muted">{alert.description}</p>
-                    <button type="button" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-brand-primary">
+                    <button
+                      type="button"
+                      className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-brand-primary"
+                    >
                       {alert.action}
                       <ChevronRight size={12} aria-hidden="true" />
                     </button>
@@ -249,13 +368,23 @@ export default function DashboardV2() {
           <Card className="overflow-hidden">
             <div className="flex items-center justify-between border-b border-app-border p-5">
               <h3 className="text-base font-semibold text-text-main">Recent transactions</h3>
-              <button type="button" className="text-sm font-semibold text-brand-primary">View all</button>
+              <button type="button" className="text-sm font-semibold text-brand-primary">
+                View all
+              </button>
             </div>
             <div className="grid gap-2 p-4">
+              {data.recentTransactions.length === 0 ? (
+                <p className="rounded-xl border border-app-border bg-app-background px-3 py-2 text-sm text-text-muted">
+                  No recent transactions for this month.
+                </p>
+              ) : null}
               {data.recentTransactions.map((tx) => {
                 const positive = tx.amount > 0;
                 return (
-                  <article key={`${tx.merchant}-${tx.dateLabel}`} className="grid grid-cols-[34px_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-app-border bg-app-background px-3 py-2.5">
+                  <article
+                    key={`${tx.merchant}-${tx.dateLabel}`}
+                    className="grid grid-cols-[34px_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-app-border bg-app-background px-3 py-2.5"
+                  >
                     <span className="grid h-8 w-8 place-items-center rounded-full bg-app-surface text-[11px] font-semibold text-text-soft ring-1 ring-app-border">
                       {tx.icon}
                     </span>
@@ -264,7 +393,9 @@ export default function DashboardV2() {
                       <p className="truncate text-xs text-text-muted">{tx.category}</p>
                     </div>
                     <div className="text-right">
-                      <p className={`text-sm font-semibold ${positive ? "text-status-successDark" : "text-text-main"}`}>
+                      <p
+                        className={`text-sm font-semibold ${positive ? "text-status-successDark" : "text-text-main"}`}
+                      >
                         {formatCurrency(tx.amount)}
                       </p>
                       <p className="text-xs text-text-muted">{tx.dateLabel}</p>
@@ -278,12 +409,16 @@ export default function DashboardV2() {
           <Card className="overflow-hidden">
             <div className="flex items-center justify-between border-b border-app-border p-5">
               <h3 className="text-base font-semibold text-text-main">Family Note</h3>
-              <span className="rounded-full bg-app-muted px-2 py-0.5 text-xs font-semibold text-text-muted">Static</span>
+              <span className="rounded-full bg-app-muted px-2 py-0.5 text-xs font-semibold text-text-muted">
+                Static
+              </span>
             </div>
             <div className="p-5">
               <blockquote className="rounded-xl border border-[#EADFCF] bg-[#FBF5EA] px-4 py-3 text-sm italic text-text-soft">
                 "{data.familyNote.quote}"
-                <footer className="mt-2 text-xs font-semibold not-italic text-text-muted">- {data.familyNote.author}</footer>
+                <footer className="mt-2 text-xs font-semibold not-italic text-text-muted">
+                  - {data.familyNote.author}
+                </footer>
               </blockquote>
             </div>
           </Card>

@@ -64,11 +64,15 @@ export default function DashboardCashFlowSummary({
             {selectedMonth}
           </span>
         </div>
-        <p className={`mt-3 text-4xl font-semibold tracking-tight ${netPositive ? "text-status-successDark" : "text-status-danger"}`}>
+        <p
+          className={`mt-3 text-4xl font-semibold tracking-tight ${netPositive ? "text-status-successDark" : "text-status-danger"}`}
+        >
           {formatCurrency(netCashFlow)}
         </p>
         <p className="mt-1 text-sm text-text-muted">Income minus spending this month</p>
-        <p className={`mt-1 text-xs font-semibold ${netVsBudgetPositive ? "text-status-successDark" : "text-status-warningDark"}`}>
+        <p
+          className={`mt-1 text-xs font-semibold ${netVsBudgetPositive ? "text-status-successDark" : "text-status-warningDark"}`}
+        >
           {netVsBudgetPositive ? "+" : ""}
           {formatCurrency(netVsBudget)} vs budget remaining
         </p>

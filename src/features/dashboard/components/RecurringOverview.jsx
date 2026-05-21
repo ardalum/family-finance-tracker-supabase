@@ -15,8 +15,12 @@ export default function RecurringOverview({
     <Card className="overflow-hidden">
       <div className="border-b border-app-border p-5">
         <h3 className="text-base font-semibold text-text-main">{title}</h3>
-        <p className="mt-2 text-2xl font-semibold tracking-tight text-text-main">{formatCurrency(summary.remainingTotal)}</p>
-        <p className="text-sm text-text-muted">Remaining from {formatCurrency(summary.estimatedTotal)} total bills</p>
+        <p className="mt-2 text-2xl font-semibold tracking-tight text-text-main">
+          {formatCurrency(summary.remainingTotal)}
+        </p>
+        <p className="text-sm text-text-muted">
+          Remaining from {formatCurrency(summary.estimatedTotal)} total bills
+        </p>
       </div>
       {rows.length === 0 ? (
         <div className="p-8 text-center text-sm text-text-muted">{emptyMessage}</div>
@@ -28,19 +32,30 @@ export default function RecurringOverview({
               row.displayStatus !== "Paid" &&
               !row.instance?.actualAmount;
             return (
-              <article key={row.template.id} className="rounded-xl border border-app-border bg-app-background p-3">
+              <article
+                key={row.template.id}
+                className="rounded-xl border border-app-border bg-app-background p-3"
+              >
                 <div className="flex items-start gap-3">
-                  <span className={`mt-1 inline-block h-2.5 w-2.5 rounded-full ${getStatusDotClass(row.displayStatus, variableNeedsActual)}`} />
+                  <span
+                    className={`mt-1 inline-block h-2.5 w-2.5 rounded-full ${getStatusDotClass(row.displayStatus, variableNeedsActual)}`}
+                  />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between gap-2">
-                      <h4 className="truncate text-sm font-semibold text-text-main">{row.template.name}</h4>
-                      <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${getStatusBadgeClass(row.displayStatus, variableNeedsActual)}`}>
+                      <h4 className="truncate text-sm font-semibold text-text-main">
+                        {row.template.name}
+                      </h4>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs font-semibold ${getStatusBadgeClass(row.displayStatus, variableNeedsActual)}`}
+                      >
                         {row.displayStatus}
                       </span>
                     </div>
                     <div className="mt-1 flex items-center justify-between text-xs text-text-muted">
                       <span>Due {row.dueDate}</span>
-                      <span className="font-semibold text-text-main">{formatCurrency(row.amount)}</span>
+                      <span className="font-semibold text-text-main">
+                        {formatCurrency(row.amount)}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -56,7 +71,8 @@ export default function RecurringOverview({
 function getStatusBadgeClass(status, variableNeedsActual) {
   if (status === "Paid") return "bg-status-successBg text-status-successDark";
   if (status === "Past due") return "bg-status-dangerBg text-status-dangerDark";
-  if (["Due now", "Due soon"].includes(status) || variableNeedsActual) return "bg-status-warningBg text-status-warningDark";
+  if (["Due now", "Due soon"].includes(status) || variableNeedsActual)
+    return "bg-status-warningBg text-status-warningDark";
   if (status === "Skipped") return "bg-app-muted text-text-soft";
   return "bg-status-infoBg text-status-infoDark";
 }

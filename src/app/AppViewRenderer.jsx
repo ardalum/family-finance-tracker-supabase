@@ -48,7 +48,11 @@ export default function AppViewRenderer({
   return (
     <>
       {activeView === "dashboard" ? (
-        ENABLE_DASHBOARD_V2_PREVIEW ? <DashboardV2 {...dashboardProps} /> : <Dashboard {...dashboardProps} />
+        ENABLE_DASHBOARD_V2_PREVIEW ? (
+          <DashboardV2 {...dashboardProps} />
+        ) : (
+          <Dashboard {...dashboardProps} />
+        )
       ) : null}
       {activeView === "credit-cards" ? <CreditCardTracker {...creditCardProps} /> : null}
       {activeView === "budgets" ? <BudgetTracker {...budgetProps} /> : null}

@@ -182,4 +182,3 @@ export function createInitialExpandedGroupState(activeView) {
 export function getNavigationItemIds(items = navItems) {
   return items.map((item) => item.id);
 }
-

@@ -37,11 +37,7 @@ export default function BudgetVsSpendingTable({
             className="mx-auto grid h-[84px] w-[84px] place-items-center rounded-full"
             style={{
               background: `conic-gradient(${
-                severeOverBudget
-                  ? "#DC2626"
-                  : safeUsagePct >= 85
-                    ? "#D97706"
-                    : "#16A34A"
+                severeOverBudget ? "#DC2626" : safeUsagePct >= 85 ? "#D97706" : "#16A34A"
               } ${safeUsagePct * 3.6}deg, #EEE8DD 0deg)`,
             }}
           >
@@ -67,10 +63,15 @@ export default function BudgetVsSpendingTable({
             const over = row.remaining < 0;
             const near = rawPct >= 90;
             return (
-              <article key={row.category} className="rounded-xl border border-app-border bg-app-background p-3">
+              <article
+                key={row.category}
+                className="rounded-xl border border-app-border bg-app-background p-3"
+              >
                 <div className="mb-2 flex items-center justify-between gap-2">
                   <h4 className="truncate text-sm font-semibold text-text-main">{row.category}</h4>
-                  <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${over ? "bg-status-dangerBg text-status-dangerDark" : near ? "bg-status-warningBg text-status-warningDark" : "bg-status-successBg text-status-successDark"}`}>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs font-semibold ${over ? "bg-status-dangerBg text-status-dangerDark" : near ? "bg-status-warningBg text-status-warningDark" : "bg-status-successBg text-status-successDark"}`}
+                  >
                     {rawPct > 999 ? "999%+" : `${Math.round(rawPct)}%`}
                   </span>
                 </div>
@@ -81,8 +82,14 @@ export default function BudgetVsSpendingTable({
                   />
                 </div>
                 <div className="mt-2 flex items-center justify-between text-xs text-text-muted">
-                  <span>{formatCurrency(row.spent)} / {formatCurrency(row.budget)}</span>
-                  <span className={over ? "font-semibold text-status-danger" : "font-semibold text-text-main"}>
+                  <span>
+                    {formatCurrency(row.spent)} / {formatCurrency(row.budget)}
+                  </span>
+                  <span
+                    className={
+                      over ? "font-semibold text-status-danger" : "font-semibold text-text-main"
+                    }
+                  >
                     {formatCurrency(row.remaining)}
                   </span>
                 </div>
