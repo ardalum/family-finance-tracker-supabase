@@ -85,6 +85,21 @@ export function hasPasswordResetCallback(location = getWindowLocation()) {
   return status === AUTH_STATUS_TYPES.resetPassword || resetCallbackTypes.has(type);
 }
 
+export function hasPasswordResetTokens(location = getWindowLocation()) {
+  if (!location) return false;
+
+  const searchParams = new URLSearchParams(location.search || "");
+  const hashParams = getHashParams(location.hash || "");
+
+  const accessToken = searchParams.get("access_token") || hashParams.get("access_token");
+  const refreshToken = searchParams.get("refresh_token") || hashParams.get("refresh_token");
+  const tokenType = searchParams.get(AUTH_TYPE_PARAM) || hashParams.get(AUTH_TYPE_PARAM);
+
+  return Boolean(
+    accessToken && refreshToken && String(tokenType || "").toLowerCase() === "recovery",
+  );
+}
+
 export function getAuthStatusUrlCleanupPath(location = getWindowLocation()) {
   if (!location) return "";
 

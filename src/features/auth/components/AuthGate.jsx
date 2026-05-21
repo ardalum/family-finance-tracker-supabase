@@ -1,11 +1,10 @@
 import { useAuth } from "../AuthProvider.jsx";
-import { hasPasswordResetCallback } from "../authStatusUtils.js";
 import AuthForm from "./AuthForm.jsx";
 import PasswordResetForm from "./PasswordResetForm.jsx";
 
 export default function AuthGate({ children }) {
-  const { session, loading, error } = useAuth();
-  const shouldShowPasswordResetForm = Boolean(session) && hasPasswordResetCallback();
+  const { session, loading, error, isPasswordRecovery, hasInvalidRecoveryLink } = useAuth();
+  const shouldShowPasswordResetForm = isPasswordRecovery;
 
   if (loading) {
     return (
@@ -15,7 +14,7 @@ export default function AuthGate({ children }) {
     );
   }
 
-  if (!session) {
+  if (!session || shouldShowPasswordResetForm) {
     return (
       <>
         {error ? (
@@ -23,13 +22,15 @@ export default function AuthGate({ children }) {
             {error}
           </div>
         ) : null}
-        <AuthForm />
+        {shouldShowPasswordResetForm ? (
+          <PasswordResetForm />
+        ) : hasInvalidRecoveryLink ? (
+          <AuthForm initialMode="reset-request" recoveryLinkError />
+        ) : (
+          <AuthForm />
+        )}
       </>
     );
-  }
-
-  if (shouldShowPasswordResetForm) {
-    return <PasswordResetForm />;
   }
 
   return children;
