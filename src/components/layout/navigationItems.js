@@ -163,6 +163,17 @@ export const groupedNavigationSections = sectionConfig.map((section) => ({
   })),
 }));
 
+export const dashboardV2SidebarItems = [
+  { id: "dashboard", label: "Overview", icon: LayoutDashboard, disabled: false },
+  { id: "budgets", label: "Budgets", icon: WalletCards, disabled: false },
+  { id: "credit-cards", label: "Cards & Debt", icon: CreditCard, disabled: false },
+  { id: "recurring", label: "Bills", icon: CalendarDays, disabled: false },
+  { id: "savings", label: "Goals", icon: PiggyBank, disabled: false },
+  { id: "insights", label: "Insights", icon: ChartNoAxesCombined, disabled: false },
+  { id: null, label: "Family Activity", icon: ActivitySquare, disabled: true },
+  { id: "app-settings", label: "Settings", icon: Settings, disabled: false },
+];
+
 export function getSectionIdByView(viewId) {
   const section = groupedNavigationSections.find((entry) => entry.views.includes(viewId));
   return section?.id ?? null;

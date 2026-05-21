@@ -54,8 +54,8 @@ export default function DashboardV2({
     );
   }
 
-  const trendValues =
-    data.netCashFlow.trendValues.length > 0 ? data.netCashFlow.trendValues : [0, 0];
+  const hasMonthlyTrend = data.netCashFlow.trendValues.length >= 2;
+  const trendValues = hasMonthlyTrend ? data.netCashFlow.trendValues : [0, 0];
   const trendMin = Math.min(...trendValues);
   const trendMax = Math.max(...trendValues);
   const trendSpread = Math.max(trendMax - trendMin, 1);
@@ -102,30 +102,35 @@ export default function DashboardV2({
                   </p>
                 </div>
                 <div className="rounded-xl border border-app-border bg-app-background p-3">
-                  <svg viewBox="0 0 100 34" className="h-28 w-full" aria-hidden="true">
-                    <defs>
-                      <linearGradient id="v2trend" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor="rgba(30,58,95,0.20)" />
-                        <stop offset="100%" stopColor="rgba(30,58,95,0.00)" />
-                      </linearGradient>
-                    </defs>
-                    <polyline
-                      points={trendPoints}
-                      fill="none"
-                      stroke="#0F2A4A"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  <div className="mt-2 grid grid-cols-6 text-xs text-text-muted">
-                    {(data.netCashFlow.trendLabels.length > 0
-                      ? data.netCashFlow.trendLabels
-                      : ["-", "-", "-", "-", "-", "-"]
-                    ).map((label) => (
-                      <span key={label}>{label}</span>
-                    ))}
-                  </div>
+                  {hasMonthlyTrend ? (
+                    <>
+                      <svg viewBox="0 0 100 34" className="h-28 w-full" aria-hidden="true">
+                        <defs>
+                          <linearGradient id="v2trend" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stopColor="rgba(30,58,95,0.20)" />
+                            <stop offset="100%" stopColor="rgba(30,58,95,0.00)" />
+                          </linearGradient>
+                        </defs>
+                        <polyline
+                          points={trendPoints}
+                          fill="none"
+                          stroke="#0F2A4A"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      <div className="mt-2 grid auto-cols-fr grid-flow-col text-xs text-text-muted">
+                        {data.netCashFlow.trendLabels.map((label, index) => (
+                          <span key={`${label}-${index}`}>{label}</span>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="grid h-28 place-items-center rounded-lg border border-app-border bg-white/70 text-xs text-text-muted">
+                      Not enough monthly trend data yet.
+                    </div>
+                  )}
                 </div>
               </div>
             </Card>
@@ -168,6 +173,7 @@ export default function DashboardV2({
                     const pctRaw =
                       category.budget > 0 ? (category.spent / category.budget) * 100 : 0;
                     const pct = Math.min(100, Math.max(0, pctRaw));
+                    const isOverBudget = pctRaw > 100;
                     return (
                       <div key={category.name} className="grid gap-1.5">
                         <div className="flex items-center justify-between gap-2 text-sm">
@@ -178,10 +184,15 @@ export default function DashboardV2({
                         </div>
                         <div className="h-1.5 overflow-hidden rounded-full bg-app-muted">
                           <div
-                            className={`h-full rounded-full ${pctRaw >= 100 ? "bg-status-danger" : pctRaw >= 85 ? "bg-status-warning" : "bg-status-success"}`}
+                            className={`h-full rounded-full ${isOverBudget ? "bg-status-danger" : pctRaw >= 85 ? "bg-status-warning" : "bg-status-success"}`}
                             style={{ width: `${pct}%` }}
                           />
                         </div>
+                        {isOverBudget ? (
+                          <p className="text-[11px] font-semibold text-status-danger">
+                            {Math.round(pctRaw)}% of budget
+                          </p>
+                        ) : null}
                       </div>
                     );
                   })}

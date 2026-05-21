@@ -68,8 +68,9 @@ export function createDashboardV2Data({ appData, selectedMonth = getCurrentMonth
     ? `As of ${monthDate.toLocaleString("en-US", { month: "short" })} ${monthDate.getFullYear()}`
     : "This month";
 
-  const trendValues = buildTrendValues(cashFlow, dashboardData);
-  const trendLabels = ["Income", "Spend", "Recurring", "Cards", "Cushion", "Cash"];
+  const monthlyTrend = normalizeMonthlyTrend(dashboardData.chartData?.monthlyTrend);
+  const trendValues = monthlyTrend.map((row) => row.total);
+  const trendLabels = monthlyTrend.map((row) => row.label);
 
   const selectedMonthRecentTransactions = dashboardData.recentTransactions
     .slice(0, 8)
@@ -162,17 +163,6 @@ export function createDashboardV2Data({ appData, selectedMonth = getCurrentMonth
   };
 }
 
-function buildTrendValues(cashFlow, dashboardData) {
-  return [
-    Math.max(0, Number(cashFlow.incomeTotal || 0)),
-    Math.max(0, Number(cashFlow.spendingTotal || 0)),
-    Math.max(0, Number(cashFlow.recurringRemaining || 0)),
-    Math.max(0, Number(dashboardData.summary.unpaidBalanceTotal || 0)),
-    Math.max(0, Math.abs(Number(cashFlow.plannedCashCushion || 0))),
-    Math.max(0, Number(cashFlow.cashPositionTotal || 0)),
-  ];
-}
-
 function calculateDeltaPct(incomeTotal, spendingTotal) {
   const baseline = Math.max(1, Number(spendingTotal || 0));
   const net = Number(incomeTotal || 0) - Number(spendingTotal || 0);
@@ -236,4 +226,20 @@ function parseMonthKey(monthKey) {
     .map(Number);
   if (!Number.isFinite(year) || !Number.isFinite(month)) return null;
   return new Date(year, month - 1, 1);
+}
+
+function normalizeMonthlyTrend(monthlyTrend) {
+  if (!Array.isArray(monthlyTrend)) return [];
+
+  return monthlyTrend
+    .map((row) => {
+      const monthKey = String(row?.month || "").trim();
+      const date = parseMonthKey(monthKey);
+      if (!date) return null;
+      return {
+        label: date.toLocaleString("en-US", { month: "short" }),
+        total: Number(row?.total || 0),
+      };
+    })
+    .filter(Boolean);
 }
