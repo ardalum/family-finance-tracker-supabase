@@ -16,25 +16,32 @@ export default function AppHeaderAccountSlot({
   onSpendingMonthChange,
   budgetMonth,
   onBudgetMonthChange,
+  balanceMonth,
+  onBalanceMonthChange,
 }) {
   const isDashboard = activeView === "dashboard";
   const isSpending = activeView === "spending";
   const isBudgets = activeView === "budgets";
+  const isCreditCards = activeView === "credit-cards";
   const activeMonth = isDashboard
     ? dashboardMonth
     : isSpending
       ? spendingMonth
       : isBudgets
         ? budgetMonth
-        : "";
+        : isCreditCards
+          ? balanceMonth
+          : "";
   const onMonthChange = isDashboard
     ? onDashboardMonthChange
     : isSpending
       ? onSpendingMonthChange
       : isBudgets
         ? onBudgetMonthChange
-        : null;
-  const actionLabel = isBudgets ? "Add budget" : "Add transaction";
+        : isCreditCards
+          ? onBalanceMonthChange
+          : null;
+  const actionLabel = isBudgets ? "Add budget" : isCreditCards ? "Add card" : "Add transaction";
   const showMonthControls = Boolean(activeMonth && onMonthChange);
   const monthOptions = showMonthControls ? buildMonthOptions(activeMonth) : [];
 
@@ -62,7 +69,13 @@ export default function AppHeaderAccountSlot({
               onChange={(event) => onMonthChange?.(event.target.value)}
               className="min-w-[130px] border-0 bg-transparent text-sm font-semibold text-text-main outline-none"
               aria-label={
-                isDashboard ? "Dashboard month" : isSpending ? "Transactions month" : "Budget month"
+                isDashboard
+                  ? "Dashboard month"
+                  : isSpending
+                    ? "Transactions month"
+                    : isBudgets
+                      ? "Budget month"
+                      : "Cards and debt month"
               }
             >
               {monthOptions.map((month) => (

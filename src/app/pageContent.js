@@ -4,8 +4,8 @@ export const pageContent = {
     description: "A clear view of cards, budget, spending, and bills.",
   },
   "credit-cards": {
-    title: "Credit Cards",
-    description: "Manage cards, monthly balances, due dates, and payment status.",
+    title: "Cards & Debt",
+    description: "Manage your cards, track balances, and pay down debt.",
   },
   budgets: {
     title: "Monthly Budget",

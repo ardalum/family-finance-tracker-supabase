@@ -784,6 +784,10 @@ function FinanceTrackerApp() {
       dispatchNavigation("budgets", "add-budget");
       return;
     }
+    if (activeView === "credit-cards") {
+      dispatchNavigation("credit-cards", "add-card");
+      return;
+    }
 
     openQuickAdd();
   }
@@ -829,6 +833,8 @@ function FinanceTrackerApp() {
       onSpendingMonthChange={setSelectedSpendingMonth}
       selectedBudgetMonth={selectedBudgetMonth}
       onBudgetMonthChange={setSelectedBudgetMonth}
+      selectedBalanceMonth={selectedBalanceMonth}
+      onBalanceMonthChange={setSelectedBalanceMonth}
       onViewChange={setActiveView}
       onQuickAdd={handlePrimaryHeaderAction}
     >
