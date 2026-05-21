@@ -80,8 +80,8 @@ const navigationItemByView = {
     iconVariant: "green",
   },
   savings: {
-    label: "Savings",
-    shortLabel: "Savings",
+    label: "Savings Goals",
+    shortLabel: "Goals",
     icon: PiggyBank,
     iconVariant: "lime",
   },
@@ -116,7 +116,7 @@ const navigationItemByView = {
     iconVariant: "amber",
   },
   "help-support": {
-    label: "Help",
+    label: "Help Center",
     shortLabel: "Help",
     icon: CircleHelp,
     iconVariant: "neutral",
@@ -134,19 +134,19 @@ const sectionConfig = [
     id: "planning",
     label: "PLANNING",
     defaultExpanded: false,
-    views: ["calendar", "financial-position", "net-worth"],
+    views: ["calendar", "savings", "net-worth"],
   },
   {
     id: "money-setup",
     label: "MONEY SETUP",
     defaultExpanded: false,
-    views: ["income", "savings", "accounts", "liabilities"],
+    views: ["income", "accounts", "liabilities"],
   },
   {
     id: "system",
     label: "SYSTEM",
     defaultExpanded: false,
-    views: ["backup", "app-settings", "privacy-policy", "help-support"],
+    views: ["app-settings", "help-support"],
   },
 ];
 

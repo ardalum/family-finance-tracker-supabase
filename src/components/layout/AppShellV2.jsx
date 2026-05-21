@@ -26,7 +26,7 @@ export default function AppShellV2({
             sidebarCollapsed ? "w-[94px]" : "w-[278px]"
           }`}
         >
-          <div className="sticky top-0 grid h-screen grid-rows-[auto_1fr_auto] gap-5 p-4">
+          <div className="sticky top-0 grid h-screen grid-rows-[auto_minmax(0,1fr)_auto] gap-4 p-4">
             <div className="grid gap-3 rounded-2xl border border-app-border bg-white p-3 shadow-[0_8px_22px_-18px_rgba(15,42,74,0.55)]">
               <div className="flex items-center gap-3">
                 <AppBrandMark />
@@ -69,7 +69,13 @@ export default function AppShellV2({
               </div>
             </div>
 
-            <NavigationV2 activeView={activeView} onChange={onViewChange} collapsed={sidebarCollapsed} />
+            <div className="min-h-0 overflow-y-auto pr-1">
+              <NavigationV2
+                activeView={activeView}
+                onChange={onViewChange}
+                collapsed={sidebarCollapsed}
+              />
+            </div>
 
             <div className="grid gap-2 rounded-2xl border border-app-border bg-white p-3 shadow-[0_8px_22px_-18px_rgba(15,42,74,0.45)]">
               {!sidebarCollapsed ? (
