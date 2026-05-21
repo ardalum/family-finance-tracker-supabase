@@ -503,33 +503,14 @@ export default function Savings({
         </Card>
       ) : null}
 
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="text-4xl font-semibold tracking-tight text-[#071F42]">Savings Goals</h2>
-          <p className="mt-1 text-sm text-[#667085]">
-            Track progress toward what matters most to your family.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => setShowContributionForm((current) => !current)}
-          >
-            {showContributionForm ? "Close contribution" : "Add contribution"}
-          </Button>
-          <Button
-            type="button"
-            onClick={() => {
-              setShowGoalForm((current) => !current);
-              requestAnimationFrame(() =>
-                addGoalRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
-              );
-            }}
-          >
-            Add goal
-          </Button>
-        </div>
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={() => setShowContributionForm((current) => !current)}
+        >
+          {showContributionForm ? "Close contribution" : "Add contribution"}
+        </Button>
       </div>
 
       <div className="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -804,7 +785,7 @@ export default function Savings({
         </Card>
       ) : null}
 
-      <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="grid min-w-0 gap-4 2xl:grid-cols-[minmax(0,1fr)_320px]">
         <div className="grid min-w-0 gap-4">
           <Card className="rounded-2xl border border-app-border bg-white p-0 shadow-sm">
             <div className="flex items-center justify-between border-b border-app-border px-4 py-4">
@@ -829,49 +810,43 @@ export default function Savings({
                 <EmptyState>No goals yet. Add your first goal to start tracking.</EmptyState>
               </div>
             ) : (
-              <div className="hidden min-w-0 xl:block">
-                <table className="w-full table-fixed border-collapse text-sm">
-                  <thead>
-                    <tr className="border-b border-app-border text-left text-xs font-semibold uppercase tracking-wide text-text-muted">
-                      <th className="w-[33%] px-4 py-3">Goal</th>
-                      <th className="w-[13%] px-2 py-3">Saved</th>
-                      <th className="w-[13%] px-2 py-3">Target</th>
-                      <th className="w-[22%] px-2 py-3">Progress</th>
-                      <th className="w-[15%] px-2 py-3">Status</th>
-                      <th className="w-[56px] px-2 py-3 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sortedGoalRows.map((row) => {
-                      const percent = row.percent;
-                      const progressBarClass =
-                        row.status === "At risk"
-                          ? "bg-[#EA7A0A]"
-                          : row.status === "Behind"
-                            ? "bg-[#DC2626]"
-                            : "bg-[#1D8E4B]";
-                      return (
-                        <tr key={row.id} className="border-b border-app-border align-middle last:border-b-0">
-                          <td className="px-4 py-3">
-                            <div className="flex items-start gap-3">
-                              <GoalIconBadge goal={row.goal} />
-                              <div className="min-w-0">
-                                <p className="truncate text-base font-semibold text-text-main">
-                                  {row.goal.name}
-                                </p>
-                                <p className="truncate text-sm text-text-muted">
-                                  {row.goal.notes || formatSavingsGoalTypeLabel(row.goal.goalType)}
-                                </p>
-                              </div>
+              <div className="hidden min-w-0 2xl:block">
+                <div className="border-b border-app-border px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-muted">
+                  <div className="grid items-center gap-3 [grid-template-columns:minmax(220px,1.5fr)_minmax(90px,.65fr)_minmax(90px,.65fr)_minmax(180px,1fr)_minmax(130px,.75fr)_44px]">
+                    <p>Goal</p>
+                    <p>Saved</p>
+                    <p>Target</p>
+                    <p>Progress</p>
+                    <p>Status</p>
+                    <p className="text-right">Actions</p>
+                  </div>
+                </div>
+                <div>
+                  {sortedGoalRows.map((row) => {
+                    const percent = row.percent;
+                    const progressBarClass =
+                      row.status === "At risk"
+                        ? "bg-[#EA7A0A]"
+                        : row.status === "Behind"
+                          ? "bg-[#DC2626]"
+                          : "bg-[#1D8E4B]";
+                    return (
+                      <div key={row.id} className="border-b border-app-border px-4 py-3 last:border-b-0">
+                        <div className="grid min-w-0 items-center gap-3 [grid-template-columns:minmax(220px,1.5fr)_minmax(90px,.65fr)_minmax(90px,.65fr)_minmax(180px,1fr)_minmax(130px,.75fr)_44px]">
+                          <div className="flex min-w-0 items-start gap-3">
+                            <GoalIconBadge goal={row.goal} />
+                            <div className="min-w-0">
+                              <p className="truncate text-base font-semibold text-text-main">{row.goal.name}</p>
+                              <p className="truncate text-sm text-text-muted">
+                                {row.goal.notes || formatSavingsGoalTypeLabel(row.goal.goalType)}
+                              </p>
                             </div>
-                          </td>
-                          <td className="px-2 py-3 font-semibold text-text-main">
-                            {formatCurrency(row.saved)}
-                          </td>
-                          <td className="px-2 py-3 font-semibold text-text-main">
+                          </div>
+                          <p className="min-w-0 text-sm font-semibold text-text-main">{formatCurrency(row.saved)}</p>
+                          <p className="min-w-0 text-sm font-semibold text-text-main">
                             {formatCurrency(row.goal.targetAmount || 0)}
-                          </td>
-                          <td className="px-2 py-3">
+                          </p>
+                          <div className="min-w-0">
                             <p className="text-sm font-semibold text-text-main">{percent}%</p>
                             <div className="mt-1 h-2 rounded-full bg-app-muted">
                               <div
@@ -879,74 +854,65 @@ export default function Savings({
                                 style={{ width: `${Math.max(0, Math.min(percent, 100))}%` }}
                               />
                             </div>
-                          </td>
-                          <td className="px-2 py-3">
+                          </div>
+                          <div className="min-w-0">
                             <GoalStatusBadge goal={{ ...row.goal, percent, status: row.status }} />
-                            <p className="mt-1 text-xs text-text-muted">{row.helperText}</p>
-                          </td>
-                          <td className="px-2 py-3 text-right">
-                            <div className="relative inline-block">
-                              <button
-                                type="button"
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-text-soft"
-                                onClick={() =>
-                                  setOpenGoalMenuId((current) =>
-                                    current === row.id ? "" : row.id,
-                                  )
-                                }
-                              >
-                                <MoreHorizontal size={16} />
-                              </button>
-                              {openGoalMenuId === row.id ? (
-                                <div className="absolute right-0 top-9 z-20 grid min-w-[140px] gap-1 rounded-xl border border-app-border bg-white p-1 shadow-lg">
-                                  <button
-                                    type="button"
-                                    className="rounded-lg px-3 py-2 text-left text-sm hover:bg-app-muted"
-                                    onClick={() => {
-                                      setEditingGoalId(row.id);
-                                      setShowGoalForm(true);
-                                      setGoalDraft(
-                                        normalizeSavingsGoalForm({
-                                          name: row.goal.name,
-                                          goalType: row.goal.goalType,
-                                          targetAmount: row.goal.targetAmount,
-                                          startingAmount: row.goal.startingAmount,
-                                          targetDate: row.goal.targetDate,
-                                          ownerProfileId: row.goal.ownerProfileId,
-                                          isActive: row.goal.isActive,
-                                          notes: row.goal.notes,
-                                        }),
-                                      );
-                                      setOpenGoalMenuId("");
-                                      requestAnimationFrame(() =>
-                                        addGoalRef.current?.scrollIntoView({
-                                          behavior: "smooth",
-                                          block: "start",
-                                        }),
-                                      );
-                                    }}
-                                  >
-                                    Edit
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="rounded-lg px-3 py-2 text-left text-sm text-status-dangerDark hover:bg-status-dangerBg"
-                                    onClick={() => {
-                                      handleDeleteGoal(row.id, row.goal.name);
-                                      setOpenGoalMenuId("");
-                                    }}
-                                  >
-                                    Delete
-                                  </button>
-                                </div>
-                              ) : null}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                            <p className="mt-1 truncate text-xs text-text-muted">{row.helperText}</p>
+                          </div>
+                          <div className="relative text-right">
+                            <button
+                              type="button"
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-text-soft"
+                              onClick={() => setOpenGoalMenuId((current) => (current === row.id ? "" : row.id))}
+                            >
+                              <MoreHorizontal size={16} />
+                            </button>
+                            {openGoalMenuId === row.id ? (
+                              <div className="absolute right-0 top-9 z-20 grid min-w-[140px] gap-1 rounded-xl border border-app-border bg-white p-1 text-left shadow-lg">
+                                <button
+                                  type="button"
+                                  className="rounded-lg px-3 py-2 text-left text-sm hover:bg-app-muted"
+                                  onClick={() => {
+                                    setEditingGoalId(row.id);
+                                    setShowGoalForm(true);
+                                    setGoalDraft(
+                                      normalizeSavingsGoalForm({
+                                        name: row.goal.name,
+                                        goalType: row.goal.goalType,
+                                        targetAmount: row.goal.targetAmount,
+                                        startingAmount: row.goal.startingAmount,
+                                        targetDate: row.goal.targetDate,
+                                        ownerProfileId: row.goal.ownerProfileId,
+                                        isActive: row.goal.isActive,
+                                        notes: row.goal.notes,
+                                      }),
+                                    );
+                                    setOpenGoalMenuId("");
+                                    requestAnimationFrame(() =>
+                                      addGoalRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+                                    );
+                                  }}
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  type="button"
+                                  className="rounded-lg px-3 py-2 text-left text-sm text-status-dangerDark hover:bg-status-dangerBg"
+                                  onClick={() => {
+                                    handleDeleteGoal(row.id, row.goal.name);
+                                    setOpenGoalMenuId("");
+                                  }}
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            ) : null}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             )}
 
@@ -1057,24 +1023,26 @@ export default function Savings({
               <p className="text-sm text-text-muted">{formatMonthLabel(selectedMonth)}</p>
             </div>
             <div className="mt-4 grid gap-3">
-              <div className="grid h-36 grid-cols-12 items-end gap-2 rounded-xl border border-app-border bg-app-background p-3">
+              <div className="h-40 rounded-xl border border-app-border bg-app-background p-3">
+                <div className="grid h-full grid-cols-12 items-end gap-2">
                 {trendRows.rows.map((row, index) => {
-                  const height = Math.max(
-                    (row.value / trendRows.maxValue) * 100,
-                    row.value > 0 ? 12 : 4,
-                  );
+                  const heightPercent =
+                    row.value > 0
+                      ? Math.max((row.value / trendRows.maxValue) * 100, 10)
+                      : 4;
                   return (
-                    <div key={row.monthKey} className="flex flex-col items-center gap-1">
-                      <span
+                    <div key={row.monthKey} className="flex h-full w-full items-end">
+                      <div
                         className={`w-full rounded-sm ${
                           index === trendRows.rows.length - 1 ? "bg-[#1D8E4B]" : "bg-[#93C5A8]"
                         }`}
-                        style={{ height: `${height}%` }}
+                        style={{ height: `${heightPercent}%` }}
                         title={`${formatMonthLabel(row.monthKey)}: ${formatCurrency(row.value)}`}
                       />
                     </div>
                   );
                 })}
+                </div>
               </div>
               <div className="flex items-center justify-between text-xs text-text-muted">
                 <span>{formatMonthLabel(trendRows.rows[0]?.monthKey || selectedMonth)}</span>
