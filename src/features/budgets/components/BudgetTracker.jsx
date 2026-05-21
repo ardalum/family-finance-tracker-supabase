@@ -377,21 +377,21 @@ function BudgetSummaryCards({ summary }) {
         const Icon = card.icon;
         return (
           <Card key={card.label} className="min-w-0 rounded-2xl border border-app-border bg-white p-4">
-            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
-              <div className="min-w-0">
+            <div className="grid min-w-0 gap-2">
+              <div className="flex min-w-0 items-start justify-between gap-3">
                 <p className="text-base font-medium text-text-main">{card.label}</p>
-                <p
-                  className={`mt-1 text-[clamp(1.55rem,2.25vw,2rem)] font-semibold leading-none ${card.valueTone}`}
+                <span
+                  className={`inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-full ${card.iconTone}`}
                 >
-                  {card.value}
-                </p>
-                <p className="mt-2 text-sm text-text-muted">{card.helper}</p>
+                  <Icon size={24} aria-hidden="true" />
+                </span>
               </div>
-              <span
-                className={`inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-full ${card.iconTone}`}
+              <p
+                className={`text-2xl font-semibold tracking-tight sm:text-[1.65rem] xl:text-[1.75rem] ${card.valueTone}`}
               >
-                <Icon size={24} aria-hidden="true" />
-              </span>
+                {card.value}
+              </p>
+              <p className="text-sm text-text-muted">{card.helper}</p>
             </div>
           </Card>
         );
