@@ -168,6 +168,25 @@ function GoalStatusBadge({ goal }) {
   );
 }
 
+function getGoalHelperText(saved, targetAmount) {
+  const target = Number(targetAmount || 0);
+  if (target <= 0) return "No target set";
+  if (saved > target) return `${formatCurrency(saved - target)} over target`;
+  if (saved === target) return "Target reached";
+  return `${formatCurrency(target - saved)} to go`;
+}
+
+function formatContributionDate(dateValue) {
+  if (!dateValue) return "";
+  const parsed = new Date(`${dateValue}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) return dateValue;
+  return parsed.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 function SummaryCard({ label, value, helper, icon, tone = "green" }) {
   const toneClasses =
     tone === "blue"
@@ -178,17 +197,17 @@ function SummaryCard({ label, value, helper, icon, tone = "green" }) {
 
   return (
     <Card className="rounded-2xl border border-[#E6E1D8] bg-white p-4 shadow-[0_1px_2px_rgba(16,24,40,0.06)]">
-      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-        <div>
-          <p className="text-sm font-medium text-[#071F42]">{label}</p>
-          <p className="mt-1 text-3xl font-semibold tracking-tight text-[#071F42]">{value}</p>
-          <p className="mt-1 text-sm text-[#667085]">{helper}</p>
-        </div>
+      <div className="flex items-center gap-3">
         <span
-          className={`inline-flex h-11 w-11 items-center justify-center rounded-full ${toneClasses}`}
+          className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${toneClasses}`}
         >
           {icon}
         </span>
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-[#071F42]">{label}</p>
+          <p className="mt-0.5 truncate text-[2rem] font-semibold tracking-tight text-[#071F42]">{value}</p>
+          <p className="mt-1 text-sm text-[#667085]">{helper}</p>
+        </div>
       </div>
     </Card>
   );
@@ -283,16 +302,19 @@ export default function Savings({
         const progress = calculateGoalProgress(goal, savingsContributions);
         const targetAmount = Number(goal.targetAmount || 0);
         const remaining = Math.max(targetAmount - saved, 0);
-        const percent = Number(progress.percent || 0);
+        const rawPercent = Number(progress.percent || 0);
+        const percent = Math.max(0, Math.min(rawPercent, 100));
         const status = getGoalStatus(goal, percent);
         return {
           id: goalId,
           goal,
           saved,
           progress,
+          rawPercent,
           percent,
           status,
           remaining,
+          helperText: getGoalHelperText(saved, targetAmount),
         };
       });
   }, [savingsContributions, savingsGoals]);
@@ -328,16 +350,20 @@ export default function Savings({
   }, [activeGoals]);
 
   const recentContributions = useMemo(() => {
-    return [...monthContributions].slice(0, 5).map((contribution) => {
+    return [...savingsContributions]
+      .sort((a, b) => String(b.contributionDate || "").localeCompare(String(a.contributionDate || "")))
+      .slice(0, 5)
+      .map((contribution) => {
       const goal = savingsGoals.find(
         (item) => (item.supabaseId ?? item.id) === contribution.savingsGoalId,
       );
       return {
         contribution,
-        goalName: goal?.name || "Unlinked goal",
+        goal: goal || { name: "Savings goal", goalType: "general" },
+        goalName: goal?.name || "Savings goal",
       };
     });
-  }, [monthContributions, savingsGoals]);
+  }, [savingsContributions, savingsGoals]);
 
   const milestones = useMemo(() => {
     return goalRows
@@ -371,7 +397,7 @@ export default function Savings({
         if (b.targetDate) return 1;
         return a.amountToMilestone - b.amountToMilestone;
       })
-      .slice(0, 4);
+      .slice(0, 3);
   }, [goalRows]);
 
   const onTrackOrCompleteCount = useMemo(
@@ -450,6 +476,22 @@ export default function Savings({
     const confirmed = window.confirm("Delete this savings contribution?");
     if (!confirmed) return;
     await onDeleteSavingsContribution(contributionId);
+  }
+
+  function startEditingContribution(contribution) {
+    setEditingContributionId(contribution.supabaseId ?? contribution.id);
+    setContributionDraft(
+      normalizeSavingsContributionForm({
+        savingsGoalId: contribution.savingsGoalId,
+        ownerProfileId: contribution.ownerProfileId,
+        contributionDate: contribution.contributionDate,
+        monthKey: contribution.monthKey,
+        amount: contribution.amount,
+        contributionType: contribution.contributionType,
+        notes: contribution.notes,
+      }),
+    );
+    setShowContributionForm(true);
   }
 
   return (
@@ -719,6 +761,46 @@ export default function Savings({
               </Button>
             </div>
           </form>
+          <div className="mt-4 border-t border-app-border pt-4">
+            <p className="text-sm font-semibold text-text-main">Manage contributions</p>
+            <div className="mt-2 grid gap-2">
+              {recentContributions.length === 0 ? (
+                <p className="text-sm text-text-muted">No contributions yet.</p>
+              ) : (
+                recentContributions.map(({ contribution, goalName }) => (
+                  <div
+                    key={`manage-${contribution.supabaseId ?? contribution.id}`}
+                    className="flex items-center justify-between gap-2 rounded-lg border border-app-border bg-app-background px-3 py-2"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-text-main">{goalName}</p>
+                      <p className="truncate text-xs text-text-muted">
+                        {formatContributionDate(contribution.contributionDate)} • {formatCurrency(contribution.amount)}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 gap-2">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        className="min-h-8 px-2.5 py-1 text-xs"
+                        onClick={() => startEditingContribution(contribution)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="danger"
+                        className="min-h-8 px-2.5 py-1 text-xs"
+                        onClick={() => handleDeleteContribution(contribution.supabaseId ?? contribution.id)}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
         </Card>
       ) : null}
 
@@ -747,17 +829,16 @@ export default function Savings({
                 <EmptyState>No goals yet. Add your first goal to start tracking.</EmptyState>
               </div>
             ) : (
-              <div className="hidden min-w-0 md:block">
+              <div className="hidden min-w-0 xl:block">
                 <table className="w-full table-fixed border-collapse text-sm">
                   <thead>
                     <tr className="border-b border-app-border text-left text-xs font-semibold uppercase tracking-wide text-text-muted">
-                      <th className="w-[31%] px-4 py-3">Goal</th>
-                      <th className="w-[12%] px-3 py-3">Saved</th>
-                      <th className="w-[12%] px-3 py-3">Target</th>
-                      <th className="w-[20%] px-3 py-3">Progress</th>
-                      <th className="w-[12%] px-3 py-3">Status</th>
-                      <th className="w-[10%] px-3 py-3">Remaining</th>
-                      <th className="w-[3%] px-3 py-3 text-right">Actions</th>
+                      <th className="w-[33%] px-4 py-3">Goal</th>
+                      <th className="w-[13%] px-2 py-3">Saved</th>
+                      <th className="w-[13%] px-2 py-3">Target</th>
+                      <th className="w-[22%] px-2 py-3">Progress</th>
+                      <th className="w-[15%] px-2 py-3">Status</th>
+                      <th className="w-[56px] px-2 py-3 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -784,13 +865,13 @@ export default function Savings({
                               </div>
                             </div>
                           </td>
-                          <td className="px-3 py-3 font-semibold text-text-main">
+                          <td className="px-2 py-3 font-semibold text-text-main">
                             {formatCurrency(row.saved)}
                           </td>
-                          <td className="px-3 py-3 font-semibold text-text-main">
+                          <td className="px-2 py-3 font-semibold text-text-main">
                             {formatCurrency(row.goal.targetAmount || 0)}
                           </td>
-                          <td className="px-3 py-3">
+                          <td className="px-2 py-3">
                             <p className="text-sm font-semibold text-text-main">{percent}%</p>
                             <div className="mt-1 h-2 rounded-full bg-app-muted">
                               <div
@@ -799,13 +880,11 @@ export default function Savings({
                               />
                             </div>
                           </td>
-                          <td className="px-3 py-3">
+                          <td className="px-2 py-3">
                             <GoalStatusBadge goal={{ ...row.goal, percent, status: row.status }} />
+                            <p className="mt-1 text-xs text-text-muted">{row.helperText}</p>
                           </td>
-                          <td className="px-3 py-3 text-sm font-medium text-text-muted">
-                            {formatCurrency(row.remaining)} to go
-                          </td>
-                          <td className="px-3 py-3 text-right">
+                          <td className="px-2 py-3 text-right">
                             <div className="relative inline-block">
                               <button
                                 type="button"
@@ -872,7 +951,7 @@ export default function Savings({
             )}
 
             {sortedGoalRows.length ? (
-              <div className="grid gap-3 p-4 md:hidden">
+              <div className="grid gap-3 p-4 xl:hidden">
                 {sortedGoalRows.map((row) => {
                   const percent = row.percent;
                   const progressBarClass =
@@ -924,7 +1003,7 @@ export default function Savings({
                         </div>
                       </div>
                       <div className="mt-2 flex items-center justify-between">
-                        <p className="text-xs text-text-muted">{formatCurrency(row.remaining)} to go</p>
+                        <p className="text-xs text-text-muted">{row.helperText}</p>
                         <div className="flex gap-2">
                           <Button
                             type="button"
@@ -1026,71 +1105,27 @@ export default function Savings({
             </div>
             <div className="mt-3 grid gap-2">
               {recentContributions.length === 0 ? (
-                <p className="text-sm text-text-muted">
-                  No contributions in {formatMonthLabel(selectedMonth)} yet.
-                </p>
+                <p className="text-sm text-text-muted">No recent contributions yet.</p>
               ) : (
-                recentContributions.map(({ contribution, goalName }) => {
+                recentContributions.map(({ contribution, goal, goalName }) => {
                   const contributionId = contribution.supabaseId ?? contribution.id;
                   return (
-                    <div
-                      key={contributionId}
-                      className="rounded-xl border border-app-border bg-app-background px-3 py-2"
-                    >
+                    <div key={contributionId} className="border-b border-app-border/80 pb-2 last:border-b-0 last:pb-0">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex min-w-0 items-start gap-2.5">
-                          <GoalIconBadge
-                            goal={
-                              savingsGoals.find(
-                                (goal) =>
-                                  (goal.supabaseId ?? goal.id) === contribution.savingsGoalId,
-                              ) || { name: goalName, goalType: "general" }
-                            }
-                          />
+                          <GoalIconBadge goal={goal} />
                           <div className="min-w-0">
                             <p className="truncate text-sm font-semibold text-text-main">
                               {goalName || "Savings goal"}
                             </p>
                             <p className="truncate text-xs text-text-muted">
-                              {contribution.contributionDate}
+                              {formatContributionDate(contribution.contributionDate)}
                             </p>
                           </div>
                         </div>
                         <p className="text-sm font-semibold text-[#1D8E4B]">
                           +{formatCurrency(contribution.amount)}
                         </p>
-                      </div>
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          className="min-h-8 px-2.5 py-1 text-xs"
-                          onClick={() => {
-                            setEditingContributionId(contributionId);
-                            setShowContributionForm(true);
-                            setContributionDraft(
-                              normalizeSavingsContributionForm({
-                                savingsGoalId: contribution.savingsGoalId,
-                                ownerProfileId: contribution.ownerProfileId,
-                                contributionDate: contribution.contributionDate,
-                                monthKey: contribution.monthKey,
-                                amount: contribution.amount,
-                                contributionType: contribution.contributionType,
-                                notes: contribution.notes,
-                              }),
-                            );
-                          }}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="danger"
-                          className="min-h-8 px-2.5 py-1 text-xs"
-                          onClick={() => handleDeleteContribution(contributionId)}
-                        >
-                          Delete
-                        </Button>
                       </div>
                     </div>
                   );
