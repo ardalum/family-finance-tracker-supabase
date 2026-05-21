@@ -372,7 +372,7 @@ function BudgetSummaryCards({ summary }) {
   ];
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-3">
       {cards.map((card) => {
         const Icon = card.icon;
         return (
@@ -380,8 +380,12 @@ function BudgetSummaryCards({ summary }) {
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-base font-medium text-text-main">{card.label}</p>
-                <p className={`mt-1 truncate text-[2rem] font-semibold leading-none ${card.valueTone}`}>{card.value}</p>
-                <p className="mt-2 truncate text-sm text-text-muted">{card.helper}</p>
+                <p
+                  className={`mt-1 text-[clamp(1.55rem,2.25vw,2rem)] font-semibold leading-none ${card.valueTone}`}
+                >
+                  {card.value}
+                </p>
+                <p className="mt-2 text-sm text-text-muted">{card.helper}</p>
               </div>
               <span className={`inline-flex h-14 w-14 items-center justify-center rounded-full ${card.iconTone}`}>
                 <Icon size={24} aria-hidden="true" />
