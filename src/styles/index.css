@@ -7,14 +7,14 @@
 :root {
   color-scheme: light;
   font-family: Manrope, ui-sans-serif, system-ui, sans-serif;
-  background: #f5f2eb;
-  color: #0e2238;
+  background: #fefdfb;
+  color: #111827;
 }
 
 body {
   margin: 0;
   min-width: 320px;
-  background: radial-gradient(circle at top right, #fdf8ef 0%, #f5f2eb 45%, #f2eee5 100%);
+  background: #fefdfb;
   overflow-x: hidden;
 }
 

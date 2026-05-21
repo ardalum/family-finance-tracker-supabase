@@ -51,7 +51,7 @@ export default function NavigationV2({
             disabled={isDisabled}
           >
             <Icon
-              size={18}
+              size={20}
               className={
                 isActive ? "text-white" : isDisabled ? "text-text-muted/70" : "text-text-soft"
               }

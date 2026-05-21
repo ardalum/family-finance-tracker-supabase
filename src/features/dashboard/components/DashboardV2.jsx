@@ -88,7 +88,7 @@ export default function DashboardV2({
               </div>
               <div className="grid gap-4 p-5">
                 {error ? (
-                  <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B]">
+                  <p className="rounded-xl border border-status-dangerBg bg-status-dangerBg px-3 py-2 text-sm text-status-dangerDark">
                     {error}
                   </p>
                 ) : null}
@@ -101,20 +101,20 @@ export default function DashboardV2({
                     +{data.netCashFlow.deltaPct}% {data.netCashFlow.comparisonLabel}
                   </p>
                 </div>
-                <div className="rounded-xl border border-app-border bg-app-background p-3">
+                <div className="rounded-xl border border-app-border bg-app-surfaceSoft p-3">
                   {hasMonthlyTrend ? (
                     <>
                       <svg viewBox="0 0 100 34" className="h-28 w-full" aria-hidden="true">
                         <defs>
                           <linearGradient id="v2trend" x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" stopColor="rgba(30,58,95,0.20)" />
-                            <stop offset="100%" stopColor="rgba(30,58,95,0.00)" />
+                            <stop offset="0%" stopColor="rgba(11,27,59,0.18)" />
+                            <stop offset="100%" stopColor="rgba(11,27,59,0.00)" />
                           </linearGradient>
                         </defs>
                         <polyline
                           points={trendPoints}
                           fill="none"
-                          stroke="#0F2A4A"
+                          stroke="#0B1B3B"
                           strokeWidth="1.8"
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -127,7 +127,7 @@ export default function DashboardV2({
                       </div>
                     </>
                   ) : (
-                    <div className="grid h-28 place-items-center rounded-lg border border-app-border bg-white/70 text-xs text-text-muted">
+                    <div className="grid h-28 place-items-center rounded-lg border border-app-border bg-app-surface text-xs text-text-muted">
                       Not enough monthly trend data yet.
                     </div>
                   )}
@@ -153,7 +153,7 @@ export default function DashboardV2({
                 <div
                   className="mx-auto grid h-40 w-40 place-items-center rounded-full"
                   style={{
-                    background: `conic-gradient(#22A06B ${(data.budgetHealth.onTrackPct / 100) * 360}deg, #EEE8DD 0deg)`,
+                    background: `conic-gradient(#22A06B ${(data.budgetHealth.onTrackPct / 100) * 360}deg, #F3F1EA 0deg)`,
                   }}
                 >
                   <div className="grid h-28 w-28 place-items-center rounded-full bg-white text-center">
@@ -165,7 +165,7 @@ export default function DashboardV2({
                 </div>
                 <div className="grid gap-2.5">
                   {data.budgetHealth.categories.length === 0 ? (
-                    <p className="rounded-xl border border-app-border bg-app-background px-3 py-2 text-sm text-text-muted">
+                    <p className="rounded-xl border border-app-border bg-app-surfaceSoft px-3 py-2 text-sm text-text-muted">
                       No budget data for this month.
                     </p>
                   ) : null}
@@ -190,7 +190,7 @@ export default function DashboardV2({
                         </div>
                         {isOverBudget ? (
                           <p className="text-[11px] font-semibold text-status-danger">
-                            {Math.round(pctRaw)}% of budget
+                            {pctRaw > 999 ? "999%+" : `${Math.round(pctRaw)}%`} of budget
                           </p>
                         ) : null}
                       </div>
@@ -207,14 +207,14 @@ export default function DashboardV2({
               </div>
               <div className="grid gap-3 p-5">
                 {data.upcomingBills.length === 0 ? (
-                  <p className="rounded-xl border border-app-border bg-app-background px-3 py-2 text-sm text-text-muted">
+                  <p className="rounded-xl border border-app-border bg-app-surfaceSoft px-3 py-2 text-sm text-text-muted">
                     No upcoming bills in this snapshot.
                   </p>
                 ) : null}
                 {data.upcomingBills.map((bill) => (
                   <article
                     key={`${bill.month}-${bill.day}-${bill.name}`}
-                    className="grid grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-app-border bg-app-background px-3 py-2.5"
+                    className="grid grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-app-border bg-app-surfaceSoft px-3 py-2.5"
                   >
                     <div className="grid h-10 w-10 place-items-center rounded-lg bg-app-surface text-center text-xs font-semibold text-text-soft ring-1 ring-app-border">
                       <span>{bill.month}</span>
@@ -259,7 +259,7 @@ export default function DashboardV2({
                   <div
                     className="mx-auto grid h-24 w-24 place-items-center rounded-full"
                     style={{
-                      background: `conic-gradient(#22A06B ${(data.cardsDebt.utilizationPct / 100) * 360}deg, #EEE8DD 0deg)`,
+                      background: `conic-gradient(#22A06B ${(data.cardsDebt.utilizationPct / 100) * 360}deg, #F3F1EA 0deg)`,
                     }}
                   >
                     <div className="grid h-16 w-16 place-items-center rounded-full bg-white text-sm font-semibold text-text-main">
@@ -267,7 +267,7 @@ export default function DashboardV2({
                     </div>
                   </div>
                 </div>
-                <div className="grid gap-2 rounded-xl border border-app-border bg-app-background p-3">
+                <div className="grid gap-2 rounded-xl border border-app-border bg-app-surfaceSoft p-3">
                   <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
                     Payment due
                   </p>
@@ -307,14 +307,14 @@ export default function DashboardV2({
               </div>
               <div className="grid gap-3 p-5">
                 {data.savingsGoals.length === 0 ? (
-                  <p className="rounded-xl border border-app-border bg-app-background px-3 py-2 text-sm text-text-muted">
+                  <p className="rounded-xl border border-app-border bg-app-surfaceSoft px-3 py-2 text-sm text-text-muted">
                     No active savings goals yet.
                   </p>
                 ) : null}
                 {data.savingsGoals.map((goal) => (
                   <article
                     key={goal.name}
-                    className="grid gap-2 rounded-xl border border-app-border bg-app-background p-3"
+                    className="grid gap-2 rounded-xl border border-app-border bg-app-surfaceSoft p-3"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-sm font-semibold text-text-main">{goal.name}</p>
@@ -346,14 +346,14 @@ export default function DashboardV2({
               </div>
               <div className="grid gap-3 p-5">
                 {data.alerts.length === 0 ? (
-                  <p className="rounded-xl border border-app-border bg-app-background px-3 py-2 text-sm text-text-muted">
+                  <p className="rounded-xl border border-app-border bg-app-surfaceSoft px-3 py-2 text-sm text-text-muted">
                     No alerts right now.
                   </p>
                 ) : null}
                 {data.alerts.map((alert) => (
                   <article
                     key={alert.title}
-                    className="rounded-xl border border-app-border bg-app-background p-3"
+                    className="rounded-xl border border-app-border bg-app-surfaceSoft p-3"
                   >
                     <p
                       className={`text-sm font-semibold ${alert.tone === "danger" ? "text-status-danger" : "text-status-warningDark"}`}
@@ -385,7 +385,7 @@ export default function DashboardV2({
             </div>
             <div className="grid gap-2 p-4">
               {data.recentTransactions.length === 0 ? (
-                <p className="rounded-xl border border-app-border bg-app-background px-3 py-2 text-sm text-text-muted">
+                <p className="rounded-xl border border-app-border bg-app-surfaceSoft px-3 py-2 text-sm text-text-muted">
                   No recent transactions for this month.
                 </p>
               ) : null}
@@ -394,7 +394,7 @@ export default function DashboardV2({
                 return (
                   <article
                     key={`${tx.merchant}-${tx.dateLabel}`}
-                    className="grid grid-cols-[34px_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-app-border bg-app-background px-3 py-2.5"
+                    className="grid grid-cols-[34px_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-app-border bg-app-surfaceSoft px-3 py-2.5"
                   >
                     <span className="grid h-8 w-8 place-items-center rounded-full bg-app-surface text-[11px] font-semibold text-text-soft ring-1 ring-app-border">
                       {tx.icon}
@@ -425,7 +425,7 @@ export default function DashboardV2({
               </span>
             </div>
             <div className="p-5">
-              <blockquote className="rounded-xl border border-[#EADFCF] bg-[#FBF5EA] px-4 py-3 text-sm italic text-text-soft">
+              <blockquote className="rounded-xl border border-app-border bg-app-surfaceSoft px-4 py-3 text-sm italic text-text-soft">
                 "{data.familyNote.quote}"
                 <footer className="mt-2 text-xs font-semibold not-italic text-text-muted">
                   - {data.familyNote.author}
@@ -445,7 +445,7 @@ export default function DashboardV2({
                   <button
                     key={action.label}
                     type="button"
-                    className="grid place-items-center gap-2 rounded-xl border border-app-border bg-app-background px-3 py-3 text-center transition hover:border-brand-primary/40 hover:bg-app-surface"
+                    className="grid place-items-center gap-2 rounded-xl border border-app-border bg-app-surfaceSoft px-3 py-3 text-center transition hover:border-brand-primary/40 hover:bg-app-surface"
                     onClick={() => runAction(action.label)}
                   >
                     <Icon size={18} aria-hidden="true" className="text-text-soft" />

@@ -3,17 +3,23 @@ import {
   CalendarDays,
   ChartNoAxesCombined,
   CircleHelp,
+  ClipboardList,
   CreditCard,
   DatabaseBackup,
   HandCoins,
+  House,
   Landmark,
+  LineChart,
   LayoutDashboard,
+  PieChart,
   PiggyBank,
   ReceiptText,
   Scale,
   Settings,
   ShieldCheck,
+  Target,
   TrendingUp,
+  Users,
   WalletCards,
 } from "lucide-react";
 import { primaryFinanceViewIds } from "../../app/secondaryViews.js";
@@ -164,14 +170,15 @@ export const groupedNavigationSections = sectionConfig.map((section) => ({
 }));
 
 export const dashboardV2SidebarItems = [
-  { id: "dashboard", label: "Overview", icon: LayoutDashboard, disabled: false },
-  { id: "budgets", label: "Budgets", icon: WalletCards, disabled: false },
+  { id: "dashboard", label: "Overview", icon: House, disabled: false },
+  { id: "budgets", label: "Budgets", icon: PieChart, disabled: false },
   { id: "credit-cards", label: "Cards & Debt", icon: CreditCard, disabled: false },
-  { id: "recurring", label: "Bills", icon: CalendarDays, disabled: false },
-  { id: "savings", label: "Goals", icon: PiggyBank, disabled: false },
-  { id: "insights", label: "Insights", icon: ChartNoAxesCombined, disabled: false },
-  { id: null, label: "Family Activity", icon: ActivitySquare, disabled: true },
+  { id: "recurring", label: "Bills", icon: ClipboardList, disabled: false },
+  { id: "savings", label: "Goals", icon: Target, disabled: false },
+  { id: "insights", label: "Insights", icon: LineChart, disabled: false },
+  { id: null, label: "Family Activity", icon: Users, disabled: true },
   { id: "app-settings", label: "Settings", icon: Settings, disabled: false },
+  { id: "help-support", label: "Help Center", icon: CircleHelp, disabled: false },
 ];
 
 export function getSectionIdByView(viewId) {
