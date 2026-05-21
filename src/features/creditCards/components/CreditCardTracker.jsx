@@ -53,6 +53,14 @@ function getUtilizationTone(utilization) {
   return "success";
 }
 
+function buildAccountDetailLine(card) {
+  const parts = [];
+  if (card.owner) parts.push(card.owner);
+  if (card.network) parts.push(card.network);
+  if (card.lastFour) parts.push(`**** ${card.lastFour}`);
+  return parts.join(" • ");
+}
+
 export default function CreditCardTracker({
   creditCards,
   cashAccounts = [],
@@ -92,7 +100,6 @@ export default function CreditCardTracker({
       ),
     [cashAccounts],
   );
-
   const ownerOptions = useMemo(
     () => Array.from(new Set(activeCards.map((card) => card.owner).filter(Boolean))).sort(),
     [activeCards],
@@ -102,12 +109,10 @@ export default function CreditCardTracker({
     setEditingCard(null);
     setIsCardModalOpen(true);
   }, []);
-
   const openEditModal = useCallback((card) => {
     setEditingCard(card);
     setIsCardModalOpen(true);
   }, []);
-
   const closeCardModal = useCallback(() => {
     setIsCardModalOpen(false);
     setEditingCard(null);
@@ -118,12 +123,10 @@ export default function CreditCardTracker({
       if (target === "add-card") openAddModal();
     }
     applyTarget(consumeNavigationTarget("credit-cards"));
-
     function handleNavigate(event) {
       if (event.detail?.view !== "credit-cards") return;
       applyTarget(event.detail?.target || "");
     }
-
     window.addEventListener(NAVIGATE_EVENT, handleNavigate);
     return () => window.removeEventListener(NAVIGATE_EVENT, handleNavigate);
   }, [openAddModal]);
@@ -132,7 +135,6 @@ export default function CreditCardTracker({
     function closeMenu() {
       setMenuState(null);
     }
-
     window.addEventListener("click", closeMenu);
     window.addEventListener("scroll", closeMenu, true);
     window.addEventListener("resize", closeMenu);
@@ -258,7 +260,6 @@ export default function CreditCardTracker({
 
   const hasPayoffInputs =
     summary.totalMinimumPayment > 0 && summaryRows.some((row) => Number(row.card.apr) > 0);
-
   const payoffEstimate = useMemo(() => {
     if (!hasPayoffInputs) return null;
     const totalBalance = Math.max(summary.totalBalance, 0);
@@ -284,7 +285,6 @@ export default function CreditCardTracker({
     },
     [onCreateCard, onUpdateCard, closeCardModal],
   );
-
   const handleDelete = useCallback(
     async (card) => {
       const linkedRecurringTemplates = getRecurringTemplatesLinkedToCard(recurringPayments, card.id);
@@ -307,7 +307,6 @@ export default function CreditCardTracker({
       balance: Number.isFinite(balance) ? balance : 0,
     });
   }
-
   function handlePaidChange(cardId, paid) {
     const currentEntry = monthBalances[cardId] ?? { balance: 0, paid: false };
     if (shouldOpenCardPaymentModal(currentEntry, paid)) {
@@ -327,30 +326,22 @@ export default function CreditCardTracker({
       paymentAccountId: "",
     });
   }
-
   function handleCheckedNoBalance(cardId) {
     const currentEntry = monthBalances[cardId] ?? { balance: 0, paid: false };
     onMonthlyBalanceChange(selectedBalanceMonth, cardId, { ...currentEntry, balance: 0, paid: true });
   }
-
   function handleResetNoBalance(cardId) {
     onMonthlyBalanceChange(selectedBalanceMonth, cardId, null);
   }
-
   function resetControls() {
     setFilters(DEFAULT_FILTERS);
     setSortMode("default");
     setPageSize("10");
   }
-
   function openMenu(event, cardId) {
     event.stopPropagation();
     const rect = event.currentTarget.getBoundingClientRect();
-    setMenuState({
-      cardId,
-      x: Math.max(rect.right - 170, 12),
-      y: rect.bottom + 6,
-    });
+    setMenuState({ cardId, x: Math.max(rect.right - 170, 12), y: rect.bottom + 6 });
   }
 
   const menuRow = pagination.rows.find((row) => row.card.id === menuState?.cardId) ?? null;
@@ -366,27 +357,22 @@ export default function CreditCardTracker({
           label="Total balance"
           value={formatCurrency(summary.totalBalance, { cents: true })}
           helper={`Across ${summary.activeCardCount} cards`}
-          icon={<CreditCard size={18} />}
+          icon={<CreditCard size={19} />}
           iconClassName="bg-[#E8F0FF] text-[#1E3A8A]"
         />
         <SummaryCard
           label="Credit utilization"
           value={`${Math.round(summary.utilizationPercent)}%`}
           helper={`${formatCurrency(summary.totalBalance, { cents: false })} of ${formatCurrency(summary.totalLimit, { cents: false })} limit`}
-          icon={<CreditCard size={18} />}
+          icon={<CreditCard size={19} />}
           iconClassName="bg-[#E8F0FF] text-[#1E3A8A]"
-          rightAdornment={
-            <ProgressRing
-              value={summary.utilizationPercent}
-              color={summary.utilizationPercent > 70 ? "#DC2626" : "#16A34A"}
-            />
-          }
+          rightAdornment={<ProgressRing value={summary.utilizationPercent} color="#16A34A" />}
         />
         <SummaryCard
           label="Due soon"
           value={formatCurrency(summary.dueSoonAmount, { cents: true })}
           helper="In the next 7 days"
-          icon={<CalendarClock size={18} />}
+          icon={<CalendarClock size={19} />}
           iconClassName="bg-[#FFF1EA] text-[#DD6B20]"
           valueClassName={summary.dueSoonAmount > 0 ? "text-status-warningDark" : ""}
         />
@@ -398,7 +384,7 @@ export default function CreditCardTracker({
               ? "Due across all accounts"
               : "Add minimum payment details to track this."
           }
-          icon={<Banknote size={18} />}
+          icon={<Banknote size={19} />}
           iconClassName="bg-[#E8F0FF] text-[#2563EB]"
         />
       </div>
@@ -501,20 +487,22 @@ export default function CreditCardTracker({
               <table className="w-full table-fixed border-collapse text-sm">
                 <thead>
                   <tr className="border-b border-app-border text-left text-xs font-semibold uppercase tracking-wide text-text-muted">
-                    <th className="w-[33%] px-5 py-3">Account</th>
+                    <th className="w-[30%] px-5 py-3">Account</th>
                     <th className="w-[10%] px-3 py-3">Balance</th>
                     <th className="w-[9%] px-3 py-3">Limit</th>
                     <th className="w-[8%] px-3 py-3">Utilization</th>
-                    <th className="w-[17%] px-3 py-3">Statement / Due</th>
+                    <th className="w-[13%] px-3 py-3">Statement closes</th>
+                    <th className="w-[10%] px-3 py-3">Payment due</th>
                     <th className="w-[8%] px-3 py-3">Minimum</th>
-                    <th className="w-[11%] px-3 py-3">Status</th>
-                    <th className="w-[4%] px-3 py-3 text-right">Actions</th>
+                    <th className="w-[9%] px-3 py-3">Status</th>
+                    <th className="w-[3%] px-3 py-3 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {pagination.rows.map((row) => {
                     const utilization = row.creditLimit > 0 ? (row.balance / row.creditLimit) * 100 : 0;
                     const rowEntry = monthBalances[row.card.id] ?? { balance: 0, paid: false };
+                    const detailLine = buildAccountDetailLine(row.card);
                     return (
                       <tr key={row.card.id} className="border-b border-app-border align-middle last:border-b-0">
                         <td className="px-5 py-3">
@@ -525,10 +513,9 @@ export default function CreditCardTracker({
                                 card={row.card}
                                 labelOptions={{ includeNetwork: false, includeLastFour: false }}
                               />
-                              <p className="truncate text-xs text-text-muted">
-                                {row.card.owner ? `${row.card.owner} • ` : ""}
-                                {row.card.network || "Card"} • **** {row.card.lastFour || "0000"}
-                              </p>
+                              {detailLine ? (
+                                <p className="truncate text-xs text-text-muted">{detailLine}</p>
+                              ) : null}
                             </div>
                           </div>
                         </td>
@@ -558,9 +545,7 @@ export default function CreditCardTracker({
                         </td>
                         <td className="px-3 py-3 text-sm text-text-soft">
                           <div className="grid gap-1">
-                            <p className="truncate">
-                              {row.closingDateText} / {row.dueDateText}
-                            </p>
+                            <p className="truncate">{row.closingDateText}</p>
                             <span
                               className={`w-fit rounded-md px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ${
                                 row.statementGenerated
@@ -572,6 +557,7 @@ export default function CreditCardTracker({
                             </span>
                           </div>
                         </td>
+                        <td className="truncate px-3 py-3 text-sm text-text-main">{row.dueDateText}</td>
                         <td className="truncate px-3 py-3 text-sm text-text-main">
                           {row.minPayment > 0 ? formatCurrency(row.minPayment, { cents: true }) : "--"}
                         </td>
@@ -598,6 +584,7 @@ export default function CreditCardTracker({
             <div className="grid gap-3 p-4 lg:hidden">
               {pagination.rows.map((row) => {
                 const utilization = row.creditLimit > 0 ? (row.balance / row.creditLimit) * 100 : 0;
+                const detailLine = buildAccountDetailLine(row.card);
                 return (
                   <article key={row.card.id} className="rounded-2xl border border-app-border bg-white p-3">
                     <div className="flex min-w-0 items-start justify-between gap-2">
@@ -609,10 +596,9 @@ export default function CreditCardTracker({
                             labelOptions={{ includeNetwork: false, includeLastFour: false }}
                           />
                         </div>
-                        <p className="mt-1 truncate text-xs text-text-muted">
-                          {row.card.owner ? `${row.card.owner} • ` : ""}
-                          {row.card.network || "Card"} • **** {row.card.lastFour || "0000"}
-                        </p>
+                        {detailLine ? (
+                          <p className="mt-1 truncate text-xs text-text-muted">{detailLine}</p>
+                        ) : null}
                       </div>
                       <button
                         type="button"
@@ -629,13 +615,15 @@ export default function CreditCardTracker({
                       <Metric label="Limit" value={formatCurrency(row.creditLimit, { cents: false })} />
                       <Metric label="Utilization" value={<UtilizationCompact utilization={utilization} compact />} />
                       <Metric label="Minimum" value={row.minPayment > 0 ? formatCurrency(row.minPayment, { cents: true }) : "--"} />
-                      <Metric label="Statement / Due" value={`${row.closingDateText} / ${row.dueDateText}`} />
+                      <Metric label="Statement closes" value={row.closingDateText} />
+                      <Metric label="Payment due" value={row.dueDateText} />
                       <Metric
                         label="Cycle"
                         value={row.statementGenerated ? "Generated" : "Not yet"}
                         badge={row.statementGenerated ? "success" : "muted"}
                       />
                     </div>
+
                     {editingBalanceCardId === row.card.id ? (
                       <div className="mt-3">
                         <label className="text-xs font-medium text-text-muted">Edit balance</label>
@@ -707,7 +695,6 @@ export default function CreditCardTracker({
               <Pencil size={16} />
             </span>
           </div>
-
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             <label className="grid gap-1 text-sm font-medium text-text-soft">
               Extra monthly payment
@@ -733,7 +720,6 @@ export default function CreditCardTracker({
               </p>
             </div>
           </div>
-
           {payoffEstimate ? (
             <div className="mt-4 grid gap-2 text-sm text-text-main">
               <BarEstimate label="Current plan" months={payoffEstimate.currentMonths} />
@@ -891,15 +877,17 @@ function SummaryCard({
   iconClassName = "",
 }) {
   return (
-    <div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-app-border bg-white p-4 shadow-sm">
+    <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-app-border bg-white p-4 shadow-sm">
       <span
-        className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${iconClassName}`}
+        className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${iconClassName}`}
       >
         {icon}
       </span>
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <p className="text-sm font-medium text-text-muted">{label}</p>
-        <p className={`mt-0.5 text-2xl font-semibold tracking-tight text-text-main ${valueClassName}`}>{value}</p>
+        <p className={`mt-0.5 text-[1.65rem] font-semibold tracking-tight text-text-main ${valueClassName}`}>
+          {value}
+        </p>
         <p className="mt-0.5 text-sm text-text-muted">{helper}</p>
       </div>
       {rightAdornment ? <div className="shrink-0">{rightAdornment}</div> : null}
