@@ -14,11 +14,27 @@ export default function AppHeaderAccountSlot({
   onDashboardMonthChange,
   spendingMonth,
   onSpendingMonthChange,
+  budgetMonth,
+  onBudgetMonthChange,
 }) {
   const isDashboard = activeView === "dashboard";
   const isSpending = activeView === "spending";
-  const activeMonth = isDashboard ? dashboardMonth : isSpending ? spendingMonth : "";
-  const onMonthChange = isDashboard ? onDashboardMonthChange : isSpending ? onSpendingMonthChange : null;
+  const isBudgets = activeView === "budgets";
+  const activeMonth = isDashboard
+    ? dashboardMonth
+    : isSpending
+      ? spendingMonth
+      : isBudgets
+        ? budgetMonth
+        : "";
+  const onMonthChange = isDashboard
+    ? onDashboardMonthChange
+    : isSpending
+      ? onSpendingMonthChange
+      : isBudgets
+        ? onBudgetMonthChange
+        : null;
+  const actionLabel = isBudgets ? "Add budget" : "Add transaction";
   const showMonthControls = Boolean(activeMonth && onMonthChange);
   const monthOptions = showMonthControls ? buildMonthOptions(activeMonth) : [];
 
@@ -45,7 +61,9 @@ export default function AppHeaderAccountSlot({
               value={activeMonth}
               onChange={(event) => onMonthChange?.(event.target.value)}
               className="min-w-[130px] border-0 bg-transparent text-sm font-semibold text-text-main outline-none"
-              aria-label={isDashboard ? "Dashboard month" : "Transactions month"}
+              aria-label={
+                isDashboard ? "Dashboard month" : isSpending ? "Transactions month" : "Budget month"
+              }
             >
               {monthOptions.map((month) => (
                 <option key={month} value={month}>
@@ -89,10 +107,10 @@ export default function AppHeaderAccountSlot({
         type="button"
         className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-brand-primary px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
         onClick={onQuickAdd}
-        aria-label="Add transaction"
+        aria-label={actionLabel}
       >
         <Plus size={16} aria-hidden="true" />
-        <span className="hidden sm:inline">Add transaction</span>
+        <span className="hidden sm:inline">{actionLabel}</span>
       </button>
 
       <div className="lg:hidden">

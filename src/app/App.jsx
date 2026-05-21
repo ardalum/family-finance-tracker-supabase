@@ -43,6 +43,7 @@ import { householdHasFinanceData } from "../features/setup/setupService.js";
 import { useSpendingCategories } from "../features/spending/useSpendingCategories.js";
 import { useSpendingTransactions } from "../features/spending/useSpendingTransactions.js";
 import { getAlerts, getDashboardData } from "../features/dashboard/dashboardUtils.js";
+import { dispatchNavigation } from "../lib/navigationTargets.js";
 
 export default function App() {
   return (
@@ -778,6 +779,15 @@ function FinanceTrackerApp() {
     setQuickAddOpen(true);
   }
 
+  function handlePrimaryHeaderAction() {
+    if (activeView === "budgets") {
+      dispatchNavigation("budgets", "add-budget");
+      return;
+    }
+
+    openQuickAdd();
+  }
+
   function closeQuickAdd() {
     if (spendingSaving) return;
     setQuickAddOpen(false);
@@ -817,8 +827,10 @@ function FinanceTrackerApp() {
       onDashboardMonthChange={setSelectedDashboardMonth}
       selectedSpendingMonth={selectedSpendingMonth}
       onSpendingMonthChange={setSelectedSpendingMonth}
+      selectedBudgetMonth={selectedBudgetMonth}
+      onBudgetMonthChange={setSelectedBudgetMonth}
       onViewChange={setActiveView}
-      onQuickAdd={openQuickAdd}
+      onQuickAdd={handlePrimaryHeaderAction}
     >
       <AppViewRenderer activeView={activeView} {...appViewProps} />
       <QuickAddTransactionModal

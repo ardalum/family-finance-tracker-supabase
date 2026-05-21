@@ -16,6 +16,8 @@ export default function AppShellFrame({
   onDashboardMonthChange,
   selectedSpendingMonth,
   onSpendingMonthChange,
+  selectedBudgetMonth,
+  onBudgetMonthChange,
   onViewChange,
   onQuickAdd,
   children,
@@ -36,6 +38,8 @@ export default function AppShellFrame({
         onDashboardMonthChange={onDashboardMonthChange}
         spendingMonth={selectedSpendingMonth}
         onSpendingMonthChange={onSpendingMonthChange}
+        budgetMonth={selectedBudgetMonth}
+        onBudgetMonthChange={onBudgetMonthChange}
       />
     ),
   };
