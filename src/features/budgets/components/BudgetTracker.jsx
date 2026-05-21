@@ -21,7 +21,6 @@ import {
 } from "../../spending/spendingService.js";
 import { listTransactions } from "../../spending/spendingSupabaseService.js";
 import { consumeNavigationTarget, NAVIGATE_EVENT } from "../../../lib/navigationTargets.js";
-import BudgetMigrationPanel from "./BudgetMigrationPanel.jsx";
 import BudgetModal from "./BudgetModal.jsx";
 import BudgetTable from "./BudgetTable.jsx";
 import { getTotalMonthlyBudget } from "../budgetsService.js";
@@ -37,7 +36,6 @@ const ROW_FILTER_OPTIONS = [
 export default function BudgetTracker({
   budgets,
   transactions = null,
-  localBudgetsByMonth,
   selectedMonth = getCurrentMonthKey(),
   loading = false,
   error = "",
@@ -48,7 +46,6 @@ export default function BudgetTracker({
   onDeleteBudget,
   onAddDefaultBudgets,
   onCopyPreviousMonthBudgets,
-  onImportLocalBudgets,
 }) {
   const { activeHouseholdId } = useHouseholds();
   const [editingBudget, setEditingBudget] = useState(null);
@@ -164,14 +161,6 @@ export default function BudgetTracker({
           {transactionsError}
         </div>
       ) : null}
-
-      <BudgetMigrationPanel
-        localBudgetsByMonth={localBudgetsByMonth}
-        supabaseBudgets={budgets}
-        selectedMonth={selectedMonth}
-        onImport={onImportLocalBudgets}
-        disabled={loading || isSaving}
-      />
 
       <div className="grid gap-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
