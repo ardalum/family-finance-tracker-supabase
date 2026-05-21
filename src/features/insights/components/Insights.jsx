@@ -32,6 +32,7 @@ import {
   getBudgetVsActualRows,
   getBudgetInsights,
   getMonthlyTrendRows,
+  splitCompositionRowsIntoColumns,
   getTopCategories,
   getTopMerchants,
   getTransactionTypeMixRows,
@@ -76,6 +77,7 @@ export default function Insights({
   liabilityReviewConfirmed = false,
 }) {
   const [netWorthRangeMonths, setNetWorthRangeMonths] = useState("6");
+  const [showDetailedReports, setShowDetailedReports] = useState(false);
   const data = useMemo(() => getDashboardData(appData, selectedMonth), [appData, selectedMonth]);
 
   const budgetInsights = useMemo(() => getBudgetInsights(data.budgetRows), [data.budgetRows]);
@@ -354,15 +356,13 @@ export default function Insights({
 
   return (
     <section className="grid gap-6">
-      {!hasInsightData ? <InsightsEmptyState selectedMonth={selectedMonth} /> : null}
-      {(loading || error) ? (
-        <Card className="rounded-2xl border border-app-border bg-white p-4">
-          {loading ? <p className="text-sm text-text-muted">Loading insights...</p> : null}
-          {error ? <p className="text-sm font-medium text-status-danger">{error}</p> : null}
-        </Card>
-      ) : null}
-
-      <div className="flex justify-end">
+      <div className="flex items-center justify-end gap-3">
+        {loading ? <p className="text-xs text-text-muted">Loading insights…</p> : null}
+        {error ? (
+          <p className="rounded-lg border border-status-danger/30 bg-status-danger/10 px-2.5 py-1 text-xs font-medium text-status-danger">
+            {error}
+          </p>
+        ) : null}
         <p className="inline-flex items-center gap-1 text-sm text-text-muted">
           Data refreshed recently <Info size={14} />
         </p>
@@ -446,41 +446,49 @@ export default function Insights({
             Spending breakdown <Info size={15} className="text-text-muted" />
           </h3>
           <p className="mt-1 text-sm text-text-muted">Where your money went this month</p>
-          <div className="mt-4 flex h-3 overflow-hidden rounded-full bg-app-muted">
-            {spendingBreakdownRows.map((row, index) => (
-              <span
-                key={row.id}
-                style={{
-                  width: `${Math.max(calculateSharePercent(row.value, spendingBreakdownTotal), 3)}%`,
-                  backgroundColor: categoryColors[index % categoryColors.length],
-                }}
-              />
-            ))}
-          </div>
-          <div className="mt-4 grid gap-1.5">
-            <div className="grid grid-cols-[1fr_auto_auto] text-xs font-semibold uppercase tracking-wide text-text-muted">
-              <span>Category</span>
-              <span>Amount</span>
-              <span>% of total</span>
+          {spendingBreakdownRows.length === 0 ? (
+            <div className="mt-6 rounded-xl border border-dashed border-app-border bg-app-background p-4 text-sm text-text-muted">
+              No category spending yet.
             </div>
-            {spendingBreakdownRows.map((row, index) => (
-              <div key={`breakdown-${row.id}`} className="grid grid-cols-[1fr_auto_auto] items-center gap-2 text-sm">
-                <p className="inline-flex min-w-0 items-center gap-2 text-text-main">
-                  <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: categoryColors[index % categoryColors.length] }} />
-                  <span className="truncate">{row.label}</span>
-                </p>
-                <p className="font-medium text-[#071F42]">{formatCurrency(row.value)}</p>
-                <p className="font-medium text-text-muted">{calculateSharePercent(row.value, spendingBreakdownTotal).toFixed(0)}%</p>
+          ) : (
+            <>
+              <div className="mt-4 flex h-3 overflow-hidden rounded-full bg-app-muted">
+                {spendingBreakdownRows.map((row, index) => (
+                  <span
+                    key={row.id}
+                    style={{
+                      width: `${Math.max(calculateSharePercent(row.value, spendingBreakdownTotal), 3)}%`,
+                      backgroundColor: categoryColors[index % categoryColors.length],
+                    }}
+                  />
+                ))}
               </div>
-            ))}
-            <div className="mt-2 border-t border-app-border pt-2">
-              <div className="grid grid-cols-[1fr_auto_auto] text-sm font-semibold text-[#071F42]">
-                <span>Total</span>
-                <span>{formatCurrency(Number(data.summary.spendingTotal || 0))}</span>
-                <span>100%</span>
+              <div className="mt-4 grid gap-1.5">
+                <div className="grid grid-cols-[minmax(0,1fr)_110px_80px] items-center gap-3 text-xs font-semibold uppercase tracking-wide text-text-muted">
+                  <span>Category</span>
+                  <span className="text-right">Amount</span>
+                  <span className="text-right">% of total</span>
+                </div>
+                {spendingBreakdownRows.map((row, index) => (
+                  <div key={`breakdown-${row.id}`} className="grid grid-cols-[minmax(0,1fr)_110px_80px] items-center gap-3 text-sm">
+                    <p className="inline-flex min-w-0 items-center gap-2 text-text-main">
+                      <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: categoryColors[index % categoryColors.length] }} />
+                      <span className="truncate">{row.label}</span>
+                    </p>
+                    <p className="text-right font-medium text-[#071F42]">{formatCurrency(row.value)}</p>
+                    <p className="text-right font-medium text-text-muted">{calculateSharePercent(row.value, spendingBreakdownTotal).toFixed(0)}%</p>
+                  </div>
+                ))}
+                <div className="mt-2 border-t border-app-border pt-2">
+                  <div className="grid grid-cols-[minmax(0,1fr)_110px_80px] items-center gap-3 text-sm font-semibold text-[#071F42]">
+                    <span>Total</span>
+                    <span className="text-right">{formatCurrency(Number(data.summary.spendingTotal || 0))}</span>
+                    <span className="text-right">100%</span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
+            </>
+          )}
         </Card>
 
         <Card className="rounded-2xl border border-[#E6E1D8] bg-white p-5">
@@ -515,21 +523,22 @@ export default function Insights({
           <h3 className="inline-flex items-center gap-2 text-2xl font-semibold tracking-tight text-[#071F42]">
             Month-over-month comparison <Info size={15} className="text-text-muted" />
           </h3>
-          <div className="mt-4 overflow-hidden rounded-xl border border-app-border">
-            <table className="w-full text-sm">
+          <div className="mt-4 overflow-x-auto rounded-xl border border-app-border">
+            <table className="min-w-[520px] w-full text-sm">
               <thead className="bg-app-background text-text-muted">
                 <tr>
                   <th className="px-3 py-2 text-left font-medium">Metric</th>
                   <th className="px-3 py-2 text-right font-medium">{formatMonthLabel(previousMonthKey)}</th>
                   <th className="px-3 py-2 text-right font-medium">{formatMonthLabel(selectedMonth)}</th>
+                  <th className="px-3 py-2 text-right font-medium">Change</th>
                 </tr>
               </thead>
               <tbody>
-                <ComparisonRow label="Total spending" current={Number(data.summary.spendingTotal || 0)} previous={Number(previousMonthData.summary.spendingTotal || 0)} />
-                <ComparisonRow label="Needs" current={groupCategorySpend.needs} previous={previousGroupCategorySpend.needs} />
-                <ComparisonRow label="Wants" current={groupCategorySpend.wants} previous={previousGroupCategorySpend.wants} />
-                <ComparisonRow label="Savings & Investments" current={groupCategorySpend.savings} previous={previousGroupCategorySpend.savings} />
-                <ComparisonRow label="Net cash flow" current={netCashFlow} previous={Number(previousMonthData.summary.incomeTotal || 0) - Number(previousMonthData.summary.spendingTotal || 0)} />
+                <ComparisonRow label="Total spending" current={Number(data.summary.spendingTotal || 0)} previous={Number(previousMonthData.summary.spendingTotal || 0)} trend="lower-better" />
+                <ComparisonRow label="Needs" current={groupCategorySpend.needs} previous={previousGroupCategorySpend.needs} trend="lower-better" />
+                <ComparisonRow label="Wants" current={groupCategorySpend.wants} previous={previousGroupCategorySpend.wants} trend="lower-better" />
+                <ComparisonRow label="Savings & Investments" current={groupCategorySpend.savings} previous={previousGroupCategorySpend.savings} trend="higher-better" />
+                <ComparisonRow label="Net cash flow" current={netCashFlow} previous={Number(previousMonthData.summary.incomeTotal || 0) - Number(previousMonthData.summary.spendingTotal || 0)} trend="higher-better" />
               </tbody>
             </table>
           </div>
@@ -591,11 +600,16 @@ export default function Insights({
         </Card>
       </section>
 
-      <details className="rounded-2xl border border-app-border bg-white p-4">
-        <summary className="cursor-pointer list-none text-sm font-semibold text-brand-primary">
-          Detailed reports
-        </summary>
-        <div className="mt-4 grid gap-6">
+      <Card className="rounded-2xl border border-app-border bg-white p-4">
+        <button
+          type="button"
+          className="text-sm font-semibold text-brand-primary"
+          onClick={() => setShowDetailedReports((current) => !current)}
+        >
+          {showDetailedReports ? "Hide detailed reports" : "Show detailed reports"}
+        </button>
+        {showDetailedReports ? (
+          <div className="mt-4 grid gap-6">
 
       <section className="grid gap-6 xl:grid-cols-2">
         <Card className="overflow-hidden">
@@ -1005,13 +1019,23 @@ export default function Insights({
           </div>
         </Card>
       </section>
-        </div>
-      </details>
+          </div>
+        ) : null}
+      </Card>
     </section>
   );
 }
 
 function Sparkline({ values, tone = "green" }) {
+  const safeValues = values ?? [];
+  const hasPositive = safeValues.some((value) => Number(value || 0) > 0);
+  if (!hasPositive) {
+    return (
+      <div className="mt-3 flex h-16 items-center justify-center rounded-lg border border-dashed border-app-border bg-app-background text-xs text-text-muted">
+        No trend data yet
+      </div>
+    );
+  }
   const points = (values ?? []).map((value, index) => ({
     x: index,
     y: Number(value || 0),
@@ -1036,6 +1060,16 @@ function Sparkline({ values, tone = "green" }) {
 }
 
 function DualLineMiniChart({ currentRows = [], previousRows = [] }) {
+  const hasCurrentData = currentRows.some((row) => Number(row.value || 0) > 0);
+  const hasPreviousData = previousRows.some((row) => Number(row.value || 0) > 0);
+  if (!hasCurrentData && !hasPreviousData) {
+    return (
+      <div className="mt-4">
+        <div className="h-44 rounded-lg border border-dashed border-app-border bg-app-background" />
+        <p className="mt-2 text-xs text-text-muted">No monthly trend data yet.</p>
+      </div>
+    );
+  }
   const maxValue = Math.max(
     1,
     ...currentRows.map((row) => Number(row.value || 0)),
@@ -1072,13 +1106,26 @@ function DualLineMiniChart({ currentRows = [], previousRows = [] }) {
   );
 }
 
-function ComparisonRow({ label, previous, current }) {
+function ComparisonRow({ label, previous, current, trend = "lower-better" }) {
   const delta = Number(current || 0) - Number(previous || 0);
+  const isPositive = delta > 0;
+  const toneClass =
+    delta === 0
+      ? "text-text-muted"
+      : trend === "higher-better"
+        ? isPositive
+          ? "text-status-success"
+          : "text-status-danger"
+        : isPositive
+          ? "text-status-danger"
+          : "text-status-success";
+  const deltaLabel = `${delta > 0 ? "+" : ""}${formatCurrency(delta)}`;
   return (
     <tr className="border-t border-app-border">
       <td className="px-3 py-2 text-text-main">{label}</td>
       <td className="px-3 py-2 text-right font-medium text-[#071F42]">{formatCurrency(previous || 0)}</td>
       <td className="px-3 py-2 text-right font-medium text-[#071F42]">{formatCurrency(current || 0)}</td>
+      <td className={`px-3 py-2 text-right font-semibold ${toneClass}`}>{deltaLabel}</td>
     </tr>
   );
 }
