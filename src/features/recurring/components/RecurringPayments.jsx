@@ -2,8 +2,10 @@ import { Fragment, useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
   ArrowDownUp,
+  Calendar,
   CheckCircle2,
   ChevronDown,
+  ChevronLeft,
   ChevronRight,
   Clock3,
   CreditCard,
@@ -13,6 +15,7 @@ import {
   MoreHorizontal,
   Receipt,
   RotateCcw,
+  X,
 } from "lucide-react";
 import LinkedCardName from "../../../components/shared/LinkedCardName.jsx";
 import LinkedRecurringBillName from "../../../components/shared/LinkedRecurringBillName.jsx";
@@ -83,15 +86,30 @@ function buildCalendarCells(monthKey) {
   const [year, month] = monthKey.split("-").map(Number);
   const firstDay = new Date(year, month - 1, 1).getDay();
   const daysInMonth = new Date(year, month, 0).getDate();
+  const previousMonthDays = new Date(year, month - 1, 0).getDate();
   const cells = [];
-  for (let i = 0; i < firstDay; i += 1) cells.push({ day: "", dateKey: "" });
+
+  for (let i = firstDay - 1; i >= 0; i -= 1) {
+    const day = previousMonthDays - i;
+    const date = new Date(year, month - 2, day);
+    cells.push({ day, dateKey: toDateKey(date), muted: true });
+  }
+
   for (let day = 1; day <= daysInMonth; day += 1) {
     cells.push({
       day,
       dateKey: `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
+      muted: false,
     });
   }
-  while (cells.length % 7 !== 0) cells.push({ day: "", dateKey: "" });
+
+  let nextMonthDay = 1;
+  while (cells.length % 7 !== 0) {
+    const date = new Date(year, month, nextMonthDay);
+    cells.push({ day: nextMonthDay, dateKey: toDateKey(date), muted: true });
+    nextMonthDay += 1;
+  }
+
   return cells;
 }
 
@@ -406,11 +424,19 @@ export default function RecurringPayments({
       {categoriesError ? <InlineAlert>{categoriesError}</InlineAlert> : null}
       {monthlyBalancesError ? <InlineAlert>{monthlyBalancesError}</InlineAlert> : null}
 
-      <div className="grid min-w-0 gap-3 sm:grid-cols-2 min-[1800px]:grid-cols-4">
-        <SummaryCard label="Monthly bills total" value={formatCurrency(summary.total, { cents: true })} helper={`Across ${summary.totalCount} bills`} icon={<FileText size={18} />} tone="bg-[#EAF8EF] text-[#1D8E4B]" />
-        <SummaryCard label="Paid" value={formatCurrency(summary.paidTotal, { cents: true })} helper={`${summary.paidCount} bills`} icon={<CheckCircle2 size={18} />} tone="bg-[#EAF8EF] text-[#1D8E4B]" />
-        <SummaryCard label="Upcoming" value={formatCurrency(summary.upcomingTotal, { cents: true })} helper={`${summary.upcomingCount} bills`} icon={<Clock3 size={18} />} tone="bg-[#FFF4E5] text-[#EA7A0A]" />
-        <SummaryCard label="Past due" value={formatCurrency(summary.pastDueTotal, { cents: true })} helper={`${summary.pastDueCount} bills`} icon={<AlertTriangle size={18} />} tone="bg-[#FEECEC] text-[#DC2626]" />
+      <div className="grid min-w-0 gap-4 xl:grid-cols-[260px_minmax(0,1fr)] xl:items-start">
+        <div className="min-w-0">
+          <h2 className="text-5xl font-semibold tracking-tight text-[#071F42]">Bills</h2>
+          <p className="mt-2 max-w-[240px] text-[1.55rem] leading-8 text-[#667085]">
+            Stay on top of what's due and never miss a payment.
+          </p>
+        </div>
+        <div className="grid min-w-0 gap-3 sm:grid-cols-2 min-[1700px]:grid-cols-4">
+          <SummaryCard label="Monthly bills total" value={formatCurrency(summary.total, { cents: true })} helper={`Across ${summary.totalCount} bills`} icon={<FileText size={18} />} iconTone="soft-green" />
+          <SummaryCard label="Paid" value={formatCurrency(summary.paidTotal, { cents: true })} helper={`${summary.paidCount} bills`} icon={<CheckCircle2 size={18} />} iconTone="solid-green" />
+          <SummaryCard label="Upcoming" value={formatCurrency(summary.upcomingTotal, { cents: true })} helper={`${summary.upcomingCount} bills`} icon={<Clock3 size={18} />} iconTone="solid-orange" />
+          <SummaryCard label="Past due" value={formatCurrency(summary.pastDueTotal, { cents: true })} helper={`${summary.pastDueCount} bills`} icon={<AlertTriangle size={18} />} iconTone="solid-red" />
+        </div>
       </div>
 
       <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
@@ -449,7 +475,9 @@ export default function RecurringPayments({
                     </tr>
                     {rowsInGroup.map((row) => (
                       <tr key={row.id} className="border-b border-app-border align-middle last:border-b-0">
-                        <td className="px-3 py-2.5 text-sm text-text-main">{formatMonthLabel(row.dueDateKey.slice(0, 7)).split(" ")[0]} {String(row.dueDate.getDate()).padStart(2, "0")}</td>
+                        <td className="px-3 py-2.5 text-sm text-text-main">
+                          <BillDatePill dueDate={row.dueDate} statusGroup={row.statusGroup} />
+                        </td>
                         <td className="px-3 py-2.5">
                           {row.sourceType === "recurring" ? <LinkedRecurringBillName billName={row.billName} portalUrl={row.row.template.portalUrl} showEditButton={false} /> : <LinkedCardName card={row.card} labelOptions={{ includeNetwork: false, includeLastFour: false }} />}
                           {row.subtitle ? <p className="truncate text-xs text-text-muted">{row.subtitle}</p> : null}
@@ -482,6 +510,7 @@ export default function RecurringPayments({
                   <article key={row.id} className="rounded-2xl border border-app-border bg-white p-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
+                        <BillDatePill dueDate={row.dueDate} statusGroup={row.statusGroup} compact />
                         {row.sourceType === "recurring" ? <LinkedRecurringBillName billName={row.billName} portalUrl={row.row.template.portalUrl} showEditButton={false} /> : <LinkedCardName card={row.card} labelOptions={{ includeNetwork: false, includeLastFour: false }} />}
                         {row.subtitle ? <p className="mt-1 truncate text-xs text-text-muted">{row.subtitle}</p> : null}
                       </div>
@@ -508,8 +537,18 @@ export default function RecurringPayments({
       </section>
       <aside className="grid gap-4">
         <section className="rounded-2xl border border-app-border bg-white p-4 shadow-sm sm:p-5">
-          <h3 className="text-lg font-semibold text-text-main">Upcoming calendar</h3>
-          <p className="mt-1 text-sm text-text-muted">{formatMonthLabel(selectedMonth)}</p>
+          <div className="flex items-center justify-between">
+            <h3 className="text-[1.7rem] font-semibold tracking-tight text-[#071F42]">Upcoming calendar</h3>
+            <div className="inline-flex items-center gap-1 text-[#071F42]">
+              <button type="button" disabled className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-[#071F42]/70 disabled:opacity-70">
+                <ChevronLeft size={15} />
+              </button>
+              <button type="button" disabled className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-[#071F42]/70 disabled:opacity-70">
+                <ChevronRight size={15} />
+              </button>
+            </div>
+          </div>
+          <p className="mt-1 text-2xl font-medium text-[#071F42]">{formatMonthLabel(selectedMonth)}</p>
           <div className="mt-3 grid grid-cols-7 gap-y-1 text-center text-xs text-text-muted">
             {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map((day) => (
               <span key={day} className="py-1 font-semibold">
@@ -526,17 +565,36 @@ export default function RecurringPayments({
                     : marker === "Paid"
                       ? "bg-[#1D8E4B]"
                       : "";
+              const ringClass =
+                marker === "Past due"
+                  ? "ring-[#FCA5A5] text-[#DC2626]"
+                  : marker === "Due soon" || marker === "Upcoming"
+                    ? "ring-[#FDBA74] text-[#EA7A0A]"
+                    : marker === "Paid"
+                      ? "ring-[#86EFAC] text-[#1D8E4B]"
+                      : "";
               return (
                 <div key={`${cell.dateKey}-${index}`} className="grid place-items-center py-1">
-                  <span className="text-sm text-text-main">{cell.day}</span>
+                  <span
+                    className={`grid h-9 w-9 place-items-center rounded-full text-sm ${
+                      cell.muted ? "text-text-muted/60" : `text-[#071F42] ${ringClass ? `ring-1 ${ringClass}` : ""}`
+                    }`}
+                  >
+                    {cell.day}
+                  </span>
                   {markerClass ? <span className={`mt-1 h-1.5 w-1.5 rounded-full ${markerClass}`} /> : null}
                 </div>
               );
             })}
           </div>
+          <div className="mt-3 flex items-center gap-5 text-sm">
+            <LegendDot color="bg-[#DC2626]" label="Past due" />
+            <LegendDot color="bg-[#EA7A0A]" label="Due soon" />
+            <LegendDot color="bg-[#1D8E4B]" label="Paid" />
+          </div>
         </section>
         <section className="rounded-2xl border border-app-border bg-white p-4 shadow-sm sm:p-5">
-          <h3 className="text-lg font-semibold text-text-main">Coming up next</h3>
+          <h3 className="text-[1.7rem] font-semibold tracking-tight text-[#071F42]">Coming up next</h3>
           <div className="mt-3 grid gap-2">
             {upcomingRows.length === 0 ? (
               <p className="text-sm text-text-muted">No upcoming unpaid bills.</p>
@@ -544,9 +602,12 @@ export default function RecurringPayments({
               upcomingRows.map((row) => (
                 <div key={`next-${row.id}`} className="rounded-xl border border-app-border bg-app-background px-3 py-2">
                   <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-text-main">{row.billName}</p>
-                      <p className="truncate text-xs text-text-muted">{row.category}</p>
+                    <div className="flex min-w-0 items-start gap-2">
+                      <BillDatePill dueDate={row.dueDate} statusGroup={row.statusGroup} compact />
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-text-main">{row.billName}</p>
+                        <p className="truncate text-xs text-text-muted">{row.category}</p>
+                      </div>
                     </div>
                     <p className="text-sm font-semibold text-text-main">
                       {formatCurrency(row.amount, { cents: true })}
@@ -609,16 +670,57 @@ export default function RecurringPayments({
   );
 }
 
-function SummaryCard({ label, value, helper, icon, tone }) {
+function SummaryCard({ label, value, helper, icon, iconTone }) {
+  const iconClass =
+    iconTone === "solid-green"
+      ? "bg-[#16A34A] text-white"
+      : iconTone === "solid-orange"
+        ? "bg-[#F59E0B] text-white"
+        : iconTone === "solid-red"
+          ? "bg-[#DC2626] text-white"
+          : "bg-[#EAF8EF] text-[#16A34A]";
   return (
-    <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-app-border bg-white p-4 shadow-sm">
-      <span className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${tone}`}>{icon}</span>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium text-text-muted">{label}</p>
-        <p className="mt-0.5 text-[1.65rem] font-semibold tracking-tight text-text-main">{value}</p>
-        <p className="mt-0.5 text-sm text-text-muted">{helper}</p>
+    <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-[#E6E1D8] bg-white p-4 shadow-[0_1px_2px_rgba(16,24,40,0.06)]">
+      <div className="min-w-0">
+        <p className="text-[1.08rem] font-medium text-[#071F42]">{label}</p>
+        <p className="mt-1 text-[2.6rem] font-semibold tracking-tight text-[#071F42]">{value}</p>
+        <p className="mt-1 text-[1.15rem] text-[#667085]">{helper}</p>
       </div>
+      <span className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${iconClass}`}>{icon}</span>
     </div>
+  );
+}
+
+function BillDatePill({ dueDate, statusGroup, compact = false }) {
+  const monthLabel = dueDate.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+  const dayLabel = String(dueDate.getDate()).padStart(2, "0");
+  const accentClass =
+    statusGroup === "Past due"
+      ? "border-[#FCA5A5] text-[#DC2626]"
+      : statusGroup === "Due soon" || statusGroup === "Upcoming"
+        ? "border-[#FDBA74] text-[#EA7A0A]"
+        : statusGroup === "Paid"
+          ? "border-[#86EFAC] text-[#1D8E4B]"
+          : "border-[#E6E1D8] text-[#071F42]";
+
+  return (
+    <span
+      className={`inline-grid rounded-xl border bg-white text-center ${accentClass} ${
+        compact ? "min-w-[44px] px-1.5 py-1" : "min-w-[52px] px-2 py-1.5"
+      }`}
+    >
+      <span className="text-[10px] font-semibold leading-4">{monthLabel}</span>
+      <span className={`${compact ? "text-base" : "text-lg"} font-semibold leading-5`}>{dayLabel}</span>
+    </span>
+  );
+}
+
+function LegendDot({ color, label }) {
+  return (
+    <p className="inline-flex items-center gap-1.5 text-[#667085]">
+      <span className={`h-2.5 w-2.5 rounded-full ${color}`} />
+      {label}
+    </p>
   );
 }
 
