@@ -13,7 +13,7 @@ export const pageContent = {
   },
   spending: {
     title: "Transactions",
-    description: "Track spending, payment methods, categories, and notes.",
+    description: "",
   },
   recurring: {
     title: "Recurring Payments",

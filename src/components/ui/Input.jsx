@@ -1,4 +1,4 @@
-export default function Input({ label, className = "", ...props }) {
+export default function Input({ label, hideLabel = false, className = "", ...props }) {
   const { onFocus, type, ...inputProps } = props;
   const isInvalid = inputProps["aria-invalid"] === true || inputProps["aria-invalid"] === "true";
   const invalidClassName = isInvalid
@@ -15,7 +15,7 @@ export default function Input({ label, className = "", ...props }) {
 
   return (
     <label className="grid min-w-0 gap-1.5 text-sm font-medium text-text-soft">
-      {label}
+      {hideLabel ? <span className="sr-only">{label}</span> : label}
       <input
         className={`h-10 w-full min-w-0 rounded-xl border bg-app-surface px-3 text-sm text-text-main outline-none transition placeholder:text-text-muted focus:ring-2 ${invalidClassName} ${className}`}
         onFocus={handleFocus}

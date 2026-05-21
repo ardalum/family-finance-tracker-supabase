@@ -14,6 +14,8 @@ export default function AppShellFrame({
   setupCheckError,
   selectedDashboardMonth,
   onDashboardMonthChange,
+  selectedSpendingMonth,
+  onSpendingMonthChange,
   onViewChange,
   onQuickAdd,
   children,
@@ -32,6 +34,8 @@ export default function AppShellFrame({
         activeView={activeView}
         dashboardMonth={selectedDashboardMonth}
         onDashboardMonthChange={onDashboardMonthChange}
+        spendingMonth={selectedSpendingMonth}
+        onSpendingMonthChange={onSpendingMonthChange}
       />
     ),
   };

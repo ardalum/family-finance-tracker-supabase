@@ -815,6 +815,8 @@ function FinanceTrackerApp() {
       setupCheckError={setupCheckError}
       selectedDashboardMonth={selectedDashboardMonth}
       onDashboardMonthChange={setSelectedDashboardMonth}
+      selectedSpendingMonth={selectedSpendingMonth}
+      onSpendingMonthChange={setSelectedSpendingMonth}
       onViewChange={setActiveView}
       onQuickAdd={openQuickAdd}
     >

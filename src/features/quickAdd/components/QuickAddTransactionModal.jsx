@@ -33,6 +33,8 @@ export default function QuickAddTransactionModal({
   onCreateTransaction,
 }) {
   const amountInputRef = useRef(null);
+  const merchantInputRef = useRef(null);
+  const submitModeRef = useRef("save-close");
   const [form, setForm] = useState(createQuickAddDefaultForm({ categories, cards }));
   const [error, setError] = useState("");
   const [showNotes, setShowNotes] = useState(false);
@@ -68,6 +70,7 @@ export default function QuickAddTransactionModal({
     if (!open) return;
     setError("");
     setShowNotes(false);
+    submitModeRef.current = "save-close";
     setForm(createQuickAddDefaultForm({ categories, cards }));
   }, [open, categories, cards]);
 
@@ -106,6 +109,16 @@ export default function QuickAddTransactionModal({
     }));
   }
 
+  function focusPrimaryField() {
+    const timer = setTimeout(() => {
+      amountInputRef.current?.focus?.();
+      if (!amountInputRef.current) {
+        merchantInputRef.current?.focus?.();
+      }
+    }, 0);
+    return () => clearTimeout(timer);
+  }
+
   function applyRecent(option) {
     setError("");
     setForm((current) =>
@@ -136,6 +149,13 @@ export default function QuickAddTransactionModal({
 
     try {
       await onCreateTransaction(buildQuickAddPayload(form));
+      if (submitModeRef.current === "save-continue") {
+        setError("");
+        setShowNotes(false);
+        setForm(createQuickAddDefaultForm({ categories, cards }));
+        focusPrimaryField();
+        return;
+      }
       onClose();
     } catch (currentError) {
       setError(currentError?.message || "Could not save transaction.");
@@ -239,6 +259,7 @@ export default function QuickAddTransactionModal({
             <div className="sm:col-span-2">
               <MerchantSuggestionInput
                 label="Merchant or description"
+                inputRef={merchantInputRef}
                 value={form.merchant}
                 suggestions={merchantSuggestions}
                 onChange={applyMerchantSuggestion}
@@ -354,8 +375,24 @@ export default function QuickAddTransactionModal({
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Button type="submit" disabled={isSaving}>
+            <Button
+              type="submit"
+              disabled={isSaving}
+              onClick={() => {
+                submitModeRef.current = "save-close";
+              }}
+            >
               {isSaving ? "Saving..." : "Save transaction"}
+            </Button>
+            <Button
+              type="submit"
+              variant="secondary"
+              disabled={isSaving}
+              onClick={() => {
+                submitModeRef.current = "save-continue";
+              }}
+            >
+              {isSaving ? "Saving..." : "Save & add another"}
             </Button>
             <Button type="button" variant="secondary" onClick={onClose} disabled={isSaving}>
               Cancel

@@ -31,6 +31,8 @@ export default function TransactionFilters({
       <div className="grid min-w-0 gap-3 xl:grid-cols-[minmax(230px,1.3fr)_minmax(140px,0.85fr)_minmax(140px,0.85fr)_minmax(130px,0.8fr)_minmax(170px,0.9fr)_auto] xl:items-end">
         <Input
           label="Search transactions"
+          hideLabel
+          aria-label="Search transactions"
           value={filters.search}
           onChange={(event) => onFiltersChange({ ...filters, search: event.target.value })}
           placeholder="Search transactions"
@@ -38,6 +40,8 @@ export default function TransactionFilters({
         />
         <Select
           label="Category"
+          hideLabel
+          aria-label="Filter by category"
           value={filters.categoryId}
           onChange={(event) => onFiltersChange({ ...filters, categoryId: event.target.value })}
         >
@@ -50,6 +54,8 @@ export default function TransactionFilters({
         </Select>
         <Select
           label="Account / card"
+          hideLabel
+          aria-label="Filter by account or card"
           value={filters.cardId}
           onChange={(event) => onFiltersChange({ ...filters, cardId: event.target.value })}
         >
@@ -62,6 +68,8 @@ export default function TransactionFilters({
         </Select>
         <Select
           label="Type"
+          hideLabel
+          aria-label="Filter by transaction type"
           value={filters.transactionType}
           onChange={(event) => {
             onClearQuickFilterForManualControl();
@@ -76,9 +84,11 @@ export default function TransactionFilters({
           <option value="transfer">Transfer</option>
           <option value="adjustment">Adjustment</option>
         </Select>
-        <div className="grid gap-1 rounded-xl border border-app-border bg-app-background px-3 py-2">
-          <p className="text-xs font-medium uppercase tracking-normal text-text-muted">Month</p>
-          <p className="text-sm font-semibold text-text-main">{selectedMonthLabel}</p>
+        <div
+          className="inline-flex min-h-10 items-center rounded-xl border border-app-border bg-app-background px-3 text-sm font-semibold text-text-main"
+          aria-label="Selected month"
+        >
+          {selectedMonthLabel}
         </div>
         <div className="grid grid-cols-2 gap-2 xl:grid-cols-1">
           <Button
@@ -115,6 +125,7 @@ export default function TransactionFilters({
       >
         <Select
           label="Payment method"
+          hideLabel
           value={filters.paymentMethod}
           onChange={(event) => onFiltersChange({ ...filters, paymentMethod: event.target.value })}
         >
@@ -127,6 +138,7 @@ export default function TransactionFilters({
         </Select>
         <Select
           label="Source"
+          hideLabel
           value={filters.source}
           onChange={(event) => {
             onClearQuickFilterForManualControl();
@@ -139,6 +151,7 @@ export default function TransactionFilters({
         </Select>
         <Select
           label="Sort"
+          hideLabel
           value={sortMode}
           onChange={(event) => onSortModeChange(event.target.value)}
         >

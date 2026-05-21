@@ -2,7 +2,6 @@ import { Menu, PanelLeftClose, PanelLeftOpen, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { appMetadata } from "../../app/appMetadata.js";
 import { AppBrandMark } from "../branding/index.js";
-import Button from "../ui/Button.jsx";
 import { footerLinks } from "./footerLinks.js";
 import NavigationV2 from "./NavigationV2.jsx";
 
@@ -40,16 +39,6 @@ export default function AppShellV2({
                 <button
                   type="button"
                   className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-app-border bg-app-surface text-text-main transition hover:bg-app-muted"
-                  onClick={onQuickAdd}
-                  title="Add transaction"
-                  aria-label="Add transaction"
-                >
-                  <Plus size={16} />
-                </button>
-
-                <button
-                  type="button"
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-app-border bg-app-surface text-text-main transition hover:bg-app-muted"
                   onClick={() => setSidebarCollapsed(false)}
                   aria-label="Expand sidebar"
                   title="Expand sidebar"
@@ -74,12 +63,7 @@ export default function AppShellV2({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <Button type="button" className="h-10 flex-1 px-3 text-sm" onClick={onQuickAdd}>
-                    <Plus size={14} />
-                    Add
-                  </Button>
-
+                <div className="flex items-center justify-end">
                   <button
                     type="button"
                     className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-app-border bg-app-surface text-text-main transition hover:bg-app-muted"
@@ -139,7 +123,9 @@ export default function AppShellV2({
                     <h2 className="truncate text-xl font-semibold tracking-tight text-text-main">
                       {pageTitle}
                     </h2>
-                    <p className="truncate text-sm text-text-muted">{pageDescription}</p>
+                    {pageDescription ? (
+                      <p className="truncate text-sm text-text-muted">{pageDescription}</p>
+                    ) : null}
                   </div>
                 </div>
                 <div className="min-w-0 flex-1">{accountSlot}</div>
@@ -189,10 +175,14 @@ export default function AppShellV2({
           />
           <aside className="absolute left-0 top-0 h-full w-[86vw] max-w-[320px] overflow-y-auto border-r border-app-border bg-app-sidebar p-3 shadow-xl">
             <div className="mb-3 flex items-center justify-between">
-              <Button type="button" className="h-9 px-3 text-xs" onClick={onQuickAdd}>
+              <button
+                type="button"
+                className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-brand-primary px-3 text-xs font-semibold text-white transition hover:bg-brand-dark"
+                onClick={onQuickAdd}
+              >
                 <Plus size={14} />
                 Add
-              </Button>
+              </button>
               <button
                 type="button"
                 className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-app-border bg-app-surface text-text-main"

@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { CalendarDays, Edit, RotateCcw, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { CalendarDays, ChevronLeft, ChevronRight, MoreHorizontal, RotateCcw } from "lucide-react";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import EmptyState from "../../../components/ui/EmptyState.jsx";
@@ -24,6 +24,8 @@ import {
   quickFilters,
 } from "./transactionTableUtils.js";
 
+const PAGE_SIZE = 25;
+
 export default function TransactionTable({
   transactions,
   cards,
@@ -39,6 +41,11 @@ export default function TransactionTable({
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [transactionPendingDelete, setTransactionPendingDelete] = useState(null);
   const [quickFilter, setQuickFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedIds, setSelectedIds] = useState(() => new Set());
+  const [menuOpenId, setMenuOpenId] = useState(null);
+  const menuRef = useRef(null);
+  const selectAllRef = useRef(null);
   const categoryOptions = useMemo(
     () => [{ id: UNCATEGORIZED_ID, name: "Uncategorized" }, ...categories],
     [categories],
@@ -70,10 +77,62 @@ export default function TransactionTable({
       ),
     [filteredTransactions],
   );
+
+  const totalPages = Math.max(1, Math.ceil(filteredTransactions.length / PAGE_SIZE));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const startIndex = (safeCurrentPage - 1) * PAGE_SIZE;
+  const endIndexExclusive = startIndex + PAGE_SIZE;
+  const paginatedTransactions = filteredTransactions.slice(startIndex, endIndexExclusive);
   const groupedTransactions = useMemo(
-    () => groupTransactionsByDate(filteredTransactions),
-    [filteredTransactions],
+    () => groupTransactionsByDate(paginatedTransactions),
+    [paginatedTransactions],
   );
+  const pageStart = filteredTransactions.length === 0 ? 0 : startIndex + 1;
+  const pageEnd = Math.min(endIndexExclusive, filteredTransactions.length);
+  const visibleIds = paginatedTransactions.map((transaction) => transaction.id);
+  const selectedVisibleCount = visibleIds.filter((id) => selectedIds.has(id)).length;
+  const allVisibleSelected = visibleIds.length > 0 && selectedVisibleCount === visibleIds.length;
+  const someVisibleSelected = selectedVisibleCount > 0 && !allVisibleSelected;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters, quickFilter, sortMode]);
+
+  useEffect(() => {
+    if (currentPage !== safeCurrentPage) {
+      setCurrentPage(safeCurrentPage);
+    }
+  }, [currentPage, safeCurrentPage]);
+
+  useEffect(() => {
+    setSelectedIds((current) => {
+      const next = new Set();
+      const validIds = new Set(filteredTransactions.map((transaction) => transaction.id));
+      current.forEach((id) => {
+        if (validIds.has(id)) next.add(id);
+      });
+      return next;
+    });
+  }, [filteredTransactions]);
+
+  useEffect(() => {
+    if (selectAllRef.current) {
+      selectAllRef.current.indeterminate = someVisibleSelected;
+    }
+  }, [someVisibleSelected]);
+
+  useEffect(() => {
+    if (!menuOpenId) return undefined;
+
+    function handlePointerDown(event) {
+      if (!menuRef.current?.contains(event.target)) {
+        setMenuOpenId(null);
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [menuOpenId]);
 
   function resetFilters() {
     setSortMode("date-desc");
@@ -129,6 +188,82 @@ export default function TransactionTable({
     setTransactionPendingDelete(null);
   }
 
+  function toggleRowSelected(transactionId) {
+    setSelectedIds((current) => {
+      const next = new Set(current);
+      if (next.has(transactionId)) {
+        next.delete(transactionId);
+      } else {
+        next.add(transactionId);
+      }
+      return next;
+    });
+  }
+
+  function toggleSelectAllVisible() {
+    setSelectedIds((current) => {
+      const next = new Set(current);
+      if (allVisibleSelected) {
+        visibleIds.forEach((id) => next.delete(id));
+      } else {
+        visibleIds.forEach((id) => next.add(id));
+      }
+      return next;
+    });
+  }
+
+  function renderPagination() {
+    if (filteredTransactions.length === 0) return null;
+    const pageNumbers = [];
+    for (let i = 1; i <= totalPages; i += 1) pageNumbers.push(i);
+    const compactPages =
+      pageNumbers.length <= 7
+        ? pageNumbers
+        : pageNumbers.filter(
+            (page) => page === 1 || page === totalPages || Math.abs(page - safeCurrentPage) <= 1,
+          );
+
+    return (
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-app-border px-4 py-3 md:px-5">
+        <p className="text-xs font-medium text-text-muted">25 / page</p>
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-app-surface text-text-main disabled:opacity-40"
+            onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+            disabled={safeCurrentPage === 1}
+            aria-label="Previous page"
+          >
+            <ChevronLeft size={14} aria-hidden="true" />
+          </button>
+          {compactPages.map((page) => (
+            <button
+              key={page}
+              type="button"
+              className={`inline-flex h-8 min-w-8 items-center justify-center rounded-lg border px-2 text-xs font-semibold ${
+                safeCurrentPage === page
+                  ? "border-brand-primary bg-brand-primary text-white"
+                  : "border-app-border bg-app-surface text-text-main"
+              }`}
+              onClick={() => setCurrentPage(page)}
+            >
+              {page}
+            </button>
+          ))}
+          <button
+            type="button"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-app-surface text-text-main disabled:opacity-40"
+            onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+            disabled={safeCurrentPage === totalPages}
+            aria-label="Next page"
+          >
+            <ChevronRight size={14} aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <Card className="min-w-0 overflow-hidden border border-app-border bg-app-surface shadow-sm">
@@ -156,10 +291,9 @@ export default function TransactionTable({
 
         <div className="grid gap-2 border-b border-app-border bg-app-background px-4 py-3 text-xs font-medium text-text-muted md:px-5">
           <div>
-            Showing{" "}
-            <span className="font-semibold text-text-main">{filteredTransactions.length}</span> of{" "}
-            <span className="font-semibold text-text-main">{transactions.length}</span> transaction
-            {transactions.length === 1 ? "" : "s"}
+            Showing <span className="font-semibold text-text-main">{pageStart}</span> to{" "}
+            <span className="font-semibold text-text-main">{pageEnd}</span> of{" "}
+            <span className="font-semibold text-text-main">{filteredTransactions.length}</span> transactions
           </div>
           <div>
             Filtered spending impact:{" "}
@@ -167,6 +301,11 @@ export default function TransactionTable({
               {formatCurrency(filteredImpactTotal)}
             </span>
           </div>
+          {selectedIds.size > 0 ? (
+            <div>
+              <span className="font-semibold text-text-main">{selectedIds.size}</span> selected
+            </div>
+          ) : null}
         </div>
 
         {filteredTransactions.length === 0 ? (
@@ -191,7 +330,16 @@ export default function TransactionTable({
           </div>
         ) : (
           <>
-            <div className="hidden border-b border-app-border bg-app-background/40 px-5 py-2 text-xs font-semibold uppercase tracking-normal text-text-muted lg:grid lg:grid-cols-[120px_minmax(240px,1.3fr)_minmax(130px,0.8fr)_minmax(130px,0.8fr)_120px_84px] lg:items-center lg:gap-3">
+            <div className="hidden border-b border-app-border bg-app-background/40 px-5 py-2 text-xs font-semibold uppercase tracking-normal text-text-muted lg:grid lg:grid-cols-[38px_120px_minmax(220px,1.25fr)_minmax(130px,0.8fr)_minmax(130px,0.8fr)_120px_56px] lg:items-center lg:gap-3">
+              <span>
+                <input
+                  ref={selectAllRef}
+                  type="checkbox"
+                  checked={allVisibleSelected}
+                  onChange={toggleSelectAllVisible}
+                  aria-label="Select all visible transactions"
+                />
+              </span>
               <span>Date</span>
               <span>Merchant</span>
               <span>Category</span>
@@ -227,12 +375,21 @@ export default function TransactionTable({
                         .slice(0, 2)
                         .map((part) => part[0]?.toUpperCase() ?? "")
                         .join("");
+                      const menuOpen = menuOpenId === transaction.id;
 
                       return (
                         <article
                           key={transaction.id}
-                          className="grid items-center gap-3 rounded-xl border border-transparent px-3 py-2 transition hover:border-brand-primary/20 hover:bg-app-background lg:grid-cols-[120px_minmax(240px,1.3fr)_minmax(130px,0.8fr)_minmax(130px,0.8fr)_120px_84px]"
+                          className="grid items-center gap-3 rounded-xl border border-transparent px-3 py-2 transition hover:border-brand-primary/20 hover:bg-app-background lg:grid-cols-[38px_120px_minmax(220px,1.25fr)_minmax(130px,0.8fr)_minmax(130px,0.8fr)_120px_56px]"
                         >
+                          <span>
+                            <input
+                              type="checkbox"
+                              checked={selectedIds.has(transaction.id)}
+                              onChange={() => toggleRowSelected(transaction.id)}
+                              aria-label={`Select ${transaction.merchant}`}
+                            />
+                          </span>
                           <p className="text-sm font-medium text-text-soft">{transaction.date}</p>
                           <div className="min-w-0 flex items-center gap-2.5">
                             <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-app-background text-xs font-semibold text-text-soft ring-1 ring-inset ring-app-border">
@@ -262,33 +419,43 @@ export default function TransactionTable({
                             {isIncome ? "+" : ""}
                             {formatCurrency(amountValue)}
                           </p>
-                          <div className="flex justify-end gap-1.5">
-                            <Button
+                          <div className="relative flex justify-end" ref={menuOpen ? menuRef : null}>
+                            <button
                               type="button"
-                              variant="secondary"
-                              className="min-h-8 min-w-8 px-2 py-1.5 text-xs"
-                              onClick={() => onEdit(transaction)}
-                              disabled={isSaving || isRecurring}
-                              aria-label={`Edit ${transaction.merchant}`}
-                              title={isRecurring ? "Manage from Recurring Payments" : "Edit transaction"}
-                            >
-                              <Edit size={14} aria-hidden="true" />
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="danger"
-                              className="min-h-8 min-w-8 px-2 py-1.5 text-xs"
-                              onClick={() => requestDelete(transaction)}
-                              disabled={isSaving || isRecurring}
-                              aria-label={`Delete ${transaction.merchant}`}
-                              title={
-                                isRecurring
-                                  ? "Mark unpaid from Recurring Payments"
-                                  : "Delete transaction"
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-app-surface text-text-main transition hover:bg-app-muted"
+                              onClick={() =>
+                                setMenuOpenId((current) => (current === transaction.id ? null : transaction.id))
                               }
+                              aria-label={`Open actions for ${transaction.merchant}`}
                             >
-                              <Trash2 size={14} aria-hidden="true" />
-                            </Button>
+                              <MoreHorizontal size={14} aria-hidden="true" />
+                            </button>
+                            {menuOpen ? (
+                              <div className="absolute right-0 top-9 z-20 min-w-32 rounded-xl border border-app-border bg-app-surface p-1 shadow-lg">
+                                <button
+                                  type="button"
+                                  className="block w-full rounded-lg px-2.5 py-2 text-left text-xs font-medium text-text-main hover:bg-app-background disabled:opacity-40"
+                                  onClick={() => {
+                                    setMenuOpenId(null);
+                                    onEdit(transaction);
+                                  }}
+                                  disabled={isSaving || isRecurring}
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  type="button"
+                                  className="block w-full rounded-lg px-2.5 py-2 text-left text-xs font-medium text-status-dangerDark hover:bg-status-dangerBg disabled:opacity-40"
+                                  onClick={() => {
+                                    setMenuOpenId(null);
+                                    requestDelete(transaction);
+                                  }}
+                                  disabled={isSaving || isRecurring}
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            ) : null}
                           </div>
                         </article>
                       );
@@ -310,6 +477,7 @@ export default function TransactionTable({
                 </section>
               ))}
             </div>
+            {renderPagination()}
           </>
         )}
       </Card>
