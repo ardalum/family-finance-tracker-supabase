@@ -12,10 +12,16 @@ import {
   ExternalLink,
   FileText,
   Funnel,
+  Home,
   MoreHorizontal,
+  Play,
   Receipt,
   RotateCcw,
+  Shield,
+  Smartphone,
   X,
+  Wifi,
+  Zap,
 } from "lucide-react";
 import LinkedCardName from "../../../components/shared/LinkedCardName.jsx";
 import LinkedRecurringBillName from "../../../components/shared/LinkedRecurringBillName.jsx";
@@ -77,6 +83,13 @@ function badgeClass(label) {
   return "bg-[#EEF2FF] text-[#3559C7] ring-[#D9E3FF]";
 }
 function detailLine(card) {
+  const parts = [];
+  if (card.owner) parts.push(card.owner);
+  if (card.network) parts.push(card.network);
+  if (card.lastFour) parts.push(`**** ${card.lastFour}`);
+  return parts.join(" • ");
+}
+function cardAccountLabel(card = {}) {
   const parts = [];
   if (card.network) parts.push(card.network);
   if (card.lastFour) parts.push(`**** ${card.lastFour}`);
@@ -237,7 +250,7 @@ export default function RecurringPayments({
           dueDateKey: toDateKey(display.dueDate),
           amount: getStatementUnpaidAmount(entry) || balance,
           category: "Credit Card",
-          accountLabel: detailLine(card) || card.name,
+          accountLabel: cardAccountLabel(card) || card.name,
           autopayEnabled: false,
           statusLabel: status.label,
           statusGroup: statusGroup(status.label),
@@ -424,19 +437,11 @@ export default function RecurringPayments({
       {categoriesError ? <InlineAlert>{categoriesError}</InlineAlert> : null}
       {monthlyBalancesError ? <InlineAlert>{monthlyBalancesError}</InlineAlert> : null}
 
-      <div className="grid min-w-0 gap-4 xl:grid-cols-[260px_minmax(0,1fr)] xl:items-start">
-        <div className="min-w-0">
-          <h2 className="text-5xl font-semibold tracking-tight text-[#071F42]">Bills</h2>
-          <p className="mt-2 max-w-[240px] text-[1.55rem] leading-8 text-[#667085]">
-            Stay on top of what's due and never miss a payment.
-          </p>
-        </div>
-        <div className="grid min-w-0 gap-3 sm:grid-cols-2 min-[1700px]:grid-cols-4">
+      <div className="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <SummaryCard label="Monthly bills total" value={formatCurrency(summary.total, { cents: true })} helper={`Across ${summary.totalCount} bills`} icon={<FileText size={18} />} iconTone="soft-green" />
           <SummaryCard label="Paid" value={formatCurrency(summary.paidTotal, { cents: true })} helper={`${summary.paidCount} bills`} icon={<CheckCircle2 size={18} />} iconTone="solid-green" />
           <SummaryCard label="Upcoming" value={formatCurrency(summary.upcomingTotal, { cents: true })} helper={`${summary.upcomingCount} bills`} icon={<Clock3 size={18} />} iconTone="solid-orange" />
           <SummaryCard label="Past due" value={formatCurrency(summary.pastDueTotal, { cents: true })} helper={`${summary.pastDueCount} bills`} icon={<AlertTriangle size={18} />} iconTone="solid-red" />
-        </div>
       </div>
 
       <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
@@ -479,14 +484,23 @@ export default function RecurringPayments({
                           <BillDatePill dueDate={row.dueDate} statusGroup={row.statusGroup} />
                         </td>
                         <td className="px-3 py-2.5">
-                          {row.sourceType === "recurring" ? <LinkedRecurringBillName billName={row.billName} portalUrl={row.row.template.portalUrl} showEditButton={false} /> : <LinkedCardName card={row.card} labelOptions={{ includeNetwork: false, includeLastFour: false }} />}
-                          {row.subtitle ? <p className="truncate text-xs text-text-muted">{row.subtitle}</p> : null}
+                          <div className="flex items-start gap-2.5">
+                            <BillIconBadge row={row} />
+                            <div className="min-w-0">
+                              {row.sourceType === "recurring" ? <LinkedRecurringBillName billName={row.billName} portalUrl={row.row.template.portalUrl} showEditButton={false} /> : <LinkedCardName card={row.card} labelOptions={{ includeNetwork: false, includeLastFour: false }} />}
+                              {row.subtitle ? <p className="truncate text-xs text-text-muted">{row.subtitle}</p> : null}
+                            </div>
+                          </div>
                         </td>
                         <td className="truncate px-3 py-2.5 text-sm text-text-main">{row.category}</td>
                         <td className="px-3 py-2.5 text-sm font-semibold text-text-main">{formatCurrency(row.amount, { cents: true })}</td>
-                        <td className="truncate px-3 py-2.5 text-sm text-text-main">{row.accountLabel || "-"}</td>
-                        <td className="px-3 py-2.5 text-sm text-text-main">{row.autopayEnabled ? <RotateCcw size={14} /> : "-"}</td>
-                        <td className="px-3 py-2.5"><span className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${badgeClass(row.statusLabel)}`}>{row.statusLabel}</span></td>
+                        <td className="truncate px-3 py-2.5 text-sm text-text-muted">{row.accountLabel || "-"}</td>
+                        <td className="px-3 py-2.5 text-sm text-text-main">
+                          <span className="inline-flex w-full justify-center text-text-muted">
+                            {row.autopayEnabled ? <RotateCcw size={14} /> : "-"}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2.5"><StatusBadge label={row.statusLabel} /></td>
                         <td className="px-3 py-2.5 text-right"><button type="button" className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-text-soft" onClick={(event) => openMenu(event, row.id)}><MoreHorizontal size={16} /></button></td>
                       </tr>
                     ))}
@@ -510,19 +524,26 @@ export default function RecurringPayments({
                   <article key={row.id} className="rounded-2xl border border-app-border bg-white p-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <BillDatePill dueDate={row.dueDate} statusGroup={row.statusGroup} compact />
-                        {row.sourceType === "recurring" ? <LinkedRecurringBillName billName={row.billName} portalUrl={row.row.template.portalUrl} showEditButton={false} /> : <LinkedCardName card={row.card} labelOptions={{ includeNetwork: false, includeLastFour: false }} />}
-                        {row.subtitle ? <p className="mt-1 truncate text-xs text-text-muted">{row.subtitle}</p> : null}
+                        <div className="flex items-start gap-2.5">
+                          <BillDatePill dueDate={row.dueDate} statusGroup={row.statusGroup} compact />
+                          <div className="flex min-w-0 items-start gap-2.5">
+                            <BillIconBadge row={row} compact />
+                            <div className="min-w-0">
+                              {row.sourceType === "recurring" ? <LinkedRecurringBillName billName={row.billName} portalUrl={row.row.template.portalUrl} showEditButton={false} /> : <LinkedCardName card={row.card} labelOptions={{ includeNetwork: false, includeLastFour: false }} />}
+                              {row.subtitle ? <p className="mt-1 truncate text-xs text-text-muted">{row.subtitle}</p> : null}
+                            </div>
+                          </div>
+                        </div>
                       </div>
                       <button type="button" className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-text-soft" onClick={(event) => openMenu(event, row.id)}><MoreHorizontal size={16} /></button>
                     </div>
                     <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
                       <Metric label="Category" value={row.category} />
                       <Metric label="Amount" value={formatCurrency(row.amount, { cents: true })} />
-                      <Metric label="Account" value={row.accountLabel || "-"} />
+                      <Metric label="Account" value={row.accountLabel || "-"} muted />
                       <Metric label="Auto-pay" value={row.autopayEnabled ? <RotateCcw size={14} /> : "-"} />
                     </div>
-                    <div className="mt-2"><span className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${badgeClass(row.statusLabel)}`}>{row.statusLabel}</span></div>
+                    <div className="mt-2"><StatusBadge label={row.statusLabel} /></div>
                   </article>
                 ))}
               </div>
@@ -680,11 +701,11 @@ function SummaryCard({ label, value, helper, icon, iconTone }) {
           ? "bg-[#DC2626] text-white"
           : "bg-[#EAF8EF] text-[#16A34A]";
   return (
-    <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-[#E6E1D8] bg-white p-4 shadow-[0_1px_2px_rgba(16,24,40,0.06)]">
+    <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-2xl border border-[#E6E1D8] bg-white px-4 py-3 shadow-[0_1px_2px_rgba(16,24,40,0.06)]">
       <div className="min-w-0">
-        <p className="text-[1.08rem] font-medium text-[#071F42]">{label}</p>
-        <p className="mt-1 text-[2.6rem] font-semibold tracking-tight text-[#071F42]">{value}</p>
-        <p className="mt-1 text-[1.15rem] text-[#667085]">{helper}</p>
+        <p className="truncate text-sm font-medium text-[#071F42]">{label}</p>
+        <p className="mt-1 truncate text-[1.95rem] font-semibold tracking-tight text-[#071F42]">{value}</p>
+        <p className="mt-0.5 text-sm text-[#667085]">{helper}</p>
       </div>
       <span className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${iconClass}`}>{icon}</span>
     </div>
@@ -724,6 +745,75 @@ function LegendDot({ color, label }) {
   );
 }
 
+function StatusBadge({ label }) {
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${badgeClass(label)}`}>
+      {label === "Paid" ? <CheckCircle2 size={12} /> : null}
+      {label}
+    </span>
+  );
+}
+
+function BillIconBadge({ row, compact = false }) {
+  if (row.sourceType === "credit-card") {
+    const network = String(row.card?.network || "").toLowerCase();
+    if (network.includes("visa")) {
+      return <NetworkBadge label="VISA" className="bg-[#E9F0FF] text-[#1D4ED8]" compact={compact} />;
+    }
+    if (network.includes("master")) {
+      return <NetworkBadge label="MC" className="bg-[#EEF2FF] text-[#1F2937]" compact={compact} />;
+    }
+    if (network.includes("american express") || network.includes("amex")) {
+      return <NetworkBadge label="AMEX" className="bg-[#E6F4FF] text-[#0369A1]" compact={compact} />;
+    }
+    if (network.includes("discover")) {
+      return <NetworkBadge label="DISC" className="bg-[#FFF3E8] text-[#C2410C]" compact={compact} />;
+    }
+    return (
+      <span
+        className={`inline-flex items-center justify-center rounded-lg border border-app-border bg-app-background text-text-muted ${
+          compact ? "h-8 w-8" : "h-9 w-9"
+        }`}
+      >
+        <CreditCard size={compact ? 14 : 15} />
+      </span>
+    );
+  }
+
+  const category = String(row.category || "").toLowerCase();
+  let icon = <Receipt size={compact ? 14 : 15} />;
+  if (category.includes("internet")) icon = <Wifi size={compact ? 14 : 15} />;
+  else if (category.includes("phone")) icon = <Smartphone size={compact ? 14 : 15} />;
+  else if (category.includes("utilit")) icon = <Zap size={compact ? 14 : 15} />;
+  else if (category.includes("entertain")) icon = <Play size={compact ? 14 : 15} />;
+  else if (category.includes("housing") || category.includes("rent")) icon = <Home size={compact ? 14 : 15} />;
+  else if (category.includes("insurance")) icon = <Shield size={compact ? 14 : 15} />;
+  else if (category.includes("subscription")) icon = <FileText size={compact ? 14 : 15} />;
+  else if (category.includes("credit")) icon = <CreditCard size={compact ? 14 : 15} />;
+
+  return (
+    <span
+      className={`inline-flex items-center justify-center rounded-lg border border-app-border bg-app-background text-text-muted ${
+        compact ? "h-8 w-8" : "h-9 w-9"
+      }`}
+    >
+      {icon}
+    </span>
+  );
+}
+
+function NetworkBadge({ label, className, compact = false }) {
+  return (
+    <span
+      className={`inline-flex items-center justify-center rounded-lg border border-app-border px-1.5 font-semibold tracking-tight ${className} ${
+        compact ? "h-8 min-w-8 text-[10px]" : "h-9 min-w-9 text-[11px]"
+      }`}
+    >
+      {label}
+    </span>
+  );
+}
+
 function MenuButton({ label, onClick, disabled = false, danger = false, icon = null }) {
   return (
     <button type="button" onClick={onClick} disabled={disabled} className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${danger ? "text-status-dangerDark hover:bg-status-dangerBg" : "text-text-main hover:bg-app-muted"} disabled:opacity-50`}>
@@ -733,11 +823,13 @@ function MenuButton({ label, onClick, disabled = false, danger = false, icon = n
   );
 }
 
-function Metric({ label, value }) {
+function Metric({ label, value, muted = false }) {
   return (
     <div className="rounded-lg border border-app-border bg-app-background px-2 py-1.5">
       <p className="text-[11px] uppercase tracking-wide text-text-muted">{label}</p>
-      <p className="mt-0.5 truncate text-sm font-semibold text-text-main">{value}</p>
+      <p className={`mt-0.5 truncate text-sm font-semibold ${muted ? "text-text-muted" : "text-text-main"}`}>
+        {value}
+      </p>
     </div>
   );
 }
