@@ -4,12 +4,10 @@ import {
   Banknote,
   CalendarClock,
   CheckCircle2,
-  CircleDollarSign,
   CreditCard,
   Landmark,
   MoreHorizontal,
   Pencil,
-  Plus,
 } from "lucide-react";
 import InlineAlert from "../../../components/ui/InlineAlert.jsx";
 import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
@@ -266,7 +264,7 @@ export default function CreditCardTracker({
           label="Total balance"
           value={formatCurrency(summary.totalBalance, { cents: true })}
           helper={`Across ${summary.activeCardCount} cards`}
-          icon={<CircleDollarSign size={18} />}
+          icon={<CreditCard size={18} />}
         />
         <SummaryCard
           label="Credit utilization"
@@ -299,21 +297,11 @@ export default function CreditCardTracker({
       </div>
 
       <section className="min-w-0 rounded-2xl border border-app-border bg-white shadow-sm">
-        <div className="flex min-w-0 items-center justify-between gap-3 border-b border-app-border px-4 py-4 sm:px-5">
-          <div className="min-w-0">
-            <h3 className="text-xl font-semibold tracking-tight text-text-main">Your cards & debts</h3>
-            <p className="text-sm text-text-muted">
-              Using real balances from {formatMonthLabel(selectedBalanceMonth)}.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={openAddModal}
-            className="inline-flex h-9 items-center gap-2 rounded-xl border border-app-border bg-white px-3 text-sm font-semibold text-text-main hover:bg-app-muted"
-          >
-            <Plus size={15} />
-            Add card
-          </button>
+        <div className="border-b border-app-border px-4 py-4 sm:px-5">
+          <h3 className="text-xl font-semibold tracking-tight text-text-main">Your cards & debts</h3>
+          <p className="text-sm text-text-muted">
+            Using real balances from {formatMonthLabel(selectedBalanceMonth)}.
+          </p>
         </div>
 
         {loading || monthlyBalancesLoading ? (
@@ -322,141 +310,143 @@ export default function CreditCardTracker({
           <p className="px-5 py-6 text-sm text-text-muted">Add your first card to start tracking debt.</p>
         ) : (
           <>
-            <div className="hidden min-w-0 lg:block">
-              <div className="grid grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.9fr)_auto] gap-3 border-b border-app-border px-5 py-3 text-xs font-semibold uppercase tracking-wide text-text-muted">
-                <p className="min-w-0">Account</p>
-                <p className="min-w-0">Current balance</p>
-                <p className="min-w-0">Credit limit</p>
-                <p className="min-w-0">Utilization</p>
-                <p className="min-w-0">Payment due</p>
-                <p className="min-w-0">Min. payment</p>
-                <p className="min-w-0">Status</p>
-                <p className="sr-only">Actions</p>
-              </div>
-
-              <div className="divide-y divide-app-border">
-                {tableRows.map((row) => {
-                  const utilization = row.creditLimit > 0 ? (row.balance / row.creditLimit) * 100 : 0;
-                  const utilizationLabel = utilization >= 999 ? "999%+" : `${Math.max(utilization, 0).toFixed(0)}%`;
-                  const rowEntry = monthBalances[row.card.id] ?? { balance: 0, paid: false };
-                  const openMenu = openMenuCardId === row.card.id;
-                  return (
-                    <div
-                      key={row.card.id}
-                      className="grid grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.9fr)_auto] items-center gap-3 px-5 py-3"
-                    >
-                      <div className="min-w-0">
-                        <div className="flex min-w-0 items-center gap-3">
-                          <NetworkBadge network={row.card.network} />
-                          <div className="min-w-0">
-                            <p className="truncate text-sm font-semibold text-text-main">{row.card.name}</p>
-                            <p className="truncate text-xs text-text-muted">•••• {row.card.lastFour || "0000"}</p>
+            <div className="hidden min-w-0 overflow-x-auto lg:block">
+              <table className="w-full min-w-[980px] border-collapse text-sm">
+                <thead>
+                  <tr className="border-b border-app-border text-left text-xs font-semibold uppercase tracking-wide text-text-muted">
+                    <th className="px-5 py-3">Account</th>
+                    <th className="px-4 py-3">Current balance</th>
+                    <th className="px-4 py-3">Credit limit</th>
+                    <th className="px-4 py-3">Utilization</th>
+                    <th className="px-4 py-3">Payment due</th>
+                    <th className="px-4 py-3">Min. payment</th>
+                    <th className="px-4 py-3">Status</th>
+                    <th className="px-4 py-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tableRows.map((row) => {
+                    const utilization = row.creditLimit > 0 ? (row.balance / row.creditLimit) * 100 : 0;
+                    const utilizationLabel = utilization >= 999 ? "999%+" : `${Math.max(utilization, 0).toFixed(0)}%`;
+                    const rowEntry = monthBalances[row.card.id] ?? { balance: 0, paid: false };
+                    const openMenu = openMenuCardId === row.card.id;
+                    return (
+                      <tr key={row.card.id} className="border-b border-app-border align-middle last:border-b-0">
+                        <td className="px-5 py-3">
+                          <div className="flex min-w-0 items-center gap-3">
+                            <NetworkBadge network={row.card.network} />
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-semibold text-text-main">{row.card.name}</p>
+                              <p className="truncate text-xs text-text-muted">**** {row.card.lastFour || "0000"}</p>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                      <div className="min-w-0">
-                        {editingBalanceCardId === row.card.id ? (
-                          <input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={rowEntry.balance || 0}
-                            onChange={(event) => handleBalanceChange(row.card.id, event.target.value)}
-                            onBlur={() => setEditingBalanceCardId("")}
-                            autoFocus
-                            className="h-9 w-full min-w-0 rounded-xl border border-app-border bg-app-surface px-2.5 text-sm font-semibold text-text-main outline-none focus:border-brand-primary"
-                          />
-                        ) : (
-                          <p className="truncate text-sm font-semibold text-text-main">
-                            {formatCurrency(row.balance, { cents: true })}
-                          </p>
-                        )}
-                      </div>
-                      <p className="truncate text-sm text-text-main">
-                        {formatCurrency(row.creditLimit, { cents: false })}
-                      </p>
-                      <div className="min-w-0">
-                        <div className="flex min-w-0 items-center gap-2">
-                          <span className="shrink-0 text-sm font-semibold text-text-main">{utilizationLabel}</span>
-                          <div className="h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-app-muted">
-                            <div
-                              className={`h-full rounded-full ${utilization > 100 ? "bg-status-danger" : "bg-status-success"}`}
-                              style={{ width: `${Math.min(Math.max(utilization, 0), 100)}%` }}
+                        </td>
+                        <td className="px-4 py-3">
+                          {editingBalanceCardId === row.card.id ? (
+                            <input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={rowEntry.balance || 0}
+                              onChange={(event) => handleBalanceChange(row.card.id, event.target.value)}
+                              onBlur={() => setEditingBalanceCardId("")}
+                              autoFocus
+                              className="h-9 w-full min-w-0 rounded-xl border border-app-border bg-app-surface px-2.5 text-sm font-semibold text-text-main outline-none focus:border-brand-primary"
                             />
+                          ) : (
+                            <p className="truncate text-sm font-semibold text-text-main">
+                              {formatCurrency(row.balance, { cents: true })}
+                            </p>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-text-main">
+                          {formatCurrency(row.creditLimit, { cents: false })}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex min-w-0 items-center gap-2">
+                            <span className="shrink-0 text-sm font-semibold text-text-main">{utilizationLabel}</span>
+                            <div className="h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-app-muted">
+                              <div
+                                className={`h-full rounded-full ${utilization > 100 ? "bg-status-danger" : "bg-status-success"}`}
+                                style={{ width: `${Math.min(Math.max(utilization, 0), 100)}%` }}
+                              />
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                      <p className="truncate text-sm text-text-main">{row.dueDateText}</p>
-                      <p className="truncate text-sm text-text-main">
-                        {row.minPayment > 0 ? formatCurrency(row.minPayment, { cents: true }) : "--"}
-                      </p>
-                      <StatusPill status={row.status} />
-                      <div className="relative">
-                        <button
-                          type="button"
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-text-soft hover:text-text-main"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            setOpenMenuCardId((current) => (current === row.card.id ? "" : row.card.id));
-                          }}
-                          aria-label={`Actions for ${row.card.name}`}
-                        >
-                          <MoreHorizontal size={16} />
-                        </button>
-                        {openMenu ? (
-                          <div
-                            className="absolute right-0 z-20 mt-1 grid min-w-[170px] gap-1 rounded-xl border border-app-border bg-white p-1 shadow-lg"
-                            onClick={(event) => event.stopPropagation()}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-text-main">{row.dueDateText}</td>
+                        <td className="px-4 py-3 text-sm text-text-main">
+                          {row.minPayment > 0 ? formatCurrency(row.minPayment, { cents: true }) : "--"}
+                        </td>
+                        <td className="px-4 py-3">
+                          <StatusPill status={row.status} />
+                        </td>
+                        <td className="relative px-4 py-3 text-right">
+                          <button
+                            type="button"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-text-soft hover:text-text-main"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              setOpenMenuCardId((current) => (current === row.card.id ? "" : row.card.id));
+                            }}
+                            aria-label={`Actions for ${row.card.name}`}
                           >
-                            <MenuButton
-                              label="Edit card"
-                              onClick={() => {
-                                openEditModal(row.card);
-                                setOpenMenuCardId("");
-                              }}
-                              disabled={isSaving}
-                            />
-                            <MenuButton
-                              label="Edit balance"
-                              onClick={() => {
-                                setEditingBalanceCardId(row.card.id);
-                                setOpenMenuCardId("");
-                              }}
-                              disabled={monthlyBalancesSaving}
-                            />
-                            <MenuButton
-                              label={rowEntry.paid ? "Mark unpaid" : "Mark paid"}
-                              onClick={() => {
-                                handlePaidChange(row.card.id, !Boolean(rowEntry.paid));
-                                setOpenMenuCardId("");
-                              }}
-                              disabled={row.status.isNoBalance || row.status.isNotChecked || monthlyBalancesSaving}
-                            />
-                            <MenuButton
-                              label={row.status.isCheckedNoBalance ? "Reset no balance" : "Mark no balance"}
-                              onClick={() => {
-                                if (row.status.isCheckedNoBalance) {
-                                  handleResetNoBalance(row.card.id);
-                                } else {
-                                  handleCheckedNoBalance(row.card.id);
-                                }
-                                setOpenMenuCardId("");
-                              }}
-                              disabled={monthlyBalancesSaving}
-                            />
-                            <MenuButton
-                              label="Delete card"
-                              danger
-                              onClick={() => handleDelete(row.card)}
-                              disabled={isSaving}
-                            />
-                          </div>
-                        ) : null}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                            <MoreHorizontal size={16} />
+                          </button>
+                          {openMenu ? (
+                            <div
+                              className="absolute right-4 z-20 mt-1 grid min-w-[170px] gap-1 rounded-xl border border-app-border bg-white p-1 text-left shadow-lg"
+                              onClick={(event) => event.stopPropagation()}
+                            >
+                              <MenuButton
+                                label="Edit card"
+                                onClick={() => {
+                                  openEditModal(row.card);
+                                  setOpenMenuCardId("");
+                                }}
+                                disabled={isSaving}
+                              />
+                              <MenuButton
+                                label="Edit balance"
+                                onClick={() => {
+                                  setEditingBalanceCardId(row.card.id);
+                                  setOpenMenuCardId("");
+                                }}
+                                disabled={monthlyBalancesSaving}
+                              />
+                              <MenuButton
+                                label={rowEntry.paid ? "Mark unpaid" : "Mark paid"}
+                                onClick={() => {
+                                  handlePaidChange(row.card.id, !Boolean(rowEntry.paid));
+                                  setOpenMenuCardId("");
+                                }}
+                                disabled={row.status.isNoBalance || row.status.isNotChecked || monthlyBalancesSaving}
+                              />
+                              <MenuButton
+                                label={row.status.isCheckedNoBalance ? "Reset no balance" : "Mark no balance"}
+                                onClick={() => {
+                                  if (row.status.isCheckedNoBalance) {
+                                    handleResetNoBalance(row.card.id);
+                                  } else {
+                                    handleCheckedNoBalance(row.card.id);
+                                  }
+                                  setOpenMenuCardId("");
+                                }}
+                                disabled={monthlyBalancesSaving}
+                              />
+                              <MenuButton
+                                label="Delete card"
+                                danger
+                                onClick={() => handleDelete(row.card)}
+                                disabled={isSaving}
+                              />
+                            </div>
+                          ) : null}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
 
             <div className="grid gap-3 p-4 lg:hidden">
@@ -472,7 +462,7 @@ export default function CreditCardTracker({
                           <NetworkBadge network={row.card.network} />
                           <p className="truncate text-sm font-semibold text-text-main">{row.card.name}</p>
                         </div>
-                        <p className="mt-1 truncate text-xs text-text-muted">•••• {row.card.lastFour || "0000"}</p>
+                        <p className="mt-1 truncate text-xs text-text-muted">**** {row.card.lastFour || "0000"}</p>
                       </div>
                       <div className="relative">
                         <button
@@ -505,11 +495,7 @@ export default function CreditCardTracker({
                                 setOpenMenuCardId("");
                               }}
                             />
-                            <MenuButton
-                              label="Delete card"
-                              danger
-                              onClick={() => handleDelete(row.card)}
-                            />
+                            <MenuButton label="Delete card" danger onClick={() => handleDelete(row.card)} />
                           </div>
                         ) : null}
                       </div>
@@ -632,7 +618,10 @@ export default function CreditCardTracker({
                 <p className="text-sm text-text-muted">Add credit limits to see utilization by card.</p>
               ) : (
                 utilizationSegments.map((segment) => (
-                  <div key={segment.id} className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-2 text-sm">
+                  <div
+                    key={segment.id}
+                    className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-2 text-sm"
+                  >
                     <span
                       className="h-2.5 w-2.5 shrink-0 rounded-full"
                       style={{ backgroundColor: segment.color }}
