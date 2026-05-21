@@ -47,6 +47,12 @@ function getStatusFilterValue(status) {
   return "unpaid";
 }
 
+function getUtilizationTone(utilization) {
+  if (utilization > 100) return "danger";
+  if (utilization >= 70) return "warning";
+  return "success";
+}
+
 export default function CreditCardTracker({
   creditCards,
   cashAccounts = [],
@@ -361,11 +367,14 @@ export default function CreditCardTracker({
           value={formatCurrency(summary.totalBalance, { cents: true })}
           helper={`Across ${summary.activeCardCount} cards`}
           icon={<CreditCard size={18} />}
+          iconClassName="bg-[#E8F0FF] text-[#1E3A8A]"
         />
         <SummaryCard
           label="Credit utilization"
           value={`${Math.round(summary.utilizationPercent)}%`}
           helper={`${formatCurrency(summary.totalBalance, { cents: false })} of ${formatCurrency(summary.totalLimit, { cents: false })} limit`}
+          icon={<CreditCard size={18} />}
+          iconClassName="bg-[#E8F0FF] text-[#1E3A8A]"
           rightAdornment={
             <ProgressRing
               value={summary.utilizationPercent}
@@ -378,6 +387,7 @@ export default function CreditCardTracker({
           value={formatCurrency(summary.dueSoonAmount, { cents: true })}
           helper="In the next 7 days"
           icon={<CalendarClock size={18} />}
+          iconClassName="bg-[#FFF1EA] text-[#DD6B20]"
           valueClassName={summary.dueSoonAmount > 0 ? "text-status-warningDark" : ""}
         />
         <SummaryCard
@@ -389,6 +399,7 @@ export default function CreditCardTracker({
               : "Add minimum payment details to track this."
           }
           icon={<Banknote size={18} />}
+          iconClassName="bg-[#E8F0FF] text-[#2563EB]"
         />
       </div>
 
@@ -490,23 +501,19 @@ export default function CreditCardTracker({
               <table className="w-full table-fixed border-collapse text-sm">
                 <thead>
                   <tr className="border-b border-app-border text-left text-xs font-semibold uppercase tracking-wide text-text-muted">
-                    <th className="w-[21%] px-5 py-3">Account</th>
-                    <th className="w-[10%] px-3 py-3">Owner</th>
-                    <th className="w-[10%] px-3 py-3">Current balance</th>
-                    <th className="w-[10%] px-3 py-3">Credit limit</th>
-                    <th className="w-[11%] px-3 py-3">Utilization</th>
-                    <th className="w-[11%] px-3 py-3">Statement closes</th>
-                    <th className="w-[9%] px-3 py-3">Payment due</th>
-                    <th className="w-[8%] px-3 py-3">Min. payment</th>
-                    <th className="w-[7%] px-3 py-3">Status</th>
-                    <th className="w-[3%] px-3 py-3 text-right">Actions</th>
+                    <th className="w-[33%] px-5 py-3">Account</th>
+                    <th className="w-[10%] px-3 py-3">Balance</th>
+                    <th className="w-[9%] px-3 py-3">Limit</th>
+                    <th className="w-[8%] px-3 py-3">Utilization</th>
+                    <th className="w-[17%] px-3 py-3">Statement / Due</th>
+                    <th className="w-[8%] px-3 py-3">Minimum</th>
+                    <th className="w-[11%] px-3 py-3">Status</th>
+                    <th className="w-[4%] px-3 py-3 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {pagination.rows.map((row) => {
                     const utilization = row.creditLimit > 0 ? (row.balance / row.creditLimit) * 100 : 0;
-                    const utilizationLabel =
-                      utilization >= 999 ? "999%+" : `${Math.max(utilization, 0).toFixed(0)}%`;
                     const rowEntry = monthBalances[row.card.id] ?? { balance: 0, paid: false };
                     return (
                       <tr key={row.card.id} className="border-b border-app-border align-middle last:border-b-0">
@@ -514,12 +521,17 @@ export default function CreditCardTracker({
                           <div className="flex min-w-0 items-center gap-2">
                             <NetworkBadge network={row.card.network} />
                             <div className="min-w-0">
-                              <LinkedCardName card={row.card} />
-                              <p className="truncate text-xs text-text-muted">**** {row.card.lastFour || "0000"}</p>
+                              <LinkedCardName
+                                card={row.card}
+                                labelOptions={{ includeNetwork: false, includeLastFour: false }}
+                              />
+                              <p className="truncate text-xs text-text-muted">
+                                {row.card.owner ? `${row.card.owner} • ` : ""}
+                                {row.card.network || "Card"} • **** {row.card.lastFour || "0000"}
+                              </p>
                             </div>
                           </div>
                         </td>
-                        <td className="truncate px-3 py-3 text-sm text-text-soft">{row.card.owner || "--"}</td>
                         <td className="px-3 py-3">
                           {editingBalanceCardId === row.card.id ? (
                             <input
@@ -542,19 +554,13 @@ export default function CreditCardTracker({
                           {formatCurrency(row.creditLimit, { cents: false })}
                         </td>
                         <td className="px-3 py-3">
-                          <div className="flex min-w-0 items-center gap-2">
-                            <span className="shrink-0 text-sm font-semibold text-text-main">{utilizationLabel}</span>
-                            <div className="h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-app-muted">
-                              <div
-                                className={`h-full rounded-full ${utilization > 100 ? "bg-status-danger" : "bg-status-success"}`}
-                                style={{ width: `${Math.min(Math.max(utilization, 0), 100)}%` }}
-                              />
-                            </div>
-                          </div>
+                          <UtilizationCompact utilization={utilization} />
                         </td>
                         <td className="px-3 py-3 text-sm text-text-soft">
                           <div className="grid gap-1">
-                            <span className="truncate">{row.closingDateText}</span>
+                            <p className="truncate">
+                              {row.closingDateText} / {row.dueDateText}
+                            </p>
                             <span
                               className={`w-fit rounded-md px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ${
                                 row.statementGenerated
@@ -566,7 +572,6 @@ export default function CreditCardTracker({
                             </span>
                           </div>
                         </td>
-                        <td className="truncate px-3 py-3 text-sm text-text-main">{row.dueDateText}</td>
                         <td className="truncate px-3 py-3 text-sm text-text-main">
                           {row.minPayment > 0 ? formatCurrency(row.minPayment, { cents: true }) : "--"}
                         </td>
@@ -599,10 +604,15 @@ export default function CreditCardTracker({
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
                           <NetworkBadge network={row.card.network} />
-                          <LinkedCardName card={row.card} />
+                          <LinkedCardName
+                            card={row.card}
+                            labelOptions={{ includeNetwork: false, includeLastFour: false }}
+                          />
                         </div>
-                        <p className="mt-1 truncate text-xs text-text-muted">**** {row.card.lastFour || "0000"}</p>
-                        <p className="truncate text-xs text-text-muted">Owner: {row.card.owner || "--"}</p>
+                        <p className="mt-1 truncate text-xs text-text-muted">
+                          {row.card.owner ? `${row.card.owner} • ` : ""}
+                          {row.card.network || "Card"} • **** {row.card.lastFour || "0000"}
+                        </p>
                       </div>
                       <button
                         type="button"
@@ -615,18 +625,17 @@ export default function CreditCardTracker({
                     </div>
 
                     <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-                      <Metric label="Current balance" value={formatCurrency(row.balance, { cents: true })} />
-                      <Metric label="Credit limit" value={formatCurrency(row.creditLimit, { cents: false })} />
-                      <Metric label="Utilization" value={`${Math.max(utilization, 0).toFixed(0)}%`} />
-                      <Metric label="Payment due" value={row.dueDateText} />
-                      <Metric label="Statement closes" value={row.closingDateText} />
+                      <Metric label="Balance" value={formatCurrency(row.balance, { cents: true })} />
+                      <Metric label="Limit" value={formatCurrency(row.creditLimit, { cents: false })} />
+                      <Metric label="Utilization" value={<UtilizationCompact utilization={utilization} compact />} />
+                      <Metric label="Minimum" value={row.minPayment > 0 ? formatCurrency(row.minPayment, { cents: true }) : "--"} />
+                      <Metric label="Statement / Due" value={`${row.closingDateText} / ${row.dueDateText}`} />
                       <Metric
                         label="Cycle"
                         value={row.statementGenerated ? "Generated" : "Not yet"}
                         badge={row.statementGenerated ? "success" : "muted"}
                       />
                     </div>
-
                     {editingBalanceCardId === row.card.id ? (
                       <div className="mt-3">
                         <label className="text-xs font-medium text-text-muted">Edit balance</label>
@@ -642,7 +651,6 @@ export default function CreditCardTracker({
                         />
                       </div>
                     ) : null}
-
                     <div className="mt-3">
                       <StatusPill status={row.status} />
                     </div>
@@ -873,23 +881,28 @@ export default function CreditCardTracker({
   );
 }
 
-function SummaryCard({ label, value, helper, icon, rightAdornment = null, valueClassName = "" }) {
+function SummaryCard({
+  label,
+  value,
+  helper,
+  icon,
+  rightAdornment = null,
+  valueClassName = "",
+  iconClassName = "",
+}) {
   return (
-    <div className="min-w-0 rounded-2xl border border-app-border bg-white p-4 shadow-sm">
-      <div className="flex min-w-0 items-start justify-between gap-3">
-        <p className="text-sm font-medium text-text-muted">{label}</p>
-        {rightAdornment ?? (
-          <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#EEF2FF] text-[#1E3A8A]">
-            {icon}
-          </span>
-        )}
-      </div>
-      <p
-        className={`mt-2 min-w-0 text-2xl font-semibold tracking-tight text-text-main sm:text-[1.65rem] xl:text-[1.75rem] ${valueClassName}`}
+    <div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-app-border bg-white p-4 shadow-sm">
+      <span
+        className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${iconClassName}`}
       >
-        {value}
-      </p>
-      <p className="mt-1 text-sm text-text-muted">{helper}</p>
+        {icon}
+      </span>
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-text-muted">{label}</p>
+        <p className={`mt-0.5 text-2xl font-semibold tracking-tight text-text-main ${valueClassName}`}>{value}</p>
+        <p className="mt-0.5 text-sm text-text-muted">{helper}</p>
+      </div>
+      {rightAdornment ? <div className="shrink-0">{rightAdornment}</div> : null}
     </div>
   );
 }
@@ -904,6 +917,31 @@ function ProgressRing({ value, color = "#16A34A" }) {
     >
       <span className="h-7 w-7 rounded-full bg-white" />
     </span>
+  );
+}
+
+function UtilizationCompact({ utilization, compact = false }) {
+  const clamped = Math.min(Math.max(utilization, 0), 100);
+  const tone = getUtilizationTone(utilization);
+  const color = tone === "danger" ? "#DC2626" : tone === "warning" ? "#D97706" : "#16A34A";
+  const size = compact ? 32 : 36;
+  return (
+    <div className="inline-flex items-center gap-2">
+      <span
+        className="inline-flex items-center justify-center rounded-full border border-app-border bg-white"
+        style={{
+          width: `${size}px`,
+          height: `${size}px`,
+          background: `conic-gradient(${color} ${clamped * 3.6}deg, #E2E8F0 0deg)`,
+        }}
+        aria-hidden="true"
+      >
+        <span className="rounded-full bg-white" style={{ width: `${size - 10}px`, height: `${size - 10}px` }} />
+      </span>
+      <span className="text-xs font-semibold text-text-main">
+        {utilization >= 999 ? "999%+" : `${Math.max(utilization, 0).toFixed(0)}%`}
+      </span>
+    </div>
   );
 }
 
@@ -999,7 +1037,7 @@ function Metric({ label, value, badge = "" }) {
           {value}
         </span>
       ) : (
-        <p className="truncate text-sm font-semibold text-text-main">{value}</p>
+        <div className="mt-0.5 min-w-0 text-sm font-semibold text-text-main">{value}</div>
       )}
     </div>
   );

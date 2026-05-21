@@ -1,9 +1,9 @@
 import { formatLinkedCardLabel } from "../../features/creditCards/cardDisplayUtils.js";
 
-export default function LinkedCardName({ card, className = "" }) {
+export default function LinkedCardName({ card, className = "", labelOptions = undefined }) {
   const safeUrl = getSafeExternalUrl(card.url);
   const faviconUrl = getFaviconUrl(safeUrl);
-  const label = formatLinkedCardLabel(card);
+  const label = formatLinkedCardLabel(card, labelOptions);
   const content = (
     <>
       {faviconUrl ? (
