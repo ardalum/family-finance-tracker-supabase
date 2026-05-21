@@ -20,12 +20,15 @@ export default function AppHeaderAccountSlot({
   onBalanceMonthChange,
   recurringMonth,
   onRecurringMonthChange,
+  savingsMonth,
+  onSavingsMonthChange,
 }) {
   const isDashboard = activeView === "dashboard";
   const isSpending = activeView === "spending";
   const isBudgets = activeView === "budgets";
   const isCreditCards = activeView === "credit-cards";
   const isRecurring = activeView === "recurring";
+  const isSavings = activeView === "savings";
   const activeMonth = isDashboard
     ? dashboardMonth
     : isSpending
@@ -36,7 +39,9 @@ export default function AppHeaderAccountSlot({
           ? balanceMonth
           : isRecurring
             ? recurringMonth
-            : "";
+            : isSavings
+              ? savingsMonth
+              : "";
   const onMonthChange = isDashboard
     ? onDashboardMonthChange
     : isSpending
@@ -47,8 +52,10 @@ export default function AppHeaderAccountSlot({
           ? onBalanceMonthChange
           : isRecurring
             ? onRecurringMonthChange
-            : null;
-  const actionLabel = isBudgets ? "Add budget" : isCreditCards ? "Add card" : isRecurring ? "Add bill" : "Add transaction";
+            : isSavings
+              ? onSavingsMonthChange
+              : null;
+  const actionLabel = isBudgets ? "Add budget" : isCreditCards ? "Add card" : isRecurring ? "Add bill" : isSavings ? "Add goal" : "Add transaction";
   const showMonthControls = Boolean(activeMonth && onMonthChange);
   const monthOptions = showMonthControls ? buildMonthOptions(activeMonth) : [];
 
@@ -84,7 +91,9 @@ export default function AppHeaderAccountSlot({
                       ? "Budget month"
                       : isRecurring
                         ? "Bills month"
-                        : "Cards and debt month"
+                        : isSavings
+                          ? "Savings goals month"
+                          : "Cards and debt month"
               }
             >
               {monthOptions.map((month) => (
@@ -150,4 +159,5 @@ export default function AppHeaderAccountSlot({
     </div>
   );
 }
+
 

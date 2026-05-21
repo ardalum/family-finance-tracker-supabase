@@ -52,8 +52,8 @@ export const pageContent = {
     description: "Manually track income sources and monthly income entries.",
   },
   savings: {
-    title: "Savings",
-    description: "Manually track savings goals and monthly contributions.",
+    title: "Savings Goals",
+    description: "Track progress toward what matters most to your family.",
   },
   backup: {
     title: "Backup & Restore",

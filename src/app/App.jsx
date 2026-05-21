@@ -792,6 +792,10 @@ function FinanceTrackerApp() {
       dispatchNavigation("recurring", "add-bill");
       return;
     }
+    if (activeView === "savings") {
+      dispatchNavigation("savings", "add-goal");
+      return;
+    }
 
     openQuickAdd();
   }
@@ -841,6 +845,8 @@ function FinanceTrackerApp() {
       onBalanceMonthChange={setSelectedBalanceMonth}
       selectedRecurringMonth={selectedRecurringMonth}
       onRecurringMonthChange={setSelectedRecurringMonth}
+      selectedSavingsMonth={selectedSavingsMonth}
+      onSavingsMonthChange={setSelectedSavingsMonth}
       onViewChange={setActiveView}
       onQuickAdd={handlePrimaryHeaderAction}
     >
@@ -859,4 +865,5 @@ function FinanceTrackerApp() {
     </AppShellFrame>
   );
 }
+
 
