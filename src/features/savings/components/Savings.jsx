@@ -7,6 +7,7 @@ import {
   Heart,
   HeartPulse,
   Home,
+  Info,
   Palmtree,
   Plane,
   MoreHorizontal,
@@ -185,6 +186,14 @@ function formatContributionDate(dateValue) {
     day: "numeric",
     year: "numeric",
   });
+}
+
+function formatCompactMoney(value) {
+  if (value >= 1000) {
+    const thousands = value / 1000;
+    return Number.isInteger(thousands) ? `$${thousands}K` : `$${thousands.toFixed(1)}K`;
+  }
+  return `$${Math.round(value)}`;
 }
 
 function SummaryCard({ label, value, helper, icon, tone = "green" }) {
@@ -416,6 +425,45 @@ export default function Savings({
     const maxValue = Math.max(...rows.map((row) => row.value), 1);
     return { rows, maxValue };
   }, [savingsContributions, selectedMonth]);
+
+  const previousMonthKey = useMemo(() => shiftMonth(selectedMonth, -1), [selectedMonth]);
+  const previousMonthTotal = useMemo(
+    () => summarizeSavingsForMonth(savingsContributions, previousMonthKey),
+    [previousMonthKey, savingsContributions],
+  );
+  const trendScaleMax = useMemo(() => {
+    const rounded = Math.ceil(trendRows.maxValue / 500) * 500;
+    return Math.max(1500, rounded);
+  }, [trendRows.maxValue]);
+  const trendTicks = useMemo(
+    () => [
+      { value: 0, percent: 0 },
+      { value: trendScaleMax / 3, percent: 100 / 3 },
+      { value: (trendScaleMax * 2) / 3, percent: 200 / 3 },
+      { value: trendScaleMax, percent: 100 },
+    ],
+    [trendScaleMax],
+  );
+  const monthComparison = useMemo(() => {
+    if (previousMonthTotal <= 0 && monthSavingsTotal <= 0) {
+      return {
+        text: `No change vs ${formatMonthLabel(previousMonthKey)}`,
+        tone: "text-text-muted",
+      };
+    }
+    if (previousMonthTotal <= 0 && monthSavingsTotal > 0) {
+      return {
+        text: `New contributions vs ${formatMonthLabel(previousMonthKey)}`,
+        tone: "text-[#1D8E4B]",
+      };
+    }
+    const deltaPercent = Math.round(((monthSavingsTotal - previousMonthTotal) / previousMonthTotal) * 100);
+    const sign = deltaPercent > 0 ? "+" : "";
+    return {
+      text: `${sign}${deltaPercent}% vs ${formatMonthLabel(previousMonthKey)}`,
+      tone: deltaPercent >= 0 ? "text-[#1D8E4B]" : "text-[#DC2626]",
+    };
+  }, [monthSavingsTotal, previousMonthKey, previousMonthTotal]);
 
   function resetGoalDraft() {
     setEditingGoalId("");
@@ -1019,39 +1067,81 @@ export default function Savings({
 
           <Card className="rounded-2xl border border-app-border bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="text-lg font-semibold text-[#071F42]">Monthly contributions trend</h3>
-              <p className="text-sm text-text-muted">{formatMonthLabel(selectedMonth)}</p>
+              <h3 className="inline-flex items-center gap-1 text-lg font-semibold text-[#071F42]">
+                Monthly contributions trend <Info size={14} className="text-text-muted" />
+              </h3>
             </div>
-            <div className="mt-4 grid gap-3">
-              <div className="h-40 rounded-xl border border-app-border bg-app-background p-3">
-                <div className="grid h-full grid-cols-12 items-end gap-2">
-                {trendRows.rows.map((row, index) => {
-                  const heightPercent =
-                    row.value > 0
-                      ? Math.max((row.value / trendRows.maxValue) * 100, 10)
-                      : 4;
-                  return (
-                    <div key={row.monthKey} className="flex h-full w-full items-end">
-                      <div
-                        className={`w-full rounded-sm ${
-                          index === trendRows.rows.length - 1 ? "bg-[#1D8E4B]" : "bg-[#93C5A8]"
-                        }`}
-                        style={{ height: `${heightPercent}%` }}
-                        title={`${formatMonthLabel(row.monthKey)}: ${formatCurrency(row.value)}`}
+            <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_170px]">
+              <div className="min-w-0">
+                <div className="grid grid-cols-[42px_minmax(0,1fr)] gap-2">
+                  <div className="relative h-44">
+                    {trendTicks.map((tick) => (
+                      <span
+                        key={`tick-label-${tick.value}`}
+                        className="absolute right-0 -translate-y-1/2 text-[11px] text-text-muted"
+                        style={{ bottom: `${tick.percent}%` }}
+                      >
+                        {formatCompactMoney(tick.value)}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="relative h-44">
+                    {trendTicks.map((tick) => (
+                      <span
+                        key={`gridline-${tick.value}`}
+                        className="absolute left-0 right-0 border-t border-app-border/80"
+                        style={{ bottom: `${tick.percent}%` }}
                       />
+                    ))}
+                    <div className="absolute inset-0 grid grid-cols-12 items-end gap-2">
+                      {trendRows.rows.map((row, index) => {
+                        const heightPercent =
+                          row.value > 0
+                            ? Math.max((row.value / trendScaleMax) * 100, 10)
+                            : 2;
+                        return (
+                          <div key={row.monthKey} className="flex h-full w-full items-end">
+                            <div
+                              className={`w-full rounded-sm ${
+                                index === trendRows.rows.length - 1
+                                  ? "bg-[#1D8E4B]"
+                                  : row.value > 0
+                                    ? "bg-[#93C5A8]"
+                                    : "bg-[#DCE9E1]"
+                              }`}
+                              style={{ height: `${heightPercent}%` }}
+                              title={`${formatMonthLabel(row.monthKey)}: ${formatCurrency(row.value)}`}
+                            />
+                          </div>
+                        );
+                      })}
                     </div>
-                  );
-                })}
+                  </div>
+                </div>
+                <div className="mt-2 grid grid-cols-[42px_minmax(0,1fr)] gap-2">
+                  <span />
+                  <div className="grid grid-cols-12 gap-2">
+                    {trendRows.rows.map((row) => (
+                      <span
+                        key={`month-label-${row.monthKey}`}
+                        className="truncate text-center text-[10px] text-text-muted"
+                        title={formatMonthLabel(row.monthKey)}
+                      >
+                        {row.monthKey.slice(5, 7)}/{row.monthKey.slice(2, 4)}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div className="flex items-center justify-between text-xs text-text-muted">
-                <span>{formatMonthLabel(trendRows.rows[0]?.monthKey || selectedMonth)}</span>
-                <span>{formatCurrency(monthSavingsTotal)} contributed</span>
-                <span>
-                  {formatMonthLabel(
-                    trendRows.rows[trendRows.rows.length - 1]?.monthKey || selectedMonth,
-                  )}
-                </span>
+              <div className="rounded-xl border border-app-border bg-app-background p-3">
+                <p className="text-sm font-medium text-text-muted">{formatMonthLabel(selectedMonth)}</p>
+                <p className="mt-1 text-4xl font-semibold tracking-tight text-[#1D8E4B]">
+                  {formatCurrency(monthSavingsTotal)}
+                </p>
+                <p className="mt-1 text-sm text-text-muted">Total contributed</p>
+                <p className={`mt-3 text-sm font-semibold ${monthComparison.tone}`}>
+                  {monthComparison.text}
+                </p>
               </div>
             </div>
           </Card>
