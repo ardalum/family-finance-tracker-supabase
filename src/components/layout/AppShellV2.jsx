@@ -22,57 +22,76 @@ export default function AppShellV2({
     <div className="min-h-screen overflow-x-hidden bg-app-background text-text-main">
       <div className="flex min-h-screen min-w-0 max-w-full">
         <aside
-          className={`hidden border-r border-app-border bg-[#F3EEE3] md:block ${
-            sidebarCollapsed ? "w-[94px]" : "w-[278px]"
+          className={`hidden shrink-0 overflow-hidden border-r border-app-border bg-[#F3EEE3] md:block ${
+            sidebarCollapsed ? "w-[104px]" : "w-[278px]"
           }`}
         >
-          <div className="sticky top-0 grid h-screen grid-rows-[auto_minmax(0,1fr)_auto] gap-4 p-4">
-            <div className="grid gap-3 rounded-2xl border border-app-border bg-white p-3 shadow-[0_8px_22px_-18px_rgba(15,42,74,0.55)]">
-              <div
-                className={`flex min-w-0 items-center overflow-hidden ${sidebarCollapsed ? "justify-center" : "gap-3"}`}
-              >
-                <AppBrandMark variant="sm" />
-                {!sidebarCollapsed ? (
-                  <div className="min-w-0 flex-1 overflow-hidden">
-                    <h1 className="truncate text-[1rem] font-semibold leading-tight text-text-main">
-                      Spedger
-                    </h1>
-                    <p className="mt-0.5 truncate text-[0.72rem] font-medium leading-tight text-text-muted">
-                      Family money center
-                    </p>
-                  </div>
-                ) : null}
-              </div>
+          <div
+            className={`sticky top-0 grid h-screen grid-rows-[auto_minmax(0,1fr)_auto] gap-4 ${
+              sidebarCollapsed ? "p-3" : "p-4"
+            }`}
+          >
+            {sidebarCollapsed ? (
+  <div className="grid justify-items-center gap-3 rounded-2xl border border-app-border bg-white p-2 shadow-[0_8px_22px_-18px_rgba(15,42,74,0.55)]">
+    <div title="Spedger" aria-label="Spedger">
+      <AppBrandMark variant="sm" />
+    </div>
 
-              <div className={`flex items-center gap-2 ${sidebarCollapsed ? "justify-center" : ""}`}>
-                {!sidebarCollapsed ? (
-                  <Button type="button" className="h-10 flex-1 px-3 text-sm" onClick={onQuickAdd}>
-                    <Plus size={14} />
-                    Add
-                  </Button>
-                ) : (
-                  <button
-                    type="button"
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-app-border bg-white text-text-main"
-                    onClick={onQuickAdd}
-                    title="Add transaction"
-                    aria-label="Add transaction"
-                  >
-                    <Plus size={16} />
-                  </button>
-                )}
+    <button
+      type="button"
+      className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-app-border bg-white text-text-main transition hover:bg-app-muted"
+      onClick={onQuickAdd}
+      title="Add transaction"
+      aria-label="Add transaction"
+    >
+      <Plus size={16} />
+    </button>
 
-                <button
-                  type="button"
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-app-border bg-white text-text-main"
-                  onClick={() => setSidebarCollapsed((value) => !value)}
-                  aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-                  title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-                >
-                  {sidebarCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
-                </button>
-              </div>
-            </div>
+    <button
+      type="button"
+      className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-app-border bg-white text-text-main transition hover:bg-app-muted"
+      onClick={() => setSidebarCollapsed(false)}
+      aria-label="Expand sidebar"
+      title="Expand sidebar"
+    >
+      <PanelLeftOpen size={16} />
+    </button>
+  </div>
+) : (
+  <div className="grid gap-3 rounded-2xl border border-app-border bg-white p-3 shadow-[0_8px_22px_-18px_rgba(15,42,74,0.55)]">
+    <div className="flex min-w-0 items-center gap-3 overflow-hidden">
+      <div className="shrink-0" title="Spedger" aria-label="Spedger">
+        <AppBrandMark variant="sm" />
+      </div>
+
+      <div className="min-w-0 flex-1 overflow-hidden">
+        <h1 className="truncate text-[1rem] font-semibold leading-tight text-text-main">
+          Spedger
+        </h1>
+        <p className="mt-0.5 truncate text-[0.72rem] font-medium leading-tight text-text-muted">
+          Family money center
+        </p>
+      </div>
+    </div>
+
+    <div className="flex items-center gap-2">
+      <Button type="button" className="h-10 flex-1 px-3 text-sm" onClick={onQuickAdd}>
+        <Plus size={14} />
+        Add
+      </Button>
+
+      <button
+        type="button"
+        className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-app-border bg-white text-text-main transition hover:bg-app-muted"
+        onClick={() => setSidebarCollapsed(true)}
+        aria-label="Collapse sidebar"
+        title="Collapse sidebar"
+      >
+        <PanelLeftClose size={16} />
+      </button>
+    </div>
+  </div>
+)}
 
             <div className="min-h-0 overflow-y-auto pr-1">
               <NavigationV2
@@ -117,7 +136,9 @@ export default function AppShellV2({
                     <Menu size={17} />
                   </button>
                   <div className="min-w-0">
-                    <h2 className="truncate text-xl font-semibold tracking-tight text-text-main">{pageTitle}</h2>
+                    <h2 className="truncate text-xl font-semibold tracking-tight text-text-main">
+                      {pageTitle}
+                    </h2>
                     <p className="truncate text-sm text-text-muted">{pageDescription}</p>
                   </div>
                 </div>
@@ -126,19 +147,29 @@ export default function AppShellV2({
             </div>
           </header>
 
-          <div className="mx-auto grid min-w-0 max-w-[1500px] gap-6 px-3 py-6 sm:px-6 lg:px-8">{children}</div>
+          <div className="mx-auto grid min-w-0 max-w-[1500px] gap-6 px-3 py-6 sm:px-6 lg:px-8">
+            {children}
+          </div>
 
           <footer className="border-t border-app-border bg-app-background/75">
             <div className="grid gap-4 px-4 py-5 text-xs text-text-muted sm:px-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-center lg:px-8">
               <div className="grid gap-1">
                 <p>
-                  <span className="font-semibold text-brand-primary">{appMetadata.name}</span> (c) {appMetadata.copyrightYear} {appMetadata.creatorName}.
+                  <span className="font-semibold text-brand-primary">{appMetadata.name}</span> (c){" "}
+                  {appMetadata.copyrightYear} {appMetadata.creatorName}.
                 </p>
                 <p className="max-w-2xl leading-5">{appMetadata.trackingDisclaimer}</p>
               </div>
-              <nav className="flex flex-wrap gap-2 md:max-w-md md:justify-end" aria-label="Footer links">
+              <nav
+                className="flex flex-wrap gap-2 md:max-w-md md:justify-end"
+                aria-label="Footer links"
+              >
                 {footerLinks.map((link) => (
-                  <FooterLink key={link.targetView} targetView={link.targetView} onNavigate={onViewChange}>
+                  <FooterLink
+                    key={link.targetView}
+                    targetView={link.targetView}
+                    onNavigate={onViewChange}
+                  >
                     {link.label}
                   </FooterLink>
                 ))}
