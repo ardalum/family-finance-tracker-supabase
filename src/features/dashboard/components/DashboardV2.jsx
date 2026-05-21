@@ -134,7 +134,9 @@ export default function DashboardV2({
                 </div>
               </div>
             </Card>
+          </div>
 
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             <Card className="overflow-hidden">
               <div className="flex items-center justify-between border-b border-app-border p-5">
                 <div className="inline-flex items-center gap-2 text-base font-semibold text-text-main">
@@ -333,46 +335,46 @@ export default function DashboardV2({
                 ))}
               </div>
             </Card>
-
-            <Card className="overflow-hidden border-status-warningBg">
-              <div className="flex items-center justify-between border-b border-app-border p-5">
-                <div className="inline-flex items-center gap-2 text-base font-semibold text-text-main">
-                  <AlertTriangle size={18} aria-hidden="true" />
-                  Needs attention
-                </div>
-                <span className="rounded-full bg-status-warningBg px-2.5 py-1 text-sm font-semibold text-status-warningDark">
-                  {data.alerts.length}
-                </span>
-              </div>
-              <div className="grid gap-3 p-5">
-                {data.alerts.length === 0 ? (
-                  <p className="rounded-xl border border-app-border bg-app-surfaceSoft px-3 py-2 text-sm text-text-muted">
-                    No alerts right now.
-                  </p>
-                ) : null}
-                {data.alerts.map((alert) => (
-                  <article
-                    key={alert.title}
-                    className="rounded-xl border border-app-border bg-app-surfaceSoft p-3"
-                  >
-                    <p
-                      className={`text-sm font-semibold ${alert.tone === "danger" ? "text-status-danger" : "text-status-warningDark"}`}
-                    >
-                      {alert.title}
-                    </p>
-                    <p className="mt-1 text-xs text-text-muted">{alert.description}</p>
-                    <button
-                      type="button"
-                      className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-brand-primary"
-                    >
-                      {alert.action}
-                      <ChevronRight size={12} aria-hidden="true" />
-                    </button>
-                  </article>
-                ))}
-              </div>
-            </Card>
           </div>
+
+          <Card className="overflow-hidden border-status-warningBg">
+            <div className="flex items-center justify-between border-b border-app-border p-5">
+              <div className="inline-flex items-center gap-2 text-base font-semibold text-text-main">
+                <AlertTriangle size={18} aria-hidden="true" />
+                Needs attention
+              </div>
+              <span className="rounded-full bg-status-warningBg px-2.5 py-1 text-sm font-semibold text-status-warningDark">
+                {data.alerts.length}
+              </span>
+            </div>
+            <div className="grid gap-3 p-5">
+              {data.alerts.length === 0 ? (
+                <p className="rounded-xl border border-app-border bg-app-surfaceSoft px-3 py-2 text-sm text-text-muted">
+                  No alerts right now.
+                </p>
+              ) : null}
+              {data.alerts.map((alert) => (
+                <article
+                  key={alert.title}
+                  className="rounded-xl border border-app-border bg-app-surfaceSoft p-3"
+                >
+                  <p
+                    className={`text-sm font-semibold ${alert.tone === "danger" ? "text-status-danger" : "text-status-warningDark"}`}
+                  >
+                    {alert.title}
+                  </p>
+                  <p className="mt-1 text-xs text-text-muted">{alert.description}</p>
+                  <button
+                    type="button"
+                    className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-brand-primary"
+                  >
+                    {alert.action}
+                    <ChevronRight size={12} aria-hidden="true" />
+                  </button>
+                </article>
+              ))}
+            </div>
+          </Card>
         </div>
 
         <aside className="grid gap-5 self-start xl:sticky xl:top-24">
