@@ -372,12 +372,12 @@ function BudgetSummaryCards({ summary }) {
   ];
 
   return (
-    <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-3">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-4">
       {cards.map((card) => {
         const Icon = card.icon;
         return (
           <Card key={card.label} className="min-w-0 rounded-2xl border border-app-border bg-white p-4">
-            <div className="flex items-start justify-between gap-3">
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
               <div className="min-w-0">
                 <p className="text-base font-medium text-text-main">{card.label}</p>
                 <p
@@ -387,7 +387,9 @@ function BudgetSummaryCards({ summary }) {
                 </p>
                 <p className="mt-2 text-sm text-text-muted">{card.helper}</p>
               </div>
-              <span className={`inline-flex h-14 w-14 items-center justify-center rounded-full ${card.iconTone}`}>
+              <span
+                className={`inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-full ${card.iconTone}`}
+              >
                 <Icon size={24} aria-hidden="true" />
               </span>
             </div>
