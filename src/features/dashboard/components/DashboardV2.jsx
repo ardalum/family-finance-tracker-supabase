@@ -380,7 +380,11 @@ export default function DashboardV2({
           <Card className="overflow-hidden">
             <div className="flex items-center justify-between border-b border-app-border p-5">
               <h3 className="text-base font-semibold text-text-main">Recent transactions</h3>
-              <button type="button" className="text-sm font-semibold text-brand-primary">
+              <button
+                type="button"
+                className="text-sm font-semibold text-brand-primary"
+                onClick={() => navigateToView("spending")}
+              >
                 View all
               </button>
             </div>
