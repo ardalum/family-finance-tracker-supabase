@@ -213,9 +213,18 @@ export default function Insights({
   const spendingDeltaPercent = Number(previousMonthData.summary.spendingTotal || 0) > 0
     ? (spendingDelta / Number(previousMonthData.summary.spendingTotal || 1)) * 100
     : null;
-  const budgetUsedPercent = Number(data.summary.budgetTotal || 0) > 0
-    ? Math.min((Number(data.summary.spendingTotal || 0) / Number(data.summary.budgetTotal || 1)) * 100, 100)
+  const budgetUsageRawPercent = Number(data.summary.budgetTotal || 0) > 0
+    ? (Number(data.summary.spendingTotal || 0) / Number(data.summary.budgetTotal || 1)) * 100
     : 0;
+  const budgetUsedPercent = Math.min(Math.max(budgetUsageRawPercent, 0), 100);
+  const budgetBarTone =
+    Number(data.summary.budgetTotal || 0) <= 0
+      ? "bg-[#CBD5E1]"
+      : budgetUsageRawPercent > 100
+        ? "bg-status-danger"
+        : budgetUsageRawPercent > 80
+          ? "bg-status-warning"
+          : "bg-status-success";
   const budgetDeltaPercent = Number(previousMonthData.summary.budgetTotal || 0) > 0
     ? budgetUsedPercent -
       Math.min(
@@ -241,6 +250,7 @@ export default function Insights({
   }, [categoryRows, previousCategoryMap]);
   const incomeTotal = Number(data.summary.incomeTotal || 0);
   const netCashFlow = incomeTotal - Number(data.summary.spendingTotal || 0);
+  const hasSpendingBaseline = spendingDeltaPercent !== null;
   const latestInsightCards = useMemo(() => {
     const defaultCards = [
       {
@@ -355,7 +365,7 @@ export default function Insights({
   }, [previousCategories]);
 
   return (
-    <section className="grid gap-6">
+    <section className="grid gap-5">
       <div className="flex items-center justify-end gap-3">
         {loading ? <p className="text-xs text-text-muted">Loading insights…</p> : null}
         {error ? (
@@ -374,21 +384,42 @@ export default function Insights({
             <p className="inline-flex items-center gap-1 text-sm font-semibold text-[#071F42]">
               Spending trend <Info size={13} className="text-text-muted" />
             </p>
-            {spendingDelta <= 0 ? (
+            {!hasSpendingBaseline ? (
+              <BarChart3 size={16} className="text-text-muted" />
+            ) : spendingDelta <= 0 ? (
               <TrendingDown size={16} className="text-status-success" />
             ) : (
-              <TrendingUp size={16} className="text-status-danger" />
+              <TrendingUp size={16} className="text-status-warningDark" />
             )}
           </div>
           <p className="mt-2 text-4xl font-semibold tracking-tight text-[#071F42]">
             {formatCurrency(data.summary.spendingTotal || 0)}
           </p>
           <p className="text-sm text-text-muted">This month</p>
-          <p className={`mt-2 text-sm font-medium ${spendingDelta <= 0 ? "text-status-success" : "text-status-danger"}`}>
-            {spendingDelta <= 0 ? <ArrowDown size={14} className="mr-1 inline-block" /> : <ArrowUp size={14} className="mr-1 inline-block" />}
-            {spendingDeltaPercent === null ? "No prior-month baseline" : `${Math.abs(spendingDeltaPercent).toFixed(1)}% vs ${formatMonthLabel(previousMonthKey)}`}
+          <p
+            className={`mt-2 text-sm font-medium ${
+              !hasSpendingBaseline
+                ? "text-text-muted"
+                : spendingDelta <= 0
+                  ? "text-status-success"
+                  : "text-status-warningDark"
+            }`}
+          >
+            {hasSpendingBaseline ? (
+              spendingDelta <= 0 ? (
+                <ArrowDown size={14} className="mr-1 inline-block" />
+              ) : (
+                <ArrowUp size={14} className="mr-1 inline-block" />
+              )
+            ) : null}
+            {hasSpendingBaseline
+              ? `${Math.abs(spendingDeltaPercent).toFixed(1)}% vs ${formatMonthLabel(previousMonthKey)}`
+              : "No prior-month baseline"}
           </p>
-          <Sparkline values={chartCurrentRows.map((row) => row.value)} tone={spendingDelta <= 0 ? "green" : "red"} />
+          <Sparkline
+            values={chartCurrentRows.map((row) => row.value)}
+            tone={!hasSpendingBaseline ? "navy" : spendingDelta <= 0 ? "green" : "red"}
+          />
         </Card>
 
         <Card className="rounded-2xl border border-[#E6E1D8] bg-white p-5">
@@ -398,9 +429,22 @@ export default function Insights({
           <p className="mt-2 text-4xl font-semibold tracking-tight text-[#071F42]">
             {Math.round(budgetUsedPercent)}%
           </p>
-          <p className="text-sm text-text-muted">On track</p>
+          <p className="text-sm text-text-muted">
+            {Number(data.summary.budgetTotal || 0) <= 0
+              ? "No monthly budget"
+              : budgetUsageRawPercent > 100
+                ? "Over budget"
+                : budgetUsageRawPercent > 80
+                  ? "Near budget"
+                  : "On track"}
+          </p>
           <div className="mt-4">
-            <ProgressBar value={budgetUsedPercent} ariaLabel="Budget performance" />
+            <div className="h-2 rounded-full bg-app-muted">
+              <div
+                className={`h-2 rounded-full ${budgetBarTone}`}
+                style={{ width: `${budgetUsedPercent}%` }}
+              />
+            </div>
           </div>
           <p className="mt-2 text-sm text-text-muted">
             {formatCurrency(data.summary.spendingTotal || 0)} of {formatCurrency(data.summary.budgetTotal || 0)} budgeted
@@ -414,11 +458,21 @@ export default function Insights({
           <p className="inline-flex items-center gap-1 text-sm font-semibold text-[#071F42]">
             Category change <Info size={13} className="text-text-muted" />
           </p>
-          <p className="mt-2 text-4xl font-semibold tracking-tight text-[#071F42]">
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-[#071F42]">
             {topCategoryChange ? `${topCategoryChange.delta >= 0 ? "+" : ""}${formatCurrency(topCategoryChange.delta)}` : formatCurrency(0)}
           </p>
-          <p className={`text-sm ${topCategoryChange && topCategoryChange.delta > 0 ? "text-status-danger" : "text-status-success"}`}>
-            {topCategoryChange ? `${topCategoryChange.delta >= 0 ? "Increase" : "Decrease"} vs ${formatMonthLabel(previousMonthKey)}` : "No category comparison yet"}
+          <p
+            className={`text-sm ${
+              !topCategoryChange
+                ? "text-text-muted"
+                : topCategoryChange.delta > 0
+                  ? "text-status-warningDark"
+                  : "text-status-success"
+            }`}
+          >
+            {topCategoryChange
+              ? `${topCategoryChange.delta >= 0 ? "Increase" : "Decrease"} vs ${formatMonthLabel(previousMonthKey)}`
+              : "No category comparison yet"}
           </p>
           <p className="mt-8 text-sm text-text-muted">
             {topCategoryChange ? `Top change: ${topCategoryChange.label} (${topCategoryChange.formattedValue})` : "Add more monthly spending history"}
@@ -433,8 +487,16 @@ export default function Insights({
             {formatCurrency(netCashFlow)}
           </p>
           <p className="text-sm text-text-muted">Estimated cash left</p>
-          <p className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-status-success">
-            <span className="h-2 w-2 rounded-full bg-status-success" />
+          <p
+            className={`mt-4 inline-flex items-center gap-2 text-sm font-medium ${
+              netCashFlow >= 0 ? "text-status-success" : "text-status-warningDark"
+            }`}
+          >
+            <span
+              className={`h-2 w-2 rounded-full ${
+                netCashFlow >= 0 ? "bg-status-success" : "bg-status-warning"
+              }`}
+            />
             {netCashFlow >= 0 ? "Healthy" : "Watch"}
           </p>
         </Card>
@@ -492,7 +554,7 @@ export default function Insights({
         </Card>
 
         <Card className="rounded-2xl border border-[#E6E1D8] bg-white p-5">
-          <h3 className="inline-flex items-center gap-2 text-2xl font-semibold tracking-tight text-[#071F42]">
+          <h3 className="inline-flex items-center gap-2 text-xl font-semibold tracking-tight text-[#071F42]">
             Spending over time <Info size={15} className="text-text-muted" />
           </h3>
           <div className="mt-3 inline-flex items-center gap-4 text-sm">
@@ -523,14 +585,20 @@ export default function Insights({
           <h3 className="inline-flex items-center gap-2 text-2xl font-semibold tracking-tight text-[#071F42]">
             Month-over-month comparison <Info size={15} className="text-text-muted" />
           </h3>
-          <div className="mt-4 overflow-x-auto rounded-xl border border-app-border">
-            <table className="min-w-[520px] w-full text-sm">
+          <div className="mt-4 rounded-xl border border-app-border">
+            <table className="w-full table-fixed text-sm">
+              <colgroup>
+                <col style={{ width: "34%" }} />
+                <col style={{ width: "22%" }} />
+                <col style={{ width: "22%" }} />
+                <col style={{ width: "22%" }} />
+              </colgroup>
               <thead className="bg-app-background text-text-muted">
                 <tr>
-                  <th className="px-3 py-2 text-left font-medium">Metric</th>
-                  <th className="px-3 py-2 text-right font-medium">{formatMonthLabel(previousMonthKey)}</th>
-                  <th className="px-3 py-2 text-right font-medium">{formatMonthLabel(selectedMonth)}</th>
-                  <th className="px-3 py-2 text-right font-medium">Change</th>
+                  <th className="px-2 py-2 text-left text-xs font-medium">Metric</th>
+                  <th className="px-2 py-2 text-right text-xs font-medium">{formatMonthLabel(previousMonthKey)}</th>
+                  <th className="px-2 py-2 text-right text-xs font-medium">{formatMonthLabel(selectedMonth)}</th>
+                  <th className="px-2 py-2 text-right text-xs font-medium">Change</th>
                 </tr>
               </thead>
               <tbody>
@@ -560,21 +628,36 @@ export default function Insights({
             Category deep dive <Info size={15} className="text-text-muted" />
           </h3>
           <p className="text-sm text-text-muted">Explore how specific categories are trending.</p>
-          <div className="mt-4 max-w-[210px]">
-            <button type="button" className="w-full rounded-xl border border-app-border bg-app-background px-3 py-2 text-left text-sm text-text-main">
-              {spendingBreakdownRows[0]?.label || "Category"} ▾
-            </button>
-          </div>
-          <div className="mt-4 grid gap-3 md:grid-cols-3">
-            <MetricPill label="This month" value={formatCurrency(spendingBreakdownRows[0]?.value || 0)} />
-            <MetricPill label={`vs ${formatMonthLabel(previousMonthKey)}`} value={formatCurrency(previousCategoryMap.get(spendingBreakdownRows[0]?.label || "") || 0)} />
-            <MetricPill
-              label="Change"
-              value={`${((spendingBreakdownRows[0]?.value || 0) - (previousCategoryMap.get(spendingBreakdownRows[0]?.label || "") || 0) >= 0 ? "+" : "")}${formatCurrency((spendingBreakdownRows[0]?.value || 0) - (previousCategoryMap.get(spendingBreakdownRows[0]?.label || "") || 0))}`}
-              tone={(spendingBreakdownRows[0]?.value || 0) - (previousCategoryMap.get(spendingBreakdownRows[0]?.label || "") || 0) > 0 ? "danger" : "success"}
-            />
-          </div>
-          <Sparkline values={chartCurrentRows.map((row) => row.value)} tone="red" />
+          {spendingBreakdownRows[0] ? (
+            <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_1.2fr]">
+              <div>
+                <div className="max-w-[210px]">
+                  <button
+                    type="button"
+                    className="w-full rounded-xl border border-app-border bg-app-background px-3 py-2 text-left text-sm text-text-main"
+                  >
+                    {spendingBreakdownRows[0]?.label || "Category"} ?
+                  </button>
+                </div>
+                <div className="mt-3 grid gap-2 sm:grid-cols-3 xl:grid-cols-1">
+                  <MetricPill label="This month" value={formatCurrency(spendingBreakdownRows[0]?.value || 0)} />
+                  <MetricPill label={`vs ${formatMonthLabel(previousMonthKey)}`} value={formatCurrency(previousCategoryMap.get(spendingBreakdownRows[0]?.label || "") || 0)} />
+                  <MetricPill
+                    label="Change"
+                    value={`${((spendingBreakdownRows[0]?.value || 0) - (previousCategoryMap.get(spendingBreakdownRows[0]?.label || "") || 0) >= 0 ? "+" : "")}${formatCurrency((spendingBreakdownRows[0]?.value || 0) - (previousCategoryMap.get(spendingBreakdownRows[0]?.label || "") || 0))}`}
+                    tone={(spendingBreakdownRows[0]?.value || 0) - (previousCategoryMap.get(spendingBreakdownRows[0]?.label || "") || 0) > 0 ? "danger" : "success"}
+                  />
+                </div>
+              </div>
+              <div className="self-center">
+                <Sparkline values={chartCurrentRows.map((row) => row.value)} tone="red" />
+              </div>
+            </div>
+          ) : (
+            <div className="mt-4 rounded-xl border border-dashed border-app-border bg-app-background p-4 text-sm text-text-muted">
+              No category data available for deep dive yet.
+            </div>
+          )}
         </Card>
 
         <Card className="rounded-2xl border border-[#E6E1D8] bg-white p-5">
@@ -582,7 +665,12 @@ export default function Insights({
             Savings rate <Info size={15} className="text-text-muted" />
           </h3>
           {incomeTotal <= 0 ? (
-            <p className="mt-6 text-sm text-text-muted">Add income data to calculate savings rate.</p>
+            <div className="mt-4 flex items-center gap-4 rounded-xl border border-dashed border-app-border bg-app-background p-4">
+              <span className="inline-flex h-14 w-14 items-center justify-center rounded-full border border-app-border bg-white text-text-muted">
+                <CircleDollarSign size={20} />
+              </span>
+              <p className="text-sm text-text-muted">Add income data to calculate savings rate.</p>
+            </div>
           ) : (
             <div className="mt-4 flex items-center gap-4">
               <SavingsRateRing percent={Math.max(0, Math.round((netCashFlow / incomeTotal) * 100))} />
@@ -599,7 +687,6 @@ export default function Insights({
           )}
         </Card>
       </section>
-
       <Card className="rounded-2xl border border-app-border bg-white p-4">
         <button
           type="button"
@@ -1031,12 +1118,13 @@ function Sparkline({ values, tone = "green" }) {
   const hasPositive = safeValues.some((value) => Number(value || 0) > 0);
   if (!hasPositive) {
     return (
-      <div className="mt-3 flex h-16 items-center justify-center rounded-lg border border-dashed border-app-border bg-app-background text-xs text-text-muted">
-        No trend data yet
+      <div className="mt-3 flex h-14 items-center justify-center rounded-lg border border-dashed border-app-border bg-app-background text-xs text-text-muted">
+        Not enough trend history
       </div>
     );
   }
-  const points = (values ?? []).map((value, index) => ({
+
+  const points = safeValues.map((value, index) => ({
     x: index,
     y: Number(value || 0),
   }));
@@ -1050,10 +1138,11 @@ function Sparkline({ values, tone = "green" }) {
       return `${x},${y}`;
     })
     .join(" ");
-  const stroke = tone === "red" ? "#EF4444" : "#198754";
+  const stroke = tone === "red" ? "#EF4444" : tone === "green" ? "#198754" : "#102A63";
 
   return (
-    <svg viewBox="0 0 100 100" className="mt-3 h-16 w-full">
+    <svg viewBox="0 0 100 100" className="mt-3 h-14 w-full">
+      <line x1="0" y1="82" x2="100" y2="82" stroke="#E8E3D8" />
       <polyline fill="none" stroke={stroke} strokeWidth="3" strokeLinejoin="round" points={chartPoints} />
     </svg>
   );
@@ -1065,41 +1154,66 @@ function DualLineMiniChart({ currentRows = [], previousRows = [] }) {
   if (!hasCurrentData && !hasPreviousData) {
     return (
       <div className="mt-4">
-        <div className="h-44 rounded-lg border border-dashed border-app-border bg-app-background" />
+        <div className="h-40 rounded-lg border border-dashed border-app-border bg-app-background" />
         <p className="mt-2 text-xs text-text-muted">No monthly trend data yet.</p>
       </div>
     );
   }
+
+  const meaningfulCurrentPoints = currentRows.filter((row) => Number(row.value || 0) > 0).length;
+  if (meaningfulCurrentPoints < 2) {
+    return (
+      <div className="mt-4">
+        <div className="h-40 rounded-lg border border-dashed border-app-border bg-app-background" />
+        <p className="mt-2 text-xs text-text-muted">Need at least two months of spending data.</p>
+      </div>
+    );
+  }
+
   const maxValue = Math.max(
     1,
     ...currentRows.map((row) => Number(row.value || 0)),
     ...previousRows.map((row) => Number(row.value || 0)),
   );
+  const scaledMax = maxValue * 1.18;
   const buildPoints = (rows) =>
     rows
       .map((row, index) => {
         const x = (index / Math.max(rows.length - 1, 1)) * 100;
-        const y = 100 - (Number(row.value || 0) / maxValue) * 70 - 15;
+        const y = 100 - (Number(row.value || 0) / scaledMax) * 68 - 16;
         return `${x},${y}`;
       })
       .join(" ");
 
+  const showPrevious = previousRows.some((row) => Number(row.value || 0) > 0);
+
   return (
     <div className="mt-4">
-      <svg viewBox="0 0 100 100" className="h-44 w-full">
+      <svg viewBox="0 0 100 100" className="h-40 w-full">
         <line x1="0" y1="85" x2="100" y2="85" stroke="#E8E3D8" />
-        <polyline
-          fill="none"
-          stroke="#98A2B3"
-          strokeDasharray="2 2"
-          strokeWidth="2"
-          points={buildPoints(previousRows)}
-        />
+        <line x1="0" y1="62" x2="100" y2="62" stroke="#F0ECE4" />
+        <line x1="0" y1="39" x2="100" y2="39" stroke="#F0ECE4" />
+        {showPrevious ? (
+          <polyline
+            fill="none"
+            stroke="#98A2B3"
+            strokeDasharray="2 2"
+            strokeWidth="2"
+            points={buildPoints(previousRows)}
+          />
+        ) : null}
         <polyline fill="none" stroke="#102A63" strokeWidth="2.5" points={buildPoints(currentRows)} />
+        {currentRows.map((row, index) => {
+          const x = (index / Math.max(currentRows.length - 1, 1)) * 100;
+          const y = 100 - (Number(row.value || 0) / scaledMax) * 68 - 16;
+          return <circle key={`dot-${row.id}`} cx={x} cy={y} r="1.9" fill="#102A63" />;
+        })}
       </svg>
       <div className="mt-2 grid grid-cols-6 gap-2 text-center text-xs text-text-muted">
         {currentRows.map((row) => (
-          <span key={`trend-label-${row.id}`}>{row.label || formatMonthLabel(row.id).slice(0, 3)}</span>
+          <span key={`trend-label-${row.id}`} className="truncate">
+            {(row.label || formatMonthLabel(row.id).slice(0, 3)).slice(0, 3)}
+          </span>
         ))}
       </div>
     </div>
@@ -1120,12 +1234,13 @@ function ComparisonRow({ label, previous, current, trend = "lower-better" }) {
           ? "text-status-danger"
           : "text-status-success";
   const deltaLabel = `${delta > 0 ? "+" : ""}${formatCurrency(delta)}`;
+
   return (
     <tr className="border-t border-app-border">
-      <td className="px-3 py-2 text-text-main">{label}</td>
-      <td className="px-3 py-2 text-right font-medium text-[#071F42]">{formatCurrency(previous || 0)}</td>
-      <td className="px-3 py-2 text-right font-medium text-[#071F42]">{formatCurrency(current || 0)}</td>
-      <td className={`px-3 py-2 text-right font-semibold ${toneClass}`}>{deltaLabel}</td>
+      <td className="px-2 py-2 text-text-main truncate" title={label}>{label}</td>
+      <td className="px-2 py-2 text-right font-medium text-[#071F42] whitespace-nowrap">{formatCurrency(previous || 0)}</td>
+      <td className="px-2 py-2 text-right font-medium text-[#071F42] whitespace-nowrap">{formatCurrency(current || 0)}</td>
+      <td className={`px-2 py-2 text-right font-semibold whitespace-nowrap ${toneClass}`}>{deltaLabel}</td>
     </tr>
   );
 }
@@ -1137,38 +1252,41 @@ function TopInsightCard({ card, tone = "positive" }) {
       iconClass: "bg-status-success/15 text-status-success",
       icon: CheckCircle2,
       linkClass: "text-status-success",
+      actionText: "Open budget",
     },
     warning: {
       cardClass: "border-status-warning/35 bg-status-warning/10",
       iconClass: "bg-status-warning/20 text-status-warning",
       icon: AlertTriangle,
-      linkClass: "text-status-warning",
+      linkClass: "text-status-warningDark",
+      actionText: "Review spending",
     },
     attention: {
       cardClass: "border-status-danger/30 bg-status-danger/5",
       iconClass: "bg-status-danger/15 text-status-danger",
       icon: CircleAlert,
       linkClass: "text-status-danger",
+      actionText: "Compare category",
     },
   };
   const style = toneMap[tone] ?? toneMap.positive;
   const Icon = style.icon;
 
   return (
-    <Card className={`rounded-2xl border p-5 ${style.cardClass}`}>
+    <Card className={`rounded-2xl border p-4 ${style.cardClass}`}>
       <div className="flex items-start gap-3">
-        <span className={`inline-flex h-11 w-11 items-center justify-center rounded-full ${style.iconClass}`}>
-          <Icon size={20} />
+        <span className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${style.iconClass}`}>
+          <Icon size={18} />
         </span>
-        <div>
-          <p className="text-[1.35rem] font-semibold tracking-tight text-[#071F42]">{card.title}</p>
+        <div className="min-w-0">
+          <p className="text-lg font-semibold tracking-tight text-[#071F42]">{card.title}</p>
           <p className="mt-1 text-sm text-text-main">{card.explanation}</p>
           <button
             type="button"
             className={`mt-3 text-sm font-semibold ${style.linkClass}`}
             onClick={() => dispatchNavigation(card.targetView || "insights")}
           >
-            {card.action || "Review"} →
+            {style.actionText} ?
           </button>
         </div>
       </div>
@@ -1177,11 +1295,12 @@ function TopInsightCard({ card, tone = "positive" }) {
 }
 
 function MetricPill({ label, value, tone = "neutral" }) {
-  const toneClass = tone === "danger" ? "text-status-danger" : tone === "success" ? "text-status-success" : "text-[#071F42]";
+  const toneClass =
+    tone === "danger" ? "text-status-danger" : tone === "success" ? "text-status-success" : "text-[#071F42]";
   return (
     <div className="rounded-xl border border-app-border bg-app-background px-3 py-2">
       <p className="text-xs text-text-muted">{label}</p>
-      <p className={`mt-1 text-2xl font-semibold tracking-tight ${toneClass}`}>{value}</p>
+      <p className={`mt-1 text-lg font-semibold tracking-tight ${toneClass}`}>{value}</p>
     </div>
   );
 }
@@ -1564,3 +1683,5 @@ function TrendBreakdownRow({ label, current, start, change, status }) {
     </Card>
   );
 }
+
+
