@@ -134,9 +134,6 @@ export default function DashboardV2({
                 </div>
               </div>
             </Card>
-          </div>
-
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             <Card className="overflow-hidden">
               <div className="flex items-center justify-between border-b border-app-border p-5">
                 <div className="inline-flex items-center gap-2 text-base font-semibold text-text-main">
@@ -201,7 +198,9 @@ export default function DashboardV2({
                 </div>
               </div>
             </Card>
+          </div>
 
+          <div className="grid gap-5 lg:grid-cols-3">
             <Card className="overflow-hidden">
               <div className="flex items-center justify-between border-b border-app-border p-5">
                 <h3 className="text-base font-semibold text-text-main">Upcoming Bills</h3>
