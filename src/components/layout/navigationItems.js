@@ -104,7 +104,7 @@ const navigationItemByView = {
     iconVariant: "amber",
   },
   "app-settings": {
-    label: "App Settings",
+    label: "Settings",
     shortLabel: "Settings",
     icon: Settings,
     iconVariant: "slate",
@@ -116,7 +116,7 @@ const navigationItemByView = {
     iconVariant: "amber",
   },
   "help-support": {
-    label: "Help / Support",
+    label: "Help",
     shortLabel: "Help",
     icon: CircleHelp,
     iconVariant: "neutral",
