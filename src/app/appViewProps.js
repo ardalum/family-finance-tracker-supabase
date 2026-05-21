@@ -110,6 +110,7 @@ export function createAppViewProps({
   deleteSupabaseBudget,
   addDefaultBudgetsToSupabase,
   copyPreviousMonthBudgetsToSupabase,
+  copyPreviousMonthBudgetCategories,
   importLocalBudgetsToSupabase,
   createSupabaseTransaction,
   updateSupabaseTransaction,
@@ -152,6 +153,9 @@ export function createAppViewProps({
   updateSupabaseSavingsContribution,
   deleteSupabaseSavingsContribution,
 } = {}) {
+  const resolvedCopyPreviousMonthBudgets =
+    copyPreviousMonthBudgetsToSupabase ?? copyPreviousMonthBudgetCategories;
+
   return {
     dashboardProps: {
       appData: dashboardAppData,
@@ -200,7 +204,7 @@ export function createAppViewProps({
       onUpdateBudget: updateSupabaseBudget,
       onDeleteBudget: deleteSupabaseBudget,
       onAddDefaultBudgets: addDefaultBudgetsToSupabase,
-      onCopyPreviousMonthBudgets: copyPreviousMonthBudgetsToSupabase,
+      onCopyPreviousMonthBudgets: resolvedCopyPreviousMonthBudgets,
       onImportLocalBudgets: importLocalBudgetsToSupabase,
     },
     spendingProps: {

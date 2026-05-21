@@ -387,7 +387,7 @@ function FinanceTrackerApp() {
     updateSupabaseBudget,
     deleteSupabaseBudget,
     addDefaultBudgetCategories: addDefaultBudgetsToSupabase,
-    copyPreviousMonthBudgetCategories: copyPreviousMonthBudgetsToSupabase,
+    copyPreviousMonthBudgetsToSupabase,
     importSupabaseBudgetCategories: importLocalBudgetsToSupabase,
   } = useBudgets({
     activeHouseholdId,
@@ -731,7 +731,7 @@ function FinanceTrackerApp() {
     updateSupabaseBudget,
     deleteSupabaseBudget,
     addDefaultBudgetsToSupabase,
-    copyPreviousMonthBudgetCategories: copyPreviousMonthBudgetsToSupabase,
+    copyPreviousMonthBudgetsToSupabase,
     importSupabaseBudgetCategories: importLocalBudgetsToSupabase,
     createSupabaseTransaction,
     updateSupabaseTransaction,
