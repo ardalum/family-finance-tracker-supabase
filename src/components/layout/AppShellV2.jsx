@@ -28,18 +28,23 @@ export default function AppShellV2({
         >
           <div className="sticky top-0 grid h-screen grid-rows-[auto_minmax(0,1fr)_auto] gap-4 p-4">
             <div className="grid gap-3 rounded-2xl border border-app-border bg-white p-3 shadow-[0_8px_22px_-18px_rgba(15,42,74,0.55)]">
-              <div className="flex items-center gap-3">
-                <AppBrandMark />
+              <div
+                className={`flex min-w-0 items-center ${sidebarCollapsed ? "justify-center" : "gap-3"}`}
+              >
+                <AppBrandMark variant="sm" />
                 {!sidebarCollapsed ? (
-                  <div className="min-w-0">
-                    <h1 className="truncate text-[1.02rem] font-semibold leading-tight text-text-main">
+                  <div className="min-w-0 flex-1">
+                    <h1 className="truncate text-[0.98rem] font-semibold leading-tight text-text-main">
                       Family Finance Tracker
                     </h1>
+                    <p className="mt-0.5 truncate text-[0.72rem] font-medium text-text-muted">
+                      Household money center
+                    </p>
                   </div>
                 ) : null}
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className={`flex items-center gap-2 ${sidebarCollapsed ? "justify-center" : ""}`}>
                 {!sidebarCollapsed ? (
                   <Button type="button" className="h-10 flex-1 px-3 text-sm" onClick={onQuickAdd}>
                     <Plus size={14} />
