@@ -1,33 +1,53 @@
-# Credit Card Tracker Supabase
+# Spedger
 
-A Vite + React household finance tracker backed by Supabase. The app supports Supabase Auth, household setup, household profiles, Dashboard/Cards/Budget/Spending/Bills/Insights workflows, Financial Position hub, a secondary Calendar workspace powered by FullCalendar, Income/Savings/Accounts/Liabilities/Net Worth tracking, monthly close review flow, Supabase JSON backup/import, Excel export, and secure account/household deletion flows through Supabase Edge Functions.
+Spedger is a Vite + React + Supabase household finance tracker for managing family finances in one place.
+
+Current app experience includes:
+
+- Overview dashboard
+- Money Center for income, accounts, and financial position
+- Transactions
+- Budgets
+- Cards & Debt
+- Bills
+- Savings Goals
+- Insights
+- Settings
+- Help Center
+- Supabase Auth and household data model
+- GitHub Pages deployment
+
+Money Center consolidates Income, Accounts, and Financial Position.
 
 ## Project Docs
 
-- `docs/local-workflow.md` covers Node version, install commands, local checks, pull request routine, and project checks.
-- `docs/frontend-architecture-plan.md` tracks the frontend architecture cleanup plan.
-- `docs/auth-session-qa.md` contains the authentication and session QA checklist.
-- `docs/production-qa-checklist.md` contains the release QA checklist and smoke test workflow.
-- `docs/release-readiness-checklist.md` contains the final pre-release checklist for deployment, migrations, auth redirects, and destructive-flow safety.
-- `docs/release-tag-deployment-handoff.md` contains release tag, deployment assumptions, and pre/post deploy handoff checks.
+- `docs/local-workflow.md` for local setup and day-to-day workflow
+- `docs/frontend-architecture-plan.md` for frontend architecture notes
+- `docs/auth-session-qa.md` for auth/session QA checks
+- `docs/production-qa-checklist.md` for release smoke testing
+- `docs/release-readiness-checklist.md` for final pre-release checks
+- `docs/release-tag-deployment-handoff.md` for deploy handoff details
+
+## Tech Stack
+
+- Vite
+- React
+- Tailwind CSS
+- Supabase (Auth, Postgres, RLS, Edge Functions)
+- Lucide icons
+- Node.js >= 24
 
 ## Install
 
-Use Node 24 for local development. The project includes `.nvmrc`, `.npmrc`, and `package.json` engine settings so local installs and project checks use the same major Node version.
+Use Node.js 24+ for local development. This repo includes `.nvmrc`, `.npmrc`, and `package.json` engines guidance.
 
 Install dependencies:
-
-```powershell
-npm.cmd install
-```
-
-On macOS/Linux or a shell where npm scripts are enabled:
 
 ```bash
 npm install
 ```
 
-For a clean install that matches the lockfile:
+For a lockfile-clean install:
 
 ```bash
 npm ci
@@ -35,150 +55,123 @@ npm ci
 
 ## Environment Variables
 
-Copy the example environment file and fill in the local values:
+Create local environment values from the example file:
 
 ```bash
 cp .env.example .env.local
 ```
 
-On PowerShell:
+PowerShell:
 
 ```powershell
 Copy-Item .env.example .env.local
 ```
 
-Required frontend variables:
+Required Vite frontend variables:
 
 ```text
 VITE_SUPABASE_URL=your-supabase-project-url
 VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
-Do not commit `.env.local`. It is already listed in `.gitignore`.
+Use `.env.local` for local values and never commit secrets.
 
-Only use the Supabase anon key in the frontend. Never put `SUPABASE_SERVICE_ROLE_KEY` in Vite environment variables or any frontend file.
+Only use the Supabase anon key in frontend code. Never expose `SUPABASE_SERVICE_ROLE_KEY` in Vite env vars, frontend source, or browser-delivered config.
 
 ## Local Development
 
-Start the Vite dev server:
-
-```powershell
-npm.cmd run dev
-```
-
-On macOS/Linux or a shell where npm scripts are enabled:
+Start the app:
 
 ```bash
 npm run dev
 ```
 
-If Vite dependency caching gets stale after moving folders or changing dependencies:
+If dependencies or Vite cache become stale:
 
-```powershell
-npm.cmd run dev -- --force
+```bash
+npm run dev -- --force
 ```
 
-Remove generated local folders before a clean rebuild:
+Clean generated local folders before rebuilding:
 
-```powershell
-npm.cmd run clean
+```bash
+npm run clean
 ```
 
 ## Build and Checks
 
-Create a production build:
+Build production assets:
 
-```powershell
-npm.cmd run build
+```bash
+npm run build
 ```
 
 Run tests:
 
-```powershell
-npm.cmd run test:run
+```bash
+npm run test:run
 ```
 
-Run the full project verification suite:
+Required project verification before PR:
 
-```powershell
-npm.cmd run verify
+```bash
+npm run verify
 ```
 
-Run a clean verification pass when generated folders or Vite cache may be stale:
+`npm run verify` runs formatting check, build, tests, and lint.
 
-```powershell
-npm.cmd run verify:clean
+Optional clean verification pass:
+
+```bash
+npm run verify:clean
 ```
-
-`verify` runs formatting checks, production build, tests, and lint.
 
 Preview the production build locally:
 
-```powershell
-npm.cmd run preview
+```bash
+npm run preview
 ```
 
 ## Supabase Setup
 
-Run the SQL migrations in `supabase/migrations` against the target Supabase project before using the app in production.
+Apply SQL migrations in `supabase/migrations` to your target Supabase project before production use.
 
-Recommended deploy path:
+Recommended path:
 
-```powershell
+```bash
 npx supabase login
 npx supabase link --project-ref your-project-ref
 npx supabase db push
 ```
 
-`015_monthly_close_reviews.sql` creates `monthly_close_reviews` for persisted monthly close review state.
-
-If migration history mismatch appears (for example after duplicate migration-number history), do not reset production data. Instead:
-
-1. Run `npx supabase migration list`.
-2. Compare local migration files vs remote history.
-3. Use Supabase migration repair commands carefully to mark the correct versions.
-4. Re-run `npx supabase db push`.
-
-Required database features include:
+Required platform capabilities include:
 
 - Supabase Auth
-- Row Level Security policies from the migrations
-- Household setup fields from `010_household_setup_and_data_controls.sql`
-- Household profiles from `009_household_profiles.sql`
-- Security hardening from `011_security_hardening.sql`
+- Row Level Security policies from migrations
+- Household setup and profile tables/policies
+- Security hardening migrations
 
-## Security Hardening Notes
-
-The latest security migration tightens household write access. `owner` and `admin` can manage shared finance data. `member` and `viewer` retain household read access through the existing select policies, but no longer receive broad write access to cards, budgets, transactions, balances, recurring payments, or household profiles.
-
-Card URLs are also validated before being rendered as external links. Invalid or unsupported URL protocols render as plain text instead of clickable links.
+If migration history mismatch appears, do not reset production data. Compare local and remote migration history and use Supabase migration repair carefully before rerunning `supabase db push`.
 
 ## Edge Functions
 
-Account deletion uses this Supabase Edge Function:
+This app uses Supabase Edge Functions for destructive account/household workflows:
 
-```text
-supabase/functions/delete-account
-```
+- `supabase/functions/delete-account`
+- `supabase/functions/delete-household-finance-data`
 
-Household finance data deletion uses this Supabase Edge Function:
+Deploy with Supabase CLI:
 
-```text
-supabase/functions/delete-household-finance-data
-```
-
-Deploy them with the Supabase CLI:
-
-```powershell
+```bash
 npx supabase login
 npx supabase link --project-ref your-project-ref
 npx supabase functions deploy delete-account
 npx supabase functions deploy delete-household-finance-data
 ```
 
-If either function changes, redeploy that function before production smoke testing.
+If function code changes, redeploy changed functions before production smoke testing.
 
-The Edge Functions need these server-side environment variables/secrets:
+Edge Function secrets:
 
 ```text
 SUPABASE_URL
@@ -187,25 +180,19 @@ SUPABASE_SERVICE_ROLE_KEY
 ALLOWED_ORIGINS
 ```
 
-`ALLOWED_ORIGINS` is optional but recommended. Use a comma-separated list, for example:
+`ALLOWED_ORIGINS` is optional but recommended as a comma-separated allowlist.
 
-```text
-https://ardalum.github.io,http://127.0.0.1:5173,http://localhost:5173
-```
-
-Keep `SUPABASE_SERVICE_ROLE_KEY` only in Supabase Edge Function secrets. Do not add it to `.env.local`, Vercel environment variables for the frontend, or source code.
+Keep `SUPABASE_SERVICE_ROLE_KEY` only in server-side Edge Function secrets.
 
 ## Backup and Import Safety
 
-Supabase JSON backups and Excel exports contain household finance data such as card names, last four digits, balances, transactions, notes, budgets, recurring payments, and household profile labels. Store exported files privately.
+Supabase JSON backups and Excel exports contain sensitive household finance data. Store exported files securely and import only trusted files.
 
-Only import backup files you trust. The current importer validates the backup structure and merges records, but exported finance data is still sensitive.
+Use non-production test accounts for destructive workflow checks, including risky imports, household finance deletion, and account deletion.
 
-Test destructive flows (account deletion, household finance deletion, and risky imports) only with test accounts and test data.
+## Deploy to GitHub Pages
 
-## Deploy To GitHub Pages (Current)
-
-This repository is configured to deploy `dist` to GitHub Pages from `main` through `.github/workflows/deploy.yml`.
+This repository deploys `dist` to GitHub Pages from `main` via `.github/workflows/deploy.yml`.
 
 Required GitHub repository secrets:
 
@@ -216,53 +203,25 @@ Release flow:
 
 1. Push to `main`.
 2. Confirm `Deploy Spedger to GitHub Pages` succeeds in GitHub Actions.
-3. Confirm the workflow `Verify` step passed (`npm run verify`).
-4. Open the deployed GitHub Pages site and complete smoke checks from `docs/production-qa-checklist.md`.
-
-## Deploy To Vercel (Optional)
-
-1. Push the repository to GitHub.
-2. Create a new Vercel project and import the repository.
-3. Use the default Vite settings:
-   - Framework preset: `Vite`
-   - Build command: `npm run build`
-   - Output directory: `dist`
-4. Add these Vercel environment variables:
-
-```text
-VITE_SUPABASE_URL
-VITE_SUPABASE_ANON_KEY
-```
-
-5. Deploy.
-
-After deployment, update Supabase Auth URL settings:
-
-- Add the Vercel production URL to allowed redirect URLs.
-- Add local dev URLs such as `http://127.0.0.1:5173` if needed.
-- Configure email confirmation and password reset templates/redirects for production.
+3. Confirm `Verify` passed (`npm run verify`).
+4. Run production smoke checks from `docs/production-qa-checklist.md` on the deployed site.
 
 ## Production Checklist
 
-- [ ] `npm.cmd run verify` passes locally.
-- [ ] `npm.cmd run dev` starts locally when browser behavior should be checked.
-- [ ] Supabase migrations have been applied to production.
-- [ ] RLS is enabled on all household finance tables.
-- [ ] `011_security_hardening.sql` has been applied and role permissions tested.
-- [ ] `VITE_SUPABASE_URL` is set in the frontend host.
-- [ ] `VITE_SUPABASE_ANON_KEY` is set in the frontend host.
-- [ ] No service role key is present in frontend code or frontend env vars.
+- [ ] `npm run verify` passes locally.
+- [ ] `npm run dev` starts locally when browser behavior should be checked.
+- [ ] Supabase migrations are applied to production.
+- [ ] RLS is enabled on household finance tables.
+- [ ] `VITE_SUPABASE_URL` is configured in frontend hosting.
+- [ ] `VITE_SUPABASE_ANON_KEY` is configured in frontend hosting.
+- [ ] No frontend code or env vars expose `SUPABASE_SERVICE_ROLE_KEY`.
 - [ ] `delete-account` Edge Function is deployed.
 - [ ] `delete-household-finance-data` Edge Function is deployed.
-- [ ] If Edge Function code changed, each changed function has been redeployed.
-- [ ] `SUPABASE_SERVICE_ROLE_KEY` is configured only as an Edge Function secret.
+- [ ] Changed Edge Functions are redeployed.
+- [ ] `SUPABASE_SERVICE_ROLE_KEY` exists only as an Edge Function secret.
 - [ ] `ALLOWED_ORIGINS` is configured for Edge Functions.
-- [ ] Supabase Auth production site URL and redirect URLs are configured.
-- [ ] Email confirmation and password reset settings are configured in Supabase.
-- [ ] Test signup, first-time setup, export, import, household finance deletion, and account deletion in a non-production test account.
-- [ ] `docs/production-qa-checklist.md` has been completed for this release.
-- [ ] Confirm `.env.local` is not committed.
-
-## Legacy LocalStorage Tools
-
-The app still includes clearly labeled legacy localStorage backup tools for users who need to recover older browser-only data. Current production data should live in Supabase.
+- [ ] Supabase Auth site URL and redirect URLs are configured.
+- [ ] Email confirmation and password reset flows are configured/tested.
+- [ ] Signup, household setup, export/import, and destructive flows are tested in non-production accounts.
+- [ ] `docs/production-qa-checklist.md` is completed for release.
+- [ ] `.env.local` is not committed.
