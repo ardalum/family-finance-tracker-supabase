@@ -22,6 +22,7 @@ Money Center consolidates Income, Accounts, and Financial Position.
 ## Project Docs
 
 - `docs/local-workflow.md` for local setup and day-to-day workflow
+- `docs/finance-model/cash-position-register-model.md` for the Cash Position and account register model decision
 - `docs/frontend-architecture-plan.md` for frontend architecture notes
 - `docs/auth-session-qa.md` for auth/session QA checks
 - `docs/production-qa-checklist.md` for release smoke testing
