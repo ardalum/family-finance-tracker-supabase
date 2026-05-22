@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CalendarDays, ChevronLeft, ChevronRight, MoreHorizontal, RotateCcw } from "lucide-react";
+import { CalendarDays, ChevronDown, ChevronLeft, ChevronRight, MoreHorizontal, RotateCcw } from "lucide-react";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import EmptyState from "../../../components/ui/EmptyState.jsx";
@@ -24,7 +24,7 @@ import {
   quickFilters,
 } from "./transactionTableUtils.js";
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
 export default function TransactionTable({
   transactions,
@@ -42,6 +42,7 @@ export default function TransactionTable({
   const [transactionPendingDelete, setTransactionPendingDelete] = useState(null);
   const [quickFilter, setQuickFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
   const [selectedIds, setSelectedIds] = useState(() => new Set());
   const [menuOpenId, setMenuOpenId] = useState(null);
   const menuRef = useRef(null);
@@ -78,10 +79,10 @@ export default function TransactionTable({
     [filteredTransactions],
   );
 
-  const totalPages = Math.max(1, Math.ceil(filteredTransactions.length / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(filteredTransactions.length / pageSize));
   const safeCurrentPage = Math.min(currentPage, totalPages);
-  const startIndex = (safeCurrentPage - 1) * PAGE_SIZE;
-  const endIndexExclusive = startIndex + PAGE_SIZE;
+  const startIndex = (safeCurrentPage - 1) * pageSize;
+  const endIndexExclusive = startIndex + pageSize;
   const paginatedTransactions = filteredTransactions.slice(startIndex, endIndexExclusive);
   const groupedTransactions = useMemo(
     () => groupTransactionsByDate(paginatedTransactions),
@@ -97,6 +98,10 @@ export default function TransactionTable({
   useEffect(() => {
     setCurrentPage(1);
   }, [filters, quickFilter, sortMode]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [pageSize]);
 
   useEffect(() => {
     if (currentPage !== safeCurrentPage) {
@@ -225,7 +230,25 @@ export default function TransactionTable({
 
     return (
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-app-border px-4 py-3 md:px-5">
-        <p className="text-xs font-medium text-text-muted">25 / page</p>
+        <div className="relative">
+          <select
+            value={pageSize}
+            onChange={(event) => setPageSize(Number(event.target.value) || 25)}
+            className="h-8 appearance-none rounded-lg border border-app-border bg-app-surface px-2.5 pr-7 text-xs font-medium text-text-main outline-none"
+            aria-label="Rows per page"
+          >
+            {PAGE_SIZE_OPTIONS.map((option) => (
+              <option key={option} value={option}>
+                {option} / page
+              </option>
+            ))}
+          </select>
+          <ChevronDown
+            size={13}
+            className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-text-muted"
+            aria-hidden="true"
+          />
+        </div>
         <div className="flex items-center gap-1.5">
           <button
             type="button"

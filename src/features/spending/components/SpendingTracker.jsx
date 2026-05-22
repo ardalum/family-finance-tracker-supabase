@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getCurrentMonthKey } from "../../../lib/dates.js";
 import { formatMonthLabel } from "../../../lib/formatters.js";
 import { consumeNavigationTarget } from "../../../lib/navigationTargets.js";
@@ -6,6 +6,7 @@ import SpendingMigrationPanel from "./SpendingMigrationPanel.jsx";
 import SpendingSummary from "./SpendingSummary.jsx";
 import TransactionModal from "./TransactionModal.jsx";
 import TransactionTable from "./TransactionTable.jsx";
+import { getTotalSpending } from "../spendingService.js";
 
 const emptyFilters = {
   search: "",
@@ -38,6 +39,25 @@ export default function SpendingTracker({
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [filters, setFilters] = useState(emptyFilters);
   const activeCards = creditCards.filter((card) => card.isActive);
+  const statusLine = useMemo(() => {
+    if (loading) return "Loading transactions...";
+    if (categoriesLoading) return "Loading categories...";
+    if (isSaving) return "Saving transaction...";
+    return "";
+  }, [loading, categoriesLoading, isSaving]);
+  const summaryPreviousMonthHint = useMemo(() => {
+    if (!Array.isArray(localTransactions) || localTransactions.length === 0) return null;
+    const previousMonthKey = shiftMonth(selectedMonth, -1);
+    const previousMonthTransactions = localTransactions.filter(
+      (transaction) => String(transaction.date || "").slice(0, 7) === previousMonthKey,
+    );
+    if (!previousMonthTransactions.length) return null;
+    return {
+      monthKey: previousMonthKey,
+      totalSpent: getTotalSpending(previousMonthTransactions),
+      transactionCount: previousMonthTransactions.length,
+    };
+  }, [localTransactions, selectedMonth]);
 
   useEffect(() => {
     const target = consumeNavigationTarget("spending");
@@ -101,15 +121,13 @@ export default function SpendingTracker({
         disabled={loading || isSaving || categoriesLoading}
       />
 
-      <header className="grid gap-1">
-        <h2 className="text-2xl font-semibold tracking-tight text-text-main">Transactions</h2>
-        <p className="text-sm text-text-soft">All income and expenses for {formatMonthLabel(selectedMonth)}</p>
-        {loading ? <p className="text-xs text-text-muted">Loading transactions...</p> : null}
-        {categoriesLoading ? <p className="text-xs text-text-muted">Loading categories...</p> : null}
-        {isSaving ? <p className="text-xs text-text-muted">Saving transaction...</p> : null}
-      </header>
+      {statusLine ? <p className="text-xs text-text-muted">{statusLine}</p> : null}
 
-      <SpendingSummary transactions={transactions} categories={categories} />
+      <SpendingSummary
+        transactions={transactions}
+        categories={categories}
+        previousMonthHint={summaryPreviousMonthHint}
+      />
 
       <TransactionTable
         transactions={transactions}
@@ -138,4 +156,12 @@ export default function SpendingTracker({
       />
     </section>
   );
+}
+
+function shiftMonth(monthKey, delta) {
+  const [year, month] = String(monthKey || "")
+    .split("-")
+    .map(Number);
+  const shifted = new Date(year, month - 1 + delta, 1);
+  return `${shifted.getFullYear()}-${String(shifted.getMonth() + 1).padStart(2, "0")}`;
 }
