@@ -1,4 +1,4 @@
-import {
+﻿import {
   AlertTriangle,
   ArrowRight,
   Car,
@@ -113,7 +113,9 @@ export default function DashboardV2({
                   <p className="mt-1 text-sm text-text-muted">{data.netCashFlow.monthLabel}</p>
                   <p
                     className={`mt-1 text-sm font-semibold ${
-                      data.netCashFlow.deltaPct >= 0 ? "text-status-successDark" : "text-status-danger"
+                      data.netCashFlow.deltaPct >= 0
+                        ? "text-status-successDark"
+                        : "text-status-danger"
                     }`}
                   >
                     {data.netCashFlow.deltaPct > 0 ? "+" : ""}
@@ -204,13 +206,16 @@ export default function DashboardV2({
                         <div className="flex items-center justify-between gap-2 text-sm">
                           <span className="inline-flex min-w-0 items-center gap-2">
                             <span className={`h-2 w-2 shrink-0 rounded-full ${tone.dotClass}`} />
-                            <span className="truncate font-medium text-text-main">{category.name}</span>
+                            <span className="truncate font-medium text-text-main">
+                              {category.name}
+                            </span>
                           </span>
                           <span
                             className="shrink-0 text-text-muted"
                             title={`${formatCurrency(category.spent)} / ${formatCurrency(category.budget)}`}
                           >
-                            {formatCompactCurrency(category.spent)} / {formatCompactCurrency(category.budget)}
+                            {formatCompactCurrency(category.spent)} /{" "}
+                            {formatCompactCurrency(category.budget)}
                           </span>
                         </div>
                       </div>
@@ -247,7 +252,7 @@ export default function DashboardV2({
                       {bill.type === "card" ? (
                         <div className="text-xs text-text-muted">
                           <p>Card payment</p>
-                          <p>•••• {bill.last4 || "0000"}</p>
+                          <p>ï¿½ï¿½ï¿½ï¿½ {bill.last4 || "0000"}</p>
                         </div>
                       ) : (
                         <p className="text-xs text-text-muted">{bill.helper || "Recurring bill"}</p>
@@ -319,7 +324,9 @@ export default function DashboardV2({
                       className="flex items-center justify-between gap-2"
                     >
                       <div>
-                        <p className="text-sm font-semibold text-text-main truncate">{payment.name}</p>
+                        <p className="text-sm font-semibold text-text-main truncate">
+                          {payment.name}
+                        </p>
                         <p className="text-xs text-text-muted">
                           ... {payment.last4} - {payment.dueText}
                         </p>
@@ -400,44 +407,50 @@ export default function DashboardV2({
                 </p>
               ) : null}
               <div className="grid gap-3 md:grid-cols-3">
-              {visibleAlerts.map((alert) => (
-                <article
-                  key={alert.title}
-                  className={`rounded-xl border p-3 ${
-                    alert.tone === "danger"
-                      ? "border-status-dangerBg bg-[#FFF6F6]"
-                      : "border-status-warningBg bg-[#FFF9F2]"
-                  }`}
-                >
-                  <div className="flex items-start gap-2">
-                    <span
-                      className={`mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-full ${
-                        alert.tone === "danger"
-                          ? "bg-status-dangerBg text-status-danger"
-                          : "bg-status-warningBg text-status-warningDark"
-                      }`}
-                    >
-                      {alert.tone === "danger" ? <AlertTriangle size={16} /> : <CalendarClock size={16} />}
-                    </span>
-                    <div className="min-w-0">
-                      <p
-                        className={`text-sm font-semibold ${alert.tone === "danger" ? "text-status-danger" : "text-status-warningDark"}`}
-                      >
-                        {alert.title}
-                      </p>
-                  <p className="mt-1 text-xs text-text-muted">{alert.description}</p>
-                  <button
-                    type="button"
-                    className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-brand-primary"
-                    onClick={() => navigateToView(getAlertTargetView(alert), getAlertTargetKey(alert))}
+                {visibleAlerts.map((alert) => (
+                  <article
+                    key={alert.title}
+                    className={`rounded-xl border p-3 ${
+                      alert.tone === "danger"
+                        ? "border-status-dangerBg bg-[#FFF6F6]"
+                        : "border-status-warningBg bg-[#FFF9F2]"
+                    }`}
                   >
-                    {alert.action}
-                    <ChevronRight size={12} aria-hidden="true" />
-                  </button>
+                    <div className="flex items-start gap-2">
+                      <span
+                        className={`mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-full ${
+                          alert.tone === "danger"
+                            ? "bg-status-dangerBg text-status-danger"
+                            : "bg-status-warningBg text-status-warningDark"
+                        }`}
+                      >
+                        {alert.tone === "danger" ? (
+                          <AlertTriangle size={16} />
+                        ) : (
+                          <CalendarClock size={16} />
+                        )}
+                      </span>
+                      <div className="min-w-0">
+                        <p
+                          className={`text-sm font-semibold ${alert.tone === "danger" ? "text-status-danger" : "text-status-warningDark"}`}
+                        >
+                          {alert.title}
+                        </p>
+                        <p className="mt-1 text-xs text-text-muted">{alert.description}</p>
+                        <button
+                          type="button"
+                          className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-brand-primary"
+                          onClick={() =>
+                            navigateToView(getAlertTargetView(alert), getAlertTargetKey(alert))
+                          }
+                        >
+                          {alert.action}
+                          <ChevronRight size={12} aria-hidden="true" />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </article>
-              ))}
+                  </article>
+                ))}
               </div>
               {remainingAlertCount > 0 ? (
                 <p className="text-xs font-medium text-text-muted">
@@ -509,8 +522,7 @@ export default function DashboardV2({
             </div>
             <div className="p-5">
               <blockquote className="rounded-xl border border-[#F2DFC2] bg-[#FFF9F1] px-4 py-3 text-sm italic text-text-soft">
-                <Quote size={16} className="mb-2 text-[#D29B3D]" />
-                "{data.familyNote.quote}"
+                <Quote size={16} className="mb-2 text-[#D29B3D]" />"{data.familyNote.quote}"
                 <footer className="mt-2 text-xs font-semibold not-italic text-text-muted">
                   - {data.familyNote.author}
                 </footer>
@@ -621,7 +633,8 @@ function runAction(label) {
 }
 
 function getAlertTargetView(alert = {}) {
-  const haystack = `${alert.title || ""} ${alert.description || ""} ${alert.action || ""}`.toLowerCase();
+  const haystack =
+    `${alert.title || ""} ${alert.description || ""} ${alert.action || ""}`.toLowerCase();
   if (haystack.includes("budget")) return "budgets";
   if (haystack.includes("card") || haystack.includes("debt") || haystack.includes("statement")) {
     return "credit-cards";

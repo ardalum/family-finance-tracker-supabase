@@ -7,18 +7,20 @@ function read(path) {
 }
 
 describe("savings ui copy", () => {
-  it("keeps separation, inactive-goal, and delete confirmation wording", () => {
+  it("keeps clear savings goal and contribution workflow wording", () => {
     const source = read("src/features/savings/components/Savings.jsx");
-    assert.equal(source.includes("Savings contributions are tracked separately"), true);
-    assert.equal(source.includes("do not change spending or budget"), true);
+    assert.equal(source.includes("Add goal"), true);
+    assert.equal(source.includes("Add contribution"), true);
+    assert.equal(source.includes("Monthly contributions trend"), true);
+    assert.equal(source.includes("Recent contributions"), true);
+    assert.equal(source.includes("Upcoming milestones"), true);
     assert.equal(
       source.includes(
-        "Inactive goals stay in history but are hidden from new contribution goal options.",
+        'Delete savings goal "${goalName}"? Existing contribution history will stay and appear as unlinked/deleted goal entries.',
       ),
       true,
     );
     assert.equal(source.includes("Delete this savings contribution?"), true);
-    assert.equal(source.includes("Delete savings goal"), true);
-    assert.equal(source.includes("Set a target amount to track progress percentage."), true);
+    assert.equal(source.includes("See insights"), true);
   });
 });

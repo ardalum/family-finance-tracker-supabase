@@ -46,7 +46,7 @@ export default function AppHeaderAccountSlot({
               ? savingsMonth
               : isInsights
                 ? insightsMonth
-              : "";
+                : "";
   const onMonthChange = isDashboard
     ? onDashboardMonthChange
     : isSpending
@@ -61,7 +61,7 @@ export default function AppHeaderAccountSlot({
               ? onSavingsMonthChange
               : isInsights
                 ? onInsightsMonthChange
-              : null;
+                : null;
   const actionLabel = isInsights
     ? "View reports"
     : isBudgets
@@ -113,7 +113,7 @@ export default function AppHeaderAccountSlot({
                           ? "Savings goals month"
                           : isInsights
                             ? "Insights month"
-                          : "Cards and debt month"
+                            : "Cards and debt month"
               }
             >
               {monthOptions.map((month) => (
@@ -179,5 +179,3 @@ export default function AppHeaderAccountSlot({
     </div>
   );
 }
-
-

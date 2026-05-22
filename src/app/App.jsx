@@ -896,5 +896,3 @@ function FinanceTrackerApp() {
     </AppShellFrame>
   );
 }
-
-

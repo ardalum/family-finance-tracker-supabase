@@ -1,5 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { ChevronRight, Home, MoreHorizontal, ShoppingCart, Car, Utensils, Clapperboard, GraduationCap, HeartPulse, Ellipsis } from "lucide-react";
+import {
+  ChevronRight,
+  Home,
+  MoreHorizontal,
+  ShoppingCart,
+  Car,
+  Utensils,
+  Clapperboard,
+  GraduationCap,
+  HeartPulse,
+  Ellipsis,
+} from "lucide-react";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
@@ -44,7 +55,8 @@ export default function BudgetTable({
             <div>
               <h2 className="text-lg font-semibold text-text-main">No budget categories yet</h2>
               <p className="mt-1 text-sm text-text-muted">
-                Copy last month&apos;s budget categories and amounts, add your own category, or start with the default set for this month.
+                Copy last month&apos;s budget categories and amounts, add your own category, or
+                start with the default set for this month.
               </p>
             </div>
             <div className="flex flex-wrap justify-center gap-3">
@@ -63,7 +75,9 @@ export default function BudgetTable({
         ) : (
           <div className="grid gap-0">
             <div className="flex items-center justify-between border-b border-app-border px-5 py-4">
-              <h3 className="text-[1.65rem] font-semibold tracking-tight text-text-main">Budget by category</h3>
+              <h3 className="text-[1.65rem] font-semibold tracking-tight text-text-main">
+                Budget by category
+              </h3>
               <p className="text-sm text-text-muted">{displayRows.length} visible</p>
             </div>
 
@@ -88,7 +102,9 @@ export default function BudgetTable({
                       isSaving={isSaving}
                       menuOpen={openMenuBudgetId === String(budget.id)}
                       onToggleMenu={() =>
-                        setOpenMenuBudgetId((current) => (current === String(budget.id) ? "" : String(budget.id)))
+                        setOpenMenuBudgetId((current) =>
+                          current === String(budget.id) ? "" : String(budget.id),
+                        )
                       }
                       onEdit={onEdit}
                       onDelete={setBudgetPendingDelete}
@@ -158,32 +174,51 @@ function BudgetRow({ budget, isSaving, menuOpen, onToggleMenu, onEdit, onDelete 
     <tr className="border-b border-app-border last:border-b-0">
       <td className="px-5 py-3">
         <div className="flex min-w-0 items-center gap-3">
-          <span className={`inline-flex h-10 w-10 items-center justify-center rounded-full ${status.iconBg}`}>
+          <span
+            className={`inline-flex h-10 w-10 items-center justify-center rounded-full ${status.iconBg}`}
+          >
             <Icon size={17} className={status.iconText} />
           </span>
           <div className="min-w-0">
             <p className="truncate font-semibold text-text-main">{budget.name}</p>
-            <p className="truncate text-xs text-text-muted">{budget.notes || "Monthly budget category"}</p>
+            <p className="truncate text-xs text-text-muted">
+              {budget.notes || "Monthly budget category"}
+            </p>
           </div>
         </div>
       </td>
-      <td className="px-4 py-3 text-sm font-semibold text-text-main">{formatCurrency(budget.monthlyAmount || 0)}</td>
-      <td className={`px-4 py-3 text-sm font-semibold ${budget.spent > (budget.monthlyAmount || 0) ? "text-status-danger" : "text-text-main"}`}>
+      <td className="px-4 py-3 text-sm font-semibold text-text-main">
+        {formatCurrency(budget.monthlyAmount || 0)}
+      </td>
+      <td
+        className={`px-4 py-3 text-sm font-semibold ${budget.spent > (budget.monthlyAmount || 0) ? "text-status-danger" : "text-text-main"}`}
+      >
         {formatCurrency(budget.spent || 0)}
       </td>
-      <td className={`px-4 py-3 text-sm font-semibold ${budget.remaining < 0 ? "text-status-danger" : "text-status-success"}`}>
+      <td
+        className={`px-4 py-3 text-sm font-semibold ${budget.remaining < 0 ? "text-status-danger" : "text-status-success"}`}
+      >
         {formatCurrency(budget.remaining || 0)}
       </td>
       <td className="px-4 py-3">
         <div className="grid gap-1">
           <div className="h-2 w-full overflow-hidden rounded-full bg-app-muted">
-            <div className={`h-full rounded-full ${status.progress}`} style={{ width: `${progressWidth}%` }} />
+            <div
+              className={`h-full rounded-full ${status.progress}`}
+              style={{ width: `${progressWidth}%` }}
+            />
           </div>
-          <p className="text-xs text-text-muted">{formatUsedPercentLabel(percentUsed, showOverText)}</p>
+          <p className="text-xs text-text-muted">
+            {formatUsedPercentLabel(percentUsed, showOverText)}
+          </p>
         </div>
       </td>
       <td className="px-4 py-3">
-        <span className={`inline-flex max-w-[88px] truncate rounded-full px-2.5 py-1 text-xs font-semibold ${status.pill}`}>{status.label}</span>
+        <span
+          className={`inline-flex max-w-[88px] truncate rounded-full px-2.5 py-1 text-xs font-semibold ${status.pill}`}
+        >
+          {status.label}
+        </span>
       </td>
       <td className="relative px-3 py-3 text-right" ref={menuRef}>
         <BudgetActionMenu
@@ -223,10 +258,16 @@ function BudgetMobileCard({ budget, onEdit, onDelete, isSaving }) {
       <div className="flex min-w-0 items-start justify-between gap-2">
         <div className="min-w-0">
           <h4 className="truncate text-base font-semibold text-text-main">{budget.name}</h4>
-          <p className="mt-1 truncate text-xs text-text-muted">{budget.notes || "Monthly budget category"}</p>
+          <p className="mt-1 truncate text-xs text-text-muted">
+            {budget.notes || "Monthly budget category"}
+          </p>
         </div>
         <div className="flex items-center gap-2">
-          <span className={`inline-flex max-w-[88px] truncate rounded-full px-2.5 py-1 text-xs font-semibold ${status.pill}`}>{status.label}</span>
+          <span
+            className={`inline-flex max-w-[88px] truncate rounded-full px-2.5 py-1 text-xs font-semibold ${status.pill}`}
+          >
+            {status.label}
+          </span>
           <BudgetActionMenu
             budget={budget}
             isSaving={isSaving}
@@ -244,7 +285,10 @@ function BudgetMobileCard({ budget, onEdit, onDelete, isSaving }) {
         <Metric label="Remaining" value={formatCurrency(budget.remaining || 0)} />
       </div>
       <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-app-muted">
-        <div className={`h-full rounded-full ${status.progress}`} style={{ width: `${progressWidth}%` }} />
+        <div
+          className={`h-full rounded-full ${status.progress}`}
+          style={{ width: `${progressWidth}%` }}
+        />
       </div>
     </article>
   );
@@ -310,20 +354,37 @@ function BudgetActionMenu({
 
 function DeleteDialog({ budget, onCancel, onConfirm, isSaving }) {
   return (
-    <div className="fixed inset-0 z-50 flex min-h-screen items-center justify-center bg-gray-950/40 px-4 py-6" role="dialog" aria-modal="true" aria-labelledby="delete-budget-title">
+    <div
+      className="fixed inset-0 z-50 flex min-h-screen items-center justify-center bg-gray-950/40 px-4 py-6"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="delete-budget-title"
+    >
       <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white shadow-xl">
         <div className="border-b border-gray-200 p-5">
-          <h2 id="delete-budget-title" className="text-lg font-semibold text-gray-950">Delete budget category?</h2>
-          <p className="mt-1 text-sm text-gray-500">This removes the category from this month&apos;s budget. Existing transactions are not deleted.</p>
+          <h2 id="delete-budget-title" className="text-lg font-semibold text-gray-950">
+            Delete budget category?
+          </h2>
+          <p className="mt-1 text-sm text-gray-500">
+            This removes the category from this month&apos;s budget. Existing transactions are not
+            deleted.
+          </p>
         </div>
         <div className="grid gap-4 p-5">
           <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-800">
             <p className="font-semibold">{budget.name}</p>
-            <p className="mt-1">Budget {formatCurrency(budget.monthlyAmount)} · Spent {formatCurrency(budget.spent || 0)}</p>
+            <p className="mt-1">
+              Budget {formatCurrency(budget.monthlyAmount)} · Spent{" "}
+              {formatCurrency(budget.spent || 0)}
+            </p>
           </div>
           <div className="flex flex-wrap justify-end gap-3">
-            <Button type="button" variant="secondary" onClick={onCancel} disabled={isSaving}>Cancel</Button>
-            <Button type="button" variant="danger" onClick={onConfirm} disabled={isSaving}>{isSaving ? "Deleting..." : "Delete category"}</Button>
+            <Button type="button" variant="secondary" onClick={onCancel} disabled={isSaving}>
+              Cancel
+            </Button>
+            <Button type="button" variant="danger" onClick={onConfirm} disabled={isSaving}>
+              {isSaving ? "Deleting..." : "Delete category"}
+            </Button>
           </div>
         </div>
       </div>

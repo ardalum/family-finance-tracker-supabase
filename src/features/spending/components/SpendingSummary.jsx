@@ -1,4 +1,4 @@
-import { CircleDollarSign, FileText, Info, ShoppingBasket, TrendingDown } from "lucide-react";
+ï»¿import { CircleDollarSign, FileText, Info, ShoppingBasket, TrendingDown } from "lucide-react";
 import Card from "../../../components/ui/Card.jsx";
 import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
 import { getTotalSpending, summarizeByCategory } from "../spendingService.js";
@@ -45,7 +45,7 @@ export default function SpendingSummary({ transactions, categories, previousMont
       title: "Top category",
       value: topCategory ? topCategory.name : "No category yet",
       helper: topCategory
-        ? `${formatCurrency(topCategory.amount)} · ${topCategoryPercent}% of total`
+        ? `${formatCurrency(topCategory.amount)} \u00B7 ${topCategoryPercent}% of total`
         : "No spending data yet",
       icon: ShoppingBasket,
       iconWrapClass: "bg-amber-50 text-amber-700 ring-amber-100",

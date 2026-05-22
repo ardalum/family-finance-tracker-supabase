@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+﻿import { useMemo, useState } from "react";
 import {
   AlertTriangle,
   Bell,
@@ -81,7 +81,7 @@ export default function AppSettings({ exportData = null }) {
 
   const householdLabel = activeHousehold?.name ?? "No household";
   const memberCount = memberships.length || 0;
-  const preferenceValue = `${draftSettings.currency?.code ?? "USD"} · ${
+  const preferenceValue = `${draftSettings.currency?.code ?? "USD"} ï¿½ ${
     draftSettings.defaultMonthBehavior === "last-viewed"
       ? "Remembered"
       : draftSettings.defaultMonthBehavior === "manual"
@@ -447,7 +447,9 @@ function SummaryCard({ icon, iconClassName, label, value, helper }) {
   return (
     <Card className="rounded-2xl border border-app-border bg-white p-4 shadow-sm">
       <div className="flex items-center gap-3.5">
-        <span className={`inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-full ${iconClassName}`}>
+        <span
+          className={`inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-full ${iconClassName}`}
+        >
           {icon}
         </span>
         <div className="min-w-0">
@@ -491,7 +493,10 @@ function LabeledSelect({ label, value, options, onChange }) {
             </option>
           ))}
         </select>
-        <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-text-muted" />
+        <ChevronDown
+          size={14}
+          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-text-muted"
+        />
       </div>
     </label>
   );
@@ -522,11 +527,15 @@ function MemberRow({ membership, fallbackEmail, isFirst }) {
           {initial}
         </span>
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-text-main">{name || "Household member"}</p>
+          <p className="truncate text-sm font-semibold text-text-main">
+            {name || "Household member"}
+          </p>
           <p className="truncate text-xs text-text-muted">{resolvedEmail || "Member access"}</p>
         </div>
       </div>
-      <span className={`inline-flex w-fit rounded-full px-2 py-1 text-xs font-semibold ${roleClass}`}>
+      <span
+        className={`inline-flex w-fit rounded-full px-2 py-1 text-xs font-semibold ${roleClass}`}
+      >
         {roleLabel}
       </span>
       <div className="flex items-center gap-1.5">
@@ -585,16 +594,11 @@ function PermissionIcon({ icon, title }) {
   );
 }
 
-function TogglePreferenceRow({
-  icon,
-  title,
-  description,
-  enabled,
-  onToggle,
-  compact = false,
-}) {
+function TogglePreferenceRow({ icon, title, description, enabled, onToggle, compact = false }) {
   return (
-    <div className={`flex items-center justify-between gap-3 rounded-xl border border-app-border bg-app-background px-3 ${compact ? "py-2" : "py-2.5"}`}>
+    <div
+      className={`flex items-center justify-between gap-3 rounded-xl border border-app-border bg-app-background px-3 ${compact ? "py-2" : "py-2.5"}`}
+    >
       <div className="flex min-w-0 items-start gap-2.5">
         <span className="mt-0.5 text-text-muted">{icon}</span>
         <div className="min-w-0">
@@ -718,7 +722,10 @@ function PreferenceSelectRow({ icon, title, value, options, onChange }) {
             </option>
           ))}
         </select>
-        <ChevronDown size={13} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-text-muted" />
+        <ChevronDown
+          size={13}
+          className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-text-muted"
+        />
       </div>
     </div>
   );

@@ -7,14 +7,18 @@ function read(path) {
 }
 
 describe("app settings honesty", () => {
-  it("keeps only working active controls and marks unfinished preferences as planned", () => {
+  it("keeps working controls active and marks unfinished/destructive controls clearly", () => {
     const source = read("src/features/settings/components/AppSettings.jsx");
 
-    assert.equal(source.includes('label="Show cents"'), true);
-    assert.equal(source.includes('label="Date format"'), false);
-    assert.equal(source.includes('label="Table density"'), false);
-    assert.equal(source.includes('label="Default selected month"'), false);
-    assert.equal(source.includes("Dark mode"), true);
-    assert.equal(source.includes("not active yet"), true);
+    assert.equal(source.includes("Save changes"), true);
+    assert.equal(source.includes("Sync now"), true);
+    assert.equal(source.includes("Export data"), true);
+    assert.equal(source.includes("Automatic backups"), true);
+    assert.equal(source.includes("InfoRow"), true);
+    assert.equal(source.includes("Import workflow coming soon."), true);
+    assert.equal(source.includes("Invite member"), true);
+    assert.equal(source.includes("Coming soon"), true);
+    assert.equal(source.includes("Delete household"), true);
+    assert.equal(source.includes("Delete all data"), true);
   });
 });

@@ -6,9 +6,10 @@ function read(path) {
   return readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 }
 
-test("app header includes global Quick Add entry point", () => {
+test("app header includes primary add/view action entry point", () => {
   const content = read("src/app/AppHeaderAccountSlot.jsx");
-  assert.match(content, /Quick Add/);
+  assert.match(content, /Add transaction/);
+  assert.match(content, /View reports/);
   assert.match(content, /onQuickAdd/);
 });
 

@@ -8,25 +8,35 @@ function read(path) {
 
 describe("dashboard quick actions", () => {
   it("keeps the compact quick action set", () => {
-    const source = read("src/features/dashboard/components/Dashboard.jsx");
+    const source = read("src/features/dashboard/components/DashboardV2.jsx");
 
-    assert.equal(source.includes('label: "Update card balances"'), true);
-    assert.equal(source.includes('label: "Add transactions"'), true);
-    assert.equal(source.includes('label: "Open recurring bills"'), true);
-    assert.equal(source.includes('label: "Review budget"'), true);
-    assert.equal(source.includes('label: "Tools"'), true);
-    assert.equal(source.includes('label: "Calendar"'), true);
+    assert.equal(source.includes('"Add bill"'), true);
+    assert.equal(source.includes('"Transfer money"'), true);
+    assert.equal(source.includes('"Add goal"'), true);
+    assert.equal(source.includes('"Scan receipt"'), true);
+    assert.equal(source.includes('"Split expense"'), true);
+    assert.equal(source.includes('"View reports"'), true);
   });
 
-  it("includes Tools quick action target", () => {
-    const source = read("src/features/dashboard/components/Dashboard.jsx");
+  it("includes quick action targets for bills, goals, and insights", () => {
+    const source = read("src/features/dashboard/components/DashboardV2.jsx");
 
-    assert.equal(source.includes('view: "tools"'), true);
-    assert.equal(source.includes('target: "tools-home"'), true);
+    assert.equal(
+      source.includes('"Add bill": { view: "recurring", target: "add-recurring" }'),
+      true,
+    );
+    assert.equal(
+      source.includes('"Add goal": { view: "savings", target: "monthly-savings" }'),
+      true,
+    );
+    assert.equal(
+      source.includes('"View reports": { view: "insights", target: "insights-home" }'),
+      true,
+    );
   });
 
-  it("removes separate income/savings/accounts/liabilities/net-worth quick actions", () => {
-    const source = read("src/features/dashboard/components/Dashboard.jsx");
+  it("removes legacy quick actions from the old dashboard", () => {
+    const source = read("src/features/dashboard/components/DashboardV2.jsx");
 
     assert.equal(source.includes('label: "Manage income"'), false);
     assert.equal(source.includes('label: "Manage savings"'), false);
@@ -35,10 +45,9 @@ describe("dashboard quick actions", () => {
     assert.equal(source.includes('label: "Net worth"'), false);
   });
 
-  it("includes Calendar quick action target", () => {
-    const source = read("src/features/dashboard/components/Dashboard.jsx");
-
-    assert.equal(source.includes('view: "calendar"'), true);
-    assert.equal(source.includes('target: "monthly-calendar"'), true);
+  it("routes quick action clicks through runAction", () => {
+    const source = read("src/features/dashboard/components/DashboardV2.jsx");
+    assert.equal(source.includes("runAction(action.label)"), true);
+    assert.equal(source.includes("navigateToView(target.view, target.target)"), true);
   });
 });
