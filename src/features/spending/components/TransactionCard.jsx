@@ -2,6 +2,7 @@ import { CreditCard, Edit, StickyNote, Tags, Trash2 } from "lucide-react";
 import LinkedCardName from "../../../components/shared/LinkedCardName.jsx";
 import Button from "../../../components/ui/Button.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
+import { dispatchNavigation } from "../../../lib/navigationTargets.js";
 import {
   getCardName,
   getCategoryName,
@@ -23,6 +24,7 @@ export default function TransactionCard({
   const categoryRows = getTransactionCategoryRows(transaction);
   const impactAmount = getTransactionImpactAmount(transaction);
   const hasDifferentImpact = impactAmount !== Number(transaction.amount || 0);
+  const isIncome = (transaction.transactionType || "expense") === "income";
 
   return (
     <article className="grid min-w-0 gap-3 rounded-2xl border border-app-border bg-app-surface p-4 shadow-sm transition hover:border-brand-primary/30 hover:bg-app-background">
@@ -47,7 +49,8 @@ export default function TransactionCard({
           <p className="text-xs font-medium text-text-muted">{transaction.date}</p>
         </div>
         <div className="shrink-0 text-right">
-          <p className="text-lg font-semibold text-text-main">
+          <p className={`text-lg font-semibold ${isIncome ? "text-status-successDark" : "text-text-main"}`}>
+            {isIncome ? "+" : ""}
             {formatCurrency(transaction.amount)}
           </p>
           {hasDifferentImpact ? (
@@ -120,7 +123,7 @@ export default function TransactionCard({
           onClick={() => onEdit(transaction)}
           disabled={isSaving || isRecurring}
           aria-label={`Edit ${transaction.merchant}`}
-          title={isRecurring ? "Manage from Recurring Payments" : "Edit transaction"}
+          title={isRecurring ? "Managed from Bills" : "Edit transaction"}
         >
           <Edit size={16} aria-hidden="true" />
           Edit
@@ -132,11 +135,21 @@ export default function TransactionCard({
           onClick={() => onDelete(transaction)}
           disabled={isSaving || isRecurring}
           aria-label={`Delete ${transaction.merchant}`}
-          title={isRecurring ? "Mark unpaid from Recurring Payments" : "Delete transaction"}
+          title={isRecurring ? "Managed from Bills" : "Delete transaction"}
         >
           <Trash2 size={16} aria-hidden="true" />
           Delete
         </Button>
+        {isRecurring ? (
+          <Button
+            type="button"
+            variant="secondary"
+            className="col-span-2 min-h-9 px-3 py-1.5 text-sm sm:col-span-1"
+            onClick={() => dispatchNavigation("recurring", "recurring-home")}
+          >
+            Manage in Bills
+          </Button>
+        ) : null}
       </div>
     </article>
   );

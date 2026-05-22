@@ -4,6 +4,7 @@ import BudgetTracker from "../features/budgets/components/BudgetTracker.jsx";
 import CreditCardTracker from "../features/creditCards/components/CreditCardTracker.jsx";
 import Calendar from "../features/calendar/components/Calendar.jsx";
 import Dashboard from "../features/dashboard/components/Dashboard.jsx";
+import DashboardV2 from "../features/dashboard/components/DashboardV2.jsx";
 import HouseholdSettings from "../features/households/components/HouseholdSettings.jsx";
 import Insights from "../features/insights/components/Insights.jsx";
 import FinancialPosition from "../features/financialPosition/components/FinancialPosition.jsx";
@@ -22,6 +23,10 @@ import SpendingTracker from "../features/spending/components/SpendingTracker.jsx
 import AccountSettings from "../features/auth/components/AccountSettings.jsx";
 import Tools from "../features/tools/components/Tools.jsx";
 
+// Dashboard V2 preview switch:
+// Set to false to fall back to the existing Dashboard.jsx at any time.
+const ENABLE_DASHBOARD_V2_PREVIEW = true;
+
 export default function AppViewRenderer({
   activeView,
   dashboardProps,
@@ -39,10 +44,17 @@ export default function AppViewRenderer({
   savingsProps,
   backupProps,
   householdSettingsProps,
+  appSettingsProps,
 }) {
   return (
     <>
-      {activeView === "dashboard" ? <Dashboard {...dashboardProps} /> : null}
+      {activeView === "dashboard" ? (
+        ENABLE_DASHBOARD_V2_PREVIEW ? (
+          <DashboardV2 {...dashboardProps} />
+        ) : (
+          <Dashboard {...dashboardProps} />
+        )
+      ) : null}
       {activeView === "credit-cards" ? <CreditCardTracker {...creditCardProps} /> : null}
       {activeView === "budgets" ? <BudgetTracker {...budgetProps} /> : null}
       {activeView === "spending" ? <SpendingTracker {...spendingProps} /> : null}
@@ -62,7 +74,7 @@ export default function AppViewRenderer({
       {activeView === "household-settings" ? (
         <HouseholdSettings {...householdSettingsProps} />
       ) : null}
-      {activeView === "app-settings" ? <AppSettings /> : null}
+      {activeView === "app-settings" ? <AppSettings {...appSettingsProps} /> : null}
       {activeView === "account-settings" ? <AccountSettings /> : null}
       {activeView === "about" ? <AboutSpedger /> : null}
       {activeView === "privacy-policy" ? <PrivacyPolicy /> : null}

@@ -110,6 +110,7 @@ export function createAppViewProps({
   deleteSupabaseBudget,
   addDefaultBudgetsToSupabase,
   copyPreviousMonthBudgetsToSupabase,
+  copyPreviousMonthBudgetCategories,
   importLocalBudgetsToSupabase,
   createSupabaseTransaction,
   updateSupabaseTransaction,
@@ -151,7 +152,11 @@ export function createAppViewProps({
   createSupabaseSavingsContribution,
   updateSupabaseSavingsContribution,
   deleteSupabaseSavingsContribution,
+  settingsExportData,
 } = {}) {
+  const resolvedCopyPreviousMonthBudgets =
+    copyPreviousMonthBudgetsToSupabase ?? copyPreviousMonthBudgetCategories;
+
   return {
     dashboardProps: {
       appData: dashboardAppData,
@@ -200,7 +205,7 @@ export function createAppViewProps({
       onUpdateBudget: updateSupabaseBudget,
       onDeleteBudget: deleteSupabaseBudget,
       onAddDefaultBudgets: addDefaultBudgetsToSupabase,
-      onCopyPreviousMonthBudgets: copyPreviousMonthBudgetsToSupabase,
+      onCopyPreviousMonthBudgets: resolvedCopyPreviousMonthBudgets,
       onImportLocalBudgets: importLocalBudgetsToSupabase,
     },
     spendingProps: {
@@ -244,6 +249,11 @@ export function createAppViewProps({
       onMarkRecurringUnpaid: markSupabaseRecurringUnpaid,
       onSkipRecurringPayment: skipSupabaseRecurringPayment,
       onImportLocalRecurringPayments: importLocalRecurringToSupabase,
+      monthlyBalances: supabaseMonthlyBalances,
+      monthlyBalancesLoading,
+      monthlyBalancesSaving,
+      monthlyBalancesError,
+      onMonthlyBalanceChange: saveSupabaseMonthlyBalance,
     },
     insightsProps: {
       appData: insightsAppData,
@@ -380,5 +390,9 @@ export function createAppViewProps({
       onDeactivateProfile: deactivateProfile,
       onCreateDefaultProfiles: addDefaultProfiles,
     },
+    appSettingsProps: {
+      exportData: settingsExportData,
+    },
   };
 }
+

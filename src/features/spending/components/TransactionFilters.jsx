@@ -2,7 +2,6 @@ import { ChevronDown, RotateCcw, SlidersHorizontal } from "lucide-react";
 import Button from "../../../components/ui/Button.jsx";
 import Input from "../../../components/ui/Input.jsx";
 import Select from "../../../components/ui/Select.jsx";
-import { TRANSACTION_TYPE_OPTIONS } from "../spendingService.js";
 import TransactionFilterChips from "./TransactionFilterChips.jsx";
 import TransactionQuickFilters from "./TransactionQuickFilters.jsx";
 
@@ -25,55 +24,87 @@ export default function TransactionFilters({
   activeFilterChips,
   onClearChip,
   onClearQuickFilterForManualControl,
+  selectedMonthLabel,
 }) {
   return (
-    <div className="grid gap-4 border-b border-app-border p-4">
-      <div className="grid min-w-0 gap-3 lg:grid-cols-[minmax(260px,1fr)_180px_auto] lg:items-end">
+    <div className="grid gap-3 border-b border-app-border bg-app-surface p-4 md:p-5">
+      <div className="grid min-w-0 gap-3 xl:grid-cols-[minmax(230px,1.3fr)_minmax(140px,0.85fr)_minmax(140px,0.85fr)_minmax(130px,0.8fr)_minmax(170px,0.9fr)_auto] xl:items-end">
         <Input
           label="Search transactions"
+          hideLabel
+          aria-label="Search transactions"
           value={filters.search}
           onChange={(event) => onFiltersChange({ ...filters, search: event.target.value })}
-          placeholder="Merchant, notes, card, category, payment method"
+          placeholder="Search transactions"
           className="min-w-0"
         />
         <Select
-          label="Sort"
-          value={sortMode}
-          onChange={(event) => onSortModeChange(event.target.value)}
+          label="Category"
+          hideLabel
+          aria-label="Filter by category"
+          value={filters.categoryId}
+          onChange={(event) => onFiltersChange({ ...filters, categoryId: event.target.value })}
         >
-          <option value="date-desc">Date newest</option>
-          <option value="date-asc">Date oldest</option>
-          <option value="store">Merchant</option>
-          <option value="category">Category</option>
-          <option value="card">Card</option>
-          <option value="amount-desc">Amount high</option>
-          <option value="amount-asc">Amount low</option>
+          <option value="">All categories</option>
+          {categoryOptions.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
         </Select>
-        <div className="grid grid-cols-2 gap-2 lg:grid-cols-none">
+        <Select
+          label="Account / card"
+          hideLabel
+          aria-label="Filter by account or card"
+          value={filters.cardId}
+          onChange={(event) => onFiltersChange({ ...filters, cardId: event.target.value })}
+        >
+          <option value="">All accounts</option>
+          {cards.map((card) => (
+            <option key={card.id} value={card.id}>
+              {card.name}
+            </option>
+          ))}
+        </Select>
+        <Select
+          label="Type"
+          hideLabel
+          aria-label="Filter by transaction type"
+          value={filters.transactionType}
+          onChange={(event) => {
+            onClearQuickFilterForManualControl();
+            onFiltersChange({ ...filters, transactionType: event.target.value });
+          }}
+        >
+          <option value="">All types</option>
+          <option value="expense">Expense</option>
+          <option value="refund">Refund / Return</option>
+          <option value="income">Income</option>
+          <option value="payment">Card payment</option>
+          <option value="transfer">Transfer</option>
+          <option value="adjustment">Adjustment</option>
+        </Select>
+        <div
+          className="inline-flex min-h-10 items-center rounded-xl border border-app-border bg-app-background px-3 text-sm font-semibold text-text-main"
+          aria-label="Selected month"
+        >
+          {selectedMonthLabel}
+        </div>
+        <div className="grid grid-cols-2 gap-2 xl:grid-cols-1">
           <Button
             type="button"
             variant="secondary"
-            className="min-h-10 px-3 py-2 text-sm md:hidden"
+            className="min-h-10 px-3 py-2 text-sm"
             onClick={onToggleMobileFilters}
             aria-expanded={showMobileFilters}
           >
             <SlidersHorizontal size={16} aria-hidden="true" />
-            Filters
+            More filters
             <ChevronDown
               size={16}
               aria-hidden="true"
               className={`transition ${showMobileFilters ? "rotate-180" : ""}`}
             />
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            className="min-h-10 px-3 py-2 text-sm"
-            onClick={onResetFilters}
-            disabled={!hasActiveControls}
-          >
-            <RotateCcw size={16} aria-hidden="true" />
-            Reset
           </Button>
         </div>
       </div>
@@ -88,51 +119,13 @@ export default function TransactionFilters({
       <div
         className={
           showMobileFilters
-            ? "grid min-w-0 gap-3 md:grid md:grid-cols-2 xl:grid-cols-5 xl:items-end"
-            : "hidden min-w-0 gap-3 md:grid md:grid-cols-2 xl:grid-cols-5 xl:items-end"
+            ? "grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(160px,1fr)_minmax(160px,1fr)_minmax(160px,1fr)_auto_auto] xl:items-end"
+            : "hidden min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(160px,1fr)_minmax(160px,1fr)_minmax(160px,1fr)_auto_auto] xl:items-end"
         }
       >
         <Select
-          label="Card"
-          value={filters.cardId}
-          onChange={(event) => onFiltersChange({ ...filters, cardId: event.target.value })}
-        >
-          <option value="">All cards</option>
-          {cards.map((card) => (
-            <option key={card.id} value={card.id}>
-              {card.name}
-            </option>
-          ))}
-        </Select>
-        <Select
-          label="Category"
-          value={filters.categoryId}
-          onChange={(event) => onFiltersChange({ ...filters, categoryId: event.target.value })}
-        >
-          <option value="">All categories</option>
-          {categoryOptions.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))}
-        </Select>
-        <Select
-          label="Type"
-          value={filters.transactionType}
-          onChange={(event) => {
-            onClearQuickFilterForManualControl();
-            onFiltersChange({ ...filters, transactionType: event.target.value });
-          }}
-        >
-          <option value="">All types</option>
-          {TRANSACTION_TYPE_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </Select>
-        <Select
           label="Payment method"
+          hideLabel
           value={filters.paymentMethod}
           onChange={(event) => onFiltersChange({ ...filters, paymentMethod: event.target.value })}
         >
@@ -145,6 +138,7 @@ export default function TransactionFilters({
         </Select>
         <Select
           label="Source"
+          hideLabel
           value={filters.source}
           onChange={(event) => {
             onClearQuickFilterForManualControl();
@@ -155,6 +149,30 @@ export default function TransactionFilters({
           <option value="manual">Manual</option>
           <option value="recurring">Recurring</option>
         </Select>
+        <Select
+          label="Sort"
+          hideLabel
+          value={sortMode}
+          onChange={(event) => onSortModeChange(event.target.value)}
+        >
+          <option value="date-desc">Date newest</option>
+          <option value="date-asc">Date oldest</option>
+          <option value="store">Merchant</option>
+          <option value="category">Category</option>
+          <option value="card">Card</option>
+          <option value="amount-desc">Amount high</option>
+          <option value="amount-asc">Amount low</option>
+        </Select>
+        <Button
+          type="button"
+          variant="secondary"
+          className="min-h-10 px-3 py-2 text-sm"
+          onClick={onResetFilters}
+          disabled={!hasActiveControls}
+        >
+          <RotateCcw size={16} aria-hidden="true" />
+          Reset
+        </Button>
       </div>
 
       <TransactionFilterChips chips={activeFilterChips} onClearChip={onClearChip} />

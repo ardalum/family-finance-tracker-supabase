@@ -1,4 +1,19 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  AlertTriangle,
+  ArrowDown,
+  ArrowRight,
+  ArrowUp,
+  BarChart3,
+  CheckCircle2,
+  CircleAlert,
+  CircleDollarSign,
+  ChevronDown,
+  Info,
+  Sparkles,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react";
 import DonutChart from "../../../components/charts/DonutChart.jsx";
 import LineTrendChart from "../../../components/charts/LineTrendChart.jsx";
 import StackedBarChart from "../../../components/charts/StackedBarChart.jsx";
@@ -8,11 +23,11 @@ import EmptyState from "../../../components/ui/EmptyState.jsx";
 import HorizontalBarChart from "../../../components/ui/HorizontalBarChart.jsx";
 import ProgressBar from "../../../components/ui/ProgressBar.jsx";
 import Select from "../../../components/ui/Select.jsx";
-import { buildMonthOptions, getCurrentMonthKey } from "../../../lib/dates.js";
+import { getCurrentMonthKey } from "../../../lib/dates.js";
 import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
-import { dispatchNavigation } from "../../../lib/navigationTargets.js";
+import { consumeNavigationTarget, dispatchNavigation, NAVIGATE_EVENT } from "../../../lib/navigationTargets.js";
 import { getDashboardData } from "../../dashboard/dashboardUtils.js";
-import InsightsSummaryCards from "./InsightsSummaryCards.jsx";
+import { getTransactionCategoryRows, getTransactionImpactAmount } from "../../spending/spendingService.js";
 import {
   calculateSharePercent,
   getActionableInsightCards,
@@ -64,7 +79,9 @@ export default function Insights({
   liabilityReviewConfirmed = false,
 }) {
   const [netWorthRangeMonths, setNetWorthRangeMonths] = useState("6");
-  const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
+  const [showDetailedReports, setShowDetailedReports] = useState(false);
+  const [selectedDeepDiveCategory, setSelectedDeepDiveCategory] = useState("");
+  const detailedReportsRef = useRef(null);
   const data = useMemo(() => getDashboardData(appData, selectedMonth), [appData, selectedMonth]);
 
   const budgetInsights = useMemo(() => getBudgetInsights(data.budgetRows), [data.budgetRows]);
@@ -187,45 +204,556 @@ export default function Insights({
   );
 
   const hasInsightData = data.transactions.length > 0 || data.budgets.length > 0;
+  const previousMonthKey = useMemo(() => {
+    const [year, month] = String(selectedMonth).split("-").map(Number);
+    const shifted = new Date(year, month - 2, 1);
+    return `${shifted.getFullYear()}-${String(shifted.getMonth() + 1).padStart(2, "0")}`;
+  }, [selectedMonth]);
+  const previousMonthData = useMemo(
+    () => getDashboardData(appData, previousMonthKey),
+    [appData, previousMonthKey],
+  );
+  const spendingDelta = Number(data.summary.spendingTotal || 0) - Number(previousMonthData.summary.spendingTotal || 0);
+  const spendingDeltaPercent = Number(previousMonthData.summary.spendingTotal || 0) > 0
+    ? (spendingDelta / Number(previousMonthData.summary.spendingTotal || 1)) * 100
+    : null;
+  const budgetUsageRawPercent = Number(data.summary.budgetTotal || 0) > 0
+    ? (Number(data.summary.spendingTotal || 0) / Number(data.summary.budgetTotal || 1)) * 100
+    : 0;
+  const budgetUsedPercent = Math.min(Math.max(budgetUsageRawPercent, 0), 100);
+  const budgetBarTone =
+    Number(data.summary.budgetTotal || 0) <= 0
+      ? "bg-[#CBD5E1]"
+      : budgetUsageRawPercent > 100
+        ? "bg-status-danger"
+        : budgetUsageRawPercent > 80
+          ? "bg-status-warning"
+          : "bg-status-success";
+  const budgetDeltaPercent = Number(previousMonthData.summary.budgetTotal || 0) > 0
+    ? budgetUsedPercent -
+      Math.min(
+        (Number(previousMonthData.summary.spendingTotal || 0) / Number(previousMonthData.summary.budgetTotal || 1)) * 100,
+        100,
+      )
+    : null;
+  const previousCategories = useMemo(
+    () => getTopCategories(previousMonthData.chartData.spendingByCategory, 20),
+    [previousMonthData.chartData.spendingByCategory],
+  );
+  const previousCategoryMap = useMemo(
+    () => new Map(previousCategories.map((row) => [row.label, row.value])),
+    [previousCategories],
+  );
+  const topCategoryChange = useMemo(() => {
+    if (!categoryRows.length) return null;
+    const deltas = categoryRows.map((row) => ({
+      ...row,
+      delta: row.value - (previousCategoryMap.get(row.label) ?? 0),
+    }));
+    return deltas.sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))[0] ?? null;
+  }, [categoryRows, previousCategoryMap]);
+  const incomeTotal = Number(data.summary.incomeTotal || 0);
+  const netCashFlow = incomeTotal - Number(data.summary.spendingTotal || 0);
+  const hasSpendingBaseline = spendingDeltaPercent !== null;
+  const latestInsightCards = useMemo(() => {
+    const defaultCards = [
+      {
+        id: "positive-default",
+        title: "Great job staying on track!",
+        explanation: "Your month is trending within budget in several categories.",
+        action: "Review budgets",
+        targetView: "budgets",
+        tone: "positive",
+      },
+      {
+        id: "warning-default",
+        title: "Category pressure is building",
+        explanation: "A few categories are close to their monthly limits.",
+        action: "Review spending",
+        targetView: "spending",
+        tone: "warning",
+      },
+      {
+        id: "attention-default",
+        title: "Upcoming bills to watch",
+        explanation: "Review upcoming obligations to protect cash flow.",
+        action: "View bills",
+        targetView: "recurring",
+        tone: "attention",
+      },
+    ];
+    if (!actionableCards.length) return defaultCards;
+    return [0, 1, 2].map((index) => {
+      const fallback = defaultCards[index];
+      const source = actionableCards[index];
+      if (!source) return fallback;
+      return { ...fallback, ...source };
+    });
+  }, [actionableCards]);
+  const chartCurrentRows = monthlyTrendRows.slice(-6);
+  const chartPreviousRows = useMemo(() => {
+    const [selectedYear] = String(selectedMonth).split("-").map(Number);
+    return chartCurrentRows.map((row) => {
+      const [yearString, monthString] = String(row.id).split("-");
+      const monthNumber = Number(monthString);
+      const previousMonthKeyForRow = `${Number(yearString || selectedYear) - 1}-${String(monthNumber).padStart(2, "0")}`;
+      const previousValue = (appData.ytdTransactionsByMonth?.[previousMonthKeyForRow] ?? []).reduce(
+        (sum, transaction) => sum + getTransactionImpactAmount(transaction),
+        0,
+      );
+      return {
+        id: previousMonthKeyForRow,
+        label: formatMonthLabel(previousMonthKeyForRow).slice(0, 3),
+        value: previousValue,
+      };
+    });
+  }, [appData.ytdTransactionsByMonth, chartCurrentRows, selectedMonth]);
+  const spendingBreakdownRows = categoryRows.slice(0, 6);
+  const deepDiveOptions = spendingBreakdownRows.map((row) => row.label);
+  const activeDeepDiveCategory =
+    selectedDeepDiveCategory && deepDiveOptions.includes(selectedDeepDiveCategory)
+      ? selectedDeepDiveCategory
+      : deepDiveOptions[0] ?? "";
+  const deepDiveCategoryRow = spendingBreakdownRows.find((row) => row.label === activeDeepDiveCategory) ?? null;
+  const deepDiveCategoryPreviousValue = previousCategoryMap.get(activeDeepDiveCategory) ?? 0;
+  const deepDiveCategoryDelta = Number(deepDiveCategoryRow?.value || 0) - Number(deepDiveCategoryPreviousValue || 0);
+  const deepDiveTrendRows = useMemo(
+    () =>
+      buildCategoryTrendRows({
+        monthRows: chartCurrentRows,
+        categoryLabel: activeDeepDiveCategory,
+        transactionsByMonth: appData.ytdTransactionsByMonth ?? {},
+        budgetsByMonth: appData.ytdBudgetsByMonth ?? {},
+      }),
+    [activeDeepDiveCategory, appData.ytdBudgetsByMonth, appData.ytdTransactionsByMonth, chartCurrentRows],
+  );
+  const spendingBreakdownTotal = spendingBreakdownRows.reduce((sum, row) => sum + row.value, 0);
+  const categoryColors = ["#198754", "#7CB342", "#F59E0B", "#EF4444", "#5C6AC4", "#94A3B8"];
+  const groupCategorySpend = useMemo(() => {
+    const groups = {
+      needs: 0,
+      wants: 0,
+      savings: 0,
+    };
+    const classify = (name) => {
+      const lower = String(name || "").toLowerCase();
+      if (lower.includes("saving") || lower.includes("invest")) return "savings";
+      if (
+        lower.includes("rent") ||
+        lower.includes("mortgage") ||
+        lower.includes("utility") ||
+        lower.includes("grocery") ||
+        lower.includes("insurance") ||
+        lower.includes("transport") ||
+        lower.includes("gas")
+      ) {
+        return "needs";
+      }
+      return "wants";
+    };
+    categoryRows.forEach((row) => {
+      const key = classify(row.label);
+      groups[key] += Number(row.value || 0);
+    });
+    return groups;
+  }, [categoryRows]);
+  const previousGroupCategorySpend = useMemo(() => {
+    const groups = {
+      needs: 0,
+      wants: 0,
+      savings: 0,
+    };
+    const classify = (name) => {
+      const lower = String(name || "").toLowerCase();
+      if (lower.includes("saving") || lower.includes("invest")) return "savings";
+      if (
+        lower.includes("rent") ||
+        lower.includes("mortgage") ||
+        lower.includes("utility") ||
+        lower.includes("grocery") ||
+        lower.includes("insurance") ||
+        lower.includes("transport") ||
+        lower.includes("gas")
+      ) {
+        return "needs";
+      }
+      return "wants";
+    };
+    previousCategories.forEach((row) => {
+      const key = classify(row.label);
+      groups[key] += Number(row.value || 0);
+    });
+    return groups;
+  }, [previousCategories]);
+
+  useEffect(() => {
+    function revealDetailedReports() {
+      setShowDetailedReports(true);
+      window.requestAnimationFrame(() => {
+        detailedReportsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        detailedReportsRef.current?.focus();
+      });
+    }
+
+    function handleTarget(target) {
+      if (target === "detailed-reports") {
+        revealDetailedReports();
+      }
+    }
+
+    handleTarget(consumeNavigationTarget("insights"));
+
+    function handleNavigate(event) {
+      if (event?.detail?.view !== "insights") return;
+      handleTarget(event.detail?.target || "");
+    }
+
+    window.addEventListener(NAVIGATE_EVENT, handleNavigate);
+    return () => window.removeEventListener(NAVIGATE_EVENT, handleNavigate);
+  }, []);
 
   return (
-    <section className="grid gap-6">
-      <Card className="p-5">
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-end">
-          <div>
-            <p className="text-sm font-medium text-text-muted">Insights month</p>
-            <h2 className="mt-1 text-2xl font-semibold tracking-normal text-text-main">
-              {formatMonthLabel(selectedMonth)}
-            </h2>
-            <p className="mt-1 max-w-2xl text-sm text-text-muted">
-              Reporting center for spending patterns, budget pressure, merchant concentration,
-              transaction mix, and year-to-date progress using current tracked data.
+    <section className="grid gap-5">
+      <div className="flex items-center justify-end gap-3">
+        {loading ? <p className="text-xs text-text-muted">Loading insights…</p> : null}
+        {error ? (
+          <p className="rounded-lg border border-status-danger/30 bg-status-danger/10 px-2.5 py-1 text-xs font-medium text-status-danger">
+            {error}
+          </p>
+        ) : null}
+        <p className="inline-flex items-center gap-1 text-sm text-text-muted">
+          Data refreshed recently <Info size={14} />
+        </p>
+      </div>
+
+      <section className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-4">
+        <Card className="rounded-2xl border border-[#E6E1D8] bg-white p-5">
+          <div className="flex items-center justify-between">
+            <p className="inline-flex items-center gap-1 text-sm font-semibold text-[#071F42]">
+              Spending trend <Info size={13} className="text-text-muted" />
             </p>
-            {loading ? <p className="mt-2 text-sm text-text-muted">Loading insights...</p> : null}
-            {error ? <p className="mt-2 text-sm font-medium text-status-danger">{error}</p> : null}
+            {!hasSpendingBaseline ? (
+              <BarChart3 size={16} className="text-text-muted" />
+            ) : spendingDelta <= 0 ? (
+              <TrendingDown size={16} className="text-status-success" />
+            ) : (
+              <TrendingUp size={16} className="text-status-warningDark" />
+            )}
           </div>
-          <Select
-            label="Month"
-            value={selectedMonth}
-            onChange={(event) => onMonthChange(event.target.value)}
+          <p className="mt-2 text-4xl font-semibold tracking-tight text-[#071F42]">
+            {formatCurrency(data.summary.spendingTotal || 0)}
+          </p>
+          <p className="text-sm text-text-muted">This month</p>
+          <p
+            className={`mt-2 text-sm font-medium ${
+              !hasSpendingBaseline
+                ? "text-text-muted"
+                : spendingDelta <= 0
+                  ? "text-status-success"
+                  : "text-status-warningDark"
+            }`}
           >
-            {monthOptions.map((month) => (
-              <option key={month} value={month}>
-                {formatMonthLabel(month)}
-              </option>
-            ))}
-          </Select>
+            {hasSpendingBaseline ? (
+              spendingDelta <= 0 ? (
+                <ArrowDown size={14} className="mr-1 inline-block" />
+              ) : (
+                <ArrowUp size={14} className="mr-1 inline-block" />
+              )
+            ) : null}
+            {hasSpendingBaseline
+              ? `${Math.abs(spendingDeltaPercent).toFixed(1)}% vs ${formatMonthLabel(previousMonthKey)}`
+              : "No prior-month baseline"}
+          </p>
+          <Sparkline
+            values={chartCurrentRows.map((row) => row.value)}
+            tone={!hasSpendingBaseline ? "navy" : spendingDelta <= 0 ? "green" : "red"}
+          />
+        </Card>
+
+        <Card className="rounded-2xl border border-[#E6E1D8] bg-white p-5">
+          <p className="inline-flex items-center gap-1 text-sm font-semibold text-[#071F42]">
+            Budget performance <Info size={13} className="text-text-muted" />
+          </p>
+          <p className="mt-2 text-4xl font-semibold tracking-tight text-[#071F42]">
+            {Math.round(budgetUsedPercent)}%
+          </p>
+          <p className="text-sm text-text-muted">
+            {Number(data.summary.budgetTotal || 0) <= 0
+              ? "No monthly budget"
+              : budgetUsageRawPercent > 100
+                ? "Over budget"
+                : budgetUsageRawPercent > 80
+                  ? "Near budget"
+                  : "On track"}
+          </p>
+          <div className="mt-4">
+            <div className="h-2 rounded-full bg-app-muted">
+              <div
+                className={`h-2 rounded-full ${budgetBarTone}`}
+                style={{ width: `${budgetUsedPercent}%` }}
+              />
+            </div>
+          </div>
+          <p className="mt-2 text-sm text-text-muted">
+            {formatCurrency(data.summary.spendingTotal || 0)} of {formatCurrency(data.summary.budgetTotal || 0)} budgeted
+          </p>
+          <p className={`mt-1 text-sm font-medium ${Number(budgetDeltaPercent || 0) <= 0 ? "text-status-success" : "text-status-warning"}`}>
+            {budgetDeltaPercent === null ? "No previous-month budget baseline" : `${budgetDeltaPercent > 0 ? "+" : ""}${budgetDeltaPercent.toFixed(0)}pp vs ${formatMonthLabel(previousMonthKey)}`}
+          </p>
+        </Card>
+
+        <Card className="rounded-2xl border border-[#E6E1D8] bg-white p-5">
+          <p className="inline-flex items-center gap-1 text-sm font-semibold text-[#071F42]">
+            Category change <Info size={13} className="text-text-muted" />
+          </p>
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-[#071F42]">
+            {topCategoryChange ? `${topCategoryChange.delta >= 0 ? "+" : ""}${formatCurrency(topCategoryChange.delta)}` : formatCurrency(0)}
+          </p>
+          <p
+            className={`text-sm ${
+              !topCategoryChange
+                ? "text-text-muted"
+                : topCategoryChange.delta > 0
+                  ? "text-status-warningDark"
+                  : "text-status-success"
+            }`}
+          >
+            {topCategoryChange
+              ? `${topCategoryChange.delta >= 0 ? "Increase" : "Decrease"} vs ${formatMonthLabel(previousMonthKey)}`
+              : "No category comparison yet"}
+          </p>
+          <p className="mt-8 text-sm text-text-muted">
+            {topCategoryChange ? `Top change: ${topCategoryChange.label} (${topCategoryChange.formattedValue})` : "Add more monthly spending history"}
+          </p>
+        </Card>
+
+        <Card className="rounded-2xl border border-[#E6E1D8] bg-white p-5">
+          <p className="inline-flex items-center gap-1 text-sm font-semibold text-[#071F42]">
+            Cash flow insight <Info size={13} className="text-text-muted" />
+          </p>
+          <p className="mt-2 text-4xl font-semibold tracking-tight text-[#071F42]">
+            {formatCurrency(netCashFlow)}
+          </p>
+          <p className="text-sm text-text-muted">Estimated cash left</p>
+          <p
+            className={`mt-4 inline-flex items-center gap-2 text-sm font-medium ${
+              netCashFlow >= 0 ? "text-status-success" : "text-status-warningDark"
+            }`}
+          >
+            <span
+              className={`h-2 w-2 rounded-full ${
+                netCashFlow >= 0 ? "bg-status-success" : "bg-status-warning"
+              }`}
+            />
+            {netCashFlow >= 0 ? "Healthy" : "Watch"}
+          </p>
+        </Card>
+      </section>
+
+      <section className="grid gap-4 xl:grid-cols-[1.1fr_1.05fr_1fr]">
+        <Card className="rounded-2xl border border-[#E6E1D8] bg-white p-5">
+          <h3 className="inline-flex items-center gap-2 text-2xl font-semibold tracking-tight text-[#071F42]">
+            Spending breakdown <Info size={15} className="text-text-muted" />
+          </h3>
+          <p className="mt-1 text-sm text-text-muted">Where your money went this month</p>
+          {spendingBreakdownRows.length === 0 ? (
+            <div className="mt-6 rounded-xl border border-dashed border-app-border bg-app-background p-4 text-sm text-text-muted">
+              No category spending yet.
+            </div>
+          ) : (
+            <>
+              <div className="mt-4 flex h-3 overflow-hidden rounded-full bg-app-muted">
+                {spendingBreakdownRows.map((row, index) => (
+                  <span
+                    key={row.id}
+                    style={{
+                      width: `${Math.max(calculateSharePercent(row.value, spendingBreakdownTotal), 3)}%`,
+                      backgroundColor: categoryColors[index % categoryColors.length],
+                    }}
+                  />
+                ))}
+              </div>
+              <div className="mt-4 grid gap-1.5">
+                <div className="grid grid-cols-[minmax(0,1fr)_110px_80px] items-center gap-3 text-xs font-semibold uppercase tracking-wide text-text-muted">
+                  <span>Category</span>
+                  <span className="text-right">Amount</span>
+                  <span className="text-right">% of total</span>
+                </div>
+                {spendingBreakdownRows.map((row, index) => (
+                  <div key={`breakdown-${row.id}`} className="grid grid-cols-[minmax(0,1fr)_110px_80px] items-center gap-3 text-sm">
+                    <p className="inline-flex min-w-0 items-center gap-2 text-text-main">
+                      <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: categoryColors[index % categoryColors.length] }} />
+                      <span className="truncate">{row.label}</span>
+                    </p>
+                    <p className="text-right font-medium text-[#071F42]">{formatCurrency(row.value)}</p>
+                    <p className="text-right font-medium text-text-muted">{calculateSharePercent(row.value, spendingBreakdownTotal).toFixed(0)}%</p>
+                  </div>
+                ))}
+                <div className="mt-2 border-t border-app-border pt-2">
+                  <div className="grid grid-cols-[minmax(0,1fr)_110px_80px] items-center gap-3 text-sm font-semibold text-[#071F42]">
+                    <span>Total</span>
+                    <span className="text-right">{formatCurrency(Number(data.summary.spendingTotal || 0))}</span>
+                    <span className="text-right">100%</span>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </Card>
+
+        <Card className="rounded-2xl border border-[#E6E1D8] bg-white p-5">
+          <h3 className="inline-flex items-center gap-2 text-xl font-semibold tracking-tight text-[#071F42]">
+            Spending over time <Info size={15} className="text-text-muted" />
+          </h3>
+          <div className="mt-3 inline-flex items-center gap-4 text-sm">
+            <span className="inline-flex items-center gap-1 text-[#071F42]"><span className="h-0.5 w-6 bg-[#102A63]" />This year</span>
+            <span className="inline-flex items-center gap-1 text-text-muted"><span className="h-0.5 w-6 border-t border-dashed border-text-muted" />Last year</span>
+          </div>
+          <DualLineMiniChart currentRows={chartCurrentRows} previousRows={chartPreviousRows} />
+          <div className="mt-4 border-t border-app-border pt-3">
+            <p className="text-sm text-text-muted">Average monthly spending</p>
+            <div className="mt-1 flex items-end gap-6">
+              <div>
+                <p className="text-2xl font-semibold text-[#071F42]">
+                  {formatCurrency(chartCurrentRows.length ? chartCurrentRows.reduce((sum, row) => sum + row.value, 0) / chartCurrentRows.length : 0)}
+                </p>
+                <p className="text-xs text-text-muted">This year</p>
+              </div>
+              <div>
+                <p className="text-2xl font-semibold text-[#667085]">
+                  {formatCurrency(chartPreviousRows.length ? chartPreviousRows.reduce((sum, row) => sum + row.value, 0) / chartPreviousRows.length : 0)}
+                </p>
+                <p className="text-xs text-text-muted">Last year</p>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="rounded-2xl border border-[#E6E1D8] bg-white p-5">
+          <h3 className="inline-flex items-center gap-2 text-2xl font-semibold tracking-tight text-[#071F42]">
+            Month-over-month comparison <Info size={15} className="text-text-muted" />
+          </h3>
+          <div className="mt-4 rounded-xl border border-app-border">
+            <table className="w-full table-fixed text-[13px]">
+              <colgroup>
+                <col style={{ width: "32%" }} />
+                <col style={{ width: "22%" }} />
+                <col style={{ width: "23%" }} />
+                <col style={{ width: "23%" }} />
+              </colgroup>
+              <thead className="bg-app-background text-text-muted">
+                <tr>
+                  <th className="px-2 py-2 text-left text-xs font-medium">Metric</th>
+                  <th className="px-2 py-2 text-right text-xs font-medium">{formatMonthLabel(previousMonthKey)}</th>
+                  <th className="px-2 py-2 text-right text-xs font-medium">{formatMonthLabel(selectedMonth)}</th>
+                  <th className="px-2 py-2 text-right text-xs font-medium">Change</th>
+                </tr>
+              </thead>
+              <tbody>
+                <ComparisonRow label="Total spending" current={Number(data.summary.spendingTotal || 0)} previous={Number(previousMonthData.summary.spendingTotal || 0)} trend="lower-better" />
+                <ComparisonRow label="Needs" current={groupCategorySpend.needs} previous={previousGroupCategorySpend.needs} trend="lower-better" />
+                <ComparisonRow label="Wants" current={groupCategorySpend.wants} previous={previousGroupCategorySpend.wants} trend="lower-better" />
+                <ComparisonRow label="Savings & Investments" current={groupCategorySpend.savings} previous={previousGroupCategorySpend.savings} trend="higher-better" />
+                <ComparisonRow label="Net cash flow" current={netCashFlow} previous={Number(previousMonthData.summary.incomeTotal || 0) - Number(previousMonthData.summary.spendingTotal || 0)} trend="higher-better" />
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      </section>
+
+      <section className="grid gap-3">
+        <h3 className="text-2xl font-semibold tracking-tight text-[#071F42]">Top insights this month</h3>
+        <div className="grid gap-4 xl:grid-cols-3">
+          {latestInsightCards.map((card, index) => (
+            <TopInsightCard key={card.id} card={card} tone={index === 0 ? "positive" : index === 1 ? "warning" : "attention"} />
+          ))}
         </div>
-      </Card>
+      </section>
 
-      {!hasInsightData ? <InsightsEmptyState selectedMonth={selectedMonth} /> : null}
+      <section className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+        <Card className="rounded-2xl border border-[#E6E1D8] bg-white p-5">
+          <h3 className="inline-flex items-center gap-2 text-2xl font-semibold tracking-tight text-[#071F42]">
+            Category deep dive <Info size={15} className="text-text-muted" />
+          </h3>
+          <p className="text-sm text-text-muted">Explore how specific categories are trending.</p>
+          {deepDiveCategoryRow ? (
+            <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_1.2fr]">
+              <div>
+                <div className="max-w-[210px]">
+                  <Select
+                    label="Category deep dive selector"
+                    hideLabel
+                    value={activeDeepDiveCategory}
+                    onChange={(event) => setSelectedDeepDiveCategory(event.target.value)}
+                    className="bg-app-background pr-9"
+                    disabled={!deepDiveOptions.length}
+                  >
+                    {deepDiveOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+                <div className="mt-3 grid gap-2 sm:grid-cols-3 xl:grid-cols-1">
+                  <MetricPill label="This month" value={formatCurrency(deepDiveCategoryRow?.value || 0)} />
+                  <MetricPill label={`vs ${formatMonthLabel(previousMonthKey)}`} value={formatCurrency(deepDiveCategoryPreviousValue || 0)} />
+                  <MetricPill
+                    label="Change"
+                    value={`${deepDiveCategoryDelta >= 0 ? "+" : ""}${formatCurrency(deepDiveCategoryDelta)}`}
+                    tone={deepDiveCategoryDelta > 0 ? "danger" : "success"}
+                  />
+                </div>
+              </div>
+              <div className="self-center">
+                <Sparkline values={deepDiveTrendRows.map((row) => row.value)} tone="red" />
+              </div>
+            </div>
+          ) : (
+            <div className="mt-4 rounded-xl border border-dashed border-app-border bg-app-background p-4 text-sm text-text-muted">
+              No category data available for deep dive yet.
+            </div>
+          )}
+        </Card>
 
-      <InsightsSummaryCards
-        summary={data.summary}
-        overBudgetCount={budgetInsights.over.length}
-        topCategory={categoryRows[0] ?? null}
-        ytdSignal={ytdData.highestSpendingMonth?.formattedValue ?? ""}
-      />
+        <Card className="rounded-2xl border border-[#E6E1D8] bg-white p-5">
+          <h3 className="inline-flex items-center gap-2 text-2xl font-semibold tracking-tight text-[#071F42]">
+            Savings rate <Info size={15} className="text-text-muted" />
+          </h3>
+          {incomeTotal <= 0 ? (
+            <div className="mt-4 flex items-center gap-4 rounded-xl border border-dashed border-app-border bg-app-background p-4">
+              <span className="inline-flex h-14 w-14 items-center justify-center rounded-full border border-app-border bg-white text-text-muted">
+                <CircleDollarSign size={20} />
+              </span>
+              <p className="text-sm text-text-muted">Add income data to calculate savings rate.</p>
+            </div>
+          ) : (
+            <div className="mt-4 flex items-center gap-4">
+              <SavingsRateRing percent={Math.max(0, Math.round((netCashFlow / incomeTotal) * 100))} />
+              <div>
+                <p className="text-3xl font-semibold tracking-tight text-[#071F42]">
+                  {formatCurrency(Math.max(netCashFlow, 0))}
+                </p>
+                <p className="text-sm text-text-muted">of {formatCurrency(incomeTotal)} income</p>
+                <p className="mt-2 text-sm font-medium text-status-success">
+                  {Math.max(0, Math.round((netCashFlow / incomeTotal) * 100))}% savings rate
+                </p>
+              </div>
+            </div>
+          )}
+        </Card>
+      </section>
+      <div ref={detailedReportsRef} tabIndex={-1} className="outline-none">
+      <Card className="rounded-2xl border border-app-border bg-white p-4">
+        <button
+          type="button"
+          className="text-sm font-semibold text-brand-primary"
+          onClick={() => setShowDetailedReports((current) => !current)}
+        >
+          {showDetailedReports ? "Hide detailed reports" : "Show detailed reports"}
+        </button>
+        {showDetailedReports ? (
+          <div className="mt-4 grid gap-6">
 
       <section className="grid gap-6 xl:grid-cols-2">
         <Card className="overflow-hidden">
@@ -635,7 +1163,296 @@ export default function Insights({
           </div>
         </Card>
       </section>
+          </div>
+        ) : null}
+      </Card>
+      </div>
     </section>
+  );
+}
+
+function Sparkline({ values, tone = "green" }) {
+  const safeValues = values ?? [];
+  const hasPositive = safeValues.some((value) => Number(value || 0) > 0);
+  if (!hasPositive) {
+    return (
+      <div className="mt-3 flex h-14 items-center justify-center rounded-lg border border-dashed border-app-border bg-app-background text-xs text-text-muted">
+        Not enough trend history
+      </div>
+    );
+  }
+
+  const points = safeValues.map((value, index) => ({
+    x: index,
+    y: Number(value || 0),
+  }));
+  const maxValue = Math.max(...points.map((point) => point.y), 1);
+  const minValue = Math.min(...points.map((point) => point.y), 0);
+  const range = Math.max(maxValue - minValue, 1);
+  const chartPoints = points
+    .map((point, index) => {
+      const x = (index / Math.max(points.length - 1, 1)) * 100;
+      const y = 100 - ((point.y - minValue) / range) * 70 - 15;
+      return `${x},${y}`;
+    })
+    .join(" ");
+  const stroke = tone === "red" ? "#EF4444" : tone === "green" ? "#198754" : "#102A63";
+
+  return (
+    <svg viewBox="0 0 100 100" className="mt-3 h-14 w-full">
+      <line x1="0" y1="82" x2="100" y2="82" stroke="#E8E3D8" />
+      <polyline fill="none" stroke={stroke} strokeWidth="3" strokeLinejoin="round" points={chartPoints} />
+    </svg>
+  );
+}
+
+function DualLineMiniChart({ currentRows = [], previousRows = [] }) {
+  const hasCurrentData = currentRows.some((row) => Number(row.value || 0) > 0);
+  const hasPreviousData = previousRows.some((row) => Number(row.value || 0) > 0);
+  if (!hasCurrentData && !hasPreviousData) {
+    return (
+      <div className="mt-4">
+        <div className="flex h-36 items-center justify-center rounded-lg border border-dashed border-app-border bg-app-background text-xs text-text-muted">
+          <span className="inline-flex items-center gap-1">
+            <BarChart3 size={13} />
+            No monthly trend data yet.
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  const meaningfulCurrentPoints = currentRows.filter((row) => Number(row.value || 0) > 0).length;
+  if (meaningfulCurrentPoints < 2) {
+    return (
+      <div className="mt-4">
+        <div className="flex h-36 items-center justify-center rounded-lg border border-dashed border-app-border bg-app-background">
+          <span className="inline-flex items-center gap-1 text-xs text-text-muted">
+            <BarChart3 size={13} />
+            Need at least two months of spending data.
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  const maxValue = Math.max(
+    1,
+    ...currentRows.map((row) => Number(row.value || 0)),
+    ...previousRows.map((row) => Number(row.value || 0)),
+  );
+  const scaledMax = maxValue * 1.18;
+  const buildPoints = (rows) =>
+    rows
+      .map((row, index) => {
+        const x = (index / Math.max(rows.length - 1, 1)) * 100;
+        const y = 100 - (Number(row.value || 0) / scaledMax) * 68 - 16;
+        return `${x},${y}`;
+      })
+      .join(" ");
+
+  const showPrevious = previousRows.some((row) => Number(row.value || 0) > 0);
+
+  return (
+    <div className="mt-4">
+      <svg viewBox="0 0 100 100" className="h-40 w-full">
+        <line x1="0" y1="85" x2="100" y2="85" stroke="#E8E3D8" />
+        <line x1="0" y1="62" x2="100" y2="62" stroke="#F0ECE4" />
+        <line x1="0" y1="39" x2="100" y2="39" stroke="#F0ECE4" />
+        {showPrevious ? (
+          <polyline
+            fill="none"
+            stroke="#98A2B3"
+            strokeDasharray="2 2"
+            strokeWidth="2"
+            points={buildPoints(previousRows)}
+          />
+        ) : null}
+        <polyline fill="none" stroke="#102A63" strokeWidth="2.5" points={buildPoints(currentRows)} />
+        {currentRows.map((row, index) => {
+          const x = (index / Math.max(currentRows.length - 1, 1)) * 100;
+          const y = 100 - (Number(row.value || 0) / scaledMax) * 68 - 16;
+          return <circle key={`dot-${row.id}`} cx={x} cy={y} r="1.9" fill="#102A63" />;
+        })}
+      </svg>
+      <div className="mt-2 grid grid-cols-6 gap-2 text-center text-xs text-text-muted">
+        {currentRows.map((row) => (
+          <span key={`trend-label-${row.id}`} className="truncate">
+            {(row.label || formatMonthLabel(row.id).slice(0, 3)).slice(0, 3)}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function formatCompactCurrencyForTable(value) {
+  const amount = Number(value || 0);
+  const abs = Math.abs(amount);
+
+  if (abs >= 1_000_000) {
+    return `${amount < 0 ? "-" : ""}$${(abs / 1_000_000).toFixed(abs >= 10_000_000 ? 1 : 2)}M`;
+  }
+  if (abs >= 100_000) {
+    return `${amount < 0 ? "-" : ""}$${Math.round(abs / 1_000)}K`;
+  }
+  return formatCurrency(amount);
+}
+
+function buildCategoryTrendRows({
+  monthRows = [],
+  categoryLabel = "",
+  transactionsByMonth = {},
+  budgetsByMonth = {},
+}) {
+  if (!categoryLabel) return monthRows.map((row) => ({ ...row, value: 0 }));
+
+  return monthRows.map((row) => {
+    const monthKey = row.id;
+    const transactions = transactionsByMonth?.[monthKey] ?? [];
+    const monthBudgets = budgetsByMonth?.[monthKey] ?? [];
+    const categoryNameById = new Map(
+      monthBudgets.map((budget) => [budget.supabaseId ?? budget.id, budget.name]),
+    );
+
+    const total = transactions.reduce((sum, transaction) => {
+      const impactAmount = getTransactionImpactAmount(transaction);
+      if (impactAmount === 0) return sum;
+      const multiplier = impactAmount < 0 ? -1 : 1;
+      return (
+        sum +
+        getTransactionCategoryRows(transaction).reduce((innerSum, split) => {
+          const splitName = categoryNameById.get(split.categoryId) ?? "Uncategorized";
+          if (splitName !== categoryLabel) return innerSum;
+          return innerSum + Number(split.amount || 0) * multiplier;
+        }, 0)
+      );
+    }, 0);
+
+    return { ...row, value: total };
+  });
+}
+
+function formatSignedCompactCurrencyForTable(value) {
+  const amount = Number(value || 0);
+  if (amount === 0) return formatCurrency(0);
+  const prefix = amount > 0 ? "+" : "-";
+  const compactAbs = formatCompactCurrencyForTable(Math.abs(amount));
+  return `${prefix}${compactAbs}`;
+}
+
+function ComparisonRow({ label, previous, current, trend = "lower-better" }) {
+  const delta = Number(current || 0) - Number(previous || 0);
+  const isPositive = delta > 0;
+  const toneClass =
+    delta === 0
+      ? "text-text-muted"
+      : trend === "higher-better"
+        ? isPositive
+          ? "text-status-success"
+          : "text-status-danger"
+        : isPositive
+          ? "text-status-danger"
+          : "text-status-success";
+  const deltaLabel = formatSignedCompactCurrencyForTable(delta);
+
+  return (
+    <tr className="border-t border-app-border">
+      <td className="px-2 py-2 text-text-main" title={label}>
+        <span className="block truncate">{label}</span>
+      </td>
+      <td className="px-2 py-2 text-right font-medium text-[#071F42]">
+        <span className="block max-w-full truncate tabular-nums" title={formatCurrency(previous || 0)}>
+          {formatCompactCurrencyForTable(previous)}
+        </span>
+      </td>
+      <td className="px-2 py-2 text-right font-medium text-[#071F42]">
+        <span className="block max-w-full truncate tabular-nums" title={formatCurrency(current || 0)}>
+          {formatCompactCurrencyForTable(current)}
+        </span>
+      </td>
+      <td className={`px-2 py-2 text-right font-semibold ${toneClass}`}>
+        <span className="block max-w-full truncate tabular-nums" title={formatCurrency(delta)}>
+          {deltaLabel}
+        </span>
+      </td>
+    </tr>
+  );
+}
+
+function TopInsightCard({ card, tone = "positive" }) {
+  const toneMap = {
+    positive: {
+      cardClass: "border-status-success/30 bg-status-success/5",
+      iconClass: "bg-status-success/15 text-status-success",
+      icon: CheckCircle2,
+      linkClass: "text-status-success",
+      actionText: "Open budget",
+    },
+    warning: {
+      cardClass: "border-status-warning/35 bg-status-warning/10",
+      iconClass: "bg-status-warning/20 text-status-warning",
+      icon: AlertTriangle,
+      linkClass: "text-status-warningDark",
+      actionText: "Review spending",
+    },
+    attention: {
+      cardClass: "border-status-danger/30 bg-status-danger/5",
+      iconClass: "bg-status-danger/15 text-status-danger",
+      icon: CircleAlert,
+      linkClass: "text-status-danger",
+      actionText: "Compare category",
+    },
+  };
+  const style = toneMap[tone] ?? toneMap.positive;
+  const Icon = style.icon;
+
+  return (
+    <Card className={`rounded-2xl border p-4 ${style.cardClass}`}>
+      <div className="flex items-start gap-3">
+        <span className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${style.iconClass}`}>
+          <Icon size={18} />
+        </span>
+        <div className="min-w-0">
+          <p className="text-lg font-semibold tracking-tight text-[#071F42]">{card.title}</p>
+          <p className="mt-1 text-sm text-text-main">{card.explanation}</p>
+          <button
+            type="button"
+            className={`mt-3 inline-flex items-center gap-1 text-sm font-semibold ${style.linkClass}`}
+            onClick={() => dispatchNavigation(card.targetView || "insights")}
+          >
+            <span>{style.actionText}</span>
+            <ArrowRight size={14} />
+          </button>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function MetricPill({ label, value, tone = "neutral" }) {
+  const toneClass =
+    tone === "danger" ? "text-status-danger" : tone === "success" ? "text-status-success" : "text-[#071F42]";
+  return (
+    <div className="rounded-xl border border-app-border bg-app-background px-3 py-2">
+      <p className="text-xs text-text-muted">{label}</p>
+      <p className={`mt-1 text-lg font-semibold tracking-tight ${toneClass}`}>{value}</p>
+    </div>
+  );
+}
+
+function SavingsRateRing({ percent = 0 }) {
+  const safePercent = Math.max(0, Math.min(Number(percent || 0), 100));
+  return (
+    <span
+      className="relative inline-flex h-24 w-24 shrink-0 items-center justify-center rounded-full"
+      style={{
+        background: `conic-gradient(#1D8E4B ${safePercent * 3.6}deg, #E6E1D8 0deg)`,
+      }}
+    >
+      <span className="absolute h-16 w-16 rounded-full bg-white" />
+      <span className="relative text-2xl font-semibold text-[#071F42]">{safePercent}%</span>
+    </span>
   );
 }
 
@@ -1002,3 +1819,5 @@ function TrendBreakdownRow({ label, current, start, change, status }) {
     </Card>
   );
 }
+
+

@@ -43,13 +43,13 @@ export default function Navigation({
   }, [onChange, onItemSelected]);
 
   return (
-    <nav className="grid gap-3" aria-label={ariaLabel}>
+    <nav className="grid gap-4 overflow-y-auto pr-1" aria-label={ariaLabel}>
       {groupedNavigationSections.map((section) => (
-        <div key={section.id} className="grid gap-1.5 rounded-lg border border-app-border/70 p-1.5">
+        <div key={section.id} className="grid gap-1.5">
           {!collapsed ? (
             <button
               type="button"
-              className="inline-flex min-h-8 w-full items-center justify-between gap-2 rounded-md px-2 py-1 text-left text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-text-muted transition hover:bg-app-background"
+              className="inline-flex min-h-8 w-full items-center justify-between gap-2 rounded-lg px-2 py-1 text-left text-[0.67rem] font-semibold tracking-[0.1em] text-text-muted transition hover:bg-app-muted"
               onClick={() =>
                 setExpandedGroups((previous) => ({
                   ...previous,
@@ -62,11 +62,7 @@ export default function Navigation({
               <span>{section.label}</span>
               {expandedGroups[section.id] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
             </button>
-          ) : (
-            <p className="px-1.5 text-[0.62rem] font-semibold uppercase tracking-[0.08em] text-text-subtle">
-              {section.label.slice(0, 1)}
-            </p>
-          )}
+          ) : null}
           <div
             id={`navigation-group-${section.id}`}
             className={`grid gap-1 ${collapsed || expandedGroups[section.id] ? "" : "hidden"}`}
@@ -77,10 +73,10 @@ export default function Navigation({
                 <button
                   key={item.id}
                   type="button"
-                  className={`group inline-flex min-h-9 w-full items-center rounded-lg px-2 py-1.5 text-sm font-medium transition ${
+                  className={`group inline-flex min-h-11 w-full items-center rounded-xl px-3 py-2.5 text-sm font-medium transition ${
                     isActive
-                      ? "bg-gray-900 text-white shadow-sm"
-                      : "text-text-main hover:bg-app-background"
+                      ? "bg-brand-primary text-white shadow-[0_8px_18px_-12px_rgba(10,31,54,0.9)]"
+                      : "text-text-soft hover:bg-app-muted hover:text-text-main"
                   } ${collapsed ? "justify-center" : "justify-start gap-2"}`}
                   onClick={() => {
                     onChange(item.id);
@@ -92,11 +88,11 @@ export default function Navigation({
                 >
                   <FeatureIcon
                     icon={item.icon}
-                    variant={item.iconVariant}
+                    variant={isActive ? "neutral" : item.iconVariant}
                     mode="plain"
                     size={16}
                     active={isActive}
-                    iconClassName={!isActive ? "group-hover:text-text-main" : ""}
+                    iconClassName={!isActive ? "group-hover:text-text-main" : "text-white"}
                   />
                   {!collapsed ? <span className="truncate">{item.label}</span> : null}
                 </button>

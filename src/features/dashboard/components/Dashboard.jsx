@@ -1,11 +1,11 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   AlertTriangle,
-  BarChart3,
-  CalendarDays,
+  ArrowRight,
   CheckCircle2,
   Clock3,
   CreditCard,
+  Goal,
   ReceiptText,
   Repeat,
   Wrench,
@@ -13,13 +13,11 @@ import {
 } from "lucide-react";
 import Card from "../../../components/ui/Card.jsx";
 import FeatureIcon from "../../../components/ui/FeatureIcon.jsx";
-import Select from "../../../components/ui/Select.jsx";
-import { buildMonthOptions, getCurrentMonthKey } from "../../../lib/dates.js";
-import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
+import { getCurrentMonthKey } from "../../../lib/dates.js";
+import { formatMonthLabel } from "../../../lib/formatters.js";
 import { dispatchNavigation } from "../../../lib/navigationTargets.js";
 import BudgetVsSpendingTable from "./BudgetVsSpendingTable.jsx";
 import CreditCardPaymentOverview from "./CreditCardPaymentOverview.jsx";
-import DashboardActionCards from "./DashboardActionCards.jsx";
 import DashboardCashFlowSummary from "./DashboardCashFlowSummary.jsx";
 import MonthlyCloseChecklist from "./MonthlyCloseChecklist.jsx";
 import RecentTransactionsTable from "./RecentTransactionsTable.jsx";
@@ -29,82 +27,60 @@ import { getMonthlyCloseChecklist } from "../monthlyCloseChecklist.js";
 
 const ACTIVE_VIEW_KEY = "personalFinanceApp:activeView:v1";
 
-const dashboardSections = [
-  {
-    id: "attention",
-    label: "Attention",
-    description: "Cards, budgets, and bills that need action soon.",
-    icon: AlertTriangle,
-  },
-  {
-    id: "activity",
-    label: "Activity",
-    description: "Recent transactions and current month movement.",
-    icon: ReceiptText,
-  },
-  {
-    id: "all-sections",
-    label: "Full View",
-    description: "Show attention items and recent activity together.",
-    icon: BarChart3,
-  },
-];
-
 const quickActions = [
   {
-    label: "Update card balances",
-    description: "Go straight to monthly balances.",
-    view: "credit-cards",
-    target: "monthly-balances",
-    icon: CreditCard,
-    iconVariant: "violet",
-  },
-  {
-    label: "Add transactions",
-    description: "Open the add transaction form.",
+    label: "Add transaction",
+    description: "Record new activity",
     view: "spending",
     target: "add-transaction",
     icon: ReceiptText,
     iconVariant: "orange",
   },
   {
-    label: "Open recurring bills",
-    description: "Go straight to this month's bills.",
-    view: "recurring",
-    target: "this-month",
-    icon: Repeat,
-    iconVariant: "rose",
-  },
-  {
-    label: "Tools",
-    description: "Open planning, setup, and maintenance tools.",
-    view: "tools",
-    target: "tools-home",
-    icon: Wrench,
-    iconVariant: "indigo",
-  },
-  {
-    label: "Review budget",
-    description: "Open the monthly budget workspace.",
+    label: "Review budgets",
+    description: "Check category usage",
     view: "budgets",
     target: "budget-table",
     icon: WalletCards,
     iconVariant: "emerald",
   },
   {
-    label: "Calendar",
-    description: "Review upcoming card, bill, income, and close dates.",
-    view: "calendar",
-    target: "monthly-calendar",
-    icon: CalendarDays,
+    label: "Manage cards",
+    description: "Update balances",
+    view: "credit-cards",
+    target: "monthly-balances",
+    icon: CreditCard,
+    iconVariant: "violet",
+  },
+  {
+    label: "Review bills",
+    description: "Open recurring bills",
+    view: "recurring",
+    target: "this-month",
+    icon: Repeat,
+    iconVariant: "rose",
+  },
+  {
+    label: "Manage goals",
+    description: "Track savings",
+    view: "savings",
+    target: "monthly-savings",
+    icon: Goal,
     iconVariant: "teal",
+  },
+  {
+    label: "Tools",
+    description: "More workflows",
+    view: "tools",
+    target: "tools-home",
+    icon: Wrench,
+    iconVariant: "indigo",
   },
 ];
 
 export default function Dashboard({
   appData,
   selectedMonth = getCurrentMonthKey(),
-  onMonthChange,
   loading = false,
   error = "",
   monthlyCloseReview,
@@ -115,160 +91,97 @@ export default function Dashboard({
   onMarkMonthlyCloseReviewed,
   onReopenMonthlyCloseReview,
 }) {
-  const [activeSection, setActiveSection] = useState("attention");
-  const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const data = useMemo(() => getDashboardData(appData, selectedMonth), [appData, selectedMonth]);
   const alerts = useMemo(() => getAlerts(data), [data]);
   const monthlyCloseChecklist = useMemo(
     () => getMonthlyCloseChecklist(data, selectedMonth, monthlyCloseReview),
     [data, monthlyCloseReview, selectedMonth],
   );
-  const priorityAlerts = alerts.slice(0, 5);
-  const currentSection =
-    dashboardSections.find((section) => section.id === activeSection) ?? dashboardSections[0];
-  const cardAttentionRows = data.cardRows.filter(
-    (row) => row.hasPaymentDue && row.daysUntilDue <= 7,
-  );
-  const budgetAttentionRows = data.budgetRows.filter(
-    (row) => row.remaining < 0 || row.percentUsed >= 90,
-  );
-  const recurringAttentionRows = data.recurringRows.filter((row) =>
-    ["Past due", "Due now", "Due soon"].includes(row.displayStatus),
-  );
-
-  const showAttention = activeSection === "attention" || activeSection === "all-sections";
-  const showActivity = activeSection === "activity" || activeSection === "all-sections";
+  const activeGoals = (appData?.savingsGoals ?? []).filter((goal) => goal.isActive !== false);
 
   return (
-    <section className="grid gap-6">
-      <Card className="p-5">
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-end">
+    <section className="grid gap-4 lg:gap-5">
+      <Card className="border-app-border/80 bg-white/90 px-4 py-3.5 sm:px-5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <p className="text-sm font-medium text-text-muted">Dashboard month</p>
-            <h2 className="mt-1 text-2xl font-semibold tracking-normal text-text-main">
-              {formatMonthLabel(selectedMonth)}
+            <p className="text-xs font-semibold uppercase tracking-[0.06em] text-text-muted">
+              Overview
+            </p>
+            <h2 className="text-xl font-semibold tracking-tight text-text-main sm:text-2xl">
+              {formatMonthLabel(selectedMonth)} dashboard
             </h2>
-            <p className="mt-1 text-sm text-text-muted">What needs your attention right now.</p>
-            {loading ? (
-              <p className="mt-2 text-sm text-text-muted">Loading dashboard data...</p>
-            ) : null}
-            {error ? <p className="mt-2 text-sm font-medium text-status-danger">{error}</p> : null}
           </div>
-          <Select
-            label="Month"
-            value={selectedMonth}
-            onChange={(event) => onMonthChange(event.target.value)}
-          >
-            {monthOptions.map((month) => (
-              <option key={month} value={month}>
-                {formatMonthLabel(month)}
-              </option>
-            ))}
-          </Select>
+          <div className="flex items-center gap-2 rounded-full bg-app-muted px-3 py-1 text-xs font-semibold text-text-soft">
+            <Clock3 size={13} aria-hidden="true" />
+            {loading ? "Refreshing" : "Live snapshot"}
+          </div>
         </div>
+        {error ? <p className="mt-2 text-sm font-medium text-status-danger">{error}</p> : null}
       </Card>
 
-      <DashboardActionCards
-        summary={data.summary}
-        cardRows={data.cardRows}
-        recurringRows={data.recurringRows}
-        budgetRows={data.budgetRows}
-      />
-      <DashboardCashFlowSummary
-        selectedMonth={selectedMonth}
-        incomeEntries={appData.incomeEntries}
-        savingsContributions={appData.savingsContributions}
-        cashAccounts={appData.cashAccounts}
-        accountBalanceSnapshots={appData.accountBalanceSnapshots}
-        accountMoneyMovements={appData.accountMoneyMovements}
-        budgetTotal={data.summary.budgetTotal}
-        remainingBudget={data.summary.remainingBudget}
-        spendingTotal={data.summary.spendingTotal}
-        recurringRemaining={data.summary.recurringRemaining}
-        unpaidCardBalanceTotal={data.summary.unpaidBalanceTotal}
-      />
-
-      <DashboardQuickActions />
-      <MonthlyCloseChecklist
-        monthKey={selectedMonth}
-        checklist={monthlyCloseChecklist}
-        onNavigate={navigateToView}
-        reviewLoading={monthlyCloseReviewLoading}
-        reviewSaving={monthlyCloseReviewSaving}
-        reviewError={monthlyCloseReviewError}
-        onToggleManualCheck={onToggleMonthlyCloseManualCheck}
-        onMarkReviewed={onMarkMonthlyCloseReviewed}
-        onReopenReview={onReopenMonthlyCloseReview}
-      />
-
-      <DashboardPriorityPanel alerts={priorityAlerts} totalAlertCount={alerts.length} />
-
-      <div className="grid gap-1">
-        <h2 className="text-lg font-semibold text-text-main">Dashboard workspace</h2>
-        <p className="text-sm text-text-muted">{currentSection.description}</p>
-      </div>
-
-      <div className="overflow-x-auto rounded-2xl border border-app-border bg-app-surface p-2">
-        <div className="flex min-w-max gap-2">
-          {dashboardSections.map((section) => {
-            const Icon = section.icon;
-            const isActive = activeSection === section.id;
-            return (
-              <button
-                key={section.id}
-                type="button"
-                className={`inline-flex min-h-11 items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition ${
-                  isActive
-                    ? "bg-text-main text-white shadow-sm"
-                    : "text-text-soft hover:bg-app-muted hover:text-text-main"
-                }`}
-                onClick={() => setActiveSection(section.id)}
-              >
-                <Icon size={16} aria-hidden="true" />
-                {section.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {showAttention ? (
-        <div>
-          <h3 className="mb-3 text-lg font-semibold text-text-main">Needs Attention</h3>
-          <div className="grid gap-6 xl:grid-cols-2">
-            <CreditCardPaymentOverview
-              rows={cardAttentionRows}
-              totalUnpaid={data.summary.unpaidBalanceTotal}
-              title="Credit Cards To Pay"
-              emptyMessage="No credit cards are due soon or past due."
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="grid gap-5">
+          <div className="grid gap-5 lg:grid-cols-2">
+            <DashboardCashFlowSummary
+              selectedMonth={selectedMonth}
+              incomeEntries={appData.incomeEntries}
+              savingsContributions={appData.savingsContributions}
+              cashAccounts={appData.cashAccounts}
+              accountBalanceSnapshots={appData.accountBalanceSnapshots}
+              accountMoneyMovements={appData.accountMoneyMovements}
+              budgetTotal={data.summary.budgetTotal}
+              remainingBudget={data.summary.remainingBudget}
+              spendingTotal={data.summary.spendingTotal}
+              recurringRemaining={data.summary.recurringRemaining}
+              unpaidCardBalanceTotal={data.summary.unpaidBalanceTotal}
             />
             <BudgetVsSpendingTable
-              rows={budgetAttentionRows}
-              title="Budget Attention"
-              emptyMessage="No categories are over budget or near the limit."
+              rows={data.budgetRows}
+              title="Budget health"
+              emptyMessage="No budget categories yet for this month."
             />
-          </div>
-          <div className="mt-6">
             <RecurringOverview
-              rows={recurringAttentionRows}
+              rows={data.recurringRows}
               summary={data.recurringSummary}
-              title="Recurring Bills To Pay"
-              emptyMessage="No recurring bills are due soon or past due."
+              title="Upcoming bills"
+              emptyMessage="No recurring bills for this month."
+            />
+            <CreditCardPaymentOverview
+              rows={data.cardRows}
+              totalUnpaid={data.summary.unpaidBalanceTotal}
+              title="Cards & debt"
+              emptyMessage="No active credit cards available."
             />
           </div>
-        </div>
-      ) : null}
 
-      {showActivity ? (
-        <div className="grid gap-6 xl:grid-cols-2">
+          <div className="grid gap-5 lg:grid-cols-2">
+            <SavingsGoalsPanel goals={activeGoals} />
+            <DashboardPriorityPanel alerts={alerts.slice(0, 6)} totalAlertCount={alerts.length} />
+          </div>
+
+          <MonthlyCloseChecklist
+            monthKey={selectedMonth}
+            checklist={monthlyCloseChecklist}
+            onNavigate={navigateToView}
+            reviewLoading={monthlyCloseReviewLoading}
+            reviewSaving={monthlyCloseReviewSaving}
+            reviewError={monthlyCloseReviewError}
+            onToggleManualCheck={onToggleMonthlyCloseManualCheck}
+            onMarkReviewed={onMarkMonthlyCloseReviewed}
+            onReopenReview={onReopenMonthlyCloseReview}
+          />
+        </div>
+
+        <div className="grid gap-4 self-start xl:sticky xl:top-24">
           <RecentTransactionsTable
             transactions={data.recentTransactions}
             cards={data.cards}
             categories={data.budgets}
           />
-          <DashboardActivitySummary data={data} />
+          <FamilyNotePlaceholder />
+          <DashboardQuickActions />
         </div>
-      ) : null}
+      </div>
     </section>
   );
 }
@@ -276,27 +189,23 @@ export default function Dashboard({
 function DashboardQuickActions() {
   return (
     <Card className="overflow-hidden">
-      <div className="border-b border-app-border p-5">
+      <div className="border-b border-app-border px-5 py-4">
         <h3 className="text-base font-semibold text-text-main">Quick actions</h3>
-        <p className="mt-1 text-sm text-text-muted">
-          Jump to the main workspaces that need regular updates.
-        </p>
+        <p className="mt-0.5 text-xs text-text-muted">Shortcuts to common workflows</p>
       </div>
-      <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-4">
-        {quickActions.map((action) => {
-          return (
-            <button
-              key={action.view}
-              type="button"
-              className="grid gap-2 rounded-2xl border border-app-border bg-app-surface p-4 text-left transition hover:border-brand-primary/40 hover:bg-app-background focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
-              onClick={() => navigateToView(action.view, action.target)}
-            >
-              <FeatureIcon icon={action.icon} variant={action.iconVariant} />
-              <span className="text-sm font-semibold text-text-main">{action.label}</span>
-              <span className="text-xs text-text-muted">{action.description}</span>
-            </button>
-          );
-        })}
+      <div className="grid gap-3 p-4 sm:grid-cols-2">
+        {quickActions.map((action) => (
+          <button
+            key={`${action.view}-${action.target}`}
+            type="button"
+            className="grid gap-1.5 rounded-2xl border border-app-border bg-app-surface p-3 text-left transition hover:border-brand-primary/40 hover:bg-app-background focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+            onClick={() => navigateToView(action.view, action.target)}
+          >
+            <FeatureIcon icon={action.icon} variant={action.iconVariant} />
+            <span className="text-sm font-semibold text-text-main">{action.label}</span>
+            <span className="text-xs text-text-muted">{action.description}</span>
+          </button>
+        ))}
       </div>
     </Card>
   );
@@ -305,15 +214,15 @@ function DashboardQuickActions() {
 function DashboardPriorityPanel({ alerts, totalAlertCount }) {
   if (totalAlertCount === 0) {
     return (
-      <Card className="border-status-successBg bg-status-successBg/40 p-5">
+      <Card className="border-status-successBg bg-status-successBg/30 p-5">
         <div className="flex items-start gap-3">
           <span className="mt-0.5 rounded-full bg-white p-2 text-status-successDark shadow-sm">
             <CheckCircle2 size={18} aria-hidden="true" />
           </span>
           <div>
-            <h3 className="text-base font-semibold text-text-main">No urgent dashboard alerts</h3>
+            <h3 className="text-base font-semibold text-text-main">No urgent alerts</h3>
             <p className="mt-1 text-sm text-text-muted">
-              Cards, budgets, and recurring bills look clear for this month.
+              Cards, budgets, and recurring bills look clear.
             </p>
           </div>
         </div>
@@ -325,15 +234,14 @@ function DashboardPriorityPanel({ alerts, totalAlertCount }) {
     <Card className="overflow-hidden border-status-warningBg">
       <div className="grid gap-3 border-b border-app-border p-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
         <div>
-          <h3 className="text-base font-semibold text-text-main">Top alerts</h3>
+          <h3 className="text-base font-semibold text-text-main">Needs attention</h3>
           <p className="mt-1 text-sm text-text-muted">
-            Showing {alerts.length} of {totalAlertCount} item{totalAlertCount === 1 ? "" : "s"} that
-            need attention.
+            Showing {alerts.length} of {totalAlertCount} active items.
           </p>
         </div>
         <span className="inline-flex w-fit items-center gap-2 rounded-full bg-status-warningBg px-3 py-1 text-sm font-semibold text-status-warningDark">
           <AlertTriangle size={16} aria-hidden="true" />
-          {totalAlertCount} alert{totalAlertCount === 1 ? "" : "s"}
+          {totalAlertCount}
         </span>
       </div>
       <div className="grid gap-2 p-4">
@@ -360,42 +268,73 @@ function DashboardPriorityPanel({ alerts, totalAlertCount }) {
   );
 }
 
-function DashboardActivitySummary({ data }) {
+function SavingsGoalsPanel({ goals }) {
   return (
-    <Card className="p-5">
-      <div className="flex items-start gap-3">
-        <span className="rounded-full bg-app-background p-2 text-text-muted ring-1 ring-inset ring-app-border">
-          <Clock3 size={18} aria-hidden="true" />
-        </span>
-        <div>
-          <h3 className="text-base font-semibold text-text-main">Month activity snapshot</h3>
-          <p className="mt-1 text-sm text-text-muted">
-            Current month totals based on budget, spending, recurring bills, and unpaid card
-            balances.
-          </p>
+    <Card className="overflow-hidden">
+      <div className="border-b border-app-border p-5">
+        <div className="flex items-center justify-between gap-3">
+          <h3 className="text-base font-semibold text-text-main">Savings goals</h3>
+          <button
+            type="button"
+            className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary hover:text-brand-dark"
+            onClick={() => navigateToView("savings", "monthly-savings")}
+          >
+            View goals <ArrowRight size={14} aria-hidden="true" />
+          </button>
         </div>
       </div>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <ActivityMetric label="Budget remaining" value={data.summary.remainingBudget} />
-        <ActivityMetric label="Recurring remaining" value={data.summary.recurringRemaining} />
-        <ActivityMetric label="Unpaid card balance" value={data.summary.unpaidBalanceTotal} />
-        <ActivityMetric label="Transactions shown" value={data.recentTransactions.length} isCount />
-      </div>
+      {goals.length === 0 ? (
+        <div className="p-5 text-sm text-text-muted">No savings goals added yet.</div>
+      ) : (
+        <div className="grid gap-3 p-4">
+          {goals.slice(0, 3).map((goal) => {
+            const target = Number(goal.targetAmount || 0);
+            const current = Number(goal.currentAmount || 0);
+            const progress = target > 0 ? Math.min(100, (current / target) * 100) : 0;
+            return (
+              <article
+                key={goal.id}
+                className="grid gap-2 rounded-xl border border-app-border bg-app-background p-3"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-semibold text-text-main">{goal.name}</p>
+                  <p className="text-xs font-semibold text-text-muted">{Math.round(progress)}%</p>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-app-muted">
+                  <div
+                    className="h-full rounded-full bg-status-success"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
     </Card>
   );
 }
 
-function ActivityMetric({ label, value, isCount = false }) {
-  const isNegativeMoney = !isCount && Number(value) < 0;
+function FamilyNotePlaceholder() {
   return (
-    <div className="rounded-xl border border-app-border bg-app-background px-3 py-2">
-      <p className="text-xs font-semibold uppercase tracking-normal text-text-muted">{label}</p>
-      <p
-        className={`mt-1 text-lg font-semibold ${isNegativeMoney ? "text-status-danger" : "text-text-main"}`}
-      >
-        {isCount ? value : formatCurrency(value)}
-      </p>
-    </div>
+    <Card className="overflow-hidden border-dashed">
+      <div className="border-b border-app-border p-5">
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="text-base font-semibold text-text-main">Family note</h3>
+          <span className="rounded-full bg-app-muted px-2 py-0.5 text-xs font-semibold text-text-muted">
+            Placeholder
+          </span>
+        </div>
+      </div>
+      <div className="p-5">
+        <blockquote className="rounded-xl border border-[#EADFCF] bg-[#FBF5EA] px-4 py-3 text-sm italic text-text-soft">
+          “Let’s keep up the momentum. Great job staying on budget this month.”
+          <footer className="mt-2 text-xs font-semibold not-italic text-text-muted">
+            — Family note (static)
+          </footer>
+        </blockquote>
+      </div>
+    </Card>
   );
 }
 

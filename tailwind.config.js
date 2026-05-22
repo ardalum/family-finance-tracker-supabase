@@ -4,21 +4,22 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+        sans: ["Manrope", "ui-sans-serif", "system-ui", "sans-serif"],
       },
       colors: {
         brand: {
-          primary: "#1F2937",
-          dark: "#111827",
-          accent: "#10B981",
-          secondary: "#4F46E5",
-          info: "#06B6D4",
+          primary: "#0B1B3B",
+          dark: "#07152E",
+          accent: "#22A06B",
+          secondary: "#1E3A5F",
         },
         app: {
-          background: "#F9FAFB",
+          background: "#FEFDFB",
+          sidebar: "#FAF8F4",
           surface: "#FFFFFF",
-          muted: "#F3F4F6",
-          border: "#E5E7EB",
+          surfaceSoft: "#FBF8F2",
+          muted: "#F3F1EA",
+          border: "#E8E2D8",
         },
         text: {
           main: "#111827",
@@ -26,13 +27,13 @@ export default {
           soft: "#374151",
         },
         status: {
-          success: "#22C55E",
+          success: "#16A34A",
           successDark: "#166534",
           successBg: "#DCFCE7",
-          warning: "#F97316",
+          warning: "#F59E0B",
           warningDark: "#92400E",
           warningBg: "#FEF3C7",
-          danger: "#DC2626",
+          danger: "#EF4444",
           dangerDark: "#991B1B",
           dangerBg: "#FEE2E2",
           infoBg: "#DBEAFE",

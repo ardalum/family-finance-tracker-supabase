@@ -3,43 +3,49 @@ import {
   CalendarDays,
   ChartNoAxesCombined,
   CircleHelp,
+  ClipboardList,
   CreditCard,
   DatabaseBackup,
   HandCoins,
+  House,
   Landmark,
+  LineChart,
   LayoutDashboard,
+  PieChart,
   PiggyBank,
   ReceiptText,
   Scale,
   Settings,
   ShieldCheck,
+  Target,
   TrendingUp,
+  Users,
   WalletCards,
 } from "lucide-react";
 import { primaryFinanceViewIds } from "../../app/secondaryViews.js";
 
 const navigationItemByView = {
   dashboard: {
-    label: "Dashboard",
-    shortLabel: "Dashboard",
+    label: "Overview",
+    shortLabel: "Overview",
     icon: LayoutDashboard,
     iconVariant: "blue",
   },
   "credit-cards": {
-    label: "Cards",
-    shortLabel: "Cards",
+    label: "Cards & Debt",
+    shortLabel: "Cards & Debt",
     icon: CreditCard,
     iconVariant: "violet",
   },
   budgets: {
-    label: "Budget",
-    shortLabel: "Budget",
+    label: "Budgets",
+    shortLabel: "Budgets",
     icon: WalletCards,
     iconVariant: "emerald",
   },
   spending: {
-    label: "Spending",
-    shortLabel: "Spending",
+    label: "Transactions",
+    shortLabel: "Transactions",
     icon: ReceiptText,
     iconVariant: "orange",
   },
@@ -80,8 +86,8 @@ const navigationItemByView = {
     iconVariant: "green",
   },
   savings: {
-    label: "Savings",
-    shortLabel: "Savings",
+    label: "Savings Goals",
+    shortLabel: "Goals",
     icon: PiggyBank,
     iconVariant: "lime",
   },
@@ -104,7 +110,7 @@ const navigationItemByView = {
     iconVariant: "amber",
   },
   "app-settings": {
-    label: "App Settings",
+    label: "Settings",
     shortLabel: "Settings",
     icon: Settings,
     iconVariant: "slate",
@@ -116,7 +122,7 @@ const navigationItemByView = {
     iconVariant: "amber",
   },
   "help-support": {
-    label: "Help / Support",
+    label: "Help Center",
     shortLabel: "Help",
     icon: CircleHelp,
     iconVariant: "neutral",
@@ -126,27 +132,27 @@ const navigationItemByView = {
 const sectionConfig = [
   {
     id: "main",
-    label: "Main",
+    label: "MAIN",
     defaultExpanded: true,
     views: ["dashboard", "credit-cards", "budgets", "spending", "recurring", "insights"],
   },
   {
     id: "planning",
-    label: "Planning",
+    label: "PLANNING",
     defaultExpanded: false,
-    views: ["calendar", "financial-position", "net-worth"],
+    views: ["calendar", "savings", "net-worth"],
   },
   {
     id: "money-setup",
-    label: "Money Setup",
+    label: "MONEY SETUP",
     defaultExpanded: false,
-    views: ["income", "savings", "accounts", "liabilities"],
+    views: ["income", "accounts", "liabilities"],
   },
   {
     id: "system",
-    label: "System",
+    label: "SYSTEM",
     defaultExpanded: false,
-    views: ["backup", "app-settings", "privacy-policy", "help-support"],
+    views: ["app-settings", "help-support"],
   },
 ];
 
@@ -162,6 +168,19 @@ export const groupedNavigationSections = sectionConfig.map((section) => ({
     ...navigationItemByView[view],
   })),
 }));
+
+export const dashboardV2SidebarItems = [
+  { id: "dashboard", label: "Overview", icon: House, disabled: false },
+  { id: "spending", label: "Transactions", icon: ReceiptText, disabled: false },
+  { id: "budgets", label: "Budgets", icon: PieChart, disabled: false },
+  { id: "credit-cards", label: "Cards & Debt", icon: CreditCard, disabled: false },
+  { id: "recurring", label: "Bills", icon: ClipboardList, disabled: false },
+  { id: "savings", label: "Goals", icon: Target, disabled: false },
+  { id: "insights", label: "Insights", icon: LineChart, disabled: false },
+  { id: null, label: "Family Activity", icon: Users, disabled: true },
+  { id: "app-settings", label: "Settings", icon: Settings, disabled: false },
+  { id: "help-support", label: "Help Center", icon: CircleHelp, disabled: false },
+];
 
 export function getSectionIdByView(viewId) {
   const section = groupedNavigationSections.find((entry) => entry.views.includes(viewId));

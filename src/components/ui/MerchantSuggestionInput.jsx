@@ -2,6 +2,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 export default function MerchantSuggestionInput({
   label,
+  inputRef: externalInputRef = null,
   value,
   onChange,
   suggestions = [],
@@ -10,7 +11,7 @@ export default function MerchantSuggestionInput({
   required = false,
 }) {
   const inputId = useId();
-  const inputRef = useRef(null);
+  const internalInputRef = useRef(null);
   const listboxId = `${inputId}-merchant-suggestions`;
   const normalizedValue = String(value ?? "");
   const canShowSuggestions =
@@ -36,14 +37,23 @@ export default function MerchantSuggestionInput({
     setHighlightedIndex((current) => (current >= 0 && current < suggestions.length ? current : 0));
   }, [canShowSuggestions, suggestions.length, suppressAutoOpen]);
 
+  function setInputRef(node) {
+    internalInputRef.current = node;
+    if (typeof externalInputRef === "function") {
+      externalInputRef(node);
+    } else if (externalInputRef && typeof externalInputRef === "object") {
+      externalInputRef.current = node;
+    }
+  }
+
   function handleSelectSuggestion(suggestion) {
     setSuppressAutoOpen(true);
     onChange?.(suggestion.merchant, suggestion);
     setIsOpen(false);
     setHighlightedIndex(-1);
     window.setTimeout(() => {
-      inputRef.current?.focus();
-      inputRef.current?.setSelectionRange?.(
+      internalInputRef.current?.focus();
+      internalInputRef.current?.setSelectionRange?.(
         String(suggestion.merchant).length,
         String(suggestion.merchant).length,
       );
@@ -106,7 +116,7 @@ export default function MerchantSuggestionInput({
       {label}
       <div className="relative">
         <input
-          ref={inputRef}
+          ref={setInputRef}
           value={value}
           onChange={handleInputChange}
           onFocus={handleInputFocus}

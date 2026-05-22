@@ -1,15 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { Plus } from "lucide-react";
-import Button from "../../../components/ui/Button.jsx";
-import Card from "../../../components/ui/Card.jsx";
-import Select from "../../../components/ui/Select.jsx";
-import { buildMonthOptions, getCurrentMonthKey } from "../../../lib/dates.js";
+import { getCurrentMonthKey } from "../../../lib/dates.js";
 import { formatMonthLabel } from "../../../lib/formatters.js";
 import { consumeNavigationTarget } from "../../../lib/navigationTargets.js";
 import SpendingMigrationPanel from "./SpendingMigrationPanel.jsx";
 import SpendingSummary from "./SpendingSummary.jsx";
 import TransactionModal from "./TransactionModal.jsx";
 import TransactionTable from "./TransactionTable.jsx";
+import { getTotalSpending } from "../spendingService.js";
 
 const emptyFilters = {
   search: "",
@@ -33,7 +30,6 @@ export default function SpendingTracker({
   isSaving = false,
   categoriesLoading = false,
   categoriesError = "",
-  onMonthChange,
   onCreateTransaction,
   onUpdateTransaction,
   onDeleteTransaction,
@@ -42,8 +38,26 @@ export default function SpendingTracker({
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [filters, setFilters] = useState(emptyFilters);
-  const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const activeCards = creditCards.filter((card) => card.isActive);
+  const statusLine = useMemo(() => {
+    if (loading) return "Loading transactions...";
+    if (categoriesLoading) return "Loading categories...";
+    if (isSaving) return "Saving transaction...";
+    return "";
+  }, [loading, categoriesLoading, isSaving]);
+  const summaryPreviousMonthHint = useMemo(() => {
+    if (!Array.isArray(localTransactions) || localTransactions.length === 0) return null;
+    const previousMonthKey = shiftMonth(selectedMonth, -1);
+    const previousMonthTransactions = localTransactions.filter(
+      (transaction) => String(transaction.date || "").slice(0, 7) === previousMonthKey,
+    );
+    if (!previousMonthTransactions.length) return null;
+    return {
+      monthKey: previousMonthKey,
+      totalSpent: getTotalSpending(previousMonthTransactions),
+      transactionCount: previousMonthTransactions.length,
+    };
+  }, [localTransactions, selectedMonth]);
 
   useEffect(() => {
     const target = consumeNavigationTarget("spending");
@@ -75,11 +89,6 @@ export default function SpendingTracker({
     if (editingTransaction?.id === transaction.id) setEditingTransaction(null);
   }
 
-  function openAddModal() {
-    setEditingTransaction(null);
-    setIsTransactionModalOpen(true);
-  }
-
   function openEditModal(transaction) {
     setEditingTransaction(transaction);
     setIsTransactionModalOpen(true);
@@ -91,7 +100,7 @@ export default function SpendingTracker({
   }
 
   return (
-    <section className="mx-auto grid w-full max-w-7xl gap-6">
+    <section className="grid w-full gap-6">
       {error ? (
         <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B]">
           {error}
@@ -112,57 +121,19 @@ export default function SpendingTracker({
         disabled={loading || isSaving || categoriesLoading}
       />
 
-      <Card className="p-5">
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto_220px] lg:items-end">
-          <div>
-            <p className="text-sm font-medium text-[#6B7280]">Transactions</p>
-            <h2 className="mt-1 text-2xl font-semibold tracking-normal text-[#111827]">
-              {formatMonthLabel(selectedMonth)}
-            </h2>
-            <p className="mt-1 text-sm text-[#6B7280]">
-              Track spending, refunds, payments, and recurring-linked transactions for this month.
-            </p>
-            {loading ? (
-              <p className="mt-2 text-sm text-[#6B7280]">Loading transactions...</p>
-            ) : null}
-            {categoriesLoading ? (
-              <p className="mt-2 text-sm text-[#6B7280]">Loading categories...</p>
-            ) : null}
-            {isSaving ? <p className="mt-2 text-sm text-[#6B7280]">Saving transaction...</p> : null}
-          </div>
-          <Button
-            type="button"
-            onClick={openAddModal}
-            disabled={loading || isSaving || categoriesLoading}
-          >
-            <Plus size={16} aria-hidden="true" />
-            Add Transaction
-          </Button>
-          <Select
-            label="Spending month"
-            value={selectedMonth}
-            onChange={(event) => {
-              setEditingTransaction(null);
-              setIsTransactionModalOpen(false);
-              setFilters(emptyFilters);
-              onMonthChange(event.target.value);
-            }}
-          >
-            {monthOptions.map((month) => (
-              <option key={month} value={month}>
-                {formatMonthLabel(month)}
-              </option>
-            ))}
-          </Select>
-        </div>
-      </Card>
+      {statusLine ? <p className="text-xs text-text-muted">{statusLine}</p> : null}
 
-      <SpendingSummary transactions={transactions} cards={activeCards} categories={categories} />
+      <SpendingSummary
+        transactions={transactions}
+        categories={categories}
+        previousMonthHint={summaryPreviousMonthHint}
+      />
 
       <TransactionTable
         transactions={transactions}
         cards={activeCards}
         categories={categories}
+        selectedMonthLabel={formatMonthLabel(selectedMonth)}
         filters={filters}
         onFiltersChange={setFilters}
         onEdit={openEditModal}
@@ -185,4 +156,12 @@ export default function SpendingTracker({
       />
     </section>
   );
+}
+
+function shiftMonth(monthKey, delta) {
+  const [year, month] = String(monthKey || "")
+    .split("-")
+    .map(Number);
+  const shifted = new Date(year, month - 1 + delta, 1);
+  return `${shifted.getFullYear()}-${String(shifted.getMonth() + 1).padStart(2, "0")}`;
 }

@@ -1,11 +1,11 @@
 export const pageContent = {
   dashboard: {
-    title: "Dashboard",
-    description: "A clear view of cards, budget, spending, and bills.",
+    title: "Overview",
+    description: "Your family finance snapshot for the selected month.",
   },
   "credit-cards": {
-    title: "Credit Cards",
-    description: "Manage cards, monthly balances, due dates, and payment status.",
+    title: "Cards & Debt",
+    description: "Manage your cards, track balances, and pay down debt.",
   },
   budgets: {
     title: "Monthly Budget",
@@ -13,15 +13,15 @@ export const pageContent = {
   },
   spending: {
     title: "Transactions",
-    description: "Track spending, payment methods, categories, and notes.",
+    description: "",
   },
   recurring: {
-    title: "Recurring Payments",
-    description: "Manage monthly bills, subscriptions, and mandatory payments.",
+    title: "Bills",
+    description: "Stay on top of what's due and never miss a payment.",
   },
   insights: {
     title: "Insights",
-    description: "Review spending trends, budget performance, and payment patterns.",
+    description: "Understand your money, spot opportunities, and build better habits.",
   },
   tools: {
     title: "Tools",
@@ -52,8 +52,8 @@ export const pageContent = {
     description: "Manually track income sources and monthly income entries.",
   },
   savings: {
-    title: "Savings",
-    description: "Manually track savings goals and monthly contributions.",
+    title: "Savings Goals",
+    description: "Track progress toward what matters most to your family.",
   },
   backup: {
     title: "Backup & Restore",
@@ -64,8 +64,8 @@ export const pageContent = {
     description: "Create households, review membership, and choose the active household.",
   },
   "app-settings": {
-    title: "App Settings",
-    description: "Customize display and app preferences.",
+    title: "Settings",
+    description: "Manage your household, preferences, notifications, and app setup.",
   },
   "account-settings": {
     title: "Account Settings",

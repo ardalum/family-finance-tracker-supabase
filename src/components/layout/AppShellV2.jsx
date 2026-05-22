@@ -2,11 +2,10 @@ import { Menu, PanelLeftClose, PanelLeftOpen, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { appMetadata } from "../../app/appMetadata.js";
 import { AppBrandMark } from "../branding/index.js";
-import Button from "../ui/Button.jsx";
 import { footerLinks } from "./footerLinks.js";
-import Navigation from "./Navigation.jsx";
+import NavigationV2 from "./NavigationV2.jsx";
 
-export default function AppShell({
+export default function AppShellV2({
   activeView,
   onViewChange,
   pageTitle,
@@ -22,74 +21,86 @@ export default function AppShell({
     <div className="min-h-screen overflow-x-hidden bg-app-background text-text-main">
       <div className="flex min-h-screen min-w-0 max-w-full">
         <aside
-          className={`hidden border-r border-app-border bg-[#F3EEE3]/95 backdrop-blur md:block ${
-            sidebarCollapsed ? "w-[88px]" : "w-[272px]"
+          className={`hidden shrink-0 overflow-hidden border-r border-app-border bg-app-sidebar lg:block ${
+            sidebarCollapsed ? "w-[88px] xl:w-[104px]" : "w-[220px] xl:w-[278px]"
           }`}
         >
-          <div className="sticky top-0 grid h-screen grid-rows-[auto_1fr_auto] gap-4 p-4">
-            <div className="grid gap-3 rounded-2xl border border-app-border bg-white p-3 shadow-[0_8px_24px_-20px_rgba(15,42,74,0.5)]">
-              <div className="flex items-center gap-3">
-                <AppBrandMark />
-                {!sidebarCollapsed ? (
-                  <div className="min-w-0">
-                    <h1 className="truncate text-base font-semibold text-text-main">
-                      Family Finance Tracker
-                    </h1>
-                    <p className="text-xs text-text-muted">Household money command center</p>
-                  </div>
-                ) : null}
-              </div>
-              <div className="flex items-center gap-2">
-                {!sidebarCollapsed ? (
-                  <Button type="button" className="h-10 flex-1 px-3 text-sm" onClick={onQuickAdd}>
-                    <Plus size={14} />
-                    Quick add
-                  </Button>
-                ) : (
-                  <button
-                    type="button"
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-app-border bg-white text-text-main"
-                    onClick={onQuickAdd}
-                    title="Quick Add"
-                    aria-label="Quick Add"
-                  >
-                    <Plus size={16} />
-                  </button>
-                )}
+          <div
+            className={`sticky top-0 grid h-screen grid-rows-[auto_minmax(0,1fr)_auto] gap-4 ${
+              sidebarCollapsed ? "p-3" : "p-4"
+            }`}
+          >
+            {sidebarCollapsed ? (
+              <div className="grid justify-items-center gap-3 rounded-2xl border border-app-border bg-app-surface p-2 shadow-[0_8px_22px_-18px_rgba(15,42,74,0.55)]">
+                <div title="Spedger" aria-label="Spedger">
+                  <AppBrandMark variant="sm" />
+                </div>
+
                 <button
                   type="button"
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-app-border bg-white text-text-main"
-                  onClick={() => setSidebarCollapsed((value) => !value)}
-                  aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-                  title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-app-border bg-app-surface text-text-main transition hover:bg-app-muted"
+                  onClick={() => setSidebarCollapsed(false)}
+                  aria-label="Expand sidebar"
+                  title="Expand sidebar"
                 >
-                  {sidebarCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+                  <PanelLeftOpen size={16} />
                 </button>
               </div>
+            ) : (
+              <div className="grid gap-3 rounded-2xl border border-app-border bg-app-surface p-3 shadow-[0_8px_22px_-18px_rgba(15,42,74,0.55)]">
+                <div className="flex min-w-0 items-center gap-3 overflow-hidden">
+                  <div className="shrink-0" title="Spedger" aria-label="Spedger">
+                    <AppBrandMark variant="sm" />
+                  </div>
+
+                  <div className="min-w-0 flex-1 overflow-hidden">
+                    <h1 className="truncate text-[1rem] font-semibold leading-tight text-text-main">
+                      Spedger
+                    </h1>
+                    <p className="mt-0.5 truncate text-[0.72rem] font-medium leading-tight text-text-muted">
+                      Family money center
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end">
+                  <button
+                    type="button"
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-app-border bg-app-surface text-text-main transition hover:bg-app-muted"
+                    onClick={() => setSidebarCollapsed(true)}
+                    aria-label="Collapse sidebar"
+                    title="Collapse sidebar"
+                  >
+                    <PanelLeftClose size={16} />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="min-h-0 overflow-y-auto pr-1">
+              <NavigationV2
+                activeView={activeView}
+                onChange={onViewChange}
+                collapsed={sidebarCollapsed}
+              />
             </div>
 
-            <Navigation
-              activeView={activeView}
-              onChange={onViewChange}
-              collapsed={sidebarCollapsed}
-            />
-
-            <div className="grid gap-2 rounded-2xl border border-app-border bg-white p-3 text-xs text-text-muted shadow-[0_8px_24px_-20px_rgba(15,42,74,0.45)]">
+            <div className="grid gap-2 rounded-2xl border border-app-border bg-app-surface p-3 shadow-[0_8px_22px_-18px_rgba(15,42,74,0.45)]">
               {!sidebarCollapsed ? (
                 <>
-                  <p className="font-semibold uppercase tracking-[0.08em] text-text-muted">
-                    Help & settings
+                  <p className="text-[0.66rem] font-semibold uppercase tracking-[0.11em] text-text-muted">
+                    Support
                   </p>
                   <button
                     type="button"
-                    className="text-left font-medium text-brand-primary hover:text-brand-dark"
+                    className="rounded-lg px-2 py-1 text-left text-sm font-medium text-brand-primary transition hover:bg-app-muted hover:text-brand-dark"
                     onClick={() => onViewChange("help-support")}
                   >
-                    Open help and support
+                    Help center
                   </button>
                 </>
               ) : (
-                <span className="text-center font-semibold">?</span>
+                <span className="text-center text-sm font-semibold text-text-muted">?</span>
               )}
             </div>
           </div>
@@ -102,7 +113,7 @@ export default function AppShell({
                 <div className="flex min-w-0 items-center gap-3">
                   <button
                     type="button"
-                    className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-app-border bg-white text-text-main md:hidden"
+                    className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-app-border bg-app-surface text-text-main lg:hidden"
                     onClick={() => setMobileDrawerOpen(true)}
                     aria-label="Open navigation menu"
                   >
@@ -112,7 +123,9 @@ export default function AppShell({
                     <h2 className="truncate text-xl font-semibold tracking-tight text-text-main">
                       {pageTitle}
                     </h2>
-                    <p className="truncate text-sm text-text-muted">{pageDescription}</p>
+                    {pageDescription ? (
+                      <p className="truncate text-sm text-text-muted">{pageDescription}</p>
+                    ) : null}
                   </div>
                 </div>
                 <div className="min-w-0 flex-1">{accountSlot}</div>
@@ -120,7 +133,9 @@ export default function AppShell({
             </div>
           </header>
 
-          <div className="grid min-w-0 max-w-full gap-6 px-3 py-6 sm:px-6 lg:px-8">{children}</div>
+          <div className="grid w-full min-w-0 max-w-none gap-6 overflow-x-hidden px-3 py-6 sm:px-6 lg:px-8">
+            {children}
+          </div>
 
           <footer className="border-t border-app-border bg-app-background/75">
             <div className="grid gap-4 px-4 py-5 text-xs text-text-muted sm:px-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-center lg:px-8">
@@ -151,29 +166,33 @@ export default function AppShell({
       </div>
 
       {mobileDrawerOpen ? (
-        <div className="fixed inset-0 z-40 md:hidden" role="dialog" aria-modal="true">
+        <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true">
           <button
             type="button"
             className="absolute inset-0 bg-black/35"
             onClick={() => setMobileDrawerOpen(false)}
             aria-label="Close navigation menu"
           />
-          <aside className="absolute left-0 top-0 h-full w-[86vw] max-w-[320px] overflow-y-auto border-r border-app-border bg-app-surface p-3 shadow-xl">
+          <aside className="absolute left-0 top-0 h-full w-[86vw] max-w-[320px] overflow-y-auto border-r border-app-border bg-app-sidebar p-3 shadow-xl">
             <div className="mb-3 flex items-center justify-between">
-              <Button type="button" className="h-9 px-3 text-xs" onClick={onQuickAdd}>
-                <Plus size={14} />
-                Quick Add
-              </Button>
               <button
                 type="button"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-app-border bg-white text-text-main"
+                className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-brand-primary px-3 text-xs font-semibold text-white transition hover:bg-brand-dark"
+                onClick={onQuickAdd}
+              >
+                <Plus size={14} />
+                Add
+              </button>
+              <button
+                type="button"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-app-border bg-app-surface text-text-main"
                 onClick={() => setMobileDrawerOpen(false)}
                 aria-label="Close navigation menu"
               >
                 <X size={16} />
               </button>
             </div>
-            <Navigation
+            <NavigationV2
               activeView={activeView}
               onChange={onViewChange}
               onItemSelected={() => setMobileDrawerOpen(false)}

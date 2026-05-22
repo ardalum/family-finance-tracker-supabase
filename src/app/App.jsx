@@ -43,6 +43,7 @@ import { householdHasFinanceData } from "../features/setup/setupService.js";
 import { useSpendingCategories } from "../features/spending/useSpendingCategories.js";
 import { useSpendingTransactions } from "../features/spending/useSpendingTransactions.js";
 import { getAlerts, getDashboardData } from "../features/dashboard/dashboardUtils.js";
+import { dispatchNavigation } from "../lib/navigationTargets.js";
 
 export default function App() {
   return (
@@ -489,6 +490,7 @@ function FinanceTrackerApp() {
         recurringPayments,
         recurringStatusByMonth,
         incomeEntries,
+        savingsGoals,
         savingsContributions,
         cashAccounts,
         accountBalanceSnapshots,
@@ -503,6 +505,7 @@ function FinanceTrackerApp() {
       recurringPayments,
       recurringStatusByMonth,
       incomeEntries,
+      savingsGoals,
       savingsContributions,
       cashAccounts,
       accountBalanceSnapshots,
@@ -528,6 +531,7 @@ function FinanceTrackerApp() {
         recurringPayments,
         recurringStatusByMonth,
         incomeEntries,
+        savingsGoals,
         savingsContributions,
         cashAccounts,
         accountBalanceSnapshots,
@@ -543,6 +547,7 @@ function FinanceTrackerApp() {
       recurringPayments,
       recurringStatusByMonth,
       incomeEntries,
+      savingsGoals,
       savingsContributions,
       cashAccounts,
       accountBalanceSnapshots,
@@ -556,6 +561,26 @@ function FinanceTrackerApp() {
   const headerAlerts = useMemo(
     () => getAlerts(getDashboardData(dashboardAppData, selectedDashboardMonth)),
     [dashboardAppData, selectedDashboardMonth],
+  );
+  const settingsExportData = useMemo(
+    () => ({
+      transactions: appData?.transactions ?? [],
+      budgetsByMonth: appData?.budgetsByMonth ?? {},
+      creditCards: appData?.creditCards ?? [],
+      monthlyBalancesByMonth: appData?.monthlyBalancesByMonth ?? {},
+      recurringPayments: appData?.recurringPayments ?? [],
+      recurringStatusByMonth: appData?.recurringStatusByMonth ?? {},
+      savingsGoals: appData?.savingsGoals ?? [],
+      savingsContributions: appData?.savingsContributions ?? [],
+      categories: appData?.categories ?? [],
+      cashAccounts: appData?.cashAccounts ?? [],
+      accountBalanceSnapshots: appData?.accountBalanceSnapshots ?? [],
+      liabilityAccounts: appData?.liabilityAccounts ?? [],
+      liabilityBalanceSnapshots: appData?.liabilityBalanceSnapshots ?? [],
+      incomeSources: appData?.incomeSources ?? [],
+      incomeEntries: appData?.incomeEntries ?? [],
+    }),
+    [appData],
   );
 
   useEffect(() => {
@@ -730,7 +755,7 @@ function FinanceTrackerApp() {
     updateSupabaseBudget,
     deleteSupabaseBudget,
     addDefaultBudgetsToSupabase,
-    copyPreviousMonthBudgetCategories: copyPreviousMonthBudgetsToSupabase,
+    copyPreviousMonthBudgetsToSupabase,
     importSupabaseBudgetCategories: importLocalBudgetsToSupabase,
     createSupabaseTransaction,
     updateSupabaseTransaction,
@@ -772,10 +797,36 @@ function FinanceTrackerApp() {
     createSupabaseSavingsContribution,
     updateSupabaseSavingsContribution,
     deleteSupabaseSavingsContribution,
+    settingsExportData,
   });
 
   function openQuickAdd() {
     setQuickAddOpen(true);
+  }
+
+  function handlePrimaryHeaderAction() {
+    if (activeView === "budgets") {
+      dispatchNavigation("budgets", "add-budget");
+      return;
+    }
+    if (activeView === "credit-cards") {
+      dispatchNavigation("credit-cards", "add-card");
+      return;
+    }
+    if (activeView === "recurring") {
+      dispatchNavigation("recurring", "add-bill");
+      return;
+    }
+    if (activeView === "savings") {
+      dispatchNavigation("savings", "add-goal");
+      return;
+    }
+    if (activeView === "insights") {
+      dispatchNavigation("insights", "detailed-reports");
+      return;
+    }
+
+    openQuickAdd();
   }
 
   function closeQuickAdd() {
@@ -813,8 +864,22 @@ function FinanceTrackerApp() {
       currentPage={currentPage}
       headerAlerts={headerAlerts}
       setupCheckError={setupCheckError}
+      selectedDashboardMonth={selectedDashboardMonth}
+      onDashboardMonthChange={setSelectedDashboardMonth}
+      selectedSpendingMonth={selectedSpendingMonth}
+      onSpendingMonthChange={setSelectedSpendingMonth}
+      selectedBudgetMonth={selectedBudgetMonth}
+      onBudgetMonthChange={setSelectedBudgetMonth}
+      selectedBalanceMonth={selectedBalanceMonth}
+      onBalanceMonthChange={setSelectedBalanceMonth}
+      selectedRecurringMonth={selectedRecurringMonth}
+      onRecurringMonthChange={setSelectedRecurringMonth}
+      selectedSavingsMonth={selectedSavingsMonth}
+      onSavingsMonthChange={setSelectedSavingsMonth}
+      selectedInsightsMonth={selectedInsightsMonth}
+      onInsightsMonthChange={setSelectedInsightsMonth}
       onViewChange={setActiveView}
-      onQuickAdd={openQuickAdd}
+      onQuickAdd={handlePrimaryHeaderAction}
     >
       <AppViewRenderer activeView={activeView} {...appViewProps} />
       <QuickAddTransactionModal
@@ -831,3 +896,5 @@ function FinanceTrackerApp() {
     </AppShellFrame>
   );
 }
+
+

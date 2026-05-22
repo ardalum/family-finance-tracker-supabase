@@ -9,88 +9,95 @@ export default function BudgetVsSpendingTable({
   emptyMessage = "No budget categories for this month.",
 }) {
   const previewRows = rows.slice(0, MAX_PREVIEW_ROWS);
-  const hiddenCount = Math.max(rows.length - previewRows.length, 0);
+  const totalBudget = rows.reduce((sum, row) => sum + Number(row.budget || 0), 0);
+  const totalSpent = rows.reduce((sum, row) => sum + Number(row.spent || 0), 0);
+  const usagePct = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
+  const safeUsagePct = Math.min(100, Math.max(0, usagePct));
+  const overCount = rows.filter((row) => Number(row.remaining) < 0).length;
+  const severeOverBudget = overCount > 0 && overCount >= Math.ceil(rows.length * 0.5);
 
   return (
     <Card className="overflow-hidden">
-      <SectionHeader title={title} />
+      <div className="border-b border-app-border p-5">
+        <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_92px] sm:items-center">
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-base font-semibold text-text-main">{title}</h3>
+              {usagePct > 100 ? (
+                <span className="rounded-full bg-status-warningBg px-2 py-0.5 text-[11px] font-semibold text-status-warningDark">
+                  {usagePct > 999 ? "999%+" : `${Math.round(usagePct)}%`}
+                </span>
+              ) : null}
+            </div>
+            <p className="mt-1 text-sm text-text-muted">
+              {formatCurrency(totalSpent)} of {formatCurrency(totalBudget)} planned budget used.
+            </p>
+          </div>
+          <div
+            className="mx-auto grid h-[84px] w-[84px] place-items-center rounded-full"
+            style={{
+              background: `conic-gradient(${
+                severeOverBudget ? "#DC2626" : safeUsagePct >= 85 ? "#D97706" : "#16A34A"
+              } ${safeUsagePct * 3.6}deg, #EEE8DD 0deg)`,
+            }}
+          >
+            <div className="grid h-[62px] w-[62px] place-items-center rounded-full bg-white text-xs font-semibold text-text-soft">
+              {Math.round(safeUsagePct)}%
+            </div>
+          </div>
+        </div>
+        <div className="mt-3 h-2 overflow-hidden rounded-full bg-app-muted">
+          <div
+            className={`h-full rounded-full ${severeOverBudget ? "bg-status-danger" : safeUsagePct >= 85 ? "bg-status-warning" : "bg-status-success"}`}
+            style={{ width: `${safeUsagePct}%` }}
+          />
+        </div>
+      </div>
       {rows.length === 0 ? (
-        <Empty message={emptyMessage} />
+        <div className="p-8 text-center text-sm text-text-muted">{emptyMessage}</div>
       ) : (
         <div className="grid gap-3 p-4">
           {previewRows.map((row) => {
+            const rawPct = Number(row.percentUsed || 0);
+            const pct = Math.min(100, Math.max(0, rawPct));
             const over = row.remaining < 0;
-            const near = row.percentUsed >= 90;
+            const near = rawPct >= 90;
             return (
               <article
                 key={row.category}
-                className="rounded-2xl border border-app-border bg-app-surface px-4 py-3"
+                className="rounded-xl border border-app-border bg-app-background p-3"
               >
-                <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex min-w-0 flex-wrap items-center gap-2">
-                      <h4 className="truncate text-sm font-semibold text-text-main">
-                        {row.category}
-                      </h4>
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-semibold ${over ? "bg-status-dangerBg text-status-dangerDark" : near ? "bg-status-warningBg text-status-warningDark" : "bg-status-successBg text-status-successDark"}`}
-                      >
-                        {row.percentUsed.toFixed(0)}% used
-                      </span>
-                    </div>
-                    <p className="mt-1 text-xs text-text-muted">
-                      Budget {formatCurrency(row.budget)} · Spent {formatCurrency(row.spent)}
-                    </p>
-                  </div>
-                  <div className="text-left sm:text-right">
-                    <p
-                      className={`text-sm font-semibold ${over ? "text-status-danger" : "text-text-main"}`}
-                    >
-                      {formatCurrency(row.remaining)}
-                    </p>
-                    <p className="text-xs text-text-muted">Remaining</p>
-                  </div>
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <h4 className="truncate text-sm font-semibold text-text-main">{row.category}</h4>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs font-semibold ${over ? "bg-status-dangerBg text-status-dangerDark" : near ? "bg-status-warningBg text-status-warningDark" : "bg-status-successBg text-status-successDark"}`}
+                  >
+                    {rawPct > 999 ? "999%+" : `${Math.round(rawPct)}%`}
+                  </span>
                 </div>
-                <div className="mt-3 h-2 overflow-hidden rounded-full bg-app-muted">
+                <div className="h-2 overflow-hidden rounded-full bg-app-muted">
                   <div
                     className={`h-full rounded-full ${over ? "bg-status-danger" : near ? "bg-status-warning" : "bg-status-success"}`}
-                    style={{ width: `${Math.min(Math.max(row.percentUsed, 0), 100)}%` }}
-                    aria-hidden="true"
+                    style={{ width: `${pct}%` }}
                   />
+                </div>
+                <div className="mt-2 flex items-center justify-between text-xs text-text-muted">
+                  <span>
+                    {formatCurrency(row.spent)} / {formatCurrency(row.budget)}
+                  </span>
+                  <span
+                    className={
+                      over ? "font-semibold text-status-danger" : "font-semibold text-text-main"
+                    }
+                  >
+                    {formatCurrency(row.remaining)}
+                  </span>
                 </div>
               </article>
             );
           })}
-          {hiddenCount > 0 ? (
-            <p className="px-1 text-xs font-medium text-text-muted">
-              Showing {previewRows.length} of {rows.length}. Open Monthly Budget to review all
-              categories.
-            </p>
-          ) : (
-            <p className="px-1 text-xs font-medium text-text-muted">
-              Open Monthly Budget to adjust category limits.
-            </p>
-          )}
         </div>
       )}
     </Card>
-  );
-}
-
-function SectionHeader({ title }) {
-  return (
-    <div className="border-b border-app-border p-5">
-      <h3 className="text-lg font-semibold text-text-main">{title}</h3>
-      <p className="mt-1 text-sm text-text-muted">Categories that are near or over budget.</p>
-    </div>
-  );
-}
-
-function Empty({ message }) {
-  return (
-    <div className="grid gap-1 p-8 text-center text-sm text-text-muted">
-      <p>{message}</p>
-      <p className="text-xs">No budget category needs attention right now.</p>
-    </div>
   );
 }
