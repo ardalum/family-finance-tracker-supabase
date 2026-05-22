@@ -1,11 +1,44 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { Info } from "lucide-react";
 
 export default function InfoTooltip({ label = "Calculation info", content }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
+  const [tooltipStyle, setTooltipStyle] = useState(null);
   const tooltipId = useId();
   const wrapperRef = useRef(null);
+  const buttonRef = useRef(null);
+  const tooltipRef = useRef(null);
+  const PADDING = 12;
+  const GAP = 8;
+  const MAX_TOOLTIP_WIDTH = 320;
+
+  const updateTooltipPosition = useCallback(() => {
+    const trigger = buttonRef.current;
+    const tooltip = tooltipRef.current;
+    if (!trigger || !tooltip) return;
+
+    const triggerRect = trigger.getBoundingClientRect();
+    const tooltipRect = tooltip.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const maxWidth = Math.min(MAX_TOOLTIP_WIDTH, viewportWidth - PADDING * 2);
+    const tooltipWidth = Math.min(tooltipRect.width, maxWidth);
+    const tooltipHeight = tooltipRect.height;
+
+    const centeredLeft = triggerRect.left + triggerRect.width / 2 - tooltipWidth / 2;
+    const left = Math.min(Math.max(PADDING, centeredLeft), viewportWidth - tooltipWidth - PADDING);
+
+    const spaceBelow = viewportHeight - triggerRect.bottom - GAP;
+    const showAbove = spaceBelow < tooltipHeight && triggerRect.top > tooltipHeight + GAP;
+    const top = showAbove ? triggerRect.top - tooltipHeight - GAP : triggerRect.bottom + GAP;
+
+    setTooltipStyle({
+      left: Math.max(PADDING, left),
+      top: Math.max(PADDING, top),
+      maxWidth,
+    });
+  }, []);
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -35,6 +68,27 @@ export default function InfoTooltip({ label = "Calculation info", content }) {
     };
   }, [isOpen]);
 
+  useLayoutEffect(() => {
+    if (!isOpen) {
+      setTooltipStyle(null);
+      return undefined;
+    }
+
+    updateTooltipPosition();
+
+    function handleViewportChange() {
+      updateTooltipPosition();
+    }
+
+    window.addEventListener("resize", handleViewportChange);
+    window.addEventListener("scroll", handleViewportChange, true);
+
+    return () => {
+      window.removeEventListener("resize", handleViewportChange);
+      window.removeEventListener("scroll", handleViewportChange, true);
+    };
+  }, [isOpen, updateTooltipPosition]);
+
   function showTransient() {
     if (!isPinned) {
       setIsOpen(true);
@@ -58,6 +112,7 @@ export default function InfoTooltip({ label = "Calculation info", content }) {
   return (
     <span className="relative inline-flex" ref={wrapperRef}>
       <button
+        ref={buttonRef}
         type="button"
         className="inline-flex h-5 w-5 items-center justify-center rounded-full text-text-muted transition hover:bg-app-background hover:text-text-main focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-app-accent"
         aria-label={label}
@@ -73,9 +128,11 @@ export default function InfoTooltip({ label = "Calculation info", content }) {
       </button>
       {isOpen ? (
         <span
+          ref={tooltipRef}
           id={tooltipId}
           role="tooltip"
-          className="absolute right-0 top-6 z-20 w-72 rounded-xl border border-app-border bg-app-surface p-3 text-left text-xs leading-5 text-text-main shadow-lg sm:w-80"
+          style={tooltipStyle ?? undefined}
+          className="fixed z-[70] rounded-xl border border-app-border bg-app-surface p-3 text-left text-xs leading-5 text-text-main shadow-lg"
         >
           {content}
         </span>
