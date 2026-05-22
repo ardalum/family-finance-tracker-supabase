@@ -39,6 +39,14 @@ describe("page content config", () => {
     );
   });
 
+  it("contains redesigned help center page content", () => {
+    assert.equal(pageContent["help-support"].title, "Help Center");
+    assert.equal(
+      pageContent["help-support"].description,
+      "Find answers, learn workflows, and get support for Spedger.",
+    );
+  });
+
   it("contains page content for every main finance view", () => {
     for (const viewId of primaryFinanceViewIds) {
       const content = pageContent[viewId];
