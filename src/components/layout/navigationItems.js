@@ -171,6 +171,7 @@ export const groupedNavigationSections = sectionConfig.map((section) => ({
 
 export const dashboardV2SidebarItems = [
   { id: "dashboard", label: "Overview", icon: House, disabled: false },
+  { id: "financial-position", label: "Money Center", icon: Landmark, disabled: false },
   { id: "spending", label: "Transactions", icon: ReceiptText, disabled: false },
   { id: "budgets", label: "Budgets", icon: PieChart, disabled: false },
   { id: "credit-cards", label: "Cards & Debt", icon: CreditCard, disabled: false },

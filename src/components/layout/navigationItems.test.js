@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import { primaryFinanceViewIds } from "../../app/secondaryViews.js";
 import {
   createInitialExpandedGroupState,
+  dashboardV2SidebarItems,
   getNavigationItemIds,
   getSectionIdByView,
   groupedNavigationSections,
@@ -56,6 +57,13 @@ describe("navigation items", () => {
     assert.equal(getSectionIdByView("calendar"), "planning");
     assert.equal(getSectionIdByView("app-settings"), "system");
     assert.equal(getSectionIdByView("backup"), null);
+  });
+
+  it("shows Money Center in the V2 sidebar and keeps income/accounts as hidden aliases", () => {
+    const labels = dashboardV2SidebarItems.map((item) => item.label);
+    assert.equal(labels.includes("Money Center"), true);
+    assert.equal(labels.includes("Income"), false);
+    assert.equal(labels.includes("Accounts"), false);
   });
 
   it("uses default collapsed/expanded group state with active-section auto-expand", () => {
