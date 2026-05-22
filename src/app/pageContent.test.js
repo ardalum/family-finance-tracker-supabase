@@ -11,7 +11,7 @@ describe("page content config", () => {
     assert.equal(pageContent.spending.title, "Transactions");
     assert.equal(pageContent.recurring.title, "Bills");
     assert.equal(pageContent.insights.title, "Insights");
-    assert.equal(pageContent["financial-position"].title, "Financial Position");
+    assert.equal(pageContent["financial-position"].title, "Money Center");
     assert.equal(
       pageContent.spending.description,
       "All income and expenses for the selected month.",

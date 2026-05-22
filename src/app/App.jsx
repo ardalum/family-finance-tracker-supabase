@@ -878,6 +878,8 @@ function FinanceTrackerApp() {
       onSavingsMonthChange={setSelectedSavingsMonth}
       selectedInsightsMonth={selectedInsightsMonth}
       onInsightsMonthChange={setSelectedInsightsMonth}
+      selectedFinancialPositionMonth={selectedFinancialPositionMonth}
+      onFinancialPositionMonthChange={setSelectedFinancialPositionMonth}
       onViewChange={setActiveView}
       onQuickAdd={handlePrimaryHeaderAction}
     >

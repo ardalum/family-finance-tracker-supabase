@@ -175,6 +175,40 @@ describe("app view props", () => {
     assert.equal(props.financialPositionProps.liabilityReviewConfirmed, undefined);
   });
 
+  it("maps money center props and month sync handler", () => {
+    let financialMonth = "";
+    let incomeMonth = "";
+    let accountsMonth = "";
+    const props = createAppViewProps({
+      ...input,
+      selectedFinancialPositionMonth: "2026-05",
+      setSelectedFinancialPositionMonth: (value) => {
+        financialMonth = value;
+      },
+      setSelectedIncomeMonth: (value) => {
+        incomeMonth = value;
+      },
+      setSelectedAccountsMonth: (value) => {
+        accountsMonth = value;
+      },
+      incomeSources: [{ id: "source-1" }],
+      incomeEntries: [{ id: "entry-1" }],
+      cashAccounts: [{ id: "cash-1" }],
+      accountBalanceSnapshots: [{ id: "snap-1" }],
+    });
+
+    assert.equal(props.moneyCenterProps.selectedMonth, "2026-05");
+    assert.equal(props.moneyCenterProps.incomeSources.length, 1);
+    assert.equal(props.moneyCenterProps.incomeEntries.length, 1);
+    assert.equal(props.moneyCenterProps.cashAccounts.length, 1);
+    assert.equal(props.moneyCenterProps.accountBalanceSnapshots.length, 1);
+
+    props.moneyCenterProps.onMonthChange("2026-06");
+    assert.equal(financialMonth, "2026-06");
+    assert.equal(incomeMonth, "2026-06");
+    assert.equal(accountsMonth, "2026-06");
+  });
+
   it("maps calendar props", () => {
     const props = createAppViewProps({
       ...input,

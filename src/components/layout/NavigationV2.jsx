@@ -26,7 +26,10 @@ export default function NavigationV2({
     <nav className="grid gap-1.5 pr-1" aria-label={ariaLabel}>
       {dashboardV2SidebarItems.map((item) => {
         const Icon = item.icon;
-        const isActive = item.id ? activeView === item.id : false;
+        const isMoneyCenterAlias =
+          item.id === "financial-position" &&
+          ["financial-position", "income", "accounts"].includes(activeView);
+        const isActive = item.id ? activeView === item.id || isMoneyCenterAlias : false;
         const isDisabled = item.disabled || !item.id;
 
         return (

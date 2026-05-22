@@ -1,4 +1,14 @@
-import { BarChart3, Bell, Calendar, ChevronLeft, ChevronRight, Plus, Search } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import {
+  BarChart3,
+  Bell,
+  Calendar,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Search,
+} from "lucide-react";
 import AlertsMenu from "../features/dashboard/components/AlertsMenu.jsx";
 import AccountMenu from "../features/auth/components/AccountMenu.jsx";
 import HouseholdSwitcher from "../features/households/components/HouseholdSwitcher.jsx";
@@ -24,7 +34,11 @@ export default function AppHeaderAccountSlot({
   onSavingsMonthChange,
   insightsMonth,
   onInsightsMonthChange,
+  financialPositionMonth,
+  onFinancialPositionMonthChange,
 }) {
+  const [moneyCenterAddOpen, setMoneyCenterAddOpen] = useState(false);
+  const moneyCenterAddRef = useRef(null);
   const isDashboard = activeView === "dashboard";
   const isSpending = activeView === "spending";
   const isBudgets = activeView === "budgets";
@@ -32,6 +46,8 @@ export default function AppHeaderAccountSlot({
   const isRecurring = activeView === "recurring";
   const isSavings = activeView === "savings";
   const isInsights = activeView === "insights";
+  const isMoneyCenterView =
+    activeView === "financial-position" || activeView === "income" || activeView === "accounts";
   const activeMonth = isDashboard
     ? dashboardMonth
     : isSpending
@@ -46,7 +62,9 @@ export default function AppHeaderAccountSlot({
               ? savingsMonth
               : isInsights
                 ? insightsMonth
-                : "";
+                : isMoneyCenterView
+                  ? financialPositionMonth
+                  : "";
   const onMonthChange = isDashboard
     ? onDashboardMonthChange
     : isSpending
@@ -61,7 +79,9 @@ export default function AppHeaderAccountSlot({
               ? onSavingsMonthChange
               : isInsights
                 ? onInsightsMonthChange
-                : null;
+                : isMoneyCenterView
+                  ? onFinancialPositionMonthChange
+                  : null;
   const actionLabel = isInsights
     ? "View reports"
     : isBudgets
@@ -76,6 +96,29 @@ export default function AppHeaderAccountSlot({
   const ActionIcon = isInsights ? BarChart3 : Plus;
   const showMonthControls = Boolean(activeMonth && onMonthChange);
   const monthOptions = showMonthControls ? buildMonthOptions(activeMonth) : [];
+
+  useEffect(() => {
+    function closeMenuOnOutside(event) {
+      if (!moneyCenterAddRef.current?.contains(event.target)) {
+        setMoneyCenterAddOpen(false);
+      }
+    }
+    function closeMenuOnEscape(event) {
+      if (event.key === "Escape") setMoneyCenterAddOpen(false);
+    }
+
+    document.addEventListener("pointerdown", closeMenuOnOutside);
+    document.addEventListener("keydown", closeMenuOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeMenuOnOutside);
+      document.removeEventListener("keydown", closeMenuOnEscape);
+    };
+  }, []);
+
+  function dispatchMoneyCenterAdd(action) {
+    setMoneyCenterAddOpen(false);
+    window.dispatchEvent(new CustomEvent("spedger:money-center-add", { detail: { action } }));
+  }
 
   function shiftMonth(monthKey, delta) {
     const [year, month] = String(monthKey).split("-").map(Number);
@@ -113,7 +156,9 @@ export default function AppHeaderAccountSlot({
                           ? "Savings goals month"
                           : isInsights
                             ? "Insights month"
-                            : "Cards and debt month"
+                            : isMoneyCenterView
+                              ? "Money Center month"
+                              : "Cards and debt month"
               }
             >
               {monthOptions.map((month) => (
@@ -154,15 +199,71 @@ export default function AppHeaderAccountSlot({
         <AlertsMenu alerts={alerts} />
       </div>
 
-      <button
-        type="button"
-        className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-brand-primary px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
-        onClick={onQuickAdd}
-        aria-label={actionLabel}
-      >
-        <ActionIcon size={16} aria-hidden="true" />
-        <span className="hidden sm:inline">{actionLabel}</span>
-      </button>
+      {isMoneyCenterView ? (
+        <div ref={moneyCenterAddRef} className="relative">
+          <button
+            type="button"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-brand-primary px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+            onClick={() => setMoneyCenterAddOpen((current) => !current)}
+            aria-label="Add"
+            aria-expanded={moneyCenterAddOpen}
+            aria-haspopup="menu"
+          >
+            <Plus size={16} aria-hidden="true" />
+            <span className="hidden sm:inline">Add</span>
+            <ChevronDown size={15} aria-hidden="true" />
+          </button>
+          {moneyCenterAddOpen ? (
+            <div
+              className="absolute right-0 z-30 mt-2 grid min-w-[220px] gap-1 rounded-xl border border-app-border bg-app-surface p-2 shadow-lg"
+              role="menu"
+            >
+              <button
+                type="button"
+                role="menuitem"
+                className="rounded-lg px-3 py-2 text-left text-sm font-medium text-text-main transition hover:bg-app-muted"
+                onClick={() => dispatchMoneyCenterAdd("income-entry")}
+              >
+                Add income entry
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className="rounded-lg px-3 py-2 text-left text-sm font-medium text-text-main transition hover:bg-app-muted"
+                onClick={() => dispatchMoneyCenterAdd("income-source")}
+              >
+                Add income source
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className="rounded-lg px-3 py-2 text-left text-sm font-medium text-text-main transition hover:bg-app-muted"
+                onClick={() => dispatchMoneyCenterAdd("account")}
+              >
+                Add account
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className="rounded-lg px-3 py-2 text-left text-sm font-medium text-text-main transition hover:bg-app-muted"
+                onClick={() => dispatchMoneyCenterAdd("snapshot")}
+              >
+                Add balance snapshot
+              </button>
+            </div>
+          ) : null}
+        </div>
+      ) : (
+        <button
+          type="button"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-brand-primary px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+          onClick={onQuickAdd}
+          aria-label={actionLabel}
+        >
+          <ActionIcon size={16} aria-hidden="true" />
+          <span className="hidden sm:inline">{actionLabel}</span>
+        </button>
+      )}
 
       <div className="lg:hidden">
         <button

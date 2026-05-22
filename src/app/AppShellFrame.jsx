@@ -26,6 +26,8 @@ export default function AppShellFrame({
   onSavingsMonthChange,
   selectedInsightsMonth,
   onInsightsMonthChange,
+  selectedFinancialPositionMonth,
+  onFinancialPositionMonthChange,
   onViewChange,
   onQuickAdd,
   children,
@@ -56,6 +58,8 @@ export default function AppShellFrame({
         onSavingsMonthChange={onSavingsMonthChange}
         insightsMonth={selectedInsightsMonth}
         onInsightsMonthChange={onInsightsMonthChange}
+        financialPositionMonth={selectedFinancialPositionMonth}
+        onFinancialPositionMonthChange={onFinancialPositionMonthChange}
       />
     ),
   };
