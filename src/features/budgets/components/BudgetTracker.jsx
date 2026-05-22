@@ -20,7 +20,7 @@ import {
   UNCATEGORIZED_ID,
 } from "../../spending/spendingService.js";
 import { listTransactions } from "../../spending/spendingSupabaseService.js";
-import { consumeNavigationTarget, NAVIGATE_EVENT } from "../../../lib/navigationTargets.js";
+import { consumeNavigationTarget, dispatchNavigation, NAVIGATE_EVENT } from "../../../lib/navigationTargets.js";
 import BudgetModal from "./BudgetModal.jsx";
 import BudgetTable from "./BudgetTable.jsx";
 import { getTotalMonthlyBudget } from "../budgetsService.js";
@@ -183,7 +183,7 @@ export default function BudgetTracker({
                 ))}
               </select>
             </FilterChip>
-            <FilterChip icon={Users} label="All members" disabled />
+            <FilterChip icon={Users} label="All members" disabled title="Member filters coming soon" />
             <FilterChip icon={Tag} label={getRowFilterLabel(categoryFilter)}>
               <select
                 value={categoryFilter}
@@ -198,7 +198,7 @@ export default function BudgetTracker({
                 ))}
               </select>
             </FilterChip>
-            <FilterChip icon={CheckCircle2} label="More filters" disabled />
+            <FilterChip icon={CheckCircle2} label="More filters" disabled title="More filters coming soon" />
           </div>
         </div>
 
@@ -243,7 +243,7 @@ export default function BudgetTracker({
               <button
                 type="button"
                 className="inline-flex items-center gap-2 rounded-xl border border-[#CCDDF8] bg-white px-3 py-2 text-sm font-semibold text-[#1F4D8F]"
-                disabled
+                onClick={() => dispatchNavigation("insights", "budget-report")}
               >
                 View trends
               </button>
@@ -400,12 +400,13 @@ function BudgetSummaryCards({ summary }) {
   );
 }
 
-function FilterChip({ icon: Icon, label, disabled = false, children = null }) {
+function FilterChip({ icon: Icon, label, disabled = false, children = null, title = "" }) {
   return (
     <label
       className={`relative inline-flex min-h-11 items-center gap-2 rounded-xl border px-3 py-2 text-sm ${
         disabled ? "cursor-not-allowed border-app-border bg-app-muted text-text-muted" : "border-app-border bg-white text-text-main"
       }`}
+      title={title || undefined}
     >
       <Icon size={16} aria-hidden="true" className="text-text-muted" />
       <span>{label}</span>

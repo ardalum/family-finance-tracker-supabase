@@ -2,6 +2,7 @@ import { CreditCard, Edit, StickyNote, Tags, Trash2 } from "lucide-react";
 import LinkedCardName from "../../../components/shared/LinkedCardName.jsx";
 import Button from "../../../components/ui/Button.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
+import { dispatchNavigation } from "../../../lib/navigationTargets.js";
 import {
   getCardName,
   getCategoryName,
@@ -122,7 +123,7 @@ export default function TransactionCard({
           onClick={() => onEdit(transaction)}
           disabled={isSaving || isRecurring}
           aria-label={`Edit ${transaction.merchant}`}
-          title={isRecurring ? "Manage from Recurring Payments" : "Edit transaction"}
+          title={isRecurring ? "Managed from Bills" : "Edit transaction"}
         >
           <Edit size={16} aria-hidden="true" />
           Edit
@@ -134,11 +135,21 @@ export default function TransactionCard({
           onClick={() => onDelete(transaction)}
           disabled={isSaving || isRecurring}
           aria-label={`Delete ${transaction.merchant}`}
-          title={isRecurring ? "Mark unpaid from Recurring Payments" : "Delete transaction"}
+          title={isRecurring ? "Managed from Bills" : "Delete transaction"}
         >
           <Trash2 size={16} aria-hidden="true" />
           Delete
         </Button>
+        {isRecurring ? (
+          <Button
+            type="button"
+            variant="secondary"
+            className="col-span-2 min-h-9 px-3 py-1.5 text-sm sm:col-span-1"
+            onClick={() => dispatchNavigation("recurring", "recurring-home")}
+          >
+            Manage in Bills
+          </Button>
+        ) : null}
       </div>
     </article>
   );

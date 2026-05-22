@@ -132,6 +132,12 @@ function buildCalendarCells(monthKey) {
   return cells;
 }
 
+function shiftMonth(monthKey, delta) {
+  const [year, month] = String(monthKey || "").split("-").map(Number);
+  const shifted = new Date(year, month - 1 + delta, 1);
+  return `${shifted.getFullYear()}-${String(shifted.getMonth() + 1).padStart(2, "0")}`;
+}
+
 export default function RecurringPayments({
   creditCards,
   cashAccounts = [],
@@ -169,6 +175,7 @@ export default function RecurringPayments({
   const [recurringRow, setRecurringRow] = useState(null);
   const [cardDraft, setCardDraft] = useState(null);
   const [cardRow, setCardRow] = useState(null);
+  const [calendarMonth, setCalendarMonth] = useState(selectedMonth);
 
   const activeCards = useMemo(() => creditCards.filter((card) => card.isActive), [creditCards]);
   const monthEntries = monthlyBalances?.[selectedMonth] ?? {};
@@ -199,6 +206,10 @@ export default function RecurringPayments({
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
   }, [activeTab, sortMode, sourceFilter, statusFilter, selectedMonth]);
+
+  useEffect(() => {
+    setCalendarMonth(selectedMonth);
+  }, [selectedMonth]);
 
   useEffect(() => {
     function closeMenu() {
@@ -327,7 +338,7 @@ export default function RecurringPayments({
     });
     return map;
   }, [sortedRows]);
-  const calendarCells = useMemo(() => buildCalendarCells(selectedMonth), [selectedMonth]);
+  const calendarCells = useMemo(() => buildCalendarCells(calendarMonth), [calendarMonth]);
   const calendarMarkers = useMemo(() => {
     const map = new Map();
     rows.forEach((row) => {
@@ -567,15 +578,25 @@ export default function RecurringPayments({
           <div className="flex items-center justify-between">
             <h3 className="whitespace-nowrap text-lg font-semibold leading-tight tracking-tight text-[#071F42]">Upcoming calendar</h3>
             <div className="inline-flex items-center gap-1 text-[#071F42]">
-              <button type="button" disabled className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-[#071F42]/70 disabled:opacity-70">
+              <button
+                type="button"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-[#071F42]/70"
+                onClick={() => setCalendarMonth((current) => shiftMonth(current, -1))}
+                aria-label="Previous calendar month"
+              >
                 <ChevronLeft size={15} />
               </button>
-              <button type="button" disabled className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-[#071F42]/70 disabled:opacity-70">
+              <button
+                type="button"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-[#071F42]/70"
+                onClick={() => setCalendarMonth((current) => shiftMonth(current, 1))}
+                aria-label="Next calendar month"
+              >
                 <ChevronRight size={15} />
               </button>
             </div>
           </div>
-          <p className="mt-1 text-sm font-medium text-[#667085]">{formatMonthLabel(selectedMonth)}</p>
+          <p className="mt-1 text-sm font-medium text-[#667085]">{formatMonthLabel(calendarMonth)}</p>
           <div className="mt-2 grid grid-cols-7 gap-y-0.5 text-center text-[11px] text-text-muted">
             {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map((day) => (
               <span key={day} className="py-0.5 font-semibold">

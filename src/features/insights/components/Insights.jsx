@@ -27,7 +27,7 @@ import { getCurrentMonthKey } from "../../../lib/dates.js";
 import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
 import { dispatchNavigation } from "../../../lib/navigationTargets.js";
 import { getDashboardData } from "../../dashboard/dashboardUtils.js";
-import { getTransactionImpactAmount } from "../../spending/spendingService.js";
+import { getTransactionCategoryRows, getTransactionImpactAmount } from "../../spending/spendingService.js";
 import {
   calculateSharePercent,
   getActionableInsightCards,
@@ -80,6 +80,7 @@ export default function Insights({
 }) {
   const [netWorthRangeMonths, setNetWorthRangeMonths] = useState("6");
   const [showDetailedReports, setShowDetailedReports] = useState(false);
+  const [selectedDeepDiveCategory, setSelectedDeepDiveCategory] = useState("");
   const data = useMemo(() => getDashboardData(appData, selectedMonth), [appData, selectedMonth]);
 
   const budgetInsights = useMemo(() => getBudgetInsights(data.budgetRows), [data.budgetRows]);
@@ -307,6 +308,24 @@ export default function Insights({
     });
   }, [appData.ytdTransactionsByMonth, chartCurrentRows, selectedMonth]);
   const spendingBreakdownRows = categoryRows.slice(0, 6);
+  const deepDiveOptions = spendingBreakdownRows.map((row) => row.label);
+  const activeDeepDiveCategory =
+    selectedDeepDiveCategory && deepDiveOptions.includes(selectedDeepDiveCategory)
+      ? selectedDeepDiveCategory
+      : deepDiveOptions[0] ?? "";
+  const deepDiveCategoryRow = spendingBreakdownRows.find((row) => row.label === activeDeepDiveCategory) ?? null;
+  const deepDiveCategoryPreviousValue = previousCategoryMap.get(activeDeepDiveCategory) ?? 0;
+  const deepDiveCategoryDelta = Number(deepDiveCategoryRow?.value || 0) - Number(deepDiveCategoryPreviousValue || 0);
+  const deepDiveTrendRows = useMemo(
+    () =>
+      buildCategoryTrendRows({
+        monthRows: chartCurrentRows,
+        categoryLabel: activeDeepDiveCategory,
+        transactionsByMonth: appData.ytdTransactionsByMonth ?? {},
+        budgetsByMonth: appData.ytdBudgetsByMonth ?? {},
+      }),
+    [activeDeepDiveCategory, appData.ytdBudgetsByMonth, appData.ytdTransactionsByMonth, chartCurrentRows],
+  );
   const spendingBreakdownTotal = spendingBreakdownRows.reduce((sum, row) => sum + row.value, 0);
   const categoryColors = ["#198754", "#7CB342", "#F59E0B", "#EF4444", "#5C6AC4", "#94A3B8"];
   const groupCategorySpend = useMemo(() => {
@@ -630,30 +649,37 @@ export default function Insights({
             Category deep dive <Info size={15} className="text-text-muted" />
           </h3>
           <p className="text-sm text-text-muted">Explore how specific categories are trending.</p>
-          {spendingBreakdownRows[0] ? (
+          {deepDiveCategoryRow ? (
             <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_1.2fr]">
               <div>
                 <div className="max-w-[210px]">
-                  <button
-                    type="button"
-                    className="inline-flex w-full items-center justify-between rounded-xl border border-app-border bg-app-background px-3 py-2 text-left text-sm text-text-main"
+                  <Select
+                    label="Category deep dive selector"
+                    hideLabel
+                    value={activeDeepDiveCategory}
+                    onChange={(event) => setSelectedDeepDiveCategory(event.target.value)}
+                    className="bg-app-background pr-9"
+                    disabled={!deepDiveOptions.length}
                   >
-                    <span className="truncate">{spendingBreakdownRows[0]?.label || "Category"}</span>
-                    <ChevronDown size={15} className="shrink-0 text-text-muted" />
-                  </button>
+                    {deepDiveOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </Select>
                 </div>
                 <div className="mt-3 grid gap-2 sm:grid-cols-3 xl:grid-cols-1">
-                  <MetricPill label="This month" value={formatCurrency(spendingBreakdownRows[0]?.value || 0)} />
-                  <MetricPill label={`vs ${formatMonthLabel(previousMonthKey)}`} value={formatCurrency(previousCategoryMap.get(spendingBreakdownRows[0]?.label || "") || 0)} />
+                  <MetricPill label="This month" value={formatCurrency(deepDiveCategoryRow?.value || 0)} />
+                  <MetricPill label={`vs ${formatMonthLabel(previousMonthKey)}`} value={formatCurrency(deepDiveCategoryPreviousValue || 0)} />
                   <MetricPill
                     label="Change"
-                    value={`${((spendingBreakdownRows[0]?.value || 0) - (previousCategoryMap.get(spendingBreakdownRows[0]?.label || "") || 0) >= 0 ? "+" : "")}${formatCurrency((spendingBreakdownRows[0]?.value || 0) - (previousCategoryMap.get(spendingBreakdownRows[0]?.label || "") || 0))}`}
-                    tone={(spendingBreakdownRows[0]?.value || 0) - (previousCategoryMap.get(spendingBreakdownRows[0]?.label || "") || 0) > 0 ? "danger" : "success"}
+                    value={`${deepDiveCategoryDelta >= 0 ? "+" : ""}${formatCurrency(deepDiveCategoryDelta)}`}
+                    tone={deepDiveCategoryDelta > 0 ? "danger" : "success"}
                   />
                 </div>
               </div>
               <div className="self-center">
-                <Sparkline values={chartCurrentRows.map((row) => row.value)} tone="red" />
+                <Sparkline values={deepDiveTrendRows.map((row) => row.value)} tone="red" />
               </div>
             </div>
           ) : (
@@ -1242,6 +1268,40 @@ function formatCompactCurrencyForTable(value) {
     return `${amount < 0 ? "-" : ""}$${Math.round(abs / 1_000)}K`;
   }
   return formatCurrency(amount);
+}
+
+function buildCategoryTrendRows({
+  monthRows = [],
+  categoryLabel = "",
+  transactionsByMonth = {},
+  budgetsByMonth = {},
+}) {
+  if (!categoryLabel) return monthRows.map((row) => ({ ...row, value: 0 }));
+
+  return monthRows.map((row) => {
+    const monthKey = row.id;
+    const transactions = transactionsByMonth?.[monthKey] ?? [];
+    const monthBudgets = budgetsByMonth?.[monthKey] ?? [];
+    const categoryNameById = new Map(
+      monthBudgets.map((budget) => [budget.supabaseId ?? budget.id, budget.name]),
+    );
+
+    const total = transactions.reduce((sum, transaction) => {
+      const impactAmount = getTransactionImpactAmount(transaction);
+      if (impactAmount === 0) return sum;
+      const multiplier = impactAmount < 0 ? -1 : 1;
+      return (
+        sum +
+        getTransactionCategoryRows(transaction).reduce((innerSum, split) => {
+          const splitName = categoryNameById.get(split.categoryId) ?? "Uncategorized";
+          if (splitName !== categoryLabel) return innerSum;
+          return innerSum + Number(split.amount || 0) * multiplier;
+        }, 0)
+      );
+    }, 0);
+
+    return { ...row, value: total };
+  });
 }
 
 function formatSignedCompactCurrencyForTable(value) {

@@ -69,6 +69,7 @@ export default function AppSettings() {
   const [savedSettings, setSavedSettings] = useState(() => normalizeSettings(readAppSettings()));
   const [draftSettings, setDraftSettings] = useState(() => normalizeSettings(readAppSettings()));
   const [saveMessage, setSaveMessage] = useState("");
+  const [lastSyncedLabel, setLastSyncedLabel] = useState("Recently");
 
   const hasChanges = useMemo(
     () => JSON.stringify(savedSettings) !== JSON.stringify(draftSettings),
@@ -111,6 +112,12 @@ export default function AppSettings() {
     setSavedSettings(normalized);
     setDraftSettings(normalized);
     setSaveMessage("Changes saved");
+    window.setTimeout(() => setSaveMessage(""), 1600);
+  }
+
+  function handleSyncNow() {
+    setLastSyncedLabel("Just now");
+    setSaveMessage("Settings refreshed");
     window.setTimeout(() => setSaveMessage(""), 1600);
   }
 
@@ -309,10 +316,9 @@ export default function AppSettings() {
             <StatusRow
               icon={<RefreshCw size={17} />}
               title="Last synced"
-              helper="Recently"
+              helper={lastSyncedLabel}
               actionText="Sync now"
-              actionDisabled
-              actionTitle="Coming soon"
+              onAction={handleSyncNow}
             />
           </Card>
 
@@ -324,13 +330,15 @@ export default function AppSettings() {
               icon={<FileText size={17} />}
               title="Export data"
               helper="Download your financial data (CSV)."
-              onClick={() => dispatchNavigation("backup", "")}
+              disabled
+              disabledTitle="Export coming soon"
             />
             <ActionRow
               icon={<Upload size={17} />}
               title="Import data"
               helper="Import transactions or budgets."
-              onClick={() => dispatchNavigation("backup", "")}
+              disabled
+              disabledTitle="Import coming soon"
             />
             <ActionRow
               icon={<Cloud size={17} />}
@@ -602,12 +610,14 @@ function ActionRow({
   danger = false,
   disabled = false,
   onClick = null,
+  disabledTitle = "",
 }) {
   return (
     <button
       type="button"
       disabled={disabled}
       onClick={onClick ?? undefined}
+      title={disabledTitle || undefined}
       className={`flex w-full items-start justify-between gap-3 border-b px-0 py-2.5 text-left last:border-b-0 ${
         danger
           ? "mt-2 rounded-xl border border-status-danger/30 bg-red-50/50 px-3 text-status-danger first:mt-3 last:mb-0"

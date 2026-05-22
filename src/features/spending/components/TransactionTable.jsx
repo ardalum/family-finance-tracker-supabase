@@ -4,6 +4,7 @@ import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import EmptyState from "../../../components/ui/EmptyState.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
+import { dispatchNavigation } from "../../../lib/navigationTargets.js";
 import {
   getCardName,
   getCategoryName,
@@ -330,6 +331,29 @@ export default function TransactionTable({
             </div>
           ) : null}
         </div>
+        {selectedIds.size > 0 ? (
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-app-border bg-app-background/60 px-4 py-2.5 md:px-5">
+            <p className="text-xs font-semibold text-text-main">{selectedIds.size} selected</p>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                className="min-h-8 px-2.5 py-1 text-xs"
+                onClick={() => setSelectedIds(new Set())}
+              >
+                Clear selection
+              </Button>
+              <button
+                type="button"
+                className="rounded-md border border-app-border bg-app-surface px-2.5 py-1 text-xs font-semibold text-text-muted"
+                title="Bulk actions coming soon"
+                disabled
+              >
+                Bulk actions coming soon
+              </button>
+            </div>
+          </div>
+        ) : null}
 
         {filteredTransactions.length === 0 ? (
           <div className="grid gap-3">
@@ -463,6 +487,7 @@ export default function TransactionTable({
                                     onEdit(transaction);
                                   }}
                                   disabled={isSaving || isRecurring}
+                                  title={isRecurring ? "Managed from Bills" : "Edit transaction"}
                                 >
                                   Edit
                                 </button>
@@ -474,9 +499,22 @@ export default function TransactionTable({
                                     requestDelete(transaction);
                                   }}
                                   disabled={isSaving || isRecurring}
+                                  title={isRecurring ? "Managed from Bills" : "Delete transaction"}
                                 >
                                   Delete
                                 </button>
+                                {isRecurring ? (
+                                  <button
+                                    type="button"
+                                    className="block w-full rounded-lg px-2.5 py-2 text-left text-xs font-medium text-brand-primary hover:bg-app-background"
+                                    onClick={() => {
+                                      setMenuOpenId(null);
+                                      dispatchNavigation("recurring", "recurring-home");
+                                    }}
+                                  >
+                                    Manage in Bills
+                                  </button>
+                                ) : null}
                               </div>
                             ) : null}
                           </div>
