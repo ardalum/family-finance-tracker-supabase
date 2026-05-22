@@ -42,7 +42,7 @@ export default function TransactionTable({
   const [transactionPendingDelete, setTransactionPendingDelete] = useState(null);
   const [quickFilter, setQuickFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
+  const [pageSize, setPageSize] = useState(10);
   const [selectedIds, setSelectedIds] = useState(() => new Set());
   const [menuOpenId, setMenuOpenId] = useState(null);
   const menuRef = useRef(null);
@@ -233,7 +233,7 @@ export default function TransactionTable({
         <div className="relative">
           <select
             value={pageSize}
-            onChange={(event) => setPageSize(Number(event.target.value) || 25)}
+            onChange={(event) => setPageSize(Number(event.target.value) || 10)}
             className="h-8 appearance-none rounded-lg border border-app-border bg-app-surface px-2.5 pr-7 text-xs font-medium text-text-main outline-none"
             aria-label="Rows per page"
           >

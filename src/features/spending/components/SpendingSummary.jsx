@@ -13,12 +13,17 @@ export default function SpendingSummary({ transactions, categories, previousMont
     return largest;
   }, null);
   const largestTransactionAmount = Number(largestTransactionEntry?.amount || 0);
-  const topCategoryPercent = totalSpent > 0 && topCategory ? Math.round((topCategory.amount / totalSpent) * 100) : 0;
+  const topCategoryPercent =
+    totalSpent > 0 && topCategory ? Math.round((topCategory.amount / totalSpent) * 100) : 0;
   const spentComparison = previousMonthHint
     ? buildComparisonHelper(totalSpent, previousMonthHint.totalSpent, previousMonthHint.monthKey)
     : "Based on current month transactions";
   const txCountHelper = previousMonthHint
-    ? buildCountComparison(transactionCount, previousMonthHint.transactionCount, previousMonthHint.monthKey)
+    ? buildCountComparison(
+        transactionCount,
+        previousMonthHint.transactionCount,
+        previousMonthHint.monthKey,
+      )
     : `${transactionCount} recorded item${transactionCount === 1 ? "" : "s"}`;
 
   const cards = [
@@ -40,7 +45,7 @@ export default function SpendingSummary({ transactions, categories, previousMont
       title: "Top category",
       value: topCategory ? topCategory.name : "No category yet",
       helper: topCategory
-        ? `${formatCurrency(topCategory.amount)} · ${topCategoryPercent}% of total`
+        ? `${formatCurrency(topCategory.amount)} � ${topCategoryPercent}% of total`
         : "No spending data yet",
       icon: ShoppingBasket,
       iconWrapClass: "bg-amber-50 text-amber-700 ring-amber-100",
@@ -66,26 +71,34 @@ export default function SpendingSummary({ transactions, categories, previousMont
 
 function SummaryCard({ title, value, helper, icon: Icon, iconWrapClass, wrapValue = false }) {
   return (
-    <Card className="grid min-h-[128px] gap-3 rounded-2xl border border-app-border bg-app-surface p-4 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
-        <div className="inline-flex items-center gap-1.5 text-sm font-medium text-text-muted">
-          <span>{title}</span>
-          <Info size={14} aria-hidden="true" />
+    <Card className="min-h-[108px] rounded-2xl border border-app-border bg-app-surface p-4 shadow-sm">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className="inline-flex items-center gap-1.5 text-xs font-medium text-text-muted">
+            <span>{title}</span>
+            <Info size={13} aria-hidden="true" />
+          </div>
+          <p
+            className={`mt-1 truncate font-semibold tracking-tight text-text-main ${
+              wrapValue
+                ? "line-clamp-2 text-[1.25rem] leading-snug sm:text-[1.35rem]"
+                : "text-2xl sm:text-[1.65rem]"
+            }`}
+            style={{ fontVariantNumeric: "tabular-nums" }}
+            title={value}
+          >
+            {value}
+          </p>
+          <p className="mt-0.5 truncate text-xs text-text-soft" title={helper}>
+            {helper}
+          </p>
         </div>
-        <span className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full ring-1 ring-inset ${iconWrapClass}`}>
-          <Icon size={20} aria-hidden="true" />
+        <span
+          className={`inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-full ring-1 ring-inset ${iconWrapClass}`}
+        >
+          <Icon size={24} aria-hidden="true" />
         </span>
       </div>
-      <p
-        className={`truncate text-[1.9rem] font-semibold tracking-tight text-text-main sm:text-[2rem] ${wrapValue ? "line-clamp-2 text-[1.35rem] leading-snug sm:text-[1.45rem]" : ""}`}
-        style={{ fontVariantNumeric: "tabular-nums" }}
-        title={value}
-      >
-        {value}
-      </p>
-      <p className="truncate text-sm text-text-soft" title={helper}>
-        {helper}
-      </p>
     </Card>
   );
 }
@@ -94,7 +107,7 @@ function buildComparisonHelper(current, previous, monthKey) {
   const prev = Number(previous || 0);
   if (prev <= 0) return "Based on current month transactions";
   const deltaPct = ((current - prev) / prev) * 100;
-  const direction = deltaPct <= 0 ? "↓" : "↑";
+  const direction = deltaPct <= 0 ? "down" : "up";
   const signed = `${deltaPct > 0 ? "+" : ""}${Math.abs(deltaPct).toFixed(1)}%`;
   return `${direction} ${signed} vs ${formatMonthLabel(monthKey)}`;
 }
