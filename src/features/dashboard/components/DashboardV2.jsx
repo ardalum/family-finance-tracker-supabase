@@ -20,6 +20,7 @@
 } from "lucide-react";
 import { getCurrentMonthKey } from "../../../lib/dates.js";
 import Card from "../../../components/ui/Card.jsx";
+import InfoTooltip from "../../../components/ui/InfoTooltip.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
 import { dispatchNavigation } from "../../../lib/navigationTargets.js";
 import { createDashboardV2Data } from "../dashboardV2Adapter.js";
@@ -83,9 +84,20 @@ export default function DashboardV2({
               <div className="flex items-center justify-between border-b border-app-border p-5">
                 <div className="inline-flex items-center gap-2 text-base font-semibold text-text-main">
                   <CircleDollarSign size={18} aria-hidden="true" />
-                  Income vs Spending
+                  Net Cash Flow
+                  <InfoTooltip
+                    label="Net Cash Flow calculation info"
+                    content="Income entries minus spending transactions for the selected month. It does not include full account-transfer cash movement."
+                  />
                 </div>
-                <span className="text-xs font-medium text-text-muted">This month</span>
+                <button
+                  className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary"
+                  type="button"
+                  onClick={() => navigateToView("financial-position", "cash-position")}
+                >
+                  View cash flow
+                  <ChevronRight size={14} aria-hidden="true" />
+                </button>
               </div>
               <div className="grid gap-4 p-5">
                 {error ? (
@@ -100,11 +112,7 @@ export default function DashboardV2({
                   >
                     {formatCurrency(data.netCashFlow.amount)}
                   </p>
-                  <p className="mt-1 text-sm text-text-muted">{data.netCashFlow.monthLabel}</p>
-                  <p className="mt-1 text-xs text-text-muted">
-                    Income minus spending this month. Uses income entries and transaction spending.
-                    It does not include account transfers or full cash-account movement.
-                  </p>
+                  <p className="mt-1 text-sm text-text-muted">This month</p>
                   <p
                     className={`mt-1 text-sm font-semibold ${
                       data.netCashFlow.deltaPct >= 0
@@ -115,30 +123,6 @@ export default function DashboardV2({
                     {data.netCashFlow.deltaPct > 0 ? "+" : ""}
                     {data.netCashFlow.deltaPct}% {data.netCashFlow.comparisonLabel}
                   </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    className="inline-flex items-center gap-1 rounded-lg border border-app-border bg-app-surface px-3 py-1.5 text-sm font-semibold text-text-main hover:border-brand-primary/40"
-                    type="button"
-                    onClick={() => navigateToView("financial-position", "add-income")}
-                  >
-                    Add income
-                  </button>
-                  <button
-                    className="inline-flex items-center gap-1 rounded-lg border border-app-border bg-app-surface px-3 py-1.5 text-sm font-semibold text-text-main hover:border-brand-primary/40"
-                    type="button"
-                    onClick={() => navigateToView("spending", "add-transaction")}
-                  >
-                    Add transaction
-                  </button>
-                  <button
-                    className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary"
-                    type="button"
-                    onClick={() => navigateToView("insights", "insights-home")}
-                  >
-                    View insights
-                    <ChevronRight size={14} aria-hidden="true" />
-                  </button>
                 </div>
                 <div className="rounded-xl border border-app-border bg-app-surfaceSoft p-3">
                   {hasMonthlyTrend ? (
@@ -166,7 +150,7 @@ export default function DashboardV2({
                       </div>
                     </>
                   ) : (
-                    <div className="grid h-16 place-items-center rounded-lg border border-app-border bg-app-surface text-xs text-text-muted">
+                    <div className="grid h-24 place-items-center rounded-lg border border-app-border bg-app-surface text-xs text-text-muted">
                       Not enough monthly trend data yet.
                     </div>
                   )}
@@ -178,6 +162,10 @@ export default function DashboardV2({
                 <div className="inline-flex items-center gap-2 text-base font-semibold text-text-main">
                   <Wallet size={18} aria-hidden="true" />
                   Budget Health
+                  <InfoTooltip
+                    label="Budget Health calculation info"
+                    content="Shows how much of your budget is on track for the selected month."
+                  />
                 </div>
                 <button
                   className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary"
@@ -247,7 +235,13 @@ export default function DashboardV2({
           <div className="grid gap-4 lg:grid-cols-3">
             <Card className="overflow-hidden">
               <div className="flex items-center justify-between border-b border-app-border p-5">
-                <h3 className="text-base font-semibold text-text-main">Upcoming Bills</h3>
+                <h3 className="inline-flex items-center gap-1.5 text-base font-semibold text-text-main">
+                  Upcoming Bills
+                  <InfoTooltip
+                    label="Upcoming Bills calculation info"
+                    content="Bills and card payments due soon."
+                  />
+                </h3>
                 <span className="text-sm text-text-muted">Next 14 days</span>
               </div>
               <div className="grid gap-2.5 p-5">
@@ -299,7 +293,13 @@ export default function DashboardV2({
 
             <Card className="overflow-hidden">
               <div className="flex items-center justify-between border-b border-app-border p-5">
-                <h3 className="text-base font-semibold text-text-main">Cards & Debt</h3>
+                <h3 className="inline-flex items-center gap-1.5 text-base font-semibold text-text-main">
+                  Cards & Debt
+                  <InfoTooltip
+                    label="Cards & Debt calculation info"
+                    content="Credit utilization and upcoming card payment obligations."
+                  />
+                </h3>
                 <button
                   type="button"
                   className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary"
@@ -312,7 +312,13 @@ export default function DashboardV2({
               <div className="grid gap-4 p-5">
                 <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_100px] sm:items-center">
                   <div>
-                    <p className="text-sm text-text-muted">Credit card utilization</p>
+                    <p className="inline-flex items-center gap-1.5 text-sm text-text-muted">
+                      Credit Card Utilization
+                      <InfoTooltip
+                        label="Credit Card Utilization calculation info"
+                        content="Current credit card balance compared with total credit limit."
+                      />
+                    </p>
                     <p className="text-4xl font-semibold tracking-tight text-text-main">
                       {data.cardsDebt.utilizationPct}%
                     </p>
@@ -330,8 +336,12 @@ export default function DashboardV2({
                   </div>
                 </div>
                 <div className="grid gap-2 rounded-xl border border-app-border bg-app-surfaceSoft p-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
-                    Payment due
+                  <p className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-text-muted">
+                    Payment Due
+                    <InfoTooltip
+                      label="Payment Due calculation info"
+                      content="Upcoming unpaid card balances and due dates."
+                    />
                   </p>
                   {data.cardsDebt.paymentDue.length === 0 ? (
                     <p className="text-xs text-text-muted">No unpaid statement balances due.</p>
@@ -360,7 +370,13 @@ export default function DashboardV2({
 
             <Card className="overflow-hidden">
               <div className="flex items-center justify-between border-b border-app-border p-5">
-                <h3 className="text-base font-semibold text-text-main">Savings Goals</h3>
+                <h3 className="inline-flex items-center gap-1.5 text-base font-semibold text-text-main">
+                  Savings Goals
+                  <InfoTooltip
+                    label="Savings Goals calculation info"
+                    content="Progress toward active savings goals."
+                  />
+                </h3>
                 <button
                   type="button"
                   className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary"
@@ -413,6 +429,10 @@ export default function DashboardV2({
               <div className="inline-flex items-center gap-2 text-base font-semibold text-text-main">
                 <AlertTriangle size={18} aria-hidden="true" />
                 Needs attention
+                <InfoTooltip
+                  label="Needs attention calculation info"
+                  content="Items that may need review, such as over-budget categories, due bills, or high utilization."
+                />
               </div>
               <span className="rounded-full bg-status-warningBg px-2.5 py-1 text-sm font-semibold text-status-warningDark">
                 {data.alerts.length}
@@ -482,7 +502,13 @@ export default function DashboardV2({
         <aside className="grid gap-4 self-start">
           <Card className="overflow-hidden">
             <div className="flex items-center justify-between border-b border-app-border p-5">
-              <h3 className="text-base font-semibold text-text-main">Recent transactions</h3>
+              <h3 className="inline-flex items-center gap-1.5 text-base font-semibold text-text-main">
+                Recent transactions
+                <InfoTooltip
+                  label="Recent transactions calculation info"
+                  content="Latest income and spending activity for the selected month."
+                />
+              </h3>
               <button
                 type="button"
                 className="text-sm font-semibold text-brand-primary"
@@ -528,7 +554,13 @@ export default function DashboardV2({
 
           <Card className="overflow-hidden">
             <div className="flex items-center justify-between border-b border-app-border p-5">
-              <h3 className="text-base font-semibold text-text-main">Family Note</h3>
+              <h3 className="inline-flex items-center gap-1.5 text-base font-semibold text-text-main">
+                Family Note
+                <InfoTooltip
+                  label="Family Note info"
+                  content="A planned shared note area for household reminders."
+                />
+              </h3>
               <span className="rounded-full border border-app-border bg-app-surfaceSoft px-2.5 py-1 text-xs font-semibold text-text-muted">
                 Coming soon
               </span>
@@ -552,7 +584,13 @@ export default function DashboardV2({
 
           <Card className="overflow-hidden">
             <div className="border-b border-app-border p-5">
-              <h3 className="text-base font-semibold text-text-main">Quick Actions</h3>
+              <h3 className="inline-flex items-center gap-1.5 text-base font-semibold text-text-main">
+                Quick Actions
+                <InfoTooltip
+                  label="Quick Actions info"
+                  content="Shortcuts to common Spedger workflows."
+                />
+              </h3>
             </div>
             <div className="grid grid-cols-2 gap-2.5 p-4">
               {data.quickActions.map((action) => {
