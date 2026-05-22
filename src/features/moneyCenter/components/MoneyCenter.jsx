@@ -97,17 +97,37 @@ function buildTrendMonths(selectedMonth) {
   return [-4, -3, -2, -1, 0].map((offset) => shiftMonth(selectedMonth, offset));
 }
 
-function formatTrendCurrency(value) {
+function formatCompactCurrency(value) {
   const numericValue = Number(value || 0);
-  if (Math.abs(numericValue) >= 1_000_000) {
+  if (!Number.isFinite(numericValue)) return "$0";
+  if (Math.abs(numericValue) < 1000) {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
-      notation: "compact",
-      maximumFractionDigits: 2,
+      maximumFractionDigits: 0,
     }).format(numericValue);
   }
-  return formatCurrency(numericValue);
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    notation: "compact",
+    maximumFractionDigits: 2,
+  }).format(numericValue);
+}
+
+function sumTrackedIncomeDepositsForMonth(movements = [], monthKey = "") {
+  return movements.reduce((sum, movement) => {
+    if (movement?.monthKey !== monthKey) return sum;
+    if (movement?.movementType !== "income_deposit") return sum;
+    if (movement?.direction !== "inflow") return sum;
+    if (movement?.isTracked === false) return sum;
+    if (!movement?.accountId) return sum;
+    return sum + Number(movement.amount || 0);
+  }, 0);
+}
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
 }
 
 export default function MoneyCenter({
@@ -263,25 +283,27 @@ export default function MoneyCenter({
   const spendingTotal = getTotalSpending(getMonthTransactions(transactions, selectedMonth));
   const savingsContributionTotal = summarizeSavingsForMonth(savingsContributions, selectedMonth);
   const billsPaidTotal = recurringSummary.paidTotal;
-  const previousMonthBalance = summarizeLiquidCashForMonth(
+  const selectedMonthStartingCash = summarizeLiquidCashForMonth(
     cashAccounts,
     accountBalanceSnapshots,
     shiftMonth(selectedMonth, -1),
   );
-  const projectedCashPosition =
-    previousMonthBalance +
-    receivedIncome -
-    spendingTotal -
-    billsPaidTotal -
-    savingsContributionTotal;
+  const selectedMonthTrackedIncomeDeposits = sumTrackedIncomeDepositsForMonth(
+    incomeDepositMovements,
+    selectedMonth,
+  );
+  const selectedMonthCashOutflows = spendingTotal + billsPaidTotal + savingsContributionTotal;
+  const selectedMonthRegisterCashPosition =
+    selectedMonthStartingCash + selectedMonthTrackedIncomeDeposits - selectedMonthCashOutflows;
+  const selectedMonthNetPosition = selectedMonthRegisterCashPosition - financialSummary.totalDebt;
 
   const accountCoverageDays = useMemo(() => {
     const outflowTotal = spendingTotal + recurringSummary.actualTotal + savingsContributionTotal;
-    if (outflowTotal <= 0 || financialSummary.liquidCashTotal <= 0) return null;
-    return Math.round(financialSummary.liquidCashTotal / (outflowTotal / 30));
+    if (outflowTotal <= 0 || selectedMonthRegisterCashPosition <= 0) return null;
+    return Math.round(selectedMonthRegisterCashPosition / (outflowTotal / 30));
   }, [
-    financialSummary.liquidCashTotal,
     recurringSummary.actualTotal,
+    selectedMonthRegisterCashPosition,
     savingsContributionTotal,
     spendingTotal,
   ]);
@@ -305,11 +327,36 @@ export default function MoneyCenter({
         monthKey,
         label: formatMonthLabel(monthKey).split(" ")[0],
         income: summarizeIncomeForMonth(incomeEntries, monthKey),
-        cash: summarizeLiquidCashForMonth(cashAccounts, accountBalanceSnapshots, monthKey),
+        cash:
+          summarizeLiquidCashForMonth(
+            cashAccounts,
+            accountBalanceSnapshots,
+            shiftMonth(monthKey, -1),
+          ) +
+          sumTrackedIncomeDepositsForMonth(incomeDepositMovements, monthKey) -
+          getTotalSpending(getMonthTransactions(transactions, monthKey)) -
+          getRecurringSummary(recurringPayments, monthKey, recurringStatusByMonth).paidTotal -
+          summarizeSavingsForMonth(savingsContributions, monthKey),
       })),
-    [accountBalanceSnapshots, cashAccounts, incomeEntries, trendMonths],
+    [
+      accountBalanceSnapshots,
+      cashAccounts,
+      incomeDepositMovements,
+      incomeEntries,
+      recurringPayments,
+      recurringStatusByMonth,
+      savingsContributions,
+      transactions,
+      trendMonths,
+    ],
   );
-  const maxTrendValue = Math.max(1, ...trendRows.map((row) => Math.max(row.income, row.cash)));
+  const incomeMax = Math.max(1, ...trendRows.map((row) => row.income));
+  const cashMin = Math.min(0, ...trendRows.map((row) => row.cash));
+  const cashMax = Math.max(1, ...trendRows.map((row) => row.cash));
+  const cashRange = Math.max(1, cashMax - cashMin);
+  const axisSteps = 4;
+  const selectedTrendRow =
+    trendRows.find((row) => row.monthKey === selectedMonth) ?? trendRows.at(-1);
 
   useEffect(() => {
     setEntryDraft((draft) => ({ ...draft, monthKey: selectedMonth }));
@@ -479,7 +526,7 @@ export default function MoneyCenter({
           <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-4">
             <SummaryMetricCard
               title="Cash Position"
-              value={formatCurrency(financialSummary.liquidCashTotal)}
+              value={formatCurrency(selectedMonthRegisterCashPosition)}
               helper="Tracked cash and bank accounts"
               icon={<Wallet size={18} aria-hidden="true" />}
               tone="good"
@@ -523,14 +570,18 @@ export default function MoneyCenter({
                 </h3>
               </div>
               <div className="grid gap-0 p-4">
-                <WaterfallRow label="Starting tracked balance" value={previousMonthBalance} />
-                <WaterfallRow label="Income received" value={receivedIncome} tone="positive" />
+                <WaterfallRow label="Starting tracked balance" value={selectedMonthStartingCash} />
+                <WaterfallRow
+                  label="Tracked income deposits"
+                  value={selectedMonthTrackedIncomeDeposits}
+                  tone="positive"
+                />
                 <WaterfallRow label="Spending" value={-spendingTotal} />
                 <WaterfallRow label="Bills paid" value={-billsPaidTotal} />
                 <WaterfallRow label="Savings contributions" value={-savingsContributionTotal} />
                 <WaterfallRow
-                  label="Projected cash position"
-                  value={projectedCashPosition}
+                  label="Cash position"
+                  value={selectedMonthRegisterCashPosition}
                   tone="positive"
                   bold
                 />
@@ -938,61 +989,134 @@ export default function MoneyCenter({
                 />
               </h3>
             </div>
-            <div className="grid gap-5 p-4 lg:grid-cols-[minmax(0,1fr)_260px]">
+            <div className="grid gap-5 p-4 lg:grid-cols-[minmax(0,1fr)_240px]">
               <div className="min-w-0">
-                <div className="grid h-44 grid-cols-5 items-end gap-3 sm:h-48">
-                  {trendRows.map((row) => {
-                    const isActive = row.monthKey === selectedMonth;
-                    const barHeightPct = Math.min(
-                      88,
-                      Math.max(8, (row.income / maxTrendValue) * 82),
-                    );
-                    const lineY = 100 - Math.min(90, Math.max(8, (row.cash / maxTrendValue) * 82));
-                    return (
-                      <div
-                        key={row.monthKey}
-                        className="grid h-full min-w-0 grid-rows-[1fr_auto] gap-2"
-                      >
+                <div className="relative grid h-[200px] grid-cols-[42px_minmax(0,1fr)_42px] gap-2">
+                  <div className="grid grid-rows-5 content-between py-2 text-[11px] text-text-muted">
+                    {Array.from({ length: axisSteps + 1 }).map((_, index) => {
+                      const tickValue = ((axisSteps - index) / axisSteps) * incomeMax;
+                      return (
+                        <span key={`income-axis-${index}`} className="self-center">
+                          {formatCompactCurrency(tickValue)}
+                        </span>
+                      );
+                    })}
+                  </div>
+
+                  <div className="relative min-w-0">
+                    <div className="pointer-events-none absolute inset-0 grid grid-rows-5">
+                      {Array.from({ length: axisSteps + 1 }).map((_, index) => (
                         <div
-                          className={`relative rounded-lg border ${
-                            isActive
-                              ? "border-brand-primary/35 bg-brand-primary/[0.03]"
-                              : "border-app-border"
-                          } bg-app-surfaceSoft px-1.5 py-2`}
-                        >
+                          key={`grid-line-${index}`}
+                          className={`border-t ${index === axisSteps ? "border-app-border/60" : "border-app-border/35"}`}
+                        />
+                      ))}
+                    </div>
+
+                    <svg
+                      viewBox="0 0 100 100"
+                      preserveAspectRatio="none"
+                      className="pointer-events-none absolute inset-0 z-20"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d={trendRows
+                          .map((row, index) => {
+                            const x =
+                              trendRows.length === 1 ? 50 : (index / (trendRows.length - 1)) * 100;
+                            const y = clamp(((cashMax - row.cash) / cashRange) * 100, 6, 94);
+                            return `${index === 0 ? "M" : "L"} ${x} ${y}`;
+                          })
+                          .join(" ")}
+                        fill="none"
+                        stroke="rgba(15, 42, 74, 0.92)"
+                        strokeWidth="1.9"
+                      />
+                    </svg>
+
+                    <div className="absolute inset-0 z-10 grid grid-cols-5 gap-2.5 sm:gap-3">
+                      {trendRows.map((row) => {
+                        const isActive = row.monthKey === selectedMonth;
+                        const incomeHeightPct =
+                          row.income <= 0 ? 4 : clamp((row.income / incomeMax) * 84, 10, 84);
+                        const lineY = clamp(((cashMax - row.cash) / cashRange) * 100, 6, 94);
+                        return (
                           <div
-                            className="absolute bottom-2 left-2 right-2 rounded-md bg-status-success/75"
-                            style={{ height: `calc(${barHeightPct}% - 8px)` }}
-                          />
-                          <div
-                            className="absolute left-1/2 z-10 h-2 w-2 -translate-x-1/2 rounded-full bg-brand-primary"
-                            style={{ top: `calc(${lineY}% - 4px)` }}
-                          />
-                        </div>
-                        <p className="text-center text-xs text-text-muted">{row.label}</p>
-                      </div>
-                    );
-                  })}
+                            key={row.monthKey}
+                            className="grid min-w-0 grid-rows-[1fr_auto] gap-2"
+                          >
+                            <div
+                              className={`relative rounded-lg border ${
+                                isActive
+                                  ? "border-brand-primary/35 bg-brand-primary/[0.03]"
+                                  : "border-app-border"
+                              } bg-app-surfaceSoft px-1 py-2`}
+                            >
+                              <div
+                                className="absolute bottom-2 left-1/2 w-6 -translate-x-1/2 rounded-[4px] bg-status-success/80 sm:w-7"
+                                style={{ height: `${incomeHeightPct}%` }}
+                              />
+                              <span
+                                className="absolute z-30 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white bg-brand-primary shadow-sm"
+                                style={{ left: "50%", top: `${lineY}%` }}
+                                aria-hidden="true"
+                              />
+                            </div>
+                            <p className="truncate text-center text-xs text-text-muted">
+                              {row.label}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-rows-5 content-between py-2 text-right text-[11px] text-text-muted">
+                    {Array.from({ length: axisSteps + 1 }).map((_, index) => {
+                      const tickValue = cashMin + ((axisSteps - index) / axisSteps) * cashRange;
+                      return (
+                        <span key={`cash-axis-${index}`} className="self-center">
+                          {formatCompactCurrency(tickValue)}
+                        </span>
+                      );
+                    })}
+                  </div>
                 </div>
+
+                <div className="mt-2 grid grid-cols-5 gap-2.5 sm:gap-3">
+                  {trendRows.map((row) => (
+                    <p
+                      key={`${row.monthKey}-label`}
+                      className="truncate text-center text-xs text-text-muted"
+                    >
+                      {row.label}
+                    </p>
+                  ))}
+                </div>
+
                 <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-text-muted">
                   <span className="inline-flex items-center gap-1">
-                    <span className="h-2 w-2 rounded bg-status-success/75" /> Income received
+                    <span className="h-2.5 w-2.5 rounded-sm bg-status-success/80" /> Income received
                   </span>
                   <span className="inline-flex items-center gap-1">
-                    <span className="h-2 w-2 rounded bg-brand-primary" /> Cash position (tracked)
+                    <span className="relative inline-flex h-2.5 w-4 items-center">
+                      <span className="absolute inset-x-0 top-1/2 h-[2px] -translate-y-1/2 rounded bg-brand-primary" />
+                      <span className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-primary" />
+                    </span>
+                    Cash position trend
                   </span>
                 </div>
               </div>
               <div className="min-w-0 rounded-xl border border-app-border bg-app-surfaceSoft p-4">
                 <p className="text-sm text-text-muted">{formatMonthLabel(selectedMonth)}</p>
                 <p className="mt-2 break-words text-2xl font-semibold text-status-successDark sm:text-3xl">
-                  {formatTrendCurrency(receivedIncome)}
+                  {formatCompactCurrency(selectedTrendRow?.income ?? 0)}
                 </p>
                 <p className="text-sm text-text-muted">Income received</p>
                 <p className="mt-4 break-words text-xl font-semibold text-text-main sm:text-2xl">
-                  {formatTrendCurrency(projectedCashPosition)}
+                  {formatCompactCurrency(selectedTrendRow?.cash ?? 0)}
                 </p>
-                <p className="text-sm text-text-muted">Projected cash position</p>
+                <p className="text-sm text-text-muted">Cash position</p>
               </div>
             </div>
           </Card>
@@ -1094,15 +1218,11 @@ export default function MoneyCenter({
               </h3>
             </div>
             <div className="grid gap-2 p-4 text-sm">
-              <SummaryLine label="Cash assets" value={financialSummary.liquidCashTotal} />
+              <SummaryLine label="Cash assets" value={selectedMonthRegisterCashPosition} />
               <SummaryLine label="Credit card balances" value={-financialSummary.totalDebt} debt />
               <SummaryLine label="Other liabilities" value={0} debt />
               <div className="my-1 border-t border-app-border" />
-              <SummaryLine
-                label="Net position"
-                value={financialSummary.netWorthSummary.netWorth}
-                emphasize
-              />
+              <SummaryLine label="Net position" value={selectedMonthNetPosition} emphasize />
               <button
                 type="button"
                 className="mt-2 w-fit text-sm font-semibold text-brand-primary"

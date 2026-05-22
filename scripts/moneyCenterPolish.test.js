@@ -69,17 +69,40 @@ test("money center summary metrics use balanced value sizing", () => {
 });
 
 test("money center trend summary uses compact currency formatting for very large values", () => {
-  assert.ok(moneyCenterSource.includes("function formatTrendCurrency(value)"));
+  assert.ok(moneyCenterSource.includes("function formatCompactCurrency(value)"));
   assert.ok(moneyCenterSource.includes('notation: "compact"'));
-  assert.ok(moneyCenterSource.includes("formatTrendCurrency(receivedIncome)"));
-  assert.ok(moneyCenterSource.includes("formatTrendCurrency(projectedCashPosition)"));
+  assert.ok(moneyCenterSource.includes("formatCompactCurrency(selectedTrendRow?.income ?? 0)"));
+  assert.ok(moneyCenterSource.includes("formatCompactCurrency(selectedTrendRow?.cash ?? 0)"));
 });
 
-test("money center trend chart uses calmer sizing and clamped visual heights", () => {
-  assert.ok(moneyCenterSource.includes("grid h-44 grid-cols-5 items-end gap-3 sm:h-48"));
-  assert.ok(moneyCenterSource.includes("Math.min("));
-  assert.ok(moneyCenterSource.includes("(row.income / maxTrendValue) * 82"));
-  assert.ok(moneyCenterSource.includes("Math.min(90, Math.max(8"));
+test("money center trend chart renders combined bars and connected cash-position line", () => {
+  assert.ok(moneyCenterSource.includes('viewBox="0 0 100 100"'));
+  assert.ok(moneyCenterSource.includes("<path"));
+  assert.ok(moneyCenterSource.includes('stroke="rgba(15, 42, 74, 0.92)"'));
+  assert.ok(moneyCenterSource.includes("grid-cols-[42px_minmax(0,1fr)_42px]"));
+  assert.ok(moneyCenterSource.includes("Income received"));
+  assert.ok(moneyCenterSource.includes("Cash position trend"));
+  assert.ok(moneyCenterSource.includes("left-1/2 w-6 -translate-x-1/2"));
+  assert.ok(moneyCenterSource.includes("clamp((row.income / incomeMax) * 84, 10, 84)"));
+});
+
+test("money center uses tracked income deposits for selected-month cash position display", () => {
+  assert.ok(moneyCenterSource.includes("selectedMonthTrackedIncomeDeposits"));
+  assert.ok(moneyCenterSource.includes("sumTrackedIncomeDepositsForMonth("));
+  assert.ok(moneyCenterSource.includes('movementType !== "income_deposit"'));
+  assert.ok(moneyCenterSource.includes("movement?.isTracked === false"));
+  assert.ok(moneyCenterSource.includes('label="Tracked income deposits"'));
+  assert.ok(moneyCenterSource.includes('label="Cash position"'));
+  assert.equal(moneyCenterSource.includes("Projected cash position"), false);
+  assert.ok(
+    moneyCenterSource.includes("value={formatCurrency(selectedMonthRegisterCashPosition)}"),
+  );
+  assert.ok(
+    moneyCenterSource.includes(
+      'SummaryLine label="Cash assets" value={selectedMonthRegisterCashPosition}',
+    ),
+  );
+  assert.ok(moneyCenterSource.includes('label="Net position"'));
 });
 
 test("money center renders info tooltips for summary cards and key sections", () => {
