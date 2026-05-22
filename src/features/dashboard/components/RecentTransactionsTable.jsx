@@ -1,4 +1,4 @@
-import LinkedCardName from "../../../components/shared/LinkedCardName.jsx";
+﻿import LinkedCardName from "../../../components/shared/LinkedCardName.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
 import { getCardName, getCategoryName } from "../../spending/spendingService.js";
@@ -55,17 +55,17 @@ export default function RecentTransactionsTable({ transactions, cards, categorie
                       </p>
                     </div>
                     <p className="mt-0.5 truncate text-xs text-text-muted">
-                      {categoryLabel || "Uncategorized"} � {transaction.date}
+                      {categoryLabel || "Uncategorized"} ï¿½ {transaction.date}
                     </p>
                     <p className="mt-0.5 truncate text-xs text-text-muted">
                       {transaction.paymentMethod || "Credit Card"}
                       {card ? (
                         <>
                           {" "}
-                          � <LinkedCardName card={card} />
+                          ï¿½ <LinkedCardName card={card} />
                         </>
                       ) : transaction.cardId ? (
-                        ` � ${getCardName(transaction.cardId, cards)}`
+                        ` ï¿½ ${getCardName(transaction.cardId, cards)}`
                       ) : (
                         ""
                       )}

@@ -5,13 +5,17 @@ import { getPageContent, isKnownPageView, pageContent } from "./pageContent.js";
 
 describe("page content config", () => {
   it("contains titles and descriptions for primary app views", () => {
-    assert.equal(pageContent.dashboard.title, "Dashboard");
-    assert.equal(pageContent["credit-cards"].title, "Credit Cards");
+    assert.equal(pageContent.dashboard.title, "Overview");
+    assert.equal(pageContent["credit-cards"].title, "Cards & Debt");
     assert.equal(pageContent.budgets.title, "Monthly Budget");
     assert.equal(pageContent.spending.title, "Transactions");
-    assert.equal(pageContent.recurring.title, "Recurring Payments");
+    assert.equal(pageContent.recurring.title, "Bills");
     assert.equal(pageContent.insights.title, "Insights");
     assert.equal(pageContent["financial-position"].title, "Financial Position");
+    assert.equal(
+      pageContent.spending.description,
+      "All income and expenses for the selected month.",
+    );
   });
 
   it("contains titles and descriptions for legal views", () => {

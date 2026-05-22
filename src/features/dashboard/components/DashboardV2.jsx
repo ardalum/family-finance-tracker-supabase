@@ -1,4 +1,4 @@
-import {
+﻿import {
   AlertTriangle,
   ArrowRight,
   Car,
@@ -252,7 +252,7 @@ export default function DashboardV2({
                       {bill.type === "card" ? (
                         <div className="text-xs text-text-muted">
                           <p>Card payment</p>
-                          <p>•••• {bill.last4 || "0000"}</p>
+                          <p>ï¿½ï¿½ï¿½ï¿½ {bill.last4 || "0000"}</p>
                         </div>
                       ) : (
                         <p className="text-xs text-text-muted">{bill.helper || "Recurring bill"}</p>

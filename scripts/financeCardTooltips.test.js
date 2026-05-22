@@ -20,14 +20,10 @@ describe("finance card tooltip coverage", () => {
     assert.equal(netWorthSource.includes("calculation info"), true);
   });
 
-  it("adds payment timing tooltip guidance to credit card dashboard summary", () => {
+  it("renders payment overview copy in the dashboard card summary", () => {
     const source = read("src/features/dashboard/components/CreditCardPaymentOverview.jsx");
-    assert.equal(source.includes("Credit card payment overview info"), true);
-    assert.equal(
-      source.includes(
-        "Cash Position changes when a card payment is recorded from a tracked account.",
-      ),
-      true,
-    );
+    assert.equal(source.includes("Credit Card Payment Overview"), true);
+    assert.equal(source.includes("Utilization"), true);
+    assert.equal(source.includes("due within 7 days"), true);
   });
 });

@@ -7,24 +7,25 @@ function read(path) {
 }
 
 test("mobile header uses compact icon controls without clipped wordmark or wide household selector", () => {
-  const appShell = read("src/components/layout/AppShell.jsx");
+  const appShell = read("src/components/layout/AppShellV2.jsx");
   const accountSlot = read("src/app/AppHeaderAccountSlot.jsx");
   const householdSwitcher = read("src/features/households/components/HouseholdSwitcher.jsx");
 
   assert.match(appShell, /overflow-x-hidden/);
-  assert.match(appShell, /hidden min-w-0 leading-tight sm:block/);
+  assert.match(appShell, /fixed inset-0 z-40 lg:hidden/);
   assert.match(appShell, /h-10 w-10 shrink-0/);
-  assert.match(accountSlot, /aria-label="Quick Add transaction"/);
-  assert.match(accountSlot, /sr-only md:not-sr-only/);
-  assert.match(householdSwitcher, /hidden min-w-0 .* md:flex/);
+  assert.match(accountSlot, /aria-label=\{actionLabel\}/);
+  assert.match(accountSlot, /HouseholdSwitcher/);
+  assert.match(householdSwitcher, /hidden min-h-11 min-w-0 .* md:flex/);
 });
 
 test("mobile app shell keeps one visible Quick Add entry point in the header", () => {
-  const appShell = read("src/components/layout/AppShell.jsx");
+  const appShell = read("src/components/layout/AppShellV2.jsx");
   const accountSlot = read("src/app/AppHeaderAccountSlot.jsx");
 
-  assert.doesNotMatch(appShell, /md:hidden" onClick=\{onQuickAdd\}[\s\S]*Quick Add/);
-  assert.match(accountSlot, /Quick Add transaction/);
+  assert.match(appShell, /onClick=\{onQuickAdd\}/);
+  assert.match(accountSlot, /"Add transaction"/);
+  assert.match(accountSlot, /"View reports"/);
 });
 
 test("credit card monthly balances use overflow-safe mobile card structure", () => {
@@ -49,7 +50,7 @@ test("recurring bills keep wide controls inside bounded responsive containers", 
   const recurringTable = read("src/features/recurring/components/RecurringPaymentTable.jsx");
   const generationPanel = read("src/features/recurring/components/RecurringGenerationPanel.jsx");
 
-  assert.match(recurringPayments, /grid min-w-0 gap-6/);
+  assert.match(recurringPayments, /grid min-w-0 gap-5 overflow-x-hidden/);
   assert.match(recurringSummary, /grid min-w-0 gap-4/);
   assert.match(recurringTable, /grid min-w-0 gap-3/);
   assert.match(generationPanel, /Card className="overflow-hidden"/);

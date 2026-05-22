@@ -1,4 +1,4 @@
-import LinkedCardName from "../../../components/shared/LinkedCardName.jsx";
+﻿import LinkedCardName from "../../../components/shared/LinkedCardName.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
 
@@ -25,7 +25,7 @@ export default function CreditCardPaymentOverview({
           {Math.round(utilization)}%
         </p>
         <p className="text-sm text-text-muted">
-          Utilization � {formatCurrency(totalUnpaid, { cents: true })} unpaid
+          Utilization ï¿½ {formatCurrency(totalUnpaid, { cents: true })} unpaid
         </p>
         <div className="mt-3 h-2 overflow-hidden rounded-full bg-app-muted">
           <div

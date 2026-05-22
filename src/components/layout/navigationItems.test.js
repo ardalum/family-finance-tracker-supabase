@@ -18,7 +18,7 @@ describe("navigation items", () => {
   it("keeps primary navigation labels concise", () => {
     assert.deepEqual(
       navItems.map((item) => item.label),
-      ["Dashboard", "Cards", "Budget", "Spending", "Bills", "Insights"],
+      ["Overview", "Cards & Debt", "Budgets", "Transactions", "Bills", "Insights"],
     );
   });
 
@@ -40,21 +40,22 @@ describe("navigation items", () => {
   it("exposes grouped sidebar sections including Money Setup", () => {
     assert.deepEqual(
       groupedNavigationSections.map((section) => section.label),
-      ["Main", "Planning", "Money Setup", "System"],
+      ["MAIN", "PLANNING", "MONEY SETUP", "SYSTEM"],
     );
 
     const moneySetup = groupedNavigationSections.find((section) => section.id === "money-setup");
     assert.ok(moneySetup);
     assert.deepEqual(
       moneySetup.items.map((item) => item.id),
-      ["income", "savings", "accounts", "liabilities"],
+      ["income", "accounts", "liabilities"],
     );
   });
 
   it("maps views to grouped section ids", () => {
     assert.equal(getSectionIdByView("income"), "money-setup");
     assert.equal(getSectionIdByView("calendar"), "planning");
-    assert.equal(getSectionIdByView("backup"), "system");
+    assert.equal(getSectionIdByView("app-settings"), "system");
+    assert.equal(getSectionIdByView("backup"), null);
   });
 
   it("uses default collapsed/expanded group state with active-section auto-expand", () => {
@@ -71,6 +72,9 @@ describe("navigation items", () => {
     assert.equal(calendarState.planning, true);
 
     const systemState = createInitialExpandedGroupState("backup");
-    assert.equal(systemState.system, true);
+    assert.equal(systemState.system, false);
+
+    const appSettingsState = createInitialExpandedGroupState("app-settings");
+    assert.equal(appSettingsState.system, true);
   });
 });

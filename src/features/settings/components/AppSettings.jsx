@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+﻿import { useMemo, useState } from "react";
 import {
   AlertTriangle,
   Bell,
@@ -81,7 +81,7 @@ export default function AppSettings({ exportData = null }) {
 
   const householdLabel = activeHousehold?.name ?? "No household";
   const memberCount = memberships.length || 0;
-  const preferenceValue = `${draftSettings.currency?.code ?? "USD"} · ${
+  const preferenceValue = `${draftSettings.currency?.code ?? "USD"} ï¿½ ${
     draftSettings.defaultMonthBehavior === "last-viewed"
       ? "Remembered"
       : draftSettings.defaultMonthBehavior === "manual"
