@@ -233,6 +233,7 @@ function FinanceTrackerApp() {
   const {
     spendingTransactions,
     householdMerchantTransactions,
+    spendingOutflowMovements,
     selectedSpendingMonth,
     setSelectedSpendingMonth,
     spendingLoading,
@@ -699,6 +700,7 @@ function FinanceTrackerApp() {
     budgetsSaving,
     spendingCategories,
     spendingTransactions,
+    spendingOutflowMovements,
     householdMerchantTransactions,
     selectedSpendingMonth,
     spendingLoading,

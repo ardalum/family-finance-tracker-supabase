@@ -49,7 +49,6 @@ import {
   summarizeIncomeForMonth,
 } from "../../income/incomeService.js";
 import { summarizeFinancialPositionForMonth } from "../../financialPosition/financialPositionService.js";
-import { getMonthTransactions, getTotalSpending } from "../../spending/spendingService.js";
 import { getRecurringSummary } from "../../recurring/recurringService.js";
 import { summarizeSavingsForMonth } from "../../savings/savingsService.js";
 
@@ -97,6 +96,51 @@ function buildTrendMonths(selectedMonth) {
   return [-4, -3, -2, -1, 0].map((offset) => shiftMonth(selectedMonth, offset));
 }
 
+function formatCompactCurrency(value) {
+  const numericValue = Number(value || 0);
+  if (!Number.isFinite(numericValue)) return "$0";
+  if (Math.abs(numericValue) < 1000) {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0,
+    }).format(numericValue);
+  }
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    notation: "compact",
+    maximumFractionDigits: 2,
+  }).format(numericValue);
+}
+
+function sumTrackedIncomeDepositsForMonth(movements = [], monthKey = "") {
+  return movements.reduce((sum, movement) => {
+    if (movement?.monthKey !== monthKey) return sum;
+    if (movement?.movementType !== "income_deposit") return sum;
+    if (movement?.direction !== "inflow") return sum;
+    if (movement?.isTracked === false) return sum;
+    if (!movement?.accountId) return sum;
+    return sum + Number(movement.amount || 0);
+  }, 0);
+}
+
+function sumTrackedSpendingOutflowsForMonth(movements = [], monthKey = "") {
+  return movements.reduce((sum, movement) => {
+    if (movement?.monthKey !== monthKey) return sum;
+    if (movement?.sourceType !== "spending_transaction") return sum;
+    if (movement?.movementType !== "spending_payment") return sum;
+    if (movement?.direction !== "outflow") return sum;
+    if (movement?.isTracked === false) return sum;
+    if (!movement?.accountId) return sum;
+    return sum + Number(movement.amount || 0);
+  }, 0);
+}
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
 export default function MoneyCenter({
   activeView = "financial-position",
   selectedMonth = getCurrentMonthKey(),
@@ -104,6 +148,7 @@ export default function MoneyCenter({
   error = "",
   isSaving = false,
   transactions = [],
+  spendingOutflowMovements = [],
   recurringPayments = [],
   recurringStatusByMonth = {},
   incomeSources = [],
@@ -247,28 +292,34 @@ export default function MoneyCenter({
     (sum, source) => sum + Number(source.expectedAmount || 0),
     0,
   );
-  const spendingTotal = getTotalSpending(getMonthTransactions(transactions, selectedMonth));
+  const selectedMonthTrackedSpendingOutflows = sumTrackedSpendingOutflowsForMonth(
+    spendingOutflowMovements,
+    selectedMonth,
+  );
+  const spendingTotal = selectedMonthTrackedSpendingOutflows;
   const savingsContributionTotal = summarizeSavingsForMonth(savingsContributions, selectedMonth);
   const billsPaidTotal = recurringSummary.paidTotal;
-  const previousMonthBalance = summarizeLiquidCashForMonth(
+  const selectedMonthStartingCash = summarizeLiquidCashForMonth(
     cashAccounts,
     accountBalanceSnapshots,
     shiftMonth(selectedMonth, -1),
   );
-  const projectedCashPosition =
-    previousMonthBalance +
-    receivedIncome -
-    spendingTotal -
-    billsPaidTotal -
-    savingsContributionTotal;
+  const selectedMonthTrackedIncomeDeposits = sumTrackedIncomeDepositsForMonth(
+    incomeDepositMovements,
+    selectedMonth,
+  );
+  const selectedMonthCashOutflows = spendingTotal + billsPaidTotal + savingsContributionTotal;
+  const selectedMonthRegisterCashPosition =
+    selectedMonthStartingCash + selectedMonthTrackedIncomeDeposits - selectedMonthCashOutflows;
+  const selectedMonthNetPosition = selectedMonthRegisterCashPosition - financialSummary.totalDebt;
 
   const accountCoverageDays = useMemo(() => {
     const outflowTotal = spendingTotal + recurringSummary.actualTotal + savingsContributionTotal;
-    if (outflowTotal <= 0 || financialSummary.liquidCashTotal <= 0) return null;
-    return Math.round(financialSummary.liquidCashTotal / (outflowTotal / 30));
+    if (outflowTotal <= 0 || selectedMonthRegisterCashPosition <= 0) return null;
+    return Math.round(selectedMonthRegisterCashPosition / (outflowTotal / 30));
   }, [
-    financialSummary.liquidCashTotal,
     recurringSummary.actualTotal,
+    selectedMonthRegisterCashPosition,
     savingsContributionTotal,
     spendingTotal,
   ]);
@@ -292,11 +343,115 @@ export default function MoneyCenter({
         monthKey,
         label: formatMonthLabel(monthKey).split(" ")[0],
         income: summarizeIncomeForMonth(incomeEntries, monthKey),
-        cash: summarizeLiquidCashForMonth(cashAccounts, accountBalanceSnapshots, monthKey),
+        cash:
+          summarizeLiquidCashForMonth(
+            cashAccounts,
+            accountBalanceSnapshots,
+            shiftMonth(monthKey, -1),
+          ) +
+          sumTrackedIncomeDepositsForMonth(incomeDepositMovements, monthKey) -
+          sumTrackedSpendingOutflowsForMonth(spendingOutflowMovements, monthKey) -
+          getRecurringSummary(recurringPayments, monthKey, recurringStatusByMonth).paidTotal -
+          summarizeSavingsForMonth(savingsContributions, monthKey),
       })),
-    [accountBalanceSnapshots, cashAccounts, incomeEntries, trendMonths],
+    [
+      accountBalanceSnapshots,
+      cashAccounts,
+      incomeDepositMovements,
+      incomeEntries,
+      recurringPayments,
+      recurringStatusByMonth,
+      savingsContributions,
+      spendingOutflowMovements,
+      trendMonths,
+    ],
   );
-  const maxTrendValue = Math.max(1, ...trendRows.map((row) => Math.max(row.income, row.cash)));
+  const incomeMax = Math.max(1, ...trendRows.map((row) => row.income));
+  const cashMin = Math.min(0, ...trendRows.map((row) => row.cash));
+  const cashMax = Math.max(1, ...trendRows.map((row) => row.cash));
+  const axisSteps = 3;
+  const selectedTrendRow =
+    trendRows.find((row) => row.monthKey === selectedMonth) ?? trendRows.at(-1);
+  const trendPlot = useMemo(() => {
+    const chartWidth = 760;
+    const chartHeight = 240;
+    const padding = { top: 24, right: 64, bottom: 46, left: 64 };
+    const plotLeft = padding.left;
+    const plotTop = padding.top;
+    const plotRight = chartWidth - padding.right;
+    const plotBottom = chartHeight - padding.bottom;
+    const plotWidth = plotRight - plotLeft;
+    const plotHeight = plotBottom - plotTop;
+    const slotWidth = trendRows.length > 0 ? plotWidth / trendRows.length : plotWidth;
+    const minBarWidth = 22;
+    const maxBarWidth = 34;
+    const barWidth = clamp(slotWidth * 0.3, minBarWidth, maxBarWidth);
+    const incomeMin = 0;
+    const safeIncomeMax = Math.max(1, incomeMax);
+    const rawCashMin = Math.min(cashMin, 0);
+    const rawCashMax = Math.max(cashMax, 0);
+    const cashSpan = rawCashMax - rawCashMin;
+    const safeCashMin = cashSpan === 0 ? rawCashMin - 1 : rawCashMin;
+    const safeCashMax = cashSpan === 0 ? rawCashMax + 1 : rawCashMax;
+
+    const getY = (value, min, max) => {
+      if (max === min) return plotTop + plotHeight / 2;
+      const ratio = (value - min) / (max - min);
+      return clamp(plotBottom - ratio * plotHeight, plotTop, plotBottom);
+    };
+
+    const points = trendRows.map((row, index) => {
+      const centerX = plotLeft + slotWidth * index + slotWidth / 2;
+      const normalizedIncomeHeight =
+        row.income <= 0 ? 0 : (row.income / safeIncomeMax) * plotHeight;
+      const incomeHeight =
+        row.income <= 0 ? 0 : clamp(normalizedIncomeHeight, 4, plotHeight * 0.85);
+      const incomeY = plotBottom - incomeHeight;
+      const cashY = getY(row.cash, safeCashMin, safeCashMax);
+
+      return {
+        monthKey: row.monthKey,
+        label: row.label,
+        centerX,
+        incomeY,
+        incomeHeight,
+        cashY,
+        isActive: row.monthKey === selectedMonth,
+      };
+    });
+
+    const pathD =
+      points.length < 2
+        ? ""
+        : points
+            .map((point, index) => `${index === 0 ? "M" : "L"} ${point.centerX} ${point.cashY}`)
+            .join(" ");
+
+    const ticks = Array.from({ length: axisSteps + 1 }).map((_, index) => {
+      const ratio = (axisSteps - index) / axisSteps;
+      return {
+        y: plotTop + (1 - ratio) * plotHeight,
+        incomeValue: incomeMin + ratio * (safeIncomeMax - incomeMin),
+        cashValue: safeCashMin + ratio * (safeCashMax - safeCashMin),
+      };
+    });
+
+    return {
+      chartWidth,
+      chartHeight,
+      plotLeft,
+      plotTop,
+      plotRight,
+      plotBottom,
+      plotWidth,
+      plotHeight,
+      points,
+      pathD,
+      ticks,
+      barWidth,
+      slotWidth,
+    };
+  }, [axisSteps, cashMax, cashMin, incomeMax, selectedMonth, trendRows]);
 
   useEffect(() => {
     setEntryDraft((draft) => ({ ...draft, monthKey: selectedMonth }));
@@ -466,7 +621,7 @@ export default function MoneyCenter({
           <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-4">
             <SummaryMetricCard
               title="Cash Position"
-              value={formatCurrency(financialSummary.liquidCashTotal)}
+              value={formatCurrency(selectedMonthRegisterCashPosition)}
               helper="Tracked cash and bank accounts"
               icon={<Wallet size={18} aria-hidden="true" />}
               tone="good"
@@ -510,14 +665,18 @@ export default function MoneyCenter({
                 </h3>
               </div>
               <div className="grid gap-0 p-4">
-                <WaterfallRow label="Starting tracked balance" value={previousMonthBalance} />
-                <WaterfallRow label="Income received" value={receivedIncome} tone="positive" />
+                <WaterfallRow label="Starting tracked balance" value={selectedMonthStartingCash} />
+                <WaterfallRow
+                  label="Tracked income deposits"
+                  value={selectedMonthTrackedIncomeDeposits}
+                  tone="positive"
+                />
                 <WaterfallRow label="Spending" value={-spendingTotal} />
                 <WaterfallRow label="Bills paid" value={-billsPaidTotal} />
                 <WaterfallRow label="Savings contributions" value={-savingsContributionTotal} />
                 <WaterfallRow
-                  label="Projected cash position"
-                  value={projectedCashPosition}
+                  label="Cash position"
+                  value={selectedMonthRegisterCashPosition}
                   tone="positive"
                   bold
                 />
@@ -925,53 +1084,150 @@ export default function MoneyCenter({
                 />
               </h3>
             </div>
-            <div className="grid gap-5 p-4 lg:grid-cols-[minmax(0,1fr)_240px]">
-              <div>
-                <div className="grid h-56 grid-cols-5 items-end gap-4">
-                  {trendRows.map((row) => {
-                    const isActive = row.monthKey === selectedMonth;
-                    const barHeightPct = Math.max(8, (row.income / maxTrendValue) * 100);
-                    const lineY = 100 - Math.min(100, (row.cash / maxTrendValue) * 100);
-                    return (
-                      <div key={row.monthKey} className="grid h-full grid-rows-[1fr_auto] gap-2">
-                        <div
-                          className={`relative rounded-lg border ${
-                            isActive ? "border-brand-primary/50" : "border-app-border"
-                          } bg-app-surfaceSoft px-2 py-2`}
-                        >
-                          <div
-                            className="absolute bottom-2 left-2 right-2 rounded-md bg-status-success/75"
-                            style={{ height: `calc(${barHeightPct}% - 8px)` }}
-                          />
-                          <div
-                            className="absolute left-1/2 z-10 h-2 w-2 -translate-x-1/2 rounded-full bg-brand-primary"
-                            style={{ top: `calc(${lineY}% - 4px)` }}
-                          />
-                        </div>
-                        <p className="text-center text-xs text-text-muted">{row.label}</p>
-                      </div>
-                    );
-                  })}
+            <div className="grid gap-5 p-4 lg:grid-cols-[minmax(0,1fr)_232px]">
+              <div className="min-w-0">
+                <div className="h-[240px] min-w-0">
+                  <svg
+                    viewBox={`0 0 ${trendPlot.chartWidth} ${trendPlot.chartHeight}`}
+                    preserveAspectRatio="none"
+                    className="h-full w-full overflow-hidden rounded-lg border border-app-border bg-app-surfaceSoft"
+                    aria-label="Income and cash trend chart"
+                  >
+                    <defs>
+                      <clipPath id="income-cash-trend-plot-clip">
+                        <rect
+                          x={trendPlot.plotLeft}
+                          y={trendPlot.plotTop}
+                          width={trendPlot.plotWidth}
+                          height={trendPlot.plotHeight}
+                        />
+                      </clipPath>
+                    </defs>
+
+                    {trendPlot.ticks.map((tick, index) => (
+                      <line
+                        key={`grid-${index}`}
+                        x1={trendPlot.plotLeft}
+                        y1={tick.y}
+                        x2={trendPlot.plotRight}
+                        y2={tick.y}
+                        stroke="rgba(148, 163, 184, 0.35)"
+                        strokeWidth="1"
+                      />
+                    ))}
+
+                    {trendPlot.points.map((point) =>
+                      point.isActive ? (
+                        <rect
+                          key={`${point.monthKey}-active`}
+                          x={point.centerX - trendPlot.slotWidth / 2 + 6}
+                          y={trendPlot.plotTop}
+                          width={Math.max(trendPlot.slotWidth - 12, trendPlot.barWidth + 10)}
+                          height={trendPlot.plotHeight}
+                          rx="10"
+                          fill="rgba(15, 42, 74, 0.04)"
+                          stroke="rgba(15, 42, 74, 0.22)"
+                          strokeWidth="1"
+                        />
+                      ) : null,
+                    )}
+
+                    <g clipPath="url(#income-cash-trend-plot-clip)">
+                      {trendPlot.points.map((point) => (
+                        <rect
+                          key={`${point.monthKey}-bar`}
+                          x={point.centerX - trendPlot.barWidth / 2}
+                          y={point.incomeY}
+                          width={trendPlot.barWidth}
+                          height={point.incomeHeight}
+                          rx="4"
+                          fill="rgba(34, 197, 94, 0.78)"
+                        />
+                      ))}
+
+                      {trendPlot.pathD ? (
+                        <path
+                          d={trendPlot.pathD}
+                          fill="none"
+                          stroke="rgba(15, 42, 74, 0.92)"
+                          strokeWidth="3"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      ) : null}
+
+                      {trendPlot.points.map((point) => (
+                        <circle
+                          key={`${point.monthKey}-dot`}
+                          cx={point.centerX}
+                          cy={point.cashY}
+                          r="4.5"
+                          fill="rgba(15, 42, 74, 0.96)"
+                        />
+                      ))}
+                    </g>
+
+                    {trendPlot.ticks.map((tick, index) => (
+                      <text
+                        key={`income-axis-${index}`}
+                        x={trendPlot.plotLeft - 10}
+                        y={tick.y + 4}
+                        textAnchor="end"
+                        className="fill-text-muted text-[11px]"
+                      >
+                        {formatCompactCurrency(tick.incomeValue)}
+                      </text>
+                    ))}
+
+                    {trendPlot.ticks.map((tick, index) => (
+                      <text
+                        key={`cash-axis-${index}`}
+                        x={trendPlot.plotRight + 10}
+                        y={tick.y + 4}
+                        textAnchor="start"
+                        className="fill-text-muted text-[11px]"
+                      >
+                        {formatCompactCurrency(tick.cashValue)}
+                      </text>
+                    ))}
+
+                    {trendPlot.points.map((point) => (
+                      <text
+                        key={`${point.monthKey}-label`}
+                        x={point.centerX}
+                        y={trendPlot.chartHeight - 12}
+                        textAnchor="middle"
+                        className="fill-text-muted text-[12px]"
+                      >
+                        {point.label}
+                      </text>
+                    ))}
+                  </svg>
                 </div>
+
                 <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-text-muted">
                   <span className="inline-flex items-center gap-1">
-                    <span className="h-2 w-2 rounded bg-status-success/75" /> Income received
+                    <span className="h-2.5 w-2.5 rounded-sm bg-status-success/80" /> Income received
                   </span>
                   <span className="inline-flex items-center gap-1">
-                    <span className="h-2 w-2 rounded bg-brand-primary" /> Cash position (tracked)
+                    <span className="relative inline-flex h-2.5 w-4 items-center">
+                      <span className="absolute inset-x-0 top-1/2 h-[2px] -translate-y-1/2 rounded bg-brand-primary" />
+                      <span className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-primary" />
+                    </span>
+                    Cash position trend
                   </span>
                 </div>
               </div>
-              <div className="rounded-xl border border-app-border bg-app-surfaceSoft p-4">
+              <div className="min-w-0 rounded-xl border border-app-border bg-app-surfaceSoft p-4">
                 <p className="text-sm text-text-muted">{formatMonthLabel(selectedMonth)}</p>
-                <p className="mt-2 text-4xl font-semibold text-status-successDark">
-                  {formatCurrency(receivedIncome)}
+                <p className="mt-2 break-words text-2xl font-semibold text-status-successDark sm:text-3xl">
+                  {formatCompactCurrency(selectedTrendRow?.income ?? 0)}
                 </p>
                 <p className="text-sm text-text-muted">Income received</p>
-                <p className="mt-4 text-3xl font-semibold text-text-main">
-                  {formatCurrency(projectedCashPosition)}
+                <p className="mt-4 break-words text-2xl font-semibold text-text-main">
+                  {formatCompactCurrency(selectedTrendRow?.cash ?? 0)}
                 </p>
-                <p className="text-sm text-text-muted">Projected cash position</p>
+                <p className="text-sm text-text-muted">Cash position</p>
               </div>
             </div>
           </Card>
@@ -1073,15 +1329,11 @@ export default function MoneyCenter({
               </h3>
             </div>
             <div className="grid gap-2 p-4 text-sm">
-              <SummaryLine label="Cash assets" value={financialSummary.liquidCashTotal} />
+              <SummaryLine label="Cash assets" value={selectedMonthRegisterCashPosition} />
               <SummaryLine label="Credit card balances" value={-financialSummary.totalDebt} debt />
               <SummaryLine label="Other liabilities" value={0} debt />
               <div className="my-1 border-t border-app-border" />
-              <SummaryLine
-                label="Net position"
-                value={financialSummary.netWorthSummary.netWorth}
-                emphasize
-              />
+              <SummaryLine label="Net position" value={selectedMonthNetPosition} emphasize />
               <button
                 type="button"
                 className="mt-2 w-fit text-sm font-semibold text-brand-primary"

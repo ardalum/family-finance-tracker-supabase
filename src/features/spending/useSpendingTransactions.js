@@ -5,6 +5,7 @@ import {
   runRefreshSequence,
 } from "../../app/refreshDataUtils.js";
 import {
+  listAccountMoneyMovements,
   deleteAccountMoneyMovementBySource,
   replaceAccountMoneyMovementBySource,
 } from "../accounts/accountMoneyMovementsSupabaseService.js";
@@ -29,6 +30,7 @@ export function useSpendingTransactions({
   const [spendingTransactions, setSpendingTransactions] = useState([]);
   const [householdMerchantTransactions, setHouseholdMerchantTransactions] = useState([]);
   const [selectedSpendingMonth, setSelectedSpendingMonth] = useState(initialSelectedMonth);
+  const [spendingOutflowMovements, setSpendingOutflowMovements] = useState([]);
   const [spendingLoading, setSpendingLoading] = useState(true);
   const [spendingSaving, setSpendingSaving] = useState(false);
   const [spendingError, setSpendingError] = useState("");
@@ -81,6 +83,30 @@ export function useSpendingTransactions({
     }
   }, [activeHouseholdId, spendingCategories, supabaseCreditCards]);
 
+  const loadSpendingOutflowMovements = useCallback(async () => {
+    if (!activeHouseholdId) {
+      setSpendingOutflowMovements([]);
+      return [];
+    }
+
+    try {
+      const movements = await listAccountMoneyMovements(activeHouseholdId);
+      const spendingOutflows = movements.filter(
+        (movement) =>
+          movement.sourceType === "spending_transaction" &&
+          movement.movementType === "spending_payment" &&
+          movement.direction === "outflow" &&
+          movement.isTracked !== false &&
+          movement.accountId,
+      );
+      setSpendingOutflowMovements(spendingOutflows);
+      return spendingOutflows;
+    } catch {
+      setSpendingOutflowMovements([]);
+      return [];
+    }
+  }, [activeHouseholdId]);
+
   useEffect(() => {
     loadSpendingTransactions();
   }, [loadSpendingTransactions]);
@@ -88,6 +114,10 @@ export function useSpendingTransactions({
   useEffect(() => {
     loadHouseholdMerchantTransactions();
   }, [loadHouseholdMerchantTransactions]);
+
+  useEffect(() => {
+    loadSpendingOutflowMovements();
+  }, [loadSpendingOutflowMovements]);
 
   const createSupabaseTransaction = useCallback(
     async (input) => {
@@ -122,6 +152,7 @@ export function useSpendingTransactions({
           }),
         );
         await loadHouseholdMerchantTransactions();
+        await loadSpendingOutflowMovements();
       } catch (error) {
         setSpendingError(error.message || "Could not add transaction.");
         throw error;
@@ -135,6 +166,7 @@ export function useSpendingTransactions({
       loadHouseholdMerchantTransactions,
       loadInsightsData,
       loadSpendingTransactions,
+      loadSpendingOutflowMovements,
       spendingCategories,
       supabaseCreditCards,
     ],
@@ -173,6 +205,7 @@ export function useSpendingTransactions({
           }),
         );
         await loadHouseholdMerchantTransactions();
+        await loadSpendingOutflowMovements();
       } catch (error) {
         setSpendingError(error.message || "Could not update transaction.");
         throw error;
@@ -186,6 +219,7 @@ export function useSpendingTransactions({
       loadHouseholdMerchantTransactions,
       loadInsightsData,
       loadSpendingTransactions,
+      loadSpendingOutflowMovements,
       spendingCategories,
       supabaseCreditCards,
     ],
@@ -219,6 +253,7 @@ export function useSpendingTransactions({
             loadInsightsData,
           }),
         );
+        await loadSpendingOutflowMovements();
       } catch (error) {
         setSpendingError(error.message || "Could not delete transaction.");
         throw error;
@@ -226,7 +261,7 @@ export function useSpendingTransactions({
         setSpendingSaving(false);
       }
     },
-    [activeHouseholdId, loadDashboardData, loadInsightsData],
+    [activeHouseholdId, loadDashboardData, loadInsightsData, loadSpendingOutflowMovements],
   );
 
   const importSupabaseTransactions = useCallback(
@@ -243,6 +278,7 @@ export function useSpendingTransactions({
         );
         await runRefreshSequence([loadSpendingTransactions, loadDashboardData]);
         await loadHouseholdMerchantTransactions();
+        await loadSpendingOutflowMovements();
         return importedIds;
       } catch (error) {
         setSpendingError(error.message || "Could not import local spending transactions.");
@@ -256,6 +292,7 @@ export function useSpendingTransactions({
       loadDashboardData,
       loadHouseholdMerchantTransactions,
       loadSpendingTransactions,
+      loadSpendingOutflowMovements,
       spendingCategories,
       supabaseCreditCards,
     ],
@@ -264,6 +301,7 @@ export function useSpendingTransactions({
   return {
     spendingTransactions,
     householdMerchantTransactions,
+    spendingOutflowMovements,
     selectedSpendingMonth,
     setSelectedSpendingMonth,
     spendingLoading,
