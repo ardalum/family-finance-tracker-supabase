@@ -822,7 +822,7 @@ function FinanceTrackerApp() {
       return;
     }
     if (activeView === "insights") {
-      dispatchNavigation("insights");
+      dispatchNavigation("insights", "detailed-reports");
       return;
     }
 

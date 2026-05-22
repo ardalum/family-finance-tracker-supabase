@@ -370,7 +370,7 @@ export default function AppSettings({ exportData = null }) {
               // TODO: Wire import after validation/mapping workflow exists.
               disabledTitle="Import workflow coming soon."
             />
-            <ActionRow
+            <InfoRow
               icon={<Cloud size={17} />}
               title="Automatic backups"
               helper="Daily backups are enabled."
@@ -720,6 +720,25 @@ function PreferenceSelectRow({ icon, title, value, options, onChange }) {
         </select>
         <ChevronDown size={13} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-text-muted" />
       </div>
+    </div>
+  );
+}
+
+function InfoRow({ icon, title, helper, badge }) {
+  return (
+    <div className="flex items-start justify-between gap-3 border-b border-app-border px-0 py-2.5 text-left last:border-b-0">
+      <div className="flex min-w-0 items-start gap-2.5">
+        <span className="text-text-muted">{icon}</span>
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-text-main">{title}</p>
+          <p className="text-xs text-text-muted">{helper}</p>
+        </div>
+      </div>
+      {badge ? (
+        <span className="rounded-full bg-[#EAF8EF] px-2 py-1 text-xs font-semibold text-[#1D8E4B]">
+          {badge}
+        </span>
+      ) : null}
     </div>
   );
 }

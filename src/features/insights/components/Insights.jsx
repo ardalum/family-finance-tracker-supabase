@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertTriangle,
   ArrowDown,
@@ -25,7 +25,7 @@ import ProgressBar from "../../../components/ui/ProgressBar.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { getCurrentMonthKey } from "../../../lib/dates.js";
 import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
-import { dispatchNavigation } from "../../../lib/navigationTargets.js";
+import { consumeNavigationTarget, dispatchNavigation, NAVIGATE_EVENT } from "../../../lib/navigationTargets.js";
 import { getDashboardData } from "../../dashboard/dashboardUtils.js";
 import { getTransactionCategoryRows, getTransactionImpactAmount } from "../../spending/spendingService.js";
 import {
@@ -81,6 +81,7 @@ export default function Insights({
   const [netWorthRangeMonths, setNetWorthRangeMonths] = useState("6");
   const [showDetailedReports, setShowDetailedReports] = useState(false);
   const [selectedDeepDiveCategory, setSelectedDeepDiveCategory] = useState("");
+  const detailedReportsRef = useRef(null);
   const data = useMemo(() => getDashboardData(appData, selectedMonth), [appData, selectedMonth]);
 
   const budgetInsights = useMemo(() => getBudgetInsights(data.budgetRows), [data.budgetRows]);
@@ -384,6 +385,32 @@ export default function Insights({
     });
     return groups;
   }, [previousCategories]);
+
+  useEffect(() => {
+    function revealDetailedReports() {
+      setShowDetailedReports(true);
+      window.requestAnimationFrame(() => {
+        detailedReportsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        detailedReportsRef.current?.focus();
+      });
+    }
+
+    function handleTarget(target) {
+      if (target === "detailed-reports") {
+        revealDetailedReports();
+      }
+    }
+
+    handleTarget(consumeNavigationTarget("insights"));
+
+    function handleNavigate(event) {
+      if (event?.detail?.view !== "insights") return;
+      handleTarget(event.detail?.target || "");
+    }
+
+    window.addEventListener(NAVIGATE_EVENT, handleNavigate);
+    return () => window.removeEventListener(NAVIGATE_EVENT, handleNavigate);
+  }, []);
 
   return (
     <section className="grid gap-5">
@@ -716,6 +743,7 @@ export default function Insights({
           )}
         </Card>
       </section>
+      <div ref={detailedReportsRef} tabIndex={-1} className="outline-none">
       <Card className="rounded-2xl border border-app-border bg-white p-4">
         <button
           type="button"
@@ -1138,6 +1166,7 @@ export default function Insights({
           </div>
         ) : null}
       </Card>
+      </div>
     </section>
   );
 }
