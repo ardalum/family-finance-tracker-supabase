@@ -1,4 +1,4 @@
-import { Menu, PanelLeftClose, PanelLeftOpen, Plus, X } from "lucide-react";
+import { CircleHelp, Menu, PanelLeftClose, PanelLeftOpen, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { appMetadata } from "../../app/appMetadata.js";
 import { AppBrandMark } from "../branding/index.js";
@@ -31,7 +31,7 @@ export default function AppShellV2({
             }`}
           >
             {sidebarCollapsed ? (
-              <div className="grid justify-items-center gap-3 rounded-2xl border border-app-border bg-app-surface p-2 shadow-[0_8px_22px_-18px_rgba(15,42,74,0.55)]">
+              <div className="grid justify-items-center gap-3 rounded-2xl border border-app-border bg-app-surface p-2.5 shadow-[0_8px_22px_-18px_rgba(15,42,74,0.55)]">
                 <div title="Spedger" aria-label="Spedger">
                   <AppBrandMark variant="sm" />
                 </div>
@@ -47,26 +47,25 @@ export default function AppShellV2({
                 </button>
               </div>
             ) : (
-              <div className="grid gap-3 rounded-2xl border border-app-border bg-app-surface p-3 shadow-[0_8px_22px_-18px_rgba(15,42,74,0.55)]">
-                <div className="flex min-w-0 items-center gap-3 overflow-hidden">
-                  <div className="shrink-0" title="Spedger" aria-label="Spedger">
-                    <AppBrandMark variant="sm" />
-                  </div>
+              <div className="rounded-2xl border border-app-border bg-app-surface p-3 shadow-[0_8px_22px_-18px_rgba(15,42,74,0.55)]">
+                <div className="flex min-w-0 items-center gap-2.5 overflow-hidden">
+                  <div className="flex min-w-0 flex-1 items-center gap-3 overflow-hidden">
+                    <div className="shrink-0" title="Spedger" aria-label="Spedger">
+                      <AppBrandMark variant="sm" />
+                    </div>
 
-                  <div className="min-w-0 flex-1 overflow-hidden">
-                    <h1 className="truncate text-[1rem] font-semibold leading-tight text-text-main">
-                      Spedger
-                    </h1>
-                    <p className="mt-0.5 truncate text-[0.72rem] font-medium leading-tight text-text-muted">
-                      Family money center
-                    </p>
+                    <div className="min-w-0 flex-1 overflow-hidden">
+                      <h1 className="truncate text-[1rem] font-semibold leading-tight text-text-main">
+                        Spedger
+                      </h1>
+                      <p className="mt-0.5 truncate text-[0.72rem] font-medium leading-tight text-text-muted">
+                        Family money center
+                      </p>
+                    </div>
                   </div>
-                </div>
-
-                <div className="flex items-center justify-end">
                   <button
                     type="button"
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-app-border bg-app-surface text-text-main transition hover:bg-app-muted"
+                    className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-app-border bg-app-surfaceSoft text-text-main transition hover:bg-app-muted"
                     onClick={() => setSidebarCollapsed(true)}
                     aria-label="Collapse sidebar"
                     title="Collapse sidebar"
@@ -93,14 +92,34 @@ export default function AppShellV2({
                   </p>
                   <button
                     type="button"
-                    className="rounded-lg px-2 py-1 text-left text-sm font-medium text-brand-primary transition hover:bg-app-muted hover:text-brand-dark"
+                    className={`rounded-lg px-2 py-1 text-left text-sm font-medium transition ${
+                      activeView === "help-support"
+                        ? "bg-brand-primary/10 text-brand-primary"
+                        : "text-brand-primary hover:bg-app-muted hover:text-brand-dark"
+                    }`}
                     onClick={() => onViewChange("help-support")}
+                    aria-current={activeView === "help-support" ? "page" : undefined}
+                    aria-label="Open Help Center"
+                    title="Help Center"
                   >
                     Help center
                   </button>
                 </>
               ) : (
-                <span className="text-center text-sm font-semibold text-text-muted">?</span>
+                <button
+                  type="button"
+                  className={`inline-flex h-10 w-10 items-center justify-center rounded-xl border transition ${
+                    activeView === "help-support"
+                      ? "border-brand-primary bg-brand-primary text-white"
+                      : "border-app-border bg-app-surface text-text-muted hover:bg-app-muted hover:text-text-main"
+                  }`}
+                  onClick={() => onViewChange("help-support")}
+                  aria-label="Open Help Center"
+                  title="Help Center"
+                  aria-current={activeView === "help-support" ? "page" : undefined}
+                >
+                  <CircleHelp size={18} aria-hidden="true" />
+                </button>
               )}
             </div>
           </div>
@@ -197,6 +216,28 @@ export default function AppShellV2({
               onChange={onViewChange}
               onItemSelected={() => setMobileDrawerOpen(false)}
             />
+            <div className="mt-4 grid gap-2 rounded-2xl border border-app-border bg-app-surface p-3 shadow-[0_8px_22px_-18px_rgba(15,42,74,0.45)]">
+              <p className="text-[0.66rem] font-semibold uppercase tracking-[0.11em] text-text-muted">
+                Support
+              </p>
+              <button
+                type="button"
+                className={`rounded-lg px-2 py-1 text-left text-sm font-medium transition ${
+                  activeView === "help-support"
+                    ? "bg-brand-primary/10 text-brand-primary"
+                    : "text-brand-primary hover:bg-app-muted hover:text-brand-dark"
+                }`}
+                onClick={() => {
+                  onViewChange("help-support");
+                  setMobileDrawerOpen(false);
+                }}
+                aria-current={activeView === "help-support" ? "page" : undefined}
+                aria-label="Open Help Center"
+                title="Help Center"
+              >
+                Help center
+              </button>
+            </div>
           </aside>
         </div>
       ) : null}

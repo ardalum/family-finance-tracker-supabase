@@ -64,6 +64,7 @@ describe("navigation items", () => {
     assert.equal(labels.includes("Money Center"), true);
     assert.equal(labels.includes("Income"), false);
     assert.equal(labels.includes("Accounts"), false);
+    assert.equal(labels.includes("Help Center"), false);
   });
 
   it("uses default collapsed/expanded group state with active-section auto-expand", () => {
