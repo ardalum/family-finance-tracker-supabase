@@ -58,6 +58,11 @@ export default function NavigationV2({
               aria-hidden="true"
             />
             {!collapsed ? <span className="truncate">{item.label}</span> : null}
+            {!collapsed && isDisabled ? (
+              <span className="ml-auto rounded-md bg-app-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+                Soon
+              </span>
+            ) : null}
           </button>
         );
       })}

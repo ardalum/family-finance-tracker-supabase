@@ -11,7 +11,6 @@ import {
   FileText,
   Goal,
   GraduationCap,
-  Heart,
   Home,
   Palmtree,
   Quote,
@@ -92,6 +91,7 @@ export default function DashboardV2({
                 <button
                   className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary"
                   type="button"
+                  onClick={() => navigateToView("insights", "insights-home")}
                 >
                   View cash flow
                   <ChevronRight size={14} aria-hidden="true" />
@@ -162,6 +162,7 @@ export default function DashboardV2({
                 <button
                   className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary"
                   type="button"
+                  onClick={() => navigateToView("budgets", "budgets-home")}
                 >
                   View budgets
                   <ChevronRight size={14} aria-hidden="true" />
@@ -279,6 +280,7 @@ export default function DashboardV2({
                 <button
                   type="button"
                   className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary"
+                  onClick={() => navigateToView("credit-cards", "cards-home")}
                 >
                   View all
                   <ChevronRight size={14} aria-hidden="true" />
@@ -337,6 +339,7 @@ export default function DashboardV2({
                 <button
                   type="button"
                   className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary"
+                  onClick={() => navigateToView("savings", "monthly-savings")}
                 >
                   View goals
                   <ChevronRight size={14} aria-hidden="true" />
@@ -426,6 +429,7 @@ export default function DashboardV2({
                   <button
                     type="button"
                     className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-brand-primary"
+                    onClick={() => navigateToView(getAlertTargetView(alert), getAlertTargetKey(alert))}
                   >
                     {alert.action}
                     <ChevronRight size={12} aria-hidden="true" />
@@ -494,7 +498,14 @@ export default function DashboardV2({
           <Card className="overflow-hidden">
             <div className="flex items-center justify-between border-b border-app-border p-5">
               <h3 className="text-base font-semibold text-text-main">Family Note</h3>
-              <button type="button" className="text-sm font-semibold text-brand-primary">Edit</button>
+              <button
+                type="button"
+                className="text-sm font-semibold text-text-muted"
+                title="Coming soon"
+                disabled
+              >
+                Edit
+              </button>
             </div>
             <div className="p-5">
               <blockquote className="rounded-xl border border-[#F2DFC2] bg-[#FFF9F1] px-4 py-3 text-sm italic text-text-soft">
@@ -503,11 +514,6 @@ export default function DashboardV2({
                 <footer className="mt-2 text-xs font-semibold not-italic text-text-muted">
                   - {data.familyNote.author}
                 </footer>
-                <div className="mt-2 flex justify-end">
-                  <button type="button" className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[#E9D4AD] text-[#9A7A3A]">
-                    <Heart size={14} />
-                  </button>
-                </div>
               </blockquote>
             </div>
           </Card>
@@ -612,6 +618,26 @@ function runAction(label) {
   const target = actionTargets[label];
   if (!target) return;
   navigateToView(target.view, target.target);
+}
+
+function getAlertTargetView(alert = {}) {
+  const haystack = `${alert.title || ""} ${alert.description || ""} ${alert.action || ""}`.toLowerCase();
+  if (haystack.includes("budget")) return "budgets";
+  if (haystack.includes("card") || haystack.includes("debt") || haystack.includes("statement")) {
+    return "credit-cards";
+  }
+  if (haystack.includes("bill") || haystack.includes("due")) return "recurring";
+  if (haystack.includes("transaction") || haystack.includes("spending")) return "spending";
+  return "insights";
+}
+
+function getAlertTargetKey(alert = {}) {
+  const view = getAlertTargetView(alert);
+  if (view === "budgets") return "budgets-home";
+  if (view === "credit-cards") return "cards-home";
+  if (view === "recurring") return "recurring-home";
+  if (view === "spending") return "spending-home";
+  return "insights-home";
 }
 
 function navigateToView(view, target = "") {

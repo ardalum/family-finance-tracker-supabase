@@ -29,7 +29,7 @@ import {
   formatSavingsGoalTypeLabel,
 } from "../../../lib/displayLabels.js";
 import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
-import { consumeNavigationTarget, NAVIGATE_EVENT } from "../../../lib/navigationTargets.js";
+import { consumeNavigationTarget, dispatchNavigation, NAVIGATE_EVENT } from "../../../lib/navigationTargets.js";
 import {
   buildSavingsGoalOptions,
   calculateGoalProgress,
@@ -1266,7 +1266,12 @@ export default function Savings({
                 ? `You're on track to reach ${onTrackOrCompleteCount} of ${activeGoals.length} goals.`
                 : "Create your first savings goal to start tracking progress."}
             </p>
-            <Button type="button" variant="secondary" className="mt-3">
+            <Button
+              type="button"
+              variant="secondary"
+              className="mt-3"
+              onClick={() => dispatchNavigation("insights", "insights-home")}
+            >
               See insights
             </Button>
           </Card>

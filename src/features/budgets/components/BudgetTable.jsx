@@ -3,6 +3,7 @@ import { ChevronRight, Home, MoreHorizontal, ShoppingCart, Car, Utensils, Clappe
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import { formatCurrency } from "../../../lib/formatters.js";
+import { dispatchNavigation } from "../../../lib/navigationTargets.js";
 
 export default function BudgetTable({
   rows,
@@ -110,12 +111,20 @@ export default function BudgetTable({
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-app-border px-5 py-4">
-              <button type="button" className="text-sm font-semibold text-brand-primary">
+              <button
+                type="button"
+                className="text-sm font-semibold text-brand-primary"
+                onClick={() => dispatchNavigation("insights", "budget-report")}
+              >
                 View spending report
               </button>
               <div className="flex items-center gap-4">
                 <p className="text-sm text-text-muted">{categoryCount} categories</p>
-                <button type="button" className="inline-flex items-center gap-2 text-sm font-semibold text-brand-primary">
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-brand-primary"
+                  onClick={() => dispatchNavigation("budgets", "add-category")}
+                >
                   Manage categories
                   <ChevronRight size={14} />
                 </button>

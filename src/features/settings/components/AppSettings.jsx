@@ -29,6 +29,7 @@ import { useAuth } from "../../auth/AuthProvider.jsx";
 import { useHouseholds } from "../../households/HouseholdProvider.jsx";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
+import { dispatchNavigation } from "../../../lib/navigationTargets.js";
 import {
   currencies,
   defaultAppSettings,
@@ -297,6 +298,7 @@ export default function AppSettings() {
               title="Connected account"
               helper={accountEmail}
               actionText="Change"
+              onAction={() => dispatchNavigation("account-settings", "")}
             />
             <StatusRow
               icon={<ShieldCheck size={17} />}
@@ -309,6 +311,8 @@ export default function AppSettings() {
               title="Last synced"
               helper="Recently"
               actionText="Sync now"
+              actionDisabled
+              actionTitle="Coming soon"
             />
           </Card>
 
@@ -320,11 +324,13 @@ export default function AppSettings() {
               icon={<FileText size={17} />}
               title="Export data"
               helper="Download your financial data (CSV)."
+              onClick={() => dispatchNavigation("backup", "")}
             />
             <ActionRow
               icon={<Upload size={17} />}
               title="Import data"
               helper="Import transactions or budgets."
+              onClick={() => dispatchNavigation("backup", "")}
             />
             <ActionRow
               icon={<Cloud size={17} />}
@@ -489,7 +495,13 @@ function MemberRow({ membership, fallbackEmail, isFirst }) {
         <PermissionIcon icon={<Home size={12} />} title="Goals" />
         <PermissionIcon icon={<Settings size={12} />} title="Settings" />
       </div>
-      <button type="button" className="inline-flex h-8 w-8 items-center justify-center justify-self-end rounded-lg border border-app-border bg-white text-text-muted">
+      <button
+        type="button"
+        className="inline-flex h-8 w-8 items-center justify-center justify-self-end rounded-lg border border-app-border bg-white text-text-muted disabled:cursor-not-allowed disabled:opacity-70"
+        disabled
+        title="Change role / remove member coming soon"
+        aria-label="Member actions coming soon"
+      >
         <MoreVertical size={14} />
       </button>
     </article>
@@ -544,7 +556,16 @@ function TogglePreferenceRow({
   );
 }
 
-function StatusRow({ icon, title, helper, actionText, badge }) {
+function StatusRow({
+  icon,
+  title,
+  helper,
+  actionText,
+  badge,
+  onAction = null,
+  actionDisabled = false,
+  actionTitle = "",
+}) {
   return (
     <div className="flex items-start justify-between gap-3 border-b border-app-border py-2.5 last:border-b-0">
       <div className="flex min-w-0 items-start gap-2.5">
@@ -559,7 +580,13 @@ function StatusRow({ icon, title, helper, actionText, badge }) {
           {badge}
         </span>
       ) : actionText ? (
-        <button type="button" className="text-sm font-semibold text-brand-primary">
+        <button
+          type="button"
+          className={`text-sm font-semibold ${actionDisabled ? "cursor-not-allowed text-text-muted" : "text-brand-primary"}`}
+          onClick={onAction ?? undefined}
+          disabled={actionDisabled}
+          title={actionTitle || undefined}
+        >
           {actionText}
         </button>
       ) : null}
@@ -567,11 +594,20 @@ function StatusRow({ icon, title, helper, actionText, badge }) {
   );
 }
 
-function ActionRow({ icon, title, helper, badge, danger = false, disabled = false }) {
+function ActionRow({
+  icon,
+  title,
+  helper,
+  badge,
+  danger = false,
+  disabled = false,
+  onClick = null,
+}) {
   return (
     <button
       type="button"
       disabled={disabled}
+      onClick={onClick ?? undefined}
       className={`flex w-full items-start justify-between gap-3 border-b px-0 py-2.5 text-left last:border-b-0 ${
         danger
           ? "mt-2 rounded-xl border border-status-danger/30 bg-red-50/50 px-3 text-status-danger first:mt-3 last:mb-0"
