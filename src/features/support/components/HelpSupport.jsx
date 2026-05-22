@@ -171,7 +171,7 @@ function SearchTopicChip({ topic, onSelect }) {
   );
 }
 
-export default function HelpSupport() {
+export default function HelpSupport({ onRestartOnboarding = null }) {
   const [query, setQuery] = useState("");
   const [openArticleId, setOpenArticleId] = useState("");
   const [openGuideId, setOpenGuideId] = useState("");
@@ -236,6 +236,16 @@ export default function HelpSupport() {
           <MessageCircle size={16} aria-hidden="true" />
           Contact support
         </button>
+        {onRestartOnboarding ? (
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 rounded-xl border border-app-border bg-app-surface px-4 py-2 text-sm font-semibold text-text-main transition hover:bg-app-surfaceSoft"
+            onClick={onRestartOnboarding}
+          >
+            <Rocket size={16} aria-hidden="true" />
+            Restart walkthrough
+          </button>
+        ) : null}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-4">
@@ -485,6 +495,18 @@ export default function HelpSupport() {
               <RailStat label="Support availability" value="Mon-Fri, 8am-8pm ET" />
               <RailStat label="App status" value="All systems operational" tone="good" />
             </div>
+            {onRestartOnboarding ? (
+              <div className="border-t border-app-border px-4 py-3">
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary"
+                  onClick={onRestartOnboarding}
+                >
+                  Restart walkthrough
+                  <ArrowRight size={14} aria-hidden="true" />
+                </button>
+              </div>
+            ) : null}
           </Card>
 
           <Card className="overflow-hidden">
