@@ -55,17 +55,17 @@ export default function RecentTransactionsTable({ transactions, cards, categorie
                       </p>
                     </div>
                     <p className="mt-0.5 truncate text-xs text-text-muted">
-                      {categoryLabel || "Uncategorized"} ï¿½ {transaction.date}
+                      {categoryLabel || "Uncategorized"} • {transaction.date}
                     </p>
                     <p className="mt-0.5 truncate text-xs text-text-muted">
                       {transaction.paymentMethod || "Credit Card"}
                       {card ? (
                         <>
                           {" "}
-                          ï¿½ <LinkedCardName card={card} />
+                          • <LinkedCardName card={card} />
                         </>
                       ) : transaction.cardId ? (
-                        ` ï¿½ ${getCardName(transaction.cardId, cards)}`
+                        ` • ${getCardName(transaction.cardId, cards)}`
                       ) : (
                         ""
                       )}

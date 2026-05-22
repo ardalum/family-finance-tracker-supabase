@@ -81,7 +81,7 @@ export default function AppSettings({ exportData = null }) {
 
   const householdLabel = activeHousehold?.name ?? "No household";
   const memberCount = memberships.length || 0;
-  const preferenceValue = `${draftSettings.currency?.code ?? "USD"} ï¿½ ${
+  const preferenceValue = `${draftSettings.currency?.code ?? "USD"} • ${
     draftSettings.defaultMonthBehavior === "last-viewed"
       ? "Remembered"
       : draftSettings.defaultMonthBehavior === "manual"
