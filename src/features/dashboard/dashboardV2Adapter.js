@@ -98,6 +98,7 @@ export function createDashboardV2Data({ appData, selectedMonth = getCurrentMonth
           : "N/A",
         name: row.template?.name || "Recurring bill",
         amount: Number(row.unpaidAmount || row.amount || 0),
+        helper: "Recurring bill",
         dueText: getBillDueText(daysUntilDue),
         tone: daysUntilDue < 0 ? "danger" : daysUntilDue <= 7 ? "warn" : "neutral",
         sortOrder: dueDateObj ? dueDateObj.getTime() : Number.MAX_SAFE_INTEGER,
@@ -120,12 +121,17 @@ export function createDashboardV2Data({ appData, selectedMonth = getCurrentMonth
           : "N/A",
         name: row.card?.name || "Card payment",
         amount: Number(row.balance || 0),
+        helper: "Card payment",
+        last4,
         dueText:
           daysUntilDue < 0
-            ? `Card payment past due by ${Math.abs(daysUntilDue)} day${Math.abs(daysUntilDue) === 1 ? "" : "s"}`
+            ? `Past due by ${Math.abs(daysUntilDue)} day${Math.abs(daysUntilDue) === 1 ? "" : "s"}`
             : daysUntilDue === 0
-              ? "Card payment due today"
-              : `Card payment due in ${daysUntilDue} day${daysUntilDue === 1 ? "" : "s"} · •••• ${last4}`,
+              ? "Due today"
+              : `Due in ${daysUntilDue} day${daysUntilDue === 1 ? "" : "s"}`,
+        dueShort: dueDateObj
+          ? `Due ${dueDateObj.toLocaleString("en-US", { month: "short" })} ${dueDateObj.getDate()}`
+          : "Due date unavailable",
         tone: daysUntilDue < 0 ? "danger" : daysUntilDue <= 7 ? "warn" : "neutral",
         sortOrder: dueDateObj ? dueDateObj.getTime() : Number.MAX_SAFE_INTEGER,
       };
@@ -214,16 +220,17 @@ function mapDashboardAlert(alert = {}) {
   const tone = alert.type === "danger" ? "danger" : "warn";
   const text = String(alert.text || "").trim();
   const category = String(alert.category || "").trim();
-  const currencyMatch = text.match(/over budget by ([\d.]+)/i);
+  const currencyMatch = text.match(/over budget by\s+\$?([\d,]+(?:\.\d{1,2})?)/i);
 
   if (currencyMatch) {
-    const amount = Number(currencyMatch[1] || 0);
+    const amount = Number(String(currencyMatch[1] || "").replace(/,/g, ""));
     const categoryName = text.split(" is over budget")[0] || "Category";
+    const description = Number.isFinite(amount)
+      ? `${Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(amount)} over budget`
+      : "Review budget overage";
     return {
       title: `Over budget: ${categoryName}`,
-      description: `${Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
-        amount,
-      )} over budget`,
+      description,
       action: "View budget",
       tone,
     };

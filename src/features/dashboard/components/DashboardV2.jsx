@@ -1,6 +1,7 @@
 import {
   AlertTriangle,
   ArrowRight,
+  Car,
   CalendarClock,
   Calendar,
   Camera,
@@ -9,8 +10,12 @@ import {
   CreditCard,
   FileText,
   Goal,
+  GraduationCap,
   Heart,
+  Home,
+  Palmtree,
   Quote,
+  Shield,
   Split,
   BarChart3,
   Wallet,
@@ -75,7 +80,7 @@ export default function DashboardV2({
 
   return (
     <section className="grid gap-4">
-      <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid min-w-0 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="grid min-w-0 gap-4">
           <div className="grid gap-4 lg:grid-cols-2">
             <Card className="overflow-hidden">
@@ -141,7 +146,7 @@ export default function DashboardV2({
                       </div>
                     </>
                   ) : (
-                    <div className="grid h-20 place-items-center rounded-lg border border-app-border bg-app-surface text-xs text-text-muted">
+                    <div className="grid h-16 place-items-center rounded-lg border border-app-border bg-app-surface text-xs text-text-muted">
                       Not enough monthly trend data yet.
                     </div>
                   )}
@@ -166,31 +171,40 @@ export default function DashboardV2({
                 <div
                   className="mx-auto grid h-40 w-40 place-items-center rounded-full"
                   style={{
-                    background: `conic-gradient(${getBudgetHealthRingTone(data.budgetHealth.onTrackPct)} ${(data.budgetHealth.onTrackPct / 100) * 360}deg, #F3F1EA 0deg)`,
+                    background: getBudgetHealthRingStyle(
+                      data.budgetHealth.categories,
+                      data.budgetHealth.onTrackPct,
+                    ),
                   }}
                 >
                   <div className="grid h-28 w-28 place-items-center rounded-full bg-white text-center">
                     <p className="text-4xl font-semibold leading-none text-text-main">
                       {data.budgetHealth.onTrackPct}%
                     </p>
-                    <p className="mt-1 text-sm text-text-muted">On track</p>
+                    <p className="mt-1 text-sm text-text-muted">
+                      {data.budgetHealth.onTrackPct >= 70
+                        ? "On track"
+                        : data.budgetHealth.onTrackPct >= 45
+                          ? "Needs review"
+                          : "Review"}
+                    </p>
                   </div>
                 </div>
-                <div className="grid gap-2.5">
+                <div className="grid gap-2">
                   {data.budgetHealth.categories.length === 0 ? (
                     <p className="rounded-xl border border-app-border bg-app-surfaceSoft px-3 py-2 text-sm text-text-muted">
                       No budget data for this month.
                     </p>
                   ) : null}
                   {data.budgetHealth.categories.slice(0, 6).map((category) => {
-                    const pctRaw =
-                      category.budget > 0 ? (category.spent / category.budget) * 100 : 0;
-                    const pct = Math.min(100, Math.max(0, pctRaw));
-                    const isOverBudget = pctRaw > 100;
+                    const tone = getBudgetCategoryTone(category);
                     return (
-                      <div key={category.name} className="grid gap-1.5">
+                      <div key={category.name} className="grid gap-1">
                         <div className="flex items-center justify-between gap-2 text-sm">
-                          <span className="truncate font-medium text-text-main">{category.name}</span>
+                          <span className="inline-flex min-w-0 items-center gap-2">
+                            <span className={`h-2 w-2 shrink-0 rounded-full ${tone.dotClass}`} />
+                            <span className="truncate font-medium text-text-main">{category.name}</span>
+                          </span>
                           <span
                             className="shrink-0 text-text-muted"
                             title={`${formatCurrency(category.spent)} / ${formatCurrency(category.budget)}`}
@@ -198,17 +212,6 @@ export default function DashboardV2({
                             {formatCompactCurrency(category.spent)} / {formatCompactCurrency(category.budget)}
                           </span>
                         </div>
-                        <div className="h-1.5 overflow-hidden rounded-full bg-app-muted">
-                          <div
-                            className={`h-full rounded-full ${isOverBudget ? "bg-status-danger" : pctRaw >= 85 ? "bg-status-warning" : "bg-status-success"}`}
-                            style={{ width: `${pct}%` }}
-                          />
-                        </div>
-                        {isOverBudget ? (
-                          <p className="text-[11px] font-semibold text-status-danger">
-                            {pctRaw > 999 ? "999%+" : `${Math.round(pctRaw)}%`} of budget
-                          </p>
-                        ) : null}
                       </div>
                     );
                   })}
@@ -240,15 +243,31 @@ export default function DashboardV2({
                     </div>
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold text-text-main">{bill.name}</p>
+                      {bill.type === "card" ? (
+                        <div className="text-xs text-text-muted">
+                          <p>Card payment</p>
+                          <p>•••• {bill.last4 || "0000"}</p>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-text-muted">{bill.helper || "Recurring bill"}</p>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold text-text-main tabular-nums">
+                        {formatCurrency(bill.amount)}
+                      </p>
                       <p
-                        className={`text-xs ${bill.tone === "danger" ? "text-status-danger" : bill.tone === "warn" ? "text-status-warningDark" : "text-text-muted"}`}
+                        className={`text-xs ${
+                          bill.tone === "danger"
+                            ? "text-status-danger"
+                            : bill.tone === "warn"
+                              ? "text-status-warningDark"
+                              : "text-text-muted"
+                        }`}
                       >
-                        {bill.dueText}
+                        {bill.dueText || bill.dueShort}
                       </p>
                     </div>
-                    <p className="text-sm font-semibold text-text-main tabular-nums">
-                      {formatCurrency(bill.amount)}
-                    </p>
                   </article>
                 ))}
               </div>
@@ -323,7 +342,7 @@ export default function DashboardV2({
                   <ChevronRight size={14} aria-hidden="true" />
                 </button>
               </div>
-              <div className="grid gap-2.5 p-5">
+              <div className="grid gap-1 p-5">
                 {data.savingsGoals.length === 0 ? (
                   <p className="rounded-xl border border-app-border bg-app-surfaceSoft px-3 py-2 text-sm text-text-muted">
                     No active savings goals yet.
@@ -332,19 +351,19 @@ export default function DashboardV2({
                 {data.savingsGoals.map((goal) => (
                   <article
                     key={goal.name}
-                    className="grid grid-cols-[32px_minmax(0,1fr)] gap-2 rounded-xl border border-app-border bg-app-surfaceSoft p-3"
+                    className="grid grid-cols-[34px_minmax(0,1fr)] gap-2 border-b border-app-border py-2.5 last:border-b-0"
                   >
-                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#EAF8EF] text-xs font-semibold text-[#1D8E4B]">
-                      {getInitials(goal.name)}
+                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#EAF8EF] text-[#1D8E4B]">
+                      <GoalIcon name={goal.name} />
                     </span>
                     <div className="min-w-0 grid gap-2">
                       <div className="flex items-center justify-between gap-2">
                         <p className="truncate text-sm font-semibold text-text-main">{goal.name}</p>
                         <p className="text-xs font-semibold text-text-muted">{goal.progress}%</p>
                       </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-app-muted">
+                      <div className="h-1.5 overflow-hidden rounded-full bg-app-muted">
                         <div
-                          className="h-full rounded-full bg-status-success"
+                          className={`h-full rounded-full ${goal.progress >= 80 ? "bg-status-success" : goal.progress >= 50 ? "bg-status-warning" : "bg-status-success"}`}
                           style={{ width: `${goal.progress}%` }}
                         />
                       </div>
@@ -381,7 +400,11 @@ export default function DashboardV2({
               {visibleAlerts.map((alert) => (
                 <article
                   key={alert.title}
-                  className="rounded-xl border border-app-border bg-app-surfaceSoft p-3"
+                  className={`rounded-xl border p-3 ${
+                    alert.tone === "danger"
+                      ? "border-status-dangerBg bg-[#FFF6F6]"
+                      : "border-status-warningBg bg-[#FFF9F2]"
+                  }`}
                 >
                   <div className="flex items-start gap-2">
                     <span
@@ -421,7 +444,7 @@ export default function DashboardV2({
           </Card>
         </div>
 
-        <aside className="grid gap-4 self-start xl:sticky xl:top-24">
+        <aside className="grid gap-4 self-start">
           <Card className="overflow-hidden">
             <div className="flex items-center justify-between border-b border-app-border p-5">
               <h3 className="text-base font-semibold text-text-main">Recent transactions</h3>
@@ -516,10 +539,45 @@ export default function DashboardV2({
   );
 }
 
-function getBudgetHealthRingTone(onTrackPct) {
-  if (onTrackPct >= 70) return "#22A06B";
-  if (onTrackPct >= 45) return "#EA7A0A";
-  return "#DC2626";
+function getBudgetHealthRingStyle(categories = [], onTrackPct = 0) {
+  if (!Array.isArray(categories) || categories.length === 0) {
+    const tone = onTrackPct >= 70 ? "#22A06B" : onTrackPct >= 45 ? "#EA7A0A" : "#DC2626";
+    return `conic-gradient(${tone} ${(onTrackPct / 100) * 360}deg, #F3F1EA 0deg)`;
+  }
+
+  const counts = categories.reduce(
+    (acc, category) => {
+      const tone = getBudgetCategoryTone(category).key;
+      acc[tone] += 1;
+      return acc;
+    },
+    { good: 0, warn: 0, danger: 0, neutral: 0 },
+  );
+  const total = Math.max(1, counts.good + counts.warn + counts.danger + counts.neutral);
+  const segments = [
+    { key: "good", color: "#22A06B", value: counts.good },
+    { key: "warn", color: "#EA7A0A", value: counts.warn },
+    { key: "danger", color: "#DC2626", value: counts.danger },
+    { key: "neutral", color: "#98A2B3", value: counts.neutral },
+  ].filter((segment) => segment.value > 0);
+
+  let current = 0;
+  const gradientStops = segments.map((segment) => {
+    const start = current;
+    current += (segment.value / total) * 360;
+    return `${segment.color} ${start}deg ${current}deg`;
+  });
+  return `conic-gradient(${gradientStops.join(", ")})`;
+}
+
+function getBudgetCategoryTone(category = {}) {
+  const budget = Number(category.budget || 0);
+  const spent = Number(category.spent || 0);
+  if (budget <= 0) return { key: "neutral", dotClass: "bg-[#98A2B3]" };
+  const pct = (spent / budget) * 100;
+  if (pct > 100) return { key: "danger", dotClass: "bg-[#DC2626]" };
+  if (pct >= 85) return { key: "warn", dotClass: "bg-[#EA7A0A]" };
+  return { key: "good", dotClass: "bg-[#22A06B]" };
 }
 
 function formatCompactCurrency(value) {
@@ -530,11 +588,24 @@ function formatCompactCurrency(value) {
   return formatCurrency(amount);
 }
 
-function getInitials(name = "") {
-  const parts = String(name).trim().split(/\s+/).filter(Boolean);
-  if (!parts.length) return "SG";
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+function GoalIcon({ name = "" }) {
+  const text = String(name).toLowerCase();
+  if (text.includes("vacation") || text.includes("travel") || text.includes("trip")) {
+    return <Palmtree size={16} />;
+  }
+  if (text.includes("college") || text.includes("education") || text.includes("school")) {
+    return <GraduationCap size={16} />;
+  }
+  if (text.includes("home") || text.includes("house")) {
+    return <Home size={16} />;
+  }
+  if (text.includes("emergency") || text.includes("health") || text.includes("medical")) {
+    return <Shield size={16} />;
+  }
+  if (text.includes("car") || text.includes("vehicle")) {
+    return <Car size={16} />;
+  }
+  return <Goal size={16} />;
 }
 
 function runAction(label) {
