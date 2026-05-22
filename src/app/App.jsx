@@ -5,6 +5,11 @@ import AppFirstTimeSetupScreen from "./AppFirstTimeSetupScreen.jsx";
 import AppShellFrame from "./AppShellFrame.jsx";
 import AppViewRenderer from "./AppViewRenderer.jsx";
 import QuickAddTransactionModal from "../features/quickAdd/components/QuickAddTransactionModal.jsx";
+import OnboardingWalkthrough from "../features/onboarding/components/OnboardingWalkthrough.jsx";
+import {
+  hasCompletedOrDismissedOnboarding,
+  writeOnboardingState,
+} from "../features/onboarding/onboardingStorage.js";
 import {
   getInitialSetupStatusState,
   getSetupStatusErrorMessage,
@@ -81,7 +86,20 @@ function FinanceTrackerApp() {
     initialSelectedMonths.netWorth,
   );
   const [quickAddOpen, setQuickAddOpen] = useState(false);
+  const [setupJustCompleted, setSetupJustCompleted] = useState(false);
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
   const creditCardDebtSyncInFlight = useRef(false);
+
+  useEffect(() => {
+    if (!setupJustCompleted || !activeHousehold?.setupComplete || !activeHouseholdId) return;
+    if (hasCompletedOrDismissedOnboarding(activeHouseholdId)) {
+      setSetupJustCompleted(false);
+      return;
+    }
+
+    setOnboardingOpen(true);
+    setSetupJustCompleted(false);
+  }, [activeHousehold?.setupComplete, activeHouseholdId, setupJustCompleted]);
   useEffect(() => {
     let isCurrent = true;
 
@@ -475,8 +493,27 @@ function FinanceTrackerApp() {
 
   const finishFirstTimeSetup = useCallback(async () => {
     await completeActiveHouseholdSetup();
+    setSetupJustCompleted(true);
     setActiveView("dashboard");
   }, [completeActiveHouseholdSetup, setActiveView]);
+
+  const handleRestartOnboarding = useCallback(() => {
+    setOnboardingOpen(true);
+  }, []);
+
+  const handleSkipOnboarding = useCallback(() => {
+    if (activeHouseholdId) {
+      writeOnboardingState(activeHouseholdId, "dismissed");
+    }
+    setOnboardingOpen(false);
+  }, [activeHouseholdId]);
+
+  const handleFinishOnboarding = useCallback(() => {
+    if (activeHouseholdId) {
+      writeOnboardingState(activeHouseholdId, "completed");
+    }
+    setOnboardingOpen(false);
+  }, [activeHouseholdId]);
 
   const dashboardAppData = useMemo(
     () =>
@@ -798,6 +835,7 @@ function FinanceTrackerApp() {
     updateSupabaseSavingsContribution,
     deleteSupabaseSavingsContribution,
     settingsExportData,
+    onRestartOnboarding: handleRestartOnboarding,
   });
 
   function openQuickAdd() {
@@ -894,6 +932,13 @@ function FinanceTrackerApp() {
         isSaving={spendingSaving}
         onClose={closeQuickAdd}
         onCreateTransaction={createSupabaseTransaction}
+      />
+      <OnboardingWalkthrough
+        open={onboardingOpen}
+        onClose={handleSkipOnboarding}
+        onSkip={handleSkipOnboarding}
+        onFinish={handleFinishOnboarding}
+        onNavigate={setActiveView}
       />
     </AppShellFrame>
   );

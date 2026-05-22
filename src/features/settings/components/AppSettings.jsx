@@ -63,7 +63,7 @@ function normalizeSettings(settings = defaultAppSettings) {
   };
 }
 
-export default function AppSettings({ exportData = null }) {
+export default function AppSettings({ exportData = null, onRestartOnboarding = null }) {
   const { user } = useAuth();
   const { activeHousehold, memberships } = useHouseholds();
   const [savedSettings, setSavedSettings] = useState(() => normalizeSettings(readAppSettings()));
@@ -398,6 +398,23 @@ export default function AppSettings({ exportData = null }) {
             <h3 className="mb-2 text-2xl font-semibold tracking-tight text-[#071F42]">
               App preferences
             </h3>
+            {onRestartOnboarding ? (
+              <div className="mb-3 rounded-xl border border-app-border bg-app-surfaceSoft px-3 py-2.5">
+                <p className="text-sm font-semibold text-text-main">Restart walkthrough</p>
+                <p className="mt-0.5 text-xs text-text-muted">
+                  Review the main Spedger workflows again.
+                </p>
+                <button
+                  type="button"
+                  className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-brand-primary"
+                  onClick={onRestartOnboarding}
+                  data-onboarding-target="restart-walkthrough-settings"
+                >
+                  Restart walkthrough
+                  <ChevronRight size={14} aria-hidden="true" />
+                </button>
+              </div>
+            ) : null}
             <PreferenceSelectRow
               icon={<Sun size={17} />}
               title="Theme"

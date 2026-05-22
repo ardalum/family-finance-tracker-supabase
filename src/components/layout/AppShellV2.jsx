@@ -101,6 +101,7 @@ export default function AppShellV2({
                     aria-current={activeView === "help-support" ? "page" : undefined}
                     aria-label="Open Help Center"
                     title="Help Center"
+                    data-onboarding-target="nav-help-center"
                   >
                     Help center
                   </button>
@@ -117,6 +118,7 @@ export default function AppShellV2({
                   aria-label="Open Help Center"
                   title="Help Center"
                   aria-current={activeView === "help-support" ? "page" : undefined}
+                  data-onboarding-target="nav-help-center"
                 >
                   <CircleHelp size={18} aria-hidden="true" />
                 </button>

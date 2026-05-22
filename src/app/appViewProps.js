@@ -153,6 +153,7 @@ export function createAppViewProps({
   updateSupabaseSavingsContribution,
   deleteSupabaseSavingsContribution,
   settingsExportData,
+  onRestartOnboarding,
 } = {}) {
   const resolvedCopyPreviousMonthBudgets =
     copyPreviousMonthBudgetsToSupabase ?? copyPreviousMonthBudgetCategories;
@@ -427,6 +428,10 @@ export function createAppViewProps({
     },
     appSettingsProps: {
       exportData: settingsExportData,
+      onRestartOnboarding,
+    },
+    helpSupportProps: {
+      onRestartOnboarding,
     },
   };
 }

@@ -10,6 +10,18 @@ export default function NavigationV2({
   collapsed = false,
   ariaLabel = "Primary navigation",
 }) {
+  const onboardingTargetByView = {
+    dashboard: "nav-overview",
+    "financial-position": "nav-money-center",
+    spending: "nav-transactions",
+    budgets: "nav-budgets",
+    "credit-cards": "nav-cards-debt",
+    recurring: "nav-bills",
+    savings: "nav-goals",
+    insights: "nav-insights",
+    "app-settings": "nav-settings",
+  };
+
   useEffect(() => {
     function handleNavigate(event) {
       const view = event.detail?.view;
@@ -52,6 +64,7 @@ export default function NavigationV2({
             aria-label={`Go to ${item.label}`}
             title={isDisabled ? `${item.label} (coming soon)` : item.label}
             disabled={isDisabled}
+            data-onboarding-target={item.id ? onboardingTargetByView[item.id] : undefined}
           >
             <Icon
               size={20}

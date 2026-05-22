@@ -41,6 +41,7 @@ export default function AppViewRenderer({
   backupProps,
   householdSettingsProps,
   appSettingsProps,
+  helpSupportProps,
 }) {
   return (
     <>
@@ -79,7 +80,7 @@ export default function AppViewRenderer({
       {activeView === "about" ? <AboutSpedger /> : null}
       {activeView === "privacy-policy" ? <PrivacyPolicy /> : null}
       {activeView === "terms-of-use" ? <TermsOfUse /> : null}
-      {activeView === "help-support" ? <HelpSupport /> : null}
+      {activeView === "help-support" ? <HelpSupport {...helpSupportProps} /> : null}
       {activeView === "release-notes" ? <ReleaseNotes /> : null}
     </>
   );

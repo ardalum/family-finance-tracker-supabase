@@ -96,6 +96,7 @@ const input = {
   saveHouseholdProfile: callback,
   deactivateProfile: callback,
   addDefaultProfiles: callback,
+  onRestartOnboarding: callback,
 };
 
 describe("app view props", () => {
@@ -436,6 +437,8 @@ describe("app view props", () => {
     assert.equal(props.creditCardProps.onDataChange, input.refreshData);
     assert.equal(props.backupProps.onSupabaseImportComplete, input.refreshSupabaseDataAfterImport);
     assert.equal(props.householdSettingsProps.onCreateDefaultProfiles, input.addDefaultProfiles);
+    assert.equal(props.appSettingsProps.onRestartOnboarding, input.onRestartOnboarding);
+    assert.equal(props.helpSupportProps.onRestartOnboarding, input.onRestartOnboarding);
   });
 
   it("handles missing app data", () => {
