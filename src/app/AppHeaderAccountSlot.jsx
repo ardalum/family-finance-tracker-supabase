@@ -24,6 +24,8 @@ export default function AppHeaderAccountSlot({
   onSavingsMonthChange,
   insightsMonth,
   onInsightsMonthChange,
+  financialPositionMonth,
+  onFinancialPositionMonthChange,
 }) {
   const isDashboard = activeView === "dashboard";
   const isSpending = activeView === "spending";
@@ -32,6 +34,8 @@ export default function AppHeaderAccountSlot({
   const isRecurring = activeView === "recurring";
   const isSavings = activeView === "savings";
   const isInsights = activeView === "insights";
+  const isMoneyCenterView =
+    activeView === "financial-position" || activeView === "income" || activeView === "accounts";
   const activeMonth = isDashboard
     ? dashboardMonth
     : isSpending
@@ -46,7 +50,9 @@ export default function AppHeaderAccountSlot({
               ? savingsMonth
               : isInsights
                 ? insightsMonth
-                : "";
+                : isMoneyCenterView
+                  ? financialPositionMonth
+                  : "";
   const onMonthChange = isDashboard
     ? onDashboardMonthChange
     : isSpending
@@ -61,7 +67,9 @@ export default function AppHeaderAccountSlot({
               ? onSavingsMonthChange
               : isInsights
                 ? onInsightsMonthChange
-                : null;
+                : isMoneyCenterView
+                  ? onFinancialPositionMonthChange
+                  : null;
   const actionLabel = isInsights
     ? "View reports"
     : isBudgets
@@ -113,7 +121,9 @@ export default function AppHeaderAccountSlot({
                           ? "Savings goals month"
                           : isInsights
                             ? "Insights month"
-                            : "Cards and debt month"
+                            : isMoneyCenterView
+                              ? "Money Center month"
+                              : "Cards and debt month"
               }
             >
               {monthOptions.map((month) => (

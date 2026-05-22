@@ -120,7 +120,7 @@ export default function DashboardV2({
                   <button
                     className="inline-flex items-center gap-1 rounded-lg border border-app-border bg-app-surface px-3 py-1.5 text-sm font-semibold text-text-main hover:border-brand-primary/40"
                     type="button"
-                    onClick={() => navigateToView("income")}
+                    onClick={() => navigateToView("financial-position", "add-income")}
                   >
                     Add income
                   </button>

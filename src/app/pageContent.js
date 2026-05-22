@@ -32,12 +32,12 @@ export const pageContent = {
     description: "Review upcoming card, bill, income, and month-close dates.",
   },
   "financial-position": {
-    title: "Financial Position",
-    description: "Review income, savings, cash, debts, and net worth in one place.",
+    title: "Money Center",
+    description: "Track household income, account balances, and cash position.",
   },
   accounts: {
-    title: "Accounts",
-    description: "Manually track cash accounts and monthly balance snapshots.",
+    title: "Money Center",
+    description: "Track household income, account balances, and cash position.",
   },
   liabilities: {
     title: "Liabilities",
@@ -48,8 +48,8 @@ export const pageContent = {
     description: "Review net worth from manual asset and liability snapshots.",
   },
   income: {
-    title: "Income",
-    description: "Manually track income sources and monthly income entries.",
+    title: "Money Center",
+    description: "Track household income, account balances, and cash position.",
   },
   savings: {
     title: "Savings Goals",
