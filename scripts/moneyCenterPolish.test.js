@@ -47,3 +47,37 @@ test("money center uses modal shells and keeps inline forms out of default card 
   assert.ok(moneyCenterSource.includes("accountModalOpen"));
   assert.ok(moneyCenterSource.includes("snapshotModalOpen"));
 });
+
+test("money center keeps monthly income wider than cash position and avoids forced desktop overflow", () => {
+  assert.ok(moneyCenterSource.includes("xl:grid-cols-[360px_minmax(0,1fr)]"));
+  assert.equal(moneyCenterSource.includes("min-w-[720px]"), false);
+  assert.ok(moneyCenterSource.includes("xl:overflow-x-visible"));
+});
+
+test("money center summary metrics use balanced value sizing", () => {
+  assert.ok(
+    moneyCenterSource.includes("text-2xl font-semibold tracking-tight text-text-main sm:text-3xl"),
+  );
+  assert.equal(
+    moneyCenterSource.includes("text-4xl font-semibold tracking-tight text-text-main"),
+    false,
+  );
+});
+
+test("money center renders info tooltips for summary cards and key sections", () => {
+  assert.ok(moneyCenterSource.includes("Cash position calculation info"));
+  assert.ok(moneyCenterSource.includes("Monthly income calculation info"));
+  assert.ok(moneyCenterSource.includes("Tracked accounts calculation info"));
+  assert.ok(moneyCenterSource.includes("Income and cash trend calculation info"));
+  assert.ok(moneyCenterSource.includes("Needs update calculation info"));
+  assert.ok(moneyCenterSource.includes("Financial position calculation info"));
+  assert.ok(moneyCenterSource.includes("Tracked cash and bank accounts for the selected month."));
+  assert.ok(moneyCenterSource.includes("Expected income from active income sources."));
+});
+
+test("money center right rail remains a sibling column aligned with the summary row", () => {
+  assert.ok(
+    moneyCenterSource.includes('className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]"'),
+  );
+  assert.ok(moneyCenterSource.includes('className="grid content-start gap-4"'));
+});

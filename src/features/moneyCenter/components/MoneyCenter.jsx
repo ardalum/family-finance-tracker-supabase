@@ -3,7 +3,6 @@ import {
   BanknoteArrowDown,
   CalendarClock,
   Check,
-  CircleAlert,
   EllipsisVertical,
   Landmark,
   Wallet,
@@ -12,6 +11,7 @@ import {
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import EmptyState from "../../../components/ui/EmptyState.jsx";
+import InfoTooltip from "../../../components/ui/InfoTooltip.jsx";
 import InlineAlert from "../../../components/ui/InlineAlert.jsx";
 import Input from "../../../components/ui/Input.jsx";
 import Select from "../../../components/ui/Select.jsx";
@@ -461,43 +461,53 @@ export default function MoneyCenter({
         </Card>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-4">
-        <SummaryMetricCard
-          title="Cash Position"
-          value={formatCurrency(financialSummary.liquidCashTotal)}
-          helper="Tracked cash and bank accounts"
-          icon={<Wallet size={18} aria-hidden="true" />}
-          tone="good"
-        />
-        <SummaryMetricCard
-          title="Income Received"
-          value={formatCurrency(receivedIncome)}
-          helper={`Received in ${formatMonthLabel(selectedMonth)}`}
-          icon={<BanknoteArrowDown size={18} aria-hidden="true" />}
-          tone="good"
-        />
-        <SummaryMetricCard
-          title="Expected Income"
-          value={formatCurrency(expectedIncome)}
-          helper="Across active sources"
-          icon={<CalendarClock size={18} aria-hidden="true" />}
-          tone="navy"
-        />
-        <SummaryMetricCard
-          title="Account Coverage"
-          value={accountCoverageDays === null ? "Needs data" : `${accountCoverageDays} days`}
-          helper="Estimated expenses covered"
-          icon={<Check size={18} aria-hidden="true" />}
-          tone={accountCoverageDays === null ? "warn" : "soft"}
-        />
-      </div>
-
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
         <div className="grid gap-4">
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+          <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-4">
+            <SummaryMetricCard
+              title="Cash Position"
+              value={formatCurrency(financialSummary.liquidCashTotal)}
+              helper="Tracked cash and bank accounts"
+              icon={<Wallet size={18} aria-hidden="true" />}
+              tone="good"
+              infoContent="Tracked cash and bank accounts for the selected month."
+            />
+            <SummaryMetricCard
+              title="Income Received"
+              value={formatCurrency(receivedIncome)}
+              helper={`Received in ${formatMonthLabel(selectedMonth)}`}
+              icon={<BanknoteArrowDown size={18} aria-hidden="true" />}
+              tone="good"
+              infoContent="Income entries recorded for the selected month."
+            />
+            <SummaryMetricCard
+              title="Expected Income"
+              value={formatCurrency(expectedIncome)}
+              helper="Across active sources"
+              icon={<CalendarClock size={18} aria-hidden="true" />}
+              tone="navy"
+              infoContent="Expected income from active income sources."
+            />
+            <SummaryMetricCard
+              title="Account Coverage"
+              value={accountCoverageDays === null ? "Needs data" : `${accountCoverageDays} days`}
+              helper="Estimated expenses covered"
+              icon={<Check size={18} aria-hidden="true" />}
+              tone={accountCoverageDays === null ? "warn" : "soft"}
+              infoContent="Estimated days your tracked cash could cover expenses."
+            />
+          </div>
+
+          <div className="grid gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
             <Card className="overflow-hidden">
               <div className="border-b border-app-border p-5">
-                <h3 className="text-xl font-semibold text-text-main">Cash position</h3>
+                <h3 className="flex items-center gap-1.5 text-xl font-semibold text-text-main">
+                  Cash position
+                  <InfoTooltip
+                    label="Cash position calculation info"
+                    content="Shows the selected month’s tracked cash movement summary."
+                  />
+                </h3>
               </div>
               <div className="grid gap-0 p-4">
                 <WaterfallRow label="Starting tracked balance" value={previousMonthBalance} />
@@ -516,7 +526,13 @@ export default function MoneyCenter({
 
             <Card ref={incomeSectionRef} className="overflow-hidden">
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-app-border p-5">
-                <h3 className="text-xl font-semibold text-text-main">Monthly income</h3>
+                <h3 className="flex items-center gap-1.5 text-xl font-semibold text-text-main">
+                  Monthly income
+                  <InfoTooltip
+                    label="Monthly income calculation info"
+                    content="Income entries and sources for the selected month."
+                  />
+                </h3>
                 <div
                   className="inline-flex rounded-xl border border-app-border bg-app-surfaceSoft p-1"
                   role="tablist"
@@ -553,8 +569,8 @@ export default function MoneyCenter({
 
               <div className="p-4">
                 {activeIncomeTab === TAB_ENTRIES ? (
-                  <div className="overflow-x-auto">
-                    <table className="w-full min-w-[720px] table-fixed border-separate border-spacing-0">
+                  <div className="overflow-x-auto xl:overflow-x-visible">
+                    <table className="w-full border-separate border-spacing-0">
                       <thead>
                         <tr className="text-left text-xs font-semibold uppercase tracking-[0.05em] text-text-muted">
                           <th className="border-b border-app-border px-2 py-2">Date</th>
@@ -565,7 +581,7 @@ export default function MoneyCenter({
                             Amount
                           </th>
                           <th className="border-b border-app-border px-2 py-2">Status</th>
-                          <th className="border-b border-app-border px-2 py-2 text-right">
+                          <th className="w-[56px] border-b border-app-border px-1 py-2 text-right">
                             Actions
                           </th>
                         </tr>
@@ -588,22 +604,22 @@ export default function MoneyCenter({
                             const status = depositValue ? "Received" : "Not deposited yet";
                             return (
                               <tr key={entryId} className="text-sm text-text-main">
-                                <td className="border-b border-app-border px-2 py-3">
+                                <td className="whitespace-nowrap border-b border-app-border px-2 py-2.5">
                                   {entry.entryDate}
                                 </td>
-                                <td className="border-b border-app-border px-2 py-3">
+                                <td className="border-b border-app-border px-2 py-2.5">
                                   {source?.name ?? "Unlinked"}
                                 </td>
-                                <td className="border-b border-app-border px-2 py-3">
+                                <td className="whitespace-nowrap border-b border-app-border px-2 py-2.5">
                                   {getOwnerLabel(entry.ownerProfileId, ownerLabelById)}
                                 </td>
-                                <td className="border-b border-app-border px-2 py-3">
+                                <td className="max-w-[200px] border-b border-app-border px-2 py-2.5 text-xs leading-5 text-text-soft sm:text-sm sm:text-text-main">
                                   {getDepositAccountLabel(depositValue, accountOptions)}
                                 </td>
-                                <td className="border-b border-app-border px-2 py-3 text-right font-semibold text-status-successDark">
+                                <td className="whitespace-nowrap border-b border-app-border px-2 py-2.5 text-right font-semibold text-status-successDark">
                                   {formatCurrency(entry.amount)}
                                 </td>
-                                <td className="border-b border-app-border px-2 py-3">
+                                <td className="border-b border-app-border px-2 py-2.5">
                                   <span
                                     className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
                                       status === "Received"
@@ -614,7 +630,7 @@ export default function MoneyCenter({
                                     {status}
                                   </span>
                                 </td>
-                                <td className="relative border-b border-app-border px-2 py-3 text-right">
+                                <td className="relative border-b border-app-border px-1 py-2.5 text-right">
                                   <button
                                     type="button"
                                     className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-app-surface hover:bg-app-muted"
@@ -769,7 +785,13 @@ export default function MoneyCenter({
 
           <Card ref={accountsSectionRef} className="overflow-hidden">
             <div className="border-b border-app-border p-5">
-              <h3 className="text-xl font-semibold text-text-main">Tracked accounts</h3>
+              <h3 className="flex items-center gap-1.5 text-xl font-semibold text-text-main">
+                Tracked accounts
+                <InfoTooltip
+                  label="Tracked accounts calculation info"
+                  content="Tracked accounts are used for Cash Position. Snapshots remain your actual balance record."
+                />
+              </h3>
               <p className="mt-1 text-sm text-text-muted">
                 Tracked accounts are used for Cash Position. Snapshots remain your actual balance
                 record.
@@ -895,7 +917,13 @@ export default function MoneyCenter({
 
           <Card className="overflow-hidden">
             <div className="border-b border-app-border p-5">
-              <h3 className="text-xl font-semibold text-text-main">Income and cash trend</h3>
+              <h3 className="flex items-center gap-1.5 text-xl font-semibold text-text-main">
+                Income and cash trend
+                <InfoTooltip
+                  label="Income and cash trend calculation info"
+                  content="Compares received income and tracked cash position over recent months."
+                />
+              </h3>
             </div>
             <div className="grid gap-5 p-4 lg:grid-cols-[minmax(0,1fr)_240px]">
               <div>
@@ -988,8 +1016,13 @@ export default function MoneyCenter({
 
           <Card className="overflow-hidden">
             <div className="flex items-center justify-between border-b border-app-border p-5">
-              <h3 className="text-lg font-semibold text-text-main">Needs update</h3>
-              <CircleAlert size={15} className="text-text-muted" />
+              <h3 className="flex items-center gap-1.5 text-lg font-semibold text-text-main">
+                Needs update
+                <InfoTooltip
+                  label="Needs update calculation info"
+                  content="Accounts that may need a fresh balance snapshot."
+                />
+              </h3>
             </div>
             <div className="grid gap-2 p-4">
               {needsUpdateRows.length === 0 ? (
@@ -1031,7 +1064,13 @@ export default function MoneyCenter({
 
           <Card className="overflow-hidden">
             <div className="border-b border-app-border p-5">
-              <h3 className="text-lg font-semibold text-text-main">Financial position</h3>
+              <h3 className="flex items-center gap-1.5 text-lg font-semibold text-text-main">
+                Financial position
+                <InfoTooltip
+                  label="Financial position calculation info"
+                  content="Cash assets minus tracked debts and liabilities."
+                />
+              </h3>
             </div>
             <div className="grid gap-2 p-4 text-sm">
               <SummaryLine label="Cash assets" value={financialSummary.liquidCashTotal} />
@@ -1541,7 +1580,7 @@ function ModalShell({ open, title, onClose, isSaving, children }) {
   );
 }
 
-function SummaryMetricCard({ title, value, helper, icon, tone = "soft" }) {
+function SummaryMetricCard({ title, value, helper, icon, tone = "soft", infoContent = "" }) {
   const iconToneClass =
     tone === "good"
       ? "bg-status-successBg text-status-successDark"
@@ -1554,8 +1593,15 @@ function SummaryMetricCard({ title, value, helper, icon, tone = "soft" }) {
     <Card className="p-4">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="text-sm font-semibold text-text-main">{title}</p>
-          <p className="mt-2 text-4xl font-semibold tracking-tight text-text-main">{value}</p>
+          <p className="flex items-center gap-1.5 text-sm font-semibold text-text-main">
+            {title}
+            {infoContent ? (
+              <InfoTooltip label={`${title} calculation info`} content={infoContent} />
+            ) : null}
+          </p>
+          <p className="mt-2 text-2xl font-semibold tracking-tight text-text-main sm:text-3xl">
+            {value}
+          </p>
           <p className="mt-1 text-sm text-text-muted">{helper}</p>
         </div>
         <span
