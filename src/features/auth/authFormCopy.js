@@ -1,9 +1,11 @@
 export const AUTH_FORM_STATUS_COPY = {
   signUpConfirmation: "Account created. Check your email to confirm your address and finish setup.",
-  passwordResetRequested: "Check your email for a password reset link.",
+  passwordResetRequested: "Check your email. You can request another link in 60 seconds.",
   submitting: "Working...",
   sendingResetLink: "Sending reset link...",
 };
+
+export const RESET_EMAIL_COOLDOWN_SECONDS = 60;
 
 export const AUTH_FORM_MODES = {
   signIn: "sign-in",

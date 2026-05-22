@@ -8,6 +8,7 @@ import { getFriendlyAuthError } from "../authErrors.js";
 import {
   AUTH_FORM_MODES,
   AUTH_FORM_STATUS_COPY,
+  RESET_EMAIL_COOLDOWN_SECONDS,
   getAuthFormCopy,
   getNextAuthFormMode,
   getPasswordAutocomplete,
@@ -35,6 +36,7 @@ export default function AuthForm({
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSendingResetLink, setIsSendingResetLink] = useState(false);
+  const [resetCooldownSecondsRemaining, setResetCooldownSecondsRemaining] = useState(0);
 
   const isSignUp = isSignUpAuthFormMode(mode);
   const isResetRequest = isResetRequestAuthFormMode(mode);
@@ -48,12 +50,29 @@ export default function AuthForm({
   const passwordToggleLabel = showPassword ? "Hide password" : "Show password";
   const hasAuthFormError = Boolean(error);
   const isFormBusy = isSubmitting || isSendingResetLink;
+  const isResetCooldownActive = isResetRequest && resetCooldownSecondsRemaining > 0;
+
+  const resetRequestSubmitLabel = isResetCooldownActive
+    ? `Send another link in ${resetCooldownSecondsRemaining}s`
+    : modeCopy.submitLabel;
 
   useEffect(() => {
     const postAuthStatus = consumePostAuthMessage?.();
     if (!postAuthStatus) return;
     setStatus(postAuthStatus);
   }, [consumePostAuthMessage]);
+
+  useEffect(() => {
+    if (resetCooldownSecondsRemaining <= 0) return undefined;
+
+    const timerId = window.setInterval(() => {
+      setResetCooldownSecondsRemaining((currentSecondsRemaining) =>
+        currentSecondsRemaining <= 1 ? 0 : currentSecondsRemaining - 1,
+      );
+    }, 1000);
+
+    return () => window.clearInterval(timerId);
+  }, [resetCooldownSecondsRemaining]);
 
   useEffect(() => {
     if (!recoveryLinkError) return;
@@ -103,6 +122,7 @@ export default function AuthForm({
     setMode(AUTH_FORM_MODES.signIn);
     setPassword("");
     setShowPassword(false);
+    setResetCooldownSecondsRemaining(0);
     resetAuthFormFeedback();
   }
 
@@ -119,6 +139,8 @@ export default function AuthForm({
   }
 
   async function handlePasswordResetRequest() {
+    if (isResetCooldownActive) return;
+
     resetAuthFormFeedback();
 
     const normalizedEmail = email.trim();
@@ -135,8 +157,14 @@ export default function AuthForm({
     try {
       await requestPasswordReset({ email: normalizedEmail });
       setStatus(AUTH_FORM_STATUS_COPY.passwordResetRequested);
+      setResetCooldownSecondsRemaining(RESET_EMAIL_COOLDOWN_SECONDS);
     } catch (currentError) {
-      setError(getFriendlyAuthError(currentError, "Could not send password reset email."));
+      setError(
+        getFriendlyAuthError(
+          currentError,
+          "Could not send reset email. Wait a moment and try again.",
+        ),
+      );
     } finally {
       setIsSendingResetLink(false);
     }
@@ -290,11 +318,14 @@ export default function AuthForm({
               </div>
             ) : null}
 
-            <Button type="submit" disabled={isFormBusy || !isSupabaseConfigured}>
+            <Button
+              type="submit"
+              disabled={isFormBusy || isResetCooldownActive || !isSupabaseConfigured}
+            >
               {isResetRequest
                 ? isSendingResetLink
                   ? AUTH_FORM_STATUS_COPY.sendingResetLink
-                  : modeCopy.submitLabel
+                  : resetRequestSubmitLabel
                 : isSubmitting
                   ? AUTH_FORM_STATUS_COPY.submitting
                   : modeCopy.submitLabel}
