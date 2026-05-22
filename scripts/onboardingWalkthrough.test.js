@@ -56,8 +56,9 @@ test("walkthrough includes required step titles, controls, and navigation action
   assert.match(walkthroughSource, /onNavigate\?\.\(action\.view\)/);
   assert.match(walkthroughSource, /role="dialog"/);
   assert.match(walkthroughSource, /data-testid="onboarding-modal"/);
-  assert.match(walkthroughSource, /grid place-items-center/);
-  assert.match(walkthroughSource, /max-w-\[680px\]/);
+  assert.match(walkthroughSource, /flex items-center justify-center/);
+  assert.match(walkthroughSource, /max-w-\[40rem\]/);
+  assert.match(walkthroughSource, /max-h-\[calc\(100vh-2rem\)\]/);
   assert.match(walkthroughSource, /aria-label="Walkthrough progress"/);
   assert.match(walkthroughSource, /onboardingSteps\.map\(\(currentStep, index\)/);
 });
@@ -74,5 +75,10 @@ test("walkthrough helper copy uses onboarding language instead of location docum
   assert.match(walkthroughSource, /Suggested first step/);
   assert.match(walkthroughSource, /What to do here/);
   assert.match(walkthroughSource, /You can come back anytime/);
+  assert.match(walkthroughSource, /Use Spedger as your family finance command center/);
+  assert.match(
+    walkthroughSource,
+    /Add your tracked accounts and starting balance snapshots before relying on Cash Position\./,
+  );
   assert.doesNotMatch(walkthroughSource, /WHERE TO FIND THIS/);
 });

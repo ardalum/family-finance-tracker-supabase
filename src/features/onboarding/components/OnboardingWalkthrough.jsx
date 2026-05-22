@@ -12,7 +12,7 @@ const onboardingSteps = [
     primaryLabel: "Start walkthrough",
     helperTitle: "What you can do here",
     helperCopy:
-      "Spedger brings your household's income, accounts, bills, cards, budgets, and goals into one workspace.",
+      "Use Spedger as your family finance command center: track money coming in, what goes out, what is due, and what needs attention.",
     iconTone: "bg-[#EAF2FF] text-[#0A1F46]",
   },
   {
@@ -23,7 +23,7 @@ const onboardingSteps = [
     actions: [{ label: "Open Money Center", view: "financial-position" }],
     helperTitle: "Suggested first step",
     helperCopy:
-      "Add your tracked accounts and starting balance snapshots so Cash Position has a reliable baseline.",
+      "Add your tracked accounts and starting balance snapshots before relying on Cash Position.",
     iconTone: "bg-[#ECF3FF] text-[#0A1F46]",
   },
   {
@@ -33,7 +33,8 @@ const onboardingSteps = [
     icon: ArrowRight,
     actions: [{ label: "Open Transactions", view: "spending" }],
     helperTitle: "What to do here",
-    helperCopy: "Log everyday spending and income activity so budgets and insights stay accurate.",
+    helperCopy:
+      "Log everyday purchases, income activity, and account-based spending so Spedger can keep your monthly view accurate.",
     iconTone: "bg-[#FFF4E6] text-[#9A4F00]",
   },
   {
@@ -44,7 +45,7 @@ const onboardingSteps = [
     actions: [{ label: "Open Budgets", view: "budgets" }],
     helperTitle: "What to do here",
     helperCopy:
-      "Set category limits for the month, then compare your actual spending against your plan.",
+      "Create category limits for the month, then review which areas are on track, near limit, or over budget.",
     iconTone: "bg-[#EEF8F1] text-[#166534]",
   },
   {
@@ -58,7 +59,7 @@ const onboardingSteps = [
     ],
     helperTitle: "What to do here",
     helperCopy:
-      "Add recurring bills and cards so Spedger can help track due dates, balances, and payment status.",
+      "Use Bills for recurring obligations and Cards & Debt for card balances, due dates, and payment tracking.",
     iconTone: "bg-[#FFF6EB] text-[#9A4F00]",
   },
   {
@@ -71,7 +72,8 @@ const onboardingSteps = [
       { label: "Open Insights", view: "insights" },
     ],
     helperTitle: "What to do here",
-    helperCopy: "Track progress toward savings goals and review trends that need attention.",
+    helperCopy:
+      "Use Goals to track progress and Insights to review patterns that may need attention.",
     iconTone: "bg-[#ECF3FF] text-[#0A1F46]",
   },
   {
@@ -133,21 +135,24 @@ export default function OnboardingWalkthrough({ open, onClose, onFinish, onSkip,
   }
 
   return (
-    <div className="fixed inset-0 z-[90] grid place-items-center bg-[#F6F3EC]/70 p-3 backdrop-blur-[2px] sm:p-6">
+    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/20 p-4 backdrop-blur-[2px] sm:p-6">
       <Card
-        className="w-full max-w-[680px] overflow-hidden rounded-[24px] border-[#E8E2D6] bg-[#FBF8F2] shadow-[0_30px_90px_-40px_rgba(15,23,42,0.48)]"
+        className="w-full max-w-[40rem] overflow-hidden rounded-[24px] border-[#E8E2D6] bg-[#FBF8F2] shadow-[0_30px_90px_-40px_rgba(15,23,42,0.48)]"
         data-testid="onboarding-modal"
       >
         <div
           role="dialog"
           aria-modal="true"
           aria-labelledby={stepTitleId}
-          className="grid max-h-[88vh] grid-rows-[auto_auto_1fr_auto]"
+          className="grid max-h-[calc(100vh-2rem)] grid-rows-[auto_auto_1fr_auto]"
         >
           <div className="flex items-center justify-between px-5 pb-3 pt-5 sm:px-7 sm:pb-4 sm:pt-6">
-            <p className="text-sm font-semibold text-text-soft">
-              Step {progressValue} of {totalSteps}
-            </p>
+            <div className="grid gap-0.5">
+              <p className="text-sm font-semibold text-text-soft">
+                Step {progressValue} of {totalSteps}
+              </p>
+              <p className="text-xs font-medium text-text-muted">Spedger walkthrough</p>
+            </div>
             <button
               type="button"
               className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-text-soft transition hover:bg-app-muted hover:text-text-main"
