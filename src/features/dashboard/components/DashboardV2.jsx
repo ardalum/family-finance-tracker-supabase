@@ -13,7 +13,6 @@
   GraduationCap,
   Home,
   Palmtree,
-  Quote,
   Shield,
   Split,
   BarChart3,
@@ -29,12 +28,10 @@ const ACTIVE_VIEW_KEY = "personalFinanceApp:activeView:v1";
 
 const actionTargets = {
   "Add bill": { view: "recurring", target: "add-recurring" },
-  "Transfer money": { view: "accounts", target: "accounts-home" },
   "Add goal": { view: "savings", target: "monthly-savings" },
-  "Scan receipt": { view: "spending", target: "add-transaction" },
-  "Split expense": { view: "spending", target: "add-transaction" },
   "View reports": { view: "insights", target: "insights-home" },
 };
+const comingSoonActionLabels = new Set(["Transfer money", "Scan receipt", "Split expense"]);
 
 const actionIcons = {
   bill: FileText,
@@ -86,16 +83,9 @@ export default function DashboardV2({
               <div className="flex items-center justify-between border-b border-app-border p-5">
                 <div className="inline-flex items-center gap-2 text-base font-semibold text-text-main">
                   <CircleDollarSign size={18} aria-hidden="true" />
-                  Net Cash Flow
+                  Income vs Spending
                 </div>
-                <button
-                  className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary"
-                  type="button"
-                  onClick={() => navigateToView("insights", "insights-home")}
-                >
-                  View cash flow
-                  <ChevronRight size={14} aria-hidden="true" />
-                </button>
+                <span className="text-xs font-medium text-text-muted">This month</span>
               </div>
               <div className="grid gap-4 p-5">
                 {error ? (
@@ -111,6 +101,10 @@ export default function DashboardV2({
                     {formatCurrency(data.netCashFlow.amount)}
                   </p>
                   <p className="mt-1 text-sm text-text-muted">{data.netCashFlow.monthLabel}</p>
+                  <p className="mt-1 text-xs text-text-muted">
+                    Income minus spending this month. Uses income entries and transaction spending.
+                    It does not include account transfers or full cash-account movement.
+                  </p>
                   <p
                     className={`mt-1 text-sm font-semibold ${
                       data.netCashFlow.deltaPct >= 0
@@ -121,6 +115,30 @@ export default function DashboardV2({
                     {data.netCashFlow.deltaPct > 0 ? "+" : ""}
                     {data.netCashFlow.deltaPct}% {data.netCashFlow.comparisonLabel}
                   </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    className="inline-flex items-center gap-1 rounded-lg border border-app-border bg-app-surface px-3 py-1.5 text-sm font-semibold text-text-main hover:border-brand-primary/40"
+                    type="button"
+                    onClick={() => navigateToView("income")}
+                  >
+                    Add income
+                  </button>
+                  <button
+                    className="inline-flex items-center gap-1 rounded-lg border border-app-border bg-app-surface px-3 py-1.5 text-sm font-semibold text-text-main hover:border-brand-primary/40"
+                    type="button"
+                    onClick={() => navigateToView("spending", "add-transaction")}
+                  >
+                    Add transaction
+                  </button>
+                  <button
+                    className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary"
+                    type="button"
+                    onClick={() => navigateToView("insights", "insights-home")}
+                  >
+                    View insights
+                    <ChevronRight size={14} aria-hidden="true" />
+                  </button>
                 </div>
                 <div className="rounded-xl border border-app-border bg-app-surfaceSoft p-3">
                   {hasMonthlyTrend ? (
@@ -252,7 +270,7 @@ export default function DashboardV2({
                       {bill.type === "card" ? (
                         <div className="text-xs text-text-muted">
                           <p>Card payment</p>
-                          <p>ï¿½ï¿½ï¿½ï¿½ {bill.last4 || "0000"}</p>
+                          <p>**** {bill.last4 || "0000"}</p>
                         </div>
                       ) : (
                         <p className="text-xs text-text-muted">{bill.helper || "Recurring bill"}</p>
@@ -511,22 +529,24 @@ export default function DashboardV2({
           <Card className="overflow-hidden">
             <div className="flex items-center justify-between border-b border-app-border p-5">
               <h3 className="text-base font-semibold text-text-main">Family Note</h3>
+              <span className="rounded-full border border-app-border bg-app-surfaceSoft px-2.5 py-1 text-xs font-semibold text-text-muted">
+                Coming soon
+              </span>
+            </div>
+            <div className="grid gap-3 p-5">
+              <p className="text-sm text-text-muted">
+                Household dashboard notes are planned. This card will support a shared editable note
+                for your household.
+              </p>
               <button
                 type="button"
-                className="text-sm font-semibold text-text-muted"
-                title="Coming soon"
+                className="inline-flex w-fit items-center rounded-lg border border-app-border bg-app-surfaceSoft px-3 py-1.5 text-sm font-semibold text-text-muted"
+                title="Household notes are coming soon"
+                aria-label="Edit family note coming soon"
                 disabled
               >
-                Edit
+                Edit (coming soon)
               </button>
-            </div>
-            <div className="p-5">
-              <blockquote className="rounded-xl border border-[#F2DFC2] bg-[#FFF9F1] px-4 py-3 text-sm italic text-text-soft">
-                <Quote size={16} className="mb-2 text-[#D29B3D]" />"{data.familyNote.quote}"
-                <footer className="mt-2 text-xs font-semibold not-italic text-text-muted">
-                  - {data.familyNote.author}
-                </footer>
-              </blockquote>
             </div>
           </Card>
 
@@ -537,12 +557,20 @@ export default function DashboardV2({
             <div className="grid grid-cols-2 gap-2.5 p-4">
               {data.quickActions.map((action) => {
                 const Icon = actionIcons[action.icon] ?? Calendar;
+                const isComingSoon = comingSoonActionLabels.has(action.label);
                 return (
                   <button
                     key={action.label}
                     type="button"
-                    className="grid place-items-center gap-2 rounded-xl border border-app-border bg-app-surfaceSoft px-3 py-3 text-center transition hover:border-brand-primary/40 hover:bg-app-surface"
+                    className={`grid place-items-center gap-2 rounded-xl border px-3 py-3 text-center transition ${
+                      isComingSoon
+                        ? "cursor-not-allowed border-app-border bg-app-muted/35 opacity-70"
+                        : "border-app-border bg-app-surfaceSoft hover:border-brand-primary/40 hover:bg-app-surface"
+                    }`}
                     onClick={() => runAction(action.label)}
+                    disabled={isComingSoon}
+                    title={isComingSoon ? `${action.label} coming soon` : action.label}
+                    aria-label={isComingSoon ? `${action.label} coming soon` : action.label}
                   >
                     <Icon size={18} aria-hidden="true" className="text-text-soft" />
                     <span className="text-sm font-medium text-text-main">{action.label}</span>
@@ -627,6 +655,7 @@ function GoalIcon({ name = "" }) {
 }
 
 function runAction(label) {
+  if (comingSoonActionLabels.has(label)) return;
   const target = actionTargets[label];
   if (!target) return;
   navigateToView(target.view, target.target);

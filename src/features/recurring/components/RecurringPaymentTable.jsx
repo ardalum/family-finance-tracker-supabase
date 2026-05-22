@@ -88,7 +88,7 @@ export default function RecurringPaymentTable({
                         ) : null}
                       </div>
                       <p className="text-sm text-text-muted">
-                        {getCategoryName(template.categoryId, categories)} ï¿½{" "}
+                        {getCategoryName(template.categoryId, categories)} •{" "}
                         {template.billType === "fixed" ? "Fixed" : "Variable"}
                       </p>
                     </div>
@@ -205,8 +205,8 @@ export default function RecurringPaymentTable({
               <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-800">
                 <p className="font-semibold">{templatePendingDelete.name}</p>
                 <p className="mt-1">
-                  {formatCurrency(templatePendingDelete.estimatedAmount)} ï¿½ Day{" "}
-                  {templatePendingDelete.dueDay} ï¿½ {templatePendingDelete.paymentMethod}
+                  {formatCurrency(templatePendingDelete.estimatedAmount)} • Day{" "}
+                  {templatePendingDelete.dueDay} • {templatePendingDelete.paymentMethod}
                 </p>
               </div>
               <div className="flex flex-wrap justify-end gap-3">

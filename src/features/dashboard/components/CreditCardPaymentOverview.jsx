@@ -25,7 +25,7 @@ export default function CreditCardPaymentOverview({
           {Math.round(utilization)}%
         </p>
         <p className="text-sm text-text-muted">
-          Utilization ï¿½ {formatCurrency(totalUnpaid, { cents: true })} unpaid
+          Utilization • {formatCurrency(totalUnpaid, { cents: true })} unpaid
         </p>
         <div className="mt-3 h-2 overflow-hidden rounded-full bg-app-muted">
           <div

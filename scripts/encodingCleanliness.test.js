@@ -3,8 +3,8 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, it } from "node:test";
 
-const ROOTS = ["src", "docs", "README.md"];
-const BAD_PATTERNS = ["�", "â€™", "â€œ", "â€", "Ã", "Â"];
+const ROOTS = ["src", "scripts", "docs", "README.md"];
+const BAD_PATTERNS = ["\uFFFD", "\u00EF\u00BF\u00BD"];
 const SKIP_DIRS = new Set(["node_modules", "dist", ".git"]);
 
 function walk(path) {
