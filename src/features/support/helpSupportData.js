@@ -1,5 +1,5 @@
 export const helpSupportHero = {
-  title: "Help / Support",
+  title: "Help Center",
   description:
     "Use this page for plain-language Spedger guidance, troubleshooting notes, privacy-safe testing reminders, and support contact guidance.",
 };

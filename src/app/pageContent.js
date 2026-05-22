@@ -85,8 +85,8 @@ export const pageContent = {
     description: "Review the rules, responsibilities, and disclaimers for using Spedger.",
   },
   "help-support": {
-    title: "Help / Support",
-    description: "Get troubleshooting guidance, support notes, and contact information.",
+    title: "Help Center",
+    description: "Find answers, learn workflows, and get support for Spedger.",
   },
   "release-notes": {
     title: "Release Notes",
