@@ -49,7 +49,9 @@ export default function TransactionCard({
           <p className="text-xs font-medium text-text-muted">{transaction.date}</p>
         </div>
         <div className="shrink-0 text-right">
-          <p className={`text-lg font-semibold ${isIncome ? "text-status-successDark" : "text-text-main"}`}>
+          <p
+            className={`text-lg font-semibold ${isIncome ? "text-status-successDark" : "text-text-main"}`}
+          >
             {isIncome ? "+" : ""}
             {formatCurrency(transaction.amount)}
           </p>

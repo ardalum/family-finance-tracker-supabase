@@ -25,9 +25,16 @@ import ProgressBar from "../../../components/ui/ProgressBar.jsx";
 import Select from "../../../components/ui/Select.jsx";
 import { getCurrentMonthKey } from "../../../lib/dates.js";
 import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
-import { consumeNavigationTarget, dispatchNavigation, NAVIGATE_EVENT } from "../../../lib/navigationTargets.js";
+import {
+  consumeNavigationTarget,
+  dispatchNavigation,
+  NAVIGATE_EVENT,
+} from "../../../lib/navigationTargets.js";
 import { getDashboardData } from "../../dashboard/dashboardUtils.js";
-import { getTransactionCategoryRows, getTransactionImpactAmount } from "../../spending/spendingService.js";
+import {
+  getTransactionCategoryRows,
+  getTransactionImpactAmount,
+} from "../../spending/spendingService.js";
 import {
   calculateSharePercent,
   getActionableInsightCards,
@@ -213,13 +220,16 @@ export default function Insights({
     () => getDashboardData(appData, previousMonthKey),
     [appData, previousMonthKey],
   );
-  const spendingDelta = Number(data.summary.spendingTotal || 0) - Number(previousMonthData.summary.spendingTotal || 0);
-  const spendingDeltaPercent = Number(previousMonthData.summary.spendingTotal || 0) > 0
-    ? (spendingDelta / Number(previousMonthData.summary.spendingTotal || 1)) * 100
-    : null;
-  const budgetUsageRawPercent = Number(data.summary.budgetTotal || 0) > 0
-    ? (Number(data.summary.spendingTotal || 0) / Number(data.summary.budgetTotal || 1)) * 100
-    : 0;
+  const spendingDelta =
+    Number(data.summary.spendingTotal || 0) - Number(previousMonthData.summary.spendingTotal || 0);
+  const spendingDeltaPercent =
+    Number(previousMonthData.summary.spendingTotal || 0) > 0
+      ? (spendingDelta / Number(previousMonthData.summary.spendingTotal || 1)) * 100
+      : null;
+  const budgetUsageRawPercent =
+    Number(data.summary.budgetTotal || 0) > 0
+      ? (Number(data.summary.spendingTotal || 0) / Number(data.summary.budgetTotal || 1)) * 100
+      : 0;
   const budgetUsedPercent = Math.min(Math.max(budgetUsageRawPercent, 0), 100);
   const budgetBarTone =
     Number(data.summary.budgetTotal || 0) <= 0
@@ -229,13 +239,16 @@ export default function Insights({
         : budgetUsageRawPercent > 80
           ? "bg-status-warning"
           : "bg-status-success";
-  const budgetDeltaPercent = Number(previousMonthData.summary.budgetTotal || 0) > 0
-    ? budgetUsedPercent -
-      Math.min(
-        (Number(previousMonthData.summary.spendingTotal || 0) / Number(previousMonthData.summary.budgetTotal || 1)) * 100,
-        100,
-      )
-    : null;
+  const budgetDeltaPercent =
+    Number(previousMonthData.summary.budgetTotal || 0) > 0
+      ? budgetUsedPercent -
+        Math.min(
+          (Number(previousMonthData.summary.spendingTotal || 0) /
+            Number(previousMonthData.summary.budgetTotal || 1)) *
+            100,
+          100,
+        )
+      : null;
   const previousCategories = useMemo(
     () => getTopCategories(previousMonthData.chartData.spendingByCategory, 20),
     [previousMonthData.chartData.spendingByCategory],
@@ -313,10 +326,12 @@ export default function Insights({
   const activeDeepDiveCategory =
     selectedDeepDiveCategory && deepDiveOptions.includes(selectedDeepDiveCategory)
       ? selectedDeepDiveCategory
-      : deepDiveOptions[0] ?? "";
-  const deepDiveCategoryRow = spendingBreakdownRows.find((row) => row.label === activeDeepDiveCategory) ?? null;
+      : (deepDiveOptions[0] ?? "");
+  const deepDiveCategoryRow =
+    spendingBreakdownRows.find((row) => row.label === activeDeepDiveCategory) ?? null;
   const deepDiveCategoryPreviousValue = previousCategoryMap.get(activeDeepDiveCategory) ?? 0;
-  const deepDiveCategoryDelta = Number(deepDiveCategoryRow?.value || 0) - Number(deepDiveCategoryPreviousValue || 0);
+  const deepDiveCategoryDelta =
+    Number(deepDiveCategoryRow?.value || 0) - Number(deepDiveCategoryPreviousValue || 0);
   const deepDiveTrendRows = useMemo(
     () =>
       buildCategoryTrendRows({
@@ -325,7 +340,12 @@ export default function Insights({
         transactionsByMonth: appData.ytdTransactionsByMonth ?? {},
         budgetsByMonth: appData.ytdBudgetsByMonth ?? {},
       }),
-    [activeDeepDiveCategory, appData.ytdBudgetsByMonth, appData.ytdTransactionsByMonth, chartCurrentRows],
+    [
+      activeDeepDiveCategory,
+      appData.ytdBudgetsByMonth,
+      appData.ytdTransactionsByMonth,
+      chartCurrentRows,
+    ],
   );
   const spendingBreakdownTotal = spendingBreakdownRows.reduce((sum, row) => sum + row.value, 0);
   const categoryColors = ["#198754", "#7CB342", "#F59E0B", "#EF4444", "#5C6AC4", "#94A3B8"];
@@ -495,10 +515,15 @@ export default function Insights({
             </div>
           </div>
           <p className="mt-2 text-sm text-text-muted">
-            {formatCurrency(data.summary.spendingTotal || 0)} of {formatCurrency(data.summary.budgetTotal || 0)} budgeted
+            {formatCurrency(data.summary.spendingTotal || 0)} of{" "}
+            {formatCurrency(data.summary.budgetTotal || 0)} budgeted
           </p>
-          <p className={`mt-1 text-sm font-medium ${Number(budgetDeltaPercent || 0) <= 0 ? "text-status-success" : "text-status-warning"}`}>
-            {budgetDeltaPercent === null ? "No previous-month budget baseline" : `${budgetDeltaPercent > 0 ? "+" : ""}${budgetDeltaPercent.toFixed(0)}pp vs ${formatMonthLabel(previousMonthKey)}`}
+          <p
+            className={`mt-1 text-sm font-medium ${Number(budgetDeltaPercent || 0) <= 0 ? "text-status-success" : "text-status-warning"}`}
+          >
+            {budgetDeltaPercent === null
+              ? "No previous-month budget baseline"
+              : `${budgetDeltaPercent > 0 ? "+" : ""}${budgetDeltaPercent.toFixed(0)}pp vs ${formatMonthLabel(previousMonthKey)}`}
           </p>
         </Card>
 
@@ -507,7 +532,9 @@ export default function Insights({
             Category change <Info size={13} className="text-text-muted" />
           </p>
           <p className="mt-2 text-3xl font-semibold tracking-tight text-[#071F42]">
-            {topCategoryChange ? `${topCategoryChange.delta >= 0 ? "+" : ""}${formatCurrency(topCategoryChange.delta)}` : formatCurrency(0)}
+            {topCategoryChange
+              ? `${topCategoryChange.delta >= 0 ? "+" : ""}${formatCurrency(topCategoryChange.delta)}`
+              : formatCurrency(0)}
           </p>
           <p
             className={`text-sm ${
@@ -523,7 +550,9 @@ export default function Insights({
               : "No category comparison yet"}
           </p>
           <p className="mt-8 text-sm text-text-muted">
-            {topCategoryChange ? `Top change: ${topCategoryChange.label} (${topCategoryChange.formattedValue})` : "Add more monthly spending history"}
+            {topCategoryChange
+              ? `Top change: ${topCategoryChange.label} (${topCategoryChange.formattedValue})`
+              : "Add more monthly spending history"}
           </p>
         </Card>
 
@@ -580,19 +609,31 @@ export default function Insights({
                   <span className="text-right">% of total</span>
                 </div>
                 {spendingBreakdownRows.map((row, index) => (
-                  <div key={`breakdown-${row.id}`} className="grid grid-cols-[minmax(0,1fr)_110px_80px] items-center gap-3 text-sm">
+                  <div
+                    key={`breakdown-${row.id}`}
+                    className="grid grid-cols-[minmax(0,1fr)_110px_80px] items-center gap-3 text-sm"
+                  >
                     <p className="inline-flex min-w-0 items-center gap-2 text-text-main">
-                      <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: categoryColors[index % categoryColors.length] }} />
+                      <span
+                        className="h-2.5 w-2.5 rounded-full"
+                        style={{ backgroundColor: categoryColors[index % categoryColors.length] }}
+                      />
                       <span className="truncate">{row.label}</span>
                     </p>
-                    <p className="text-right font-medium text-[#071F42]">{formatCurrency(row.value)}</p>
-                    <p className="text-right font-medium text-text-muted">{calculateSharePercent(row.value, spendingBreakdownTotal).toFixed(0)}%</p>
+                    <p className="text-right font-medium text-[#071F42]">
+                      {formatCurrency(row.value)}
+                    </p>
+                    <p className="text-right font-medium text-text-muted">
+                      {calculateSharePercent(row.value, spendingBreakdownTotal).toFixed(0)}%
+                    </p>
                   </div>
                 ))}
                 <div className="mt-2 border-t border-app-border pt-2">
                   <div className="grid grid-cols-[minmax(0,1fr)_110px_80px] items-center gap-3 text-sm font-semibold text-[#071F42]">
                     <span>Total</span>
-                    <span className="text-right">{formatCurrency(Number(data.summary.spendingTotal || 0))}</span>
+                    <span className="text-right">
+                      {formatCurrency(Number(data.summary.spendingTotal || 0))}
+                    </span>
                     <span className="text-right">100%</span>
                   </div>
                 </div>
@@ -606,8 +647,14 @@ export default function Insights({
             Spending over time <Info size={15} className="text-text-muted" />
           </h3>
           <div className="mt-3 inline-flex items-center gap-4 text-sm">
-            <span className="inline-flex items-center gap-1 text-[#071F42]"><span className="h-0.5 w-6 bg-[#102A63]" />This year</span>
-            <span className="inline-flex items-center gap-1 text-text-muted"><span className="h-0.5 w-6 border-t border-dashed border-text-muted" />Last year</span>
+            <span className="inline-flex items-center gap-1 text-[#071F42]">
+              <span className="h-0.5 w-6 bg-[#102A63]" />
+              This year
+            </span>
+            <span className="inline-flex items-center gap-1 text-text-muted">
+              <span className="h-0.5 w-6 border-t border-dashed border-text-muted" />
+              Last year
+            </span>
           </div>
           <DualLineMiniChart currentRows={chartCurrentRows} previousRows={chartPreviousRows} />
           <div className="mt-4 border-t border-app-border pt-3">
@@ -615,13 +662,23 @@ export default function Insights({
             <div className="mt-1 flex items-end gap-6">
               <div>
                 <p className="text-2xl font-semibold text-[#071F42]">
-                  {formatCurrency(chartCurrentRows.length ? chartCurrentRows.reduce((sum, row) => sum + row.value, 0) / chartCurrentRows.length : 0)}
+                  {formatCurrency(
+                    chartCurrentRows.length
+                      ? chartCurrentRows.reduce((sum, row) => sum + row.value, 0) /
+                          chartCurrentRows.length
+                      : 0,
+                  )}
                 </p>
                 <p className="text-xs text-text-muted">This year</p>
               </div>
               <div>
                 <p className="text-2xl font-semibold text-[#667085]">
-                  {formatCurrency(chartPreviousRows.length ? chartPreviousRows.reduce((sum, row) => sum + row.value, 0) / chartPreviousRows.length : 0)}
+                  {formatCurrency(
+                    chartPreviousRows.length
+                      ? chartPreviousRows.reduce((sum, row) => sum + row.value, 0) /
+                          chartPreviousRows.length
+                      : 0,
+                  )}
                 </p>
                 <p className="text-xs text-text-muted">Last year</p>
               </div>
@@ -644,17 +701,49 @@ export default function Insights({
               <thead className="bg-app-background text-text-muted">
                 <tr>
                   <th className="px-2 py-2 text-left text-xs font-medium">Metric</th>
-                  <th className="px-2 py-2 text-right text-xs font-medium">{formatMonthLabel(previousMonthKey)}</th>
-                  <th className="px-2 py-2 text-right text-xs font-medium">{formatMonthLabel(selectedMonth)}</th>
+                  <th className="px-2 py-2 text-right text-xs font-medium">
+                    {formatMonthLabel(previousMonthKey)}
+                  </th>
+                  <th className="px-2 py-2 text-right text-xs font-medium">
+                    {formatMonthLabel(selectedMonth)}
+                  </th>
                   <th className="px-2 py-2 text-right text-xs font-medium">Change</th>
                 </tr>
               </thead>
               <tbody>
-                <ComparisonRow label="Total spending" current={Number(data.summary.spendingTotal || 0)} previous={Number(previousMonthData.summary.spendingTotal || 0)} trend="lower-better" />
-                <ComparisonRow label="Needs" current={groupCategorySpend.needs} previous={previousGroupCategorySpend.needs} trend="lower-better" />
-                <ComparisonRow label="Wants" current={groupCategorySpend.wants} previous={previousGroupCategorySpend.wants} trend="lower-better" />
-                <ComparisonRow label="Savings & Investments" current={groupCategorySpend.savings} previous={previousGroupCategorySpend.savings} trend="higher-better" />
-                <ComparisonRow label="Net cash flow" current={netCashFlow} previous={Number(previousMonthData.summary.incomeTotal || 0) - Number(previousMonthData.summary.spendingTotal || 0)} trend="higher-better" />
+                <ComparisonRow
+                  label="Total spending"
+                  current={Number(data.summary.spendingTotal || 0)}
+                  previous={Number(previousMonthData.summary.spendingTotal || 0)}
+                  trend="lower-better"
+                />
+                <ComparisonRow
+                  label="Needs"
+                  current={groupCategorySpend.needs}
+                  previous={previousGroupCategorySpend.needs}
+                  trend="lower-better"
+                />
+                <ComparisonRow
+                  label="Wants"
+                  current={groupCategorySpend.wants}
+                  previous={previousGroupCategorySpend.wants}
+                  trend="lower-better"
+                />
+                <ComparisonRow
+                  label="Savings & Investments"
+                  current={groupCategorySpend.savings}
+                  previous={previousGroupCategorySpend.savings}
+                  trend="higher-better"
+                />
+                <ComparisonRow
+                  label="Net cash flow"
+                  current={netCashFlow}
+                  previous={
+                    Number(previousMonthData.summary.incomeTotal || 0) -
+                    Number(previousMonthData.summary.spendingTotal || 0)
+                  }
+                  trend="higher-better"
+                />
               </tbody>
             </table>
           </div>
@@ -662,10 +751,16 @@ export default function Insights({
       </section>
 
       <section className="grid gap-3">
-        <h3 className="text-2xl font-semibold tracking-tight text-[#071F42]">Top insights this month</h3>
+        <h3 className="text-2xl font-semibold tracking-tight text-[#071F42]">
+          Top insights this month
+        </h3>
         <div className="grid gap-4 xl:grid-cols-3">
           {latestInsightCards.map((card, index) => (
-            <TopInsightCard key={card.id} card={card} tone={index === 0 ? "positive" : index === 1 ? "warning" : "attention"} />
+            <TopInsightCard
+              key={card.id}
+              card={card}
+              tone={index === 0 ? "positive" : index === 1 ? "warning" : "attention"}
+            />
           ))}
         </div>
       </section>
@@ -696,8 +791,14 @@ export default function Insights({
                   </Select>
                 </div>
                 <div className="mt-3 grid gap-2 sm:grid-cols-3 xl:grid-cols-1">
-                  <MetricPill label="This month" value={formatCurrency(deepDiveCategoryRow?.value || 0)} />
-                  <MetricPill label={`vs ${formatMonthLabel(previousMonthKey)}`} value={formatCurrency(deepDiveCategoryPreviousValue || 0)} />
+                  <MetricPill
+                    label="This month"
+                    value={formatCurrency(deepDiveCategoryRow?.value || 0)}
+                  />
+                  <MetricPill
+                    label={`vs ${formatMonthLabel(previousMonthKey)}`}
+                    value={formatCurrency(deepDiveCategoryPreviousValue || 0)}
+                  />
                   <MetricPill
                     label="Change"
                     value={`${deepDiveCategoryDelta >= 0 ? "+" : ""}${formatCurrency(deepDiveCategoryDelta)}`}
@@ -729,7 +830,9 @@ export default function Insights({
             </div>
           ) : (
             <div className="mt-4 flex items-center gap-4">
-              <SavingsRateRing percent={Math.max(0, Math.round((netCashFlow / incomeTotal) * 100))} />
+              <SavingsRateRing
+                percent={Math.max(0, Math.round((netCashFlow / incomeTotal) * 100))}
+              />
               <div>
                 <p className="text-3xl font-semibold tracking-tight text-[#071F42]">
                   {formatCurrency(Math.max(netCashFlow, 0))}
@@ -744,428 +847,447 @@ export default function Insights({
         </Card>
       </section>
       <div ref={detailedReportsRef} tabIndex={-1} className="outline-none">
-      <Card className="rounded-2xl border border-app-border bg-white p-4">
-        <button
-          type="button"
-          className="text-sm font-semibold text-brand-primary"
-          onClick={() => setShowDetailedReports((current) => !current)}
-        >
-          {showDetailedReports ? "Hide detailed reports" : "Show detailed reports"}
-        </button>
-        {showDetailedReports ? (
-          <div className="mt-4 grid gap-6">
-
-      <section className="grid gap-6 xl:grid-cols-2">
-        <Card className="overflow-hidden">
-          <SectionHeader
-            title="Actionable Insights"
-            description="Rule-based recommendations from this month and YTD trend context."
-          />
-          <div className="grid gap-3 p-5">
-            {actionableCards.map((card) => (
-              <ActionableInsightCard key={card.id} card={card} />
-            ))}
-          </div>
-        </Card>
-
-        <Card>
-          <SectionHeader
-            title="Spending Composition"
-            description="Category composition with a ranked list for fast pattern recognition."
-          />
-          <div className="grid gap-5 p-5">
-            <div className="mx-auto w-full max-w-xl">
-              <DonutChart
-                data={categoryRows.map((row) => ({ label: row.label, value: row.value }))}
-                valueLabel="Category spend"
-                showLegend={false}
-                showPercentInTooltip
-                emptyMessage="No category spending for this month."
-              />
-            </div>
-            <CategoryCompositionList rows={categoryRows} />
-          </div>
-        </Card>
-      </section>
-
-      <section className="grid gap-6 xl:grid-cols-2">
-        <Card>
-          <SectionHeader
-            title="Monthly Spending Trend"
-            description="Month-by-month YTD spending totals for quick trend reading."
-          />
-          {monthlyTrendRows.length === 0 ? (
-            <EmptyPanel message="Add transactions to unlock monthly spending trend." />
-          ) : (
-            <div className="grid gap-4 p-5">
-              <LineTrendChart
-                data={monthlyTrendRows}
-                lineKey="value"
-                lineName="Monthly spending"
-                xKey="label"
-                emptyMessage="No monthly trend data."
-              />
-              <VerticalBarChart
-                data={monthlyTrendRows}
-                dataKey="value"
-                dataName="Monthly spending"
-                xKey="label"
-                emptyMessage="No monthly bar data."
-              />
-            </div>
-          )}
-        </Card>
-
-        <Card>
-          <SectionHeader
-            title="Budget vs Actual"
-            description="Top categories compared by budget and tracked spending."
-          />
-          {budgetVsActualRows.length === 0 ? (
-            <EmptyPanel message="No budget comparison data for this month." />
-          ) : (
-            <div className="grid gap-3 p-5">
-              <StackedBarChart
-                data={budgetVsActualRows}
-                xKey="label"
-                stackAKey="budget"
-                stackAName="Budget"
-                stackBKey="spent"
-                stackBName="Spent"
-                emptyMessage="No budget vs actual chart data."
-              />
-              <BudgetStatusList rows={budgetVsActualRows} />
-            </div>
-          )}
-        </Card>
-      </section>
-
-      <section className="grid gap-6 xl:grid-cols-2">
-        <Card>
-          <SectionHeader
-            title="Merchant Concentration"
-            description="Top merchants with share and transaction-count context."
-          />
-          <div className="grid gap-4 p-5">
-            <HorizontalBarChart
-              title="Top merchants"
-              description="Merchant spending bars with amount and transaction counts"
-              items={merchantRows}
-              valueLabel="Net spending"
-              emptyMessage="No merchant spending for this month."
-            />
-            <MerchantConcentrationCard
-              topMerchant={merchantRows[0] ?? null}
-              spendingTotal={Number(data.summary.spendingTotal || 0)}
-            />
-          </div>
-        </Card>
-
-        <Card>
-          <SectionHeader
-            title="Transaction Type Mix"
-            description="Entered amount and net spending impact by transaction type."
-          />
-          {transactionTypeRows.length === 0 ? (
-            <EmptyPanel message="No transactions for this month." />
-          ) : (
-            <div className="grid gap-3 p-5">
-              {transactionTypeRows.map((row) => (
-                <TransactionTypeMixRow key={row.type} row={row} rows={transactionTypeRows} />
-              ))}
-            </div>
-          )}
-        </Card>
-      </section>
-
-      <section className="grid gap-6">
-        <Card>
-          <SectionHeader
-            title="YTD Review"
-            description="Year-to-date reporting from January through the selected month using currently tracked transactions."
-          />
-          <div className="grid gap-5 p-5">
-            {!ytdData.hasData ? (
-              <EmptyState
-                title="No YTD spending data yet."
-                description="YTD reporting appears after transactions are added for the year."
-              />
-            ) : (
-              <>
-                <YtdSummaryCards ytdData={ytdData} />
-                {ytdData.isPartialYear ? (
-                  <p className="text-xs text-text-muted">
-                    YTD is based on tracked data from January through the selected month.
-                  </p>
-                ) : null}
-                <div className="grid gap-6 xl:grid-cols-3">
-                  <div className="xl:col-span-1">
-                    <h4 className="mb-2 text-sm font-semibold text-text-main">
-                      YTD Spending by Month
-                    </h4>
-                    <HorizontalBarChart
-                      title="YTD Spending by Month"
-                      description="Year-to-date month-by-month spending totals"
-                      items={ytdData.ytdSpendingByMonth.map((row) => ({
-                        id: row.monthKey,
-                        label: row.label,
-                        value: row.value,
-                        formattedValue: row.formattedValue,
-                      }))}
-                      valueLabel="Net spending"
-                      emptyMessage="No YTD month data."
-                      maxItems={12}
-                    />
+        <Card className="rounded-2xl border border-app-border bg-white p-4">
+          <button
+            type="button"
+            className="text-sm font-semibold text-brand-primary"
+            onClick={() => setShowDetailedReports((current) => !current)}
+          >
+            {showDetailedReports ? "Hide detailed reports" : "Show detailed reports"}
+          </button>
+          {showDetailedReports ? (
+            <div className="mt-4 grid gap-6">
+              <section className="grid gap-6 xl:grid-cols-2">
+                <Card className="overflow-hidden">
+                  <SectionHeader
+                    title="Actionable Insights"
+                    description="Rule-based recommendations from this month and YTD trend context."
+                  />
+                  <div className="grid gap-3 p-5">
+                    {actionableCards.map((card) => (
+                      <ActionableInsightCard key={card.id} card={card} />
+                    ))}
                   </div>
-                  <div className="xl:col-span-1">
-                    <h4 className="mb-2 text-sm font-semibold text-text-main">
-                      YTD Spending by Category
-                    </h4>
-                    <HorizontalBarChart
-                      title="YTD Spending by Category"
-                      description="Year-to-date category totals"
-                      items={ytdData.ytdSpendingByCategory}
-                      valueLabel="Net spending"
-                      emptyMessage="No YTD category spending yet."
-                    />
-                  </div>
-                  <div className="xl:col-span-1">
-                    <h4 className="mb-2 text-sm font-semibold text-text-main">Top Merchants YTD</h4>
-                    <HorizontalBarChart
-                      title="Top Merchants YTD"
-                      description="Year-to-date top merchant spending totals"
-                      items={ytdData.ytdTopMerchants}
-                      valueLabel="Net spending"
-                      emptyMessage="No YTD merchant spending yet."
-                    />
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        </Card>
-      </section>
+                </Card>
 
-      <section className="grid gap-6">
-        <Card>
-          <SectionHeader
-            title="Year-over-Year"
-            description="Comparison with the same month and same YTD period from the previous year."
-          />
-          <div className="grid gap-5 p-5">
-            {!yearComparison.hasPreviousYearData ? (
-              <EmptyState description="Previous-year comparison will appear once you have tracked data for the same period last year." />
-            ) : (
-              <>
-                {yearComparison.isPartialPreviousYear ? (
-                  <p className="text-xs text-text-muted">
-                    Comparison is based only on months with tracked data.
-                  </p>
-                ) : null}
-                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                  <ComparisonMetricCard
-                    label="This Month vs Last Year"
-                    currentLabel={yearComparison.selectedMonthComparison.labelCurrent}
-                    currentValue={yearComparison.selectedMonthComparison.formattedCurrent}
-                    previousLabel={yearComparison.selectedMonthComparison.labelPrevious}
-                    previousValue={yearComparison.selectedMonthComparison.formattedPrevious}
-                    delta={yearComparison.selectedMonthComparison.delta}
+                <Card>
+                  <SectionHeader
+                    title="Spending Composition"
+                    description="Category composition with a ranked list for fast pattern recognition."
                   />
-                  <ComparisonMetricCard
-                    label="YTD vs Prior YTD"
-                    currentLabel="Current YTD"
-                    currentValue={yearComparison.ytdComparison.formattedCurrent}
-                    previousLabel="Previous YTD"
-                    previousValue={yearComparison.ytdComparison.formattedPrevious}
-                    delta={yearComparison.ytdComparison.delta}
-                  />
-                  <ComparisonMetricCard
-                    label="Average Monthly Spending"
-                    currentLabel="Current YTD Avg"
-                    currentValue={yearComparison.averageComparison.formattedCurrent}
-                    previousLabel="Previous YTD Avg"
-                    previousValue={yearComparison.averageComparison.formattedPrevious}
-                    delta={yearComparison.averageComparison.delta}
-                  />
-                  <ComparisonTopCard
-                    label="Top Comparisons"
-                    topCategoryCurrent={yearComparison.topCategoryComparison.current}
-                    topCategoryPrevious={yearComparison.topCategoryComparison.previous}
-                    topMerchantCurrent={yearComparison.topMerchantComparison.current}
-                    topMerchantPrevious={yearComparison.topMerchantComparison.previous}
-                  />
-                </div>
-                <div className="grid gap-6 xl:grid-cols-2">
-                  <div>
-                    <h4 className="mb-2 text-sm font-semibold text-text-main">Category Deltas</h4>
-                    <HorizontalBarChart
-                      title="Category Deltas"
-                      description="Current YTD category spending values, with delta helper text versus prior YTD."
-                      items={yearComparison.categoryDeltas.map((row) => ({
-                        id: row.id,
-                        label: row.label,
-                        value: row.current,
-                        formattedValue: row.formattedCurrent,
-                        helperText: `Prev ${row.formattedPrevious} | Delta ${row.formattedDelta}`,
-                      }))}
-                      valueLabel="Current YTD"
-                      emptyMessage="No comparable category data yet."
-                    />
-                  </div>
-                  <div>
-                    <h4 className="mb-2 text-sm font-semibold text-text-main">Merchant Deltas</h4>
-                    <HorizontalBarChart
-                      title="Merchant Deltas"
-                      description="Current YTD merchant spending values, with delta helper text versus prior YTD."
-                      items={yearComparison.merchantDeltas.map((row) => ({
-                        id: row.id,
-                        label: row.label,
-                        value: row.current,
-                        formattedValue: row.formattedCurrent,
-                        helperText: `Prev ${row.formattedPrevious} | Delta ${row.formattedDelta}`,
-                      }))}
-                      valueLabel="Current YTD"
-                      emptyMessage="No comparable merchant data yet."
-                    />
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        </Card>
-      </section>
-
-      <section className="grid gap-6">
-        <Card>
-          <SectionHeader
-            title="Net Worth Trends"
-            description="Historical net worth from manual account and debt snapshots."
-          />
-          <div className="grid gap-5 p-5">
-            <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px] md:items-end">
-              <div>
-                <p className="text-sm text-text-muted">
-                  Net worth trends use manual account and debt snapshots.
-                </p>
-                <p className="mt-1 text-sm text-text-muted">
-                  Savings goals are not counted unless represented by account balance snapshots.
-                </p>
-                <p className="mt-1 text-sm text-text-muted">
-                  Credit card balances are not included unless entered as liability snapshots.
-                </p>
-                <p className="mt-1 text-sm text-text-muted">Missing months are shown as no data.</p>
-              </div>
-              <Select
-                label="Trend range"
-                value={netWorthRangeMonths}
-                onChange={(event) => setNetWorthRangeMonths(event.target.value)}
-              >
-                <option value="6">Last 6 months</option>
-                <option value="12">Last 12 months</option>
-              </Select>
-            </div>
-
-            {!hasAnyNetWorthSnapshots ? (
-              <EmptyState description="Net worth trends will appear after you add account and debt snapshots." />
-            ) : (
-              <>
-                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                  <SimpleMetricCard
-                    label="Current Net Worth"
-                    value={currentNetWorth}
-                    emptyLabel="No data"
-                  />
-                  <SimpleMetricCard
-                    label="Starting Net Worth"
-                    value={startingNetWorth}
-                    emptyLabel="No data"
-                  />
-                  <SimpleMetricCard
-                    label="Net Worth Change"
-                    value={netWorthChange}
-                    emptyLabel="Need 2+ months"
-                    helperText={
-                      netWorthTrendStatus === "up"
-                        ? "Improved over range"
-                        : netWorthTrendStatus === "down"
-                          ? "Declined over range"
-                          : netWorthTrendStatus === "flat"
-                            ? "No change over range"
-                            : "Add more monthly snapshots"
-                    }
-                  />
-                  <Card className="p-4">
-                    <p className="text-xs font-semibold uppercase tracking-normal text-text-muted">
-                      Best / Worst Month
-                    </p>
-                    <p className="mt-2 text-sm font-semibold text-text-main">
-                      {bestMonth
-                        ? `${formatMonthLabel(bestMonth.monthKey)} (${formatCurrency(bestMonth.netWorth)})`
-                        : "No data"}
-                    </p>
-                    <p className="mt-1 text-xs text-text-muted">
-                      {worstMonth
-                        ? `${formatMonthLabel(worstMonth.monthKey)} (${formatCurrency(worstMonth.netWorth)})`
-                        : "No data"}
-                    </p>
-                  </Card>
-                </div>
-
-                {netWorthMonthsWithData.length === 1 ? (
-                  <p className="text-sm text-text-muted">
-                    Add snapshots for more months to see a trend.
-                  </p>
-                ) : null}
-                {!hasAnyLiabilitySnapshots ? (
-                  <p className="text-sm text-text-muted">
-                    Liability snapshots are missing, so net worth may be incomplete without debt
-                    data.
-                  </p>
-                ) : null}
-
-                <div className="grid gap-6 xl:grid-cols-3">
-                  <div className="xl:col-span-2">
-                    <h4 className="mb-2 text-sm font-semibold text-text-main">
-                      Net Worth by Month
-                    </h4>
-                    <LineTrendChart
-                      data={netWorthTrendRows
-                        .filter((row) => row.hasData)
-                        .map((row) => ({ id: row.id, label: row.label, value: row.netWorth }))}
-                      lineKey="value"
-                      lineName="Net worth"
-                      xKey="label"
-                      emptyMessage="No net worth trend data yet."
-                    />
-                  </div>
-                  <div>
-                    <h4 className="mb-2 text-sm font-semibold text-text-main">Trend Breakdown</h4>
-                    <div className="grid gap-3">
-                      <TrendBreakdownRow
-                        label="Assets"
-                        current={assetTrend.current}
-                        start={assetTrend.start}
-                        change={assetTrend.change}
-                        status={assetTrend.status}
-                      />
-                      <TrendBreakdownRow
-                        label="Liabilities"
-                        current={liabilityTrend.current}
-                        start={liabilityTrend.start}
-                        change={liabilityTrend.change}
-                        status={liabilityTrend.status}
+                  <div className="grid gap-5 p-5">
+                    <div className="mx-auto w-full max-w-xl">
+                      <DonutChart
+                        data={categoryRows.map((row) => ({ label: row.label, value: row.value }))}
+                        valueLabel="Category spend"
+                        showLegend={false}
+                        showPercentInTooltip
+                        emptyMessage="No category spending for this month."
                       />
                     </div>
+                    <CategoryCompositionList rows={categoryRows} />
                   </div>
-                </div>
-              </>
-            )}
-          </div>
+                </Card>
+              </section>
+
+              <section className="grid gap-6 xl:grid-cols-2">
+                <Card>
+                  <SectionHeader
+                    title="Monthly Spending Trend"
+                    description="Month-by-month YTD spending totals for quick trend reading."
+                  />
+                  {monthlyTrendRows.length === 0 ? (
+                    <EmptyPanel message="Add transactions to unlock monthly spending trend." />
+                  ) : (
+                    <div className="grid gap-4 p-5">
+                      <LineTrendChart
+                        data={monthlyTrendRows}
+                        lineKey="value"
+                        lineName="Monthly spending"
+                        xKey="label"
+                        emptyMessage="No monthly trend data."
+                      />
+                      <VerticalBarChart
+                        data={monthlyTrendRows}
+                        dataKey="value"
+                        dataName="Monthly spending"
+                        xKey="label"
+                        emptyMessage="No monthly bar data."
+                      />
+                    </div>
+                  )}
+                </Card>
+
+                <Card>
+                  <SectionHeader
+                    title="Budget vs Actual"
+                    description="Top categories compared by budget and tracked spending."
+                  />
+                  {budgetVsActualRows.length === 0 ? (
+                    <EmptyPanel message="No budget comparison data for this month." />
+                  ) : (
+                    <div className="grid gap-3 p-5">
+                      <StackedBarChart
+                        data={budgetVsActualRows}
+                        xKey="label"
+                        stackAKey="budget"
+                        stackAName="Budget"
+                        stackBKey="spent"
+                        stackBName="Spent"
+                        emptyMessage="No budget vs actual chart data."
+                      />
+                      <BudgetStatusList rows={budgetVsActualRows} />
+                    </div>
+                  )}
+                </Card>
+              </section>
+
+              <section className="grid gap-6 xl:grid-cols-2">
+                <Card>
+                  <SectionHeader
+                    title="Merchant Concentration"
+                    description="Top merchants with share and transaction-count context."
+                  />
+                  <div className="grid gap-4 p-5">
+                    <HorizontalBarChart
+                      title="Top merchants"
+                      description="Merchant spending bars with amount and transaction counts"
+                      items={merchantRows}
+                      valueLabel="Net spending"
+                      emptyMessage="No merchant spending for this month."
+                    />
+                    <MerchantConcentrationCard
+                      topMerchant={merchantRows[0] ?? null}
+                      spendingTotal={Number(data.summary.spendingTotal || 0)}
+                    />
+                  </div>
+                </Card>
+
+                <Card>
+                  <SectionHeader
+                    title="Transaction Type Mix"
+                    description="Entered amount and net spending impact by transaction type."
+                  />
+                  {transactionTypeRows.length === 0 ? (
+                    <EmptyPanel message="No transactions for this month." />
+                  ) : (
+                    <div className="grid gap-3 p-5">
+                      {transactionTypeRows.map((row) => (
+                        <TransactionTypeMixRow
+                          key={row.type}
+                          row={row}
+                          rows={transactionTypeRows}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </Card>
+              </section>
+
+              <section className="grid gap-6">
+                <Card>
+                  <SectionHeader
+                    title="YTD Review"
+                    description="Year-to-date reporting from January through the selected month using currently tracked transactions."
+                  />
+                  <div className="grid gap-5 p-5">
+                    {!ytdData.hasData ? (
+                      <EmptyState
+                        title="No YTD spending data yet."
+                        description="YTD reporting appears after transactions are added for the year."
+                      />
+                    ) : (
+                      <>
+                        <YtdSummaryCards ytdData={ytdData} />
+                        {ytdData.isPartialYear ? (
+                          <p className="text-xs text-text-muted">
+                            YTD is based on tracked data from January through the selected month.
+                          </p>
+                        ) : null}
+                        <div className="grid gap-6 xl:grid-cols-3">
+                          <div className="xl:col-span-1">
+                            <h4 className="mb-2 text-sm font-semibold text-text-main">
+                              YTD Spending by Month
+                            </h4>
+                            <HorizontalBarChart
+                              title="YTD Spending by Month"
+                              description="Year-to-date month-by-month spending totals"
+                              items={ytdData.ytdSpendingByMonth.map((row) => ({
+                                id: row.monthKey,
+                                label: row.label,
+                                value: row.value,
+                                formattedValue: row.formattedValue,
+                              }))}
+                              valueLabel="Net spending"
+                              emptyMessage="No YTD month data."
+                              maxItems={12}
+                            />
+                          </div>
+                          <div className="xl:col-span-1">
+                            <h4 className="mb-2 text-sm font-semibold text-text-main">
+                              YTD Spending by Category
+                            </h4>
+                            <HorizontalBarChart
+                              title="YTD Spending by Category"
+                              description="Year-to-date category totals"
+                              items={ytdData.ytdSpendingByCategory}
+                              valueLabel="Net spending"
+                              emptyMessage="No YTD category spending yet."
+                            />
+                          </div>
+                          <div className="xl:col-span-1">
+                            <h4 className="mb-2 text-sm font-semibold text-text-main">
+                              Top Merchants YTD
+                            </h4>
+                            <HorizontalBarChart
+                              title="Top Merchants YTD"
+                              description="Year-to-date top merchant spending totals"
+                              items={ytdData.ytdTopMerchants}
+                              valueLabel="Net spending"
+                              emptyMessage="No YTD merchant spending yet."
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </Card>
+              </section>
+
+              <section className="grid gap-6">
+                <Card>
+                  <SectionHeader
+                    title="Year-over-Year"
+                    description="Comparison with the same month and same YTD period from the previous year."
+                  />
+                  <div className="grid gap-5 p-5">
+                    {!yearComparison.hasPreviousYearData ? (
+                      <EmptyState description="Previous-year comparison will appear once you have tracked data for the same period last year." />
+                    ) : (
+                      <>
+                        {yearComparison.isPartialPreviousYear ? (
+                          <p className="text-xs text-text-muted">
+                            Comparison is based only on months with tracked data.
+                          </p>
+                        ) : null}
+                        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                          <ComparisonMetricCard
+                            label="This Month vs Last Year"
+                            currentLabel={yearComparison.selectedMonthComparison.labelCurrent}
+                            currentValue={yearComparison.selectedMonthComparison.formattedCurrent}
+                            previousLabel={yearComparison.selectedMonthComparison.labelPrevious}
+                            previousValue={yearComparison.selectedMonthComparison.formattedPrevious}
+                            delta={yearComparison.selectedMonthComparison.delta}
+                          />
+                          <ComparisonMetricCard
+                            label="YTD vs Prior YTD"
+                            currentLabel="Current YTD"
+                            currentValue={yearComparison.ytdComparison.formattedCurrent}
+                            previousLabel="Previous YTD"
+                            previousValue={yearComparison.ytdComparison.formattedPrevious}
+                            delta={yearComparison.ytdComparison.delta}
+                          />
+                          <ComparisonMetricCard
+                            label="Average Monthly Spending"
+                            currentLabel="Current YTD Avg"
+                            currentValue={yearComparison.averageComparison.formattedCurrent}
+                            previousLabel="Previous YTD Avg"
+                            previousValue={yearComparison.averageComparison.formattedPrevious}
+                            delta={yearComparison.averageComparison.delta}
+                          />
+                          <ComparisonTopCard
+                            label="Top Comparisons"
+                            topCategoryCurrent={yearComparison.topCategoryComparison.current}
+                            topCategoryPrevious={yearComparison.topCategoryComparison.previous}
+                            topMerchantCurrent={yearComparison.topMerchantComparison.current}
+                            topMerchantPrevious={yearComparison.topMerchantComparison.previous}
+                          />
+                        </div>
+                        <div className="grid gap-6 xl:grid-cols-2">
+                          <div>
+                            <h4 className="mb-2 text-sm font-semibold text-text-main">
+                              Category Deltas
+                            </h4>
+                            <HorizontalBarChart
+                              title="Category Deltas"
+                              description="Current YTD category spending values, with delta helper text versus prior YTD."
+                              items={yearComparison.categoryDeltas.map((row) => ({
+                                id: row.id,
+                                label: row.label,
+                                value: row.current,
+                                formattedValue: row.formattedCurrent,
+                                helperText: `Prev ${row.formattedPrevious} | Delta ${row.formattedDelta}`,
+                              }))}
+                              valueLabel="Current YTD"
+                              emptyMessage="No comparable category data yet."
+                            />
+                          </div>
+                          <div>
+                            <h4 className="mb-2 text-sm font-semibold text-text-main">
+                              Merchant Deltas
+                            </h4>
+                            <HorizontalBarChart
+                              title="Merchant Deltas"
+                              description="Current YTD merchant spending values, with delta helper text versus prior YTD."
+                              items={yearComparison.merchantDeltas.map((row) => ({
+                                id: row.id,
+                                label: row.label,
+                                value: row.current,
+                                formattedValue: row.formattedCurrent,
+                                helperText: `Prev ${row.formattedPrevious} | Delta ${row.formattedDelta}`,
+                              }))}
+                              valueLabel="Current YTD"
+                              emptyMessage="No comparable merchant data yet."
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </Card>
+              </section>
+
+              <section className="grid gap-6">
+                <Card>
+                  <SectionHeader
+                    title="Net Worth Trends"
+                    description="Historical net worth from manual account and debt snapshots."
+                  />
+                  <div className="grid gap-5 p-5">
+                    <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px] md:items-end">
+                      <div>
+                        <p className="text-sm text-text-muted">
+                          Net worth trends use manual account and debt snapshots.
+                        </p>
+                        <p className="mt-1 text-sm text-text-muted">
+                          Savings goals are not counted unless represented by account balance
+                          snapshots.
+                        </p>
+                        <p className="mt-1 text-sm text-text-muted">
+                          Credit card balances are not included unless entered as liability
+                          snapshots.
+                        </p>
+                        <p className="mt-1 text-sm text-text-muted">
+                          Missing months are shown as no data.
+                        </p>
+                      </div>
+                      <Select
+                        label="Trend range"
+                        value={netWorthRangeMonths}
+                        onChange={(event) => setNetWorthRangeMonths(event.target.value)}
+                      >
+                        <option value="6">Last 6 months</option>
+                        <option value="12">Last 12 months</option>
+                      </Select>
+                    </div>
+
+                    {!hasAnyNetWorthSnapshots ? (
+                      <EmptyState description="Net worth trends will appear after you add account and debt snapshots." />
+                    ) : (
+                      <>
+                        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                          <SimpleMetricCard
+                            label="Current Net Worth"
+                            value={currentNetWorth}
+                            emptyLabel="No data"
+                          />
+                          <SimpleMetricCard
+                            label="Starting Net Worth"
+                            value={startingNetWorth}
+                            emptyLabel="No data"
+                          />
+                          <SimpleMetricCard
+                            label="Net Worth Change"
+                            value={netWorthChange}
+                            emptyLabel="Need 2+ months"
+                            helperText={
+                              netWorthTrendStatus === "up"
+                                ? "Improved over range"
+                                : netWorthTrendStatus === "down"
+                                  ? "Declined over range"
+                                  : netWorthTrendStatus === "flat"
+                                    ? "No change over range"
+                                    : "Add more monthly snapshots"
+                            }
+                          />
+                          <Card className="p-4">
+                            <p className="text-xs font-semibold uppercase tracking-normal text-text-muted">
+                              Best / Worst Month
+                            </p>
+                            <p className="mt-2 text-sm font-semibold text-text-main">
+                              {bestMonth
+                                ? `${formatMonthLabel(bestMonth.monthKey)} (${formatCurrency(bestMonth.netWorth)})`
+                                : "No data"}
+                            </p>
+                            <p className="mt-1 text-xs text-text-muted">
+                              {worstMonth
+                                ? `${formatMonthLabel(worstMonth.monthKey)} (${formatCurrency(worstMonth.netWorth)})`
+                                : "No data"}
+                            </p>
+                          </Card>
+                        </div>
+
+                        {netWorthMonthsWithData.length === 1 ? (
+                          <p className="text-sm text-text-muted">
+                            Add snapshots for more months to see a trend.
+                          </p>
+                        ) : null}
+                        {!hasAnyLiabilitySnapshots ? (
+                          <p className="text-sm text-text-muted">
+                            Liability snapshots are missing, so net worth may be incomplete without
+                            debt data.
+                          </p>
+                        ) : null}
+
+                        <div className="grid gap-6 xl:grid-cols-3">
+                          <div className="xl:col-span-2">
+                            <h4 className="mb-2 text-sm font-semibold text-text-main">
+                              Net Worth by Month
+                            </h4>
+                            <LineTrendChart
+                              data={netWorthTrendRows
+                                .filter((row) => row.hasData)
+                                .map((row) => ({
+                                  id: row.id,
+                                  label: row.label,
+                                  value: row.netWorth,
+                                }))}
+                              lineKey="value"
+                              lineName="Net worth"
+                              xKey="label"
+                              emptyMessage="No net worth trend data yet."
+                            />
+                          </div>
+                          <div>
+                            <h4 className="mb-2 text-sm font-semibold text-text-main">
+                              Trend Breakdown
+                            </h4>
+                            <div className="grid gap-3">
+                              <TrendBreakdownRow
+                                label="Assets"
+                                current={assetTrend.current}
+                                start={assetTrend.start}
+                                change={assetTrend.change}
+                                status={assetTrend.status}
+                              />
+                              <TrendBreakdownRow
+                                label="Liabilities"
+                                current={liabilityTrend.current}
+                                start={liabilityTrend.start}
+                                change={liabilityTrend.change}
+                                status={liabilityTrend.status}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </Card>
+              </section>
+            </div>
+          ) : null}
         </Card>
-      </section>
-          </div>
-        ) : null}
-      </Card>
       </div>
     </section>
   );
@@ -1201,7 +1323,13 @@ function Sparkline({ values, tone = "green" }) {
   return (
     <svg viewBox="0 0 100 100" className="mt-3 h-14 w-full">
       <line x1="0" y1="82" x2="100" y2="82" stroke="#E8E3D8" />
-      <polyline fill="none" stroke={stroke} strokeWidth="3" strokeLinejoin="round" points={chartPoints} />
+      <polyline
+        fill="none"
+        stroke={stroke}
+        strokeWidth="3"
+        strokeLinejoin="round"
+        points={chartPoints}
+      />
     </svg>
   );
 }
@@ -1268,7 +1396,12 @@ function DualLineMiniChart({ currentRows = [], previousRows = [] }) {
             points={buildPoints(previousRows)}
           />
         ) : null}
-        <polyline fill="none" stroke="#102A63" strokeWidth="2.5" points={buildPoints(currentRows)} />
+        <polyline
+          fill="none"
+          stroke="#102A63"
+          strokeWidth="2.5"
+          points={buildPoints(currentRows)}
+        />
         {currentRows.map((row, index) => {
           const x = (index / Math.max(currentRows.length - 1, 1)) * 100;
           const y = 100 - (Number(row.value || 0) / scaledMax) * 68 - 16;
@@ -1362,12 +1495,18 @@ function ComparisonRow({ label, previous, current, trend = "lower-better" }) {
         <span className="block truncate">{label}</span>
       </td>
       <td className="px-2 py-2 text-right font-medium text-[#071F42]">
-        <span className="block max-w-full truncate tabular-nums" title={formatCurrency(previous || 0)}>
+        <span
+          className="block max-w-full truncate tabular-nums"
+          title={formatCurrency(previous || 0)}
+        >
           {formatCompactCurrencyForTable(previous)}
         </span>
       </td>
       <td className="px-2 py-2 text-right font-medium text-[#071F42]">
-        <span className="block max-w-full truncate tabular-nums" title={formatCurrency(current || 0)}>
+        <span
+          className="block max-w-full truncate tabular-nums"
+          title={formatCurrency(current || 0)}
+        >
           {formatCompactCurrencyForTable(current)}
         </span>
       </td>
@@ -1410,7 +1549,9 @@ function TopInsightCard({ card, tone = "positive" }) {
   return (
     <Card className={`rounded-2xl border p-4 ${style.cardClass}`}>
       <div className="flex items-start gap-3">
-        <span className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${style.iconClass}`}>
+        <span
+          className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${style.iconClass}`}
+        >
           <Icon size={18} />
         </span>
         <div className="min-w-0">
@@ -1432,7 +1573,11 @@ function TopInsightCard({ card, tone = "positive" }) {
 
 function MetricPill({ label, value, tone = "neutral" }) {
   const toneClass =
-    tone === "danger" ? "text-status-danger" : tone === "success" ? "text-status-success" : "text-[#071F42]";
+    tone === "danger"
+      ? "text-status-danger"
+      : tone === "success"
+        ? "text-status-success"
+        : "text-[#071F42]";
   return (
     <div className="rounded-xl border border-app-border bg-app-background px-3 py-2">
       <p className="text-xs text-text-muted">{label}</p>
@@ -1819,5 +1964,3 @@ function TrendBreakdownRow({ label, current, start, change, status }) {
     </Card>
   );
 }
-
-

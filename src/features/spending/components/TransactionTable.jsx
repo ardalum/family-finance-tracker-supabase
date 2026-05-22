@@ -1,5 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CalendarDays, ChevronDown, ChevronLeft, ChevronRight, MoreHorizontal, RotateCcw } from "lucide-react";
+import {
+  CalendarDays,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  MoreHorizontal,
+  RotateCcw,
+} from "lucide-react";
 import Button from "../../../components/ui/Button.jsx";
 import Card from "../../../components/ui/Card.jsx";
 import EmptyState from "../../../components/ui/EmptyState.jsx";
@@ -317,7 +324,8 @@ export default function TransactionTable({
           <div>
             Showing <span className="font-semibold text-text-main">{pageStart}</span> to{" "}
             <span className="font-semibold text-text-main">{pageEnd}</span> of{" "}
-            <span className="font-semibold text-text-main">{filteredTransactions.length}</span> transactions
+            <span className="font-semibold text-text-main">{filteredTransactions.length}</span>{" "}
+            transactions
           </div>
           <div>
             Filtered spending impact:{" "}
@@ -466,12 +474,17 @@ export default function TransactionTable({
                             {isIncome ? "+" : ""}
                             {formatCurrency(amountValue)}
                           </p>
-                          <div className="relative flex justify-end" ref={menuOpen ? menuRef : null}>
+                          <div
+                            className="relative flex justify-end"
+                            ref={menuOpen ? menuRef : null}
+                          >
                             <button
                               type="button"
                               className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-app-surface text-text-main transition hover:bg-app-muted"
                               onClick={() =>
-                                setMenuOpenId((current) => (current === transaction.id ? null : transaction.id))
+                                setMenuOpenId((current) =>
+                                  current === transaction.id ? null : transaction.id,
+                                )
                               }
                               aria-label={`Open actions for ${transaction.merchant}`}
                             >

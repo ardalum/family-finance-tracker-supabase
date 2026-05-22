@@ -29,7 +29,11 @@ import {
   formatSavingsGoalTypeLabel,
 } from "../../../lib/displayLabels.js";
 import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
-import { consumeNavigationTarget, dispatchNavigation, NAVIGATE_EVENT } from "../../../lib/navigationTargets.js";
+import {
+  consumeNavigationTarget,
+  dispatchNavigation,
+  NAVIGATE_EVENT,
+} from "../../../lib/navigationTargets.js";
 import {
   buildSavingsGoalOptions,
   calculateGoalProgress,
@@ -64,13 +68,21 @@ function getGoalIconConfig(goal) {
   if (haystack.includes("vacation") || haystack.includes("travel") || haystack.includes("trip")) {
     return { icon: Palmtree, className: "bg-[#EAF8EF] text-[#1D8E4B]" };
   }
-  if (haystack.includes("college") || haystack.includes("education") || haystack.includes("school")) {
+  if (
+    haystack.includes("college") ||
+    haystack.includes("education") ||
+    haystack.includes("school")
+  ) {
     return { icon: GraduationCap, className: "bg-[#ECF3FF] text-[#2158B6]" };
   }
   if (haystack.includes("emergency") || haystack.includes("safety")) {
     return { icon: ShieldPlus, className: "bg-[#EAF8EF] text-[#1D8E4B]" };
   }
-  if (haystack.includes("home") || haystack.includes("house") || haystack.includes("down payment")) {
+  if (
+    haystack.includes("home") ||
+    haystack.includes("house") ||
+    haystack.includes("down payment")
+  ) {
     return { icon: Home, className: "bg-[#ECF3FF] text-[#0D2F6F]" };
   }
   if (haystack.includes("car") || haystack.includes("vehicle")) {
@@ -127,7 +139,8 @@ function getGoalStatus(goal, progressPercent) {
 
   if (daysToTarget <= 45 && progressPercent < 85) return "Behind";
   if (progressPercent + 20 < expectedPercent) return "Behind";
-  if (progressPercent + 8 < expectedPercent || (daysToTarget <= 90 && progressPercent < 70)) return "At risk";
+  if (progressPercent + 8 < expectedPercent || (daysToTarget <= 90 && progressPercent < 70))
+    return "At risk";
 
   return "On track";
 }
@@ -332,40 +345,44 @@ export default function Savings({
   );
 
   const goalRows = useMemo(() => {
-    return savingsGoals
-      .map((goal) => {
-        const goalId = goal.supabaseId ?? goal.id;
-        const saved = calculateTotalSavedForGoal(goal, savingsContributions);
-        const progress = calculateGoalProgress(goal, savingsContributions);
-        const targetAmount = Number(goal.targetAmount || 0);
-        const remaining = Math.max(targetAmount - saved, 0);
-        const rawPercent = Number(progress.percent || 0);
-        const percent = Math.max(0, Math.min(rawPercent, 100));
-        const status = getGoalStatus(goal, percent);
-        return {
-          id: goalId,
-          goal,
-          saved,
-          progress,
-          rawPercent,
-          percent,
-          status,
-          remaining,
-          helperText: getGoalHelperText(saved, targetAmount),
-        };
-      });
+    return savingsGoals.map((goal) => {
+      const goalId = goal.supabaseId ?? goal.id;
+      const saved = calculateTotalSavedForGoal(goal, savingsContributions);
+      const progress = calculateGoalProgress(goal, savingsContributions);
+      const targetAmount = Number(goal.targetAmount || 0);
+      const remaining = Math.max(targetAmount - saved, 0);
+      const rawPercent = Number(progress.percent || 0);
+      const percent = Math.max(0, Math.min(rawPercent, 100));
+      const status = getGoalStatus(goal, percent);
+      return {
+        id: goalId,
+        goal,
+        saved,
+        progress,
+        rawPercent,
+        percent,
+        status,
+        remaining,
+        helperText: getGoalHelperText(saved, targetAmount),
+      };
+    });
   }, [savingsContributions, savingsGoals]);
 
   const sortedGoalRows = useMemo(() => {
     const rows = [...goalRows];
     rows.sort((a, b) => {
       if (goalSortMode === "saved") return b.saved - a.saved;
-      if (goalSortMode === "target") return Number(b.goal.targetAmount || 0) - Number(a.goal.targetAmount || 0);
+      if (goalSortMode === "target")
+        return Number(b.goal.targetAmount || 0) - Number(a.goal.targetAmount || 0);
       if (goalSortMode === "remaining") return a.remaining - b.remaining;
       if (goalSortMode === "name") return a.goal.name.localeCompare(b.goal.name);
       if (goalSortMode === "target-date") {
-        const aDate = a.goal.targetDate ? new Date(`${a.goal.targetDate}T00:00:00`).getTime() : Number.MAX_SAFE_INTEGER;
-        const bDate = b.goal.targetDate ? new Date(`${b.goal.targetDate}T00:00:00`).getTime() : Number.MAX_SAFE_INTEGER;
+        const aDate = a.goal.targetDate
+          ? new Date(`${a.goal.targetDate}T00:00:00`).getTime()
+          : Number.MAX_SAFE_INTEGER;
+        const bDate = b.goal.targetDate
+          ? new Date(`${b.goal.targetDate}T00:00:00`).getTime()
+          : Number.MAX_SAFE_INTEGER;
         return aDate - bDate;
       }
       return b.percent - a.percent || b.saved - a.saved;
@@ -388,18 +405,20 @@ export default function Savings({
 
   const recentContributions = useMemo(() => {
     return [...savingsContributions]
-      .sort((a, b) => String(b.contributionDate || "").localeCompare(String(a.contributionDate || "")))
+      .sort((a, b) =>
+        String(b.contributionDate || "").localeCompare(String(a.contributionDate || "")),
+      )
       .slice(0, 5)
       .map((contribution) => {
-      const goal = savingsGoals.find(
-        (item) => (item.supabaseId ?? item.id) === contribution.savingsGoalId,
-      );
-      return {
-        contribution,
-        goal: goal || { name: "Savings goal", goalType: "general" },
-        goalName: goal?.name || "Savings goal",
-      };
-    });
+        const goal = savingsGoals.find(
+          (item) => (item.supabaseId ?? item.id) === contribution.savingsGoalId,
+        );
+        return {
+          contribution,
+          goal: goal || { name: "Savings goal", goalType: "general" },
+          goalName: goal?.name || "Savings goal",
+        };
+      });
   }, [savingsContributions, savingsGoals]);
 
   const milestones = useMemo(() => {
@@ -438,7 +457,10 @@ export default function Savings({
   }, [goalRows]);
 
   const onTrackOrCompleteCount = useMemo(
-    () => activeGoals.filter((goalRow) => goalRow.status === "On track" || goalRow.status === "Complete").length,
+    () =>
+      activeGoals.filter(
+        (goalRow) => goalRow.status === "On track" || goalRow.status === "Complete",
+      ).length,
     [activeGoals],
   );
 
@@ -485,7 +507,9 @@ export default function Savings({
         tone: "text-[#1D8E4B]",
       };
     }
-    const deltaPercent = Math.round(((monthSavingsTotal - previousMonthTotal) / previousMonthTotal) * 100);
+    const deltaPercent = Math.round(
+      ((monthSavingsTotal - previousMonthTotal) / previousMonthTotal) * 100,
+    );
     const sign = deltaPercent > 0 ? "+" : "";
     return {
       text: `${sign}${deltaPercent}% vs ${formatMonthLabel(previousMonthKey)}`,
@@ -589,7 +613,7 @@ export default function Savings({
         </Button>
       </div>
 
-      {(showGoalForm || editingGoalId) ? (
+      {showGoalForm || editingGoalId ? (
         <Card ref={addGoalRef} className="rounded-2xl border border-app-border bg-white p-5">
           <h3 className="text-base font-semibold text-text-main">
             {editingGoalId ? "Edit goal" : "Add goal"}
@@ -801,7 +825,8 @@ export default function Savings({
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold text-text-main">{goalName}</p>
                       <p className="truncate text-xs text-text-muted">
-                        {formatContributionDate(contribution.contributionDate)} • {formatCurrency(contribution.amount)}
+                        {formatContributionDate(contribution.contributionDate)} •{" "}
+                        {formatCurrency(contribution.amount)}
                       </p>
                     </div>
                     <div className="flex shrink-0 gap-2">
@@ -817,7 +842,9 @@ export default function Savings({
                         type="button"
                         variant="danger"
                         className="min-h-8 px-2.5 py-1 text-xs"
-                        onClick={() => handleDeleteContribution(contribution.supabaseId ?? contribution.id)}
+                        onClick={() =>
+                          handleDeleteContribution(contribution.supabaseId ?? contribution.id)
+                        }
                       >
                         Delete
                       </Button>
@@ -907,18 +934,25 @@ export default function Savings({
                           ? "bg-[#DC2626]"
                           : "bg-[#1D8E4B]";
                     return (
-                      <div key={row.id} className="border-b border-app-border px-4 py-3 last:border-b-0">
+                      <div
+                        key={row.id}
+                        className="border-b border-app-border px-4 py-3 last:border-b-0"
+                      >
                         <div className="grid min-w-0 items-center gap-3 [grid-template-columns:minmax(220px,1.5fr)_minmax(90px,.65fr)_minmax(90px,.65fr)_minmax(180px,1fr)_minmax(130px,.75fr)_44px]">
                           <div className="flex min-w-0 items-start gap-3">
                             <GoalIconBadge goal={row.goal} />
                             <div className="min-w-0">
-                              <p className="truncate text-base font-semibold text-text-main">{row.goal.name}</p>
+                              <p className="truncate text-base font-semibold text-text-main">
+                                {row.goal.name}
+                              </p>
                               <p className="truncate text-sm text-text-muted">
                                 {row.goal.notes || formatSavingsGoalTypeLabel(row.goal.goalType)}
                               </p>
                             </div>
                           </div>
-                          <p className="min-w-0 text-sm font-semibold text-text-main">{formatCurrency(row.saved)}</p>
+                          <p className="min-w-0 text-sm font-semibold text-text-main">
+                            {formatCurrency(row.saved)}
+                          </p>
                           <p className="min-w-0 text-sm font-semibold text-text-main">
                             {formatCurrency(row.goal.targetAmount || 0)}
                           </p>
@@ -933,13 +967,17 @@ export default function Savings({
                           </div>
                           <div className="min-w-0">
                             <GoalStatusBadge goal={{ ...row.goal, percent, status: row.status }} />
-                            <p className="mt-1 truncate text-xs text-text-muted">{row.helperText}</p>
+                            <p className="mt-1 truncate text-xs text-text-muted">
+                              {row.helperText}
+                            </p>
                           </div>
                           <div className="relative text-right">
                             <button
                               type="button"
                               className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-text-soft"
-                              onClick={() => setOpenGoalMenuId((current) => (current === row.id ? "" : row.id))}
+                              onClick={() =>
+                                setOpenGoalMenuId((current) => (current === row.id ? "" : row.id))
+                              }
                             >
                               <MoreHorizontal size={16} />
                             </button>
@@ -965,7 +1003,10 @@ export default function Savings({
                                     );
                                     setOpenGoalMenuId("");
                                     requestAnimationFrame(() =>
-                                      addGoalRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+                                      addGoalRef.current?.scrollIntoView({
+                                        behavior: "smooth",
+                                        block: "start",
+                                      }),
                                     );
                                   }}
                                 >
@@ -1122,9 +1163,7 @@ export default function Savings({
                     <div className="absolute inset-0 grid grid-cols-12 items-end gap-2">
                       {trendRows.rows.map((row, index) => {
                         const heightPercent =
-                          row.value > 0
-                            ? Math.max((row.value / trendScaleMax) * 100, 10)
-                            : 2;
+                          row.value > 0 ? Math.max((row.value / trendScaleMax) * 100, 10) : 2;
                         return (
                           <div key={row.monthKey} className="flex h-full w-full items-end">
                             <div
@@ -1157,7 +1196,9 @@ export default function Savings({
                 </div>
               </div>
               <div className="rounded-xl border border-app-border bg-app-background p-3 lg:max-w-[155px]">
-                <p className="text-sm font-medium text-text-muted">{formatMonthLabel(selectedMonth)}</p>
+                <p className="text-sm font-medium text-text-muted">
+                  {formatMonthLabel(selectedMonth)}
+                </p>
                 <p className="mt-1 text-2xl font-semibold tracking-tight text-[#1D8E4B]">
                   {formatCurrency(monthSavingsTotal)}
                 </p>
@@ -1191,7 +1232,10 @@ export default function Savings({
                 recentContributions.map(({ contribution, goal, goalName }) => {
                   const contributionId = contribution.supabaseId ?? contribution.id;
                   return (
-                    <div key={contributionId} className="border-b border-app-border/80 pb-2 last:border-b-0 last:pb-0">
+                    <div
+                      key={contributionId}
+                      className="border-b border-app-border/80 pb-2 last:border-b-0 last:pb-0"
+                    >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex min-w-0 items-start gap-2.5">
                           <GoalIconBadge goal={goal} />
@@ -1217,7 +1261,9 @@ export default function Savings({
 
           <Card className="rounded-2xl border border-app-border bg-white p-4 shadow-sm">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold tracking-tight text-[#071F42]">Upcoming milestones</h3>
+              <h3 className="text-lg font-semibold tracking-tight text-[#071F42]">
+                Upcoming milestones
+              </h3>
               <button
                 type="button"
                 onClick={() => setGoalSortMode("target-date")}
@@ -1238,12 +1284,16 @@ export default function Savings({
                     <div className="flex items-start gap-2.5">
                       <GoalIconBadge goal={milestone.goal} />
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-text-main">{milestone.name}</p>
+                        <p className="truncate text-sm font-semibold text-text-main">
+                          {milestone.name}
+                        </p>
                         <p className="text-xs text-text-muted">{milestone.milestoneLabel}</p>
                       </div>
                     </div>
                     <div className="mt-1 flex items-center justify-between text-xs">
-                      <span className="text-text-muted">{milestone.targetDate || "No target date"}</span>
+                      <span className="text-text-muted">
+                        {milestone.targetDate || "No target date"}
+                      </span>
                       <span className="font-semibold text-text-main">
                         {formatCurrency(milestone.milestoneAmount)}
                       </span>
@@ -1259,7 +1309,9 @@ export default function Savings({
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#FFF1DC] text-[#D97706]">
                 <Sun size={16} />
               </span>
-              <h3 className="text-lg font-semibold tracking-tight text-[#071F42]">Great progress!</h3>
+              <h3 className="text-lg font-semibold tracking-tight text-[#071F42]">
+                Great progress!
+              </h3>
             </div>
             <p className="mt-2 text-sm text-[#667085]">
               {activeGoals.length
@@ -1279,7 +1331,9 @@ export default function Savings({
       </div>
 
       {savingsGoals.length === 0 && savingsContributions.length === 0 && !loading ? (
-        <EmptyState>Add goals and contributions to start tracking your savings progress.</EmptyState>
+        <EmptyState>
+          Add goals and contributions to start tracking your savings progress.
+        </EmptyState>
       ) : null}
     </section>
   );

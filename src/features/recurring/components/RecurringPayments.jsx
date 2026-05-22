@@ -28,7 +28,11 @@ import LinkedRecurringBillName from "../../../components/shared/LinkedRecurringB
 import InlineAlert from "../../../components/ui/InlineAlert.jsx";
 import LoadingMessage from "../../../components/ui/LoadingMessage.jsx";
 import { formatCurrency, formatMonthLabel } from "../../../lib/formatters.js";
-import { consumeNavigationTarget, dispatchNavigation, NAVIGATE_EVENT } from "../../../lib/navigationTargets.js";
+import {
+  consumeNavigationTarget,
+  dispatchNavigation,
+  NAVIGATE_EVENT,
+} from "../../../lib/navigationTargets.js";
 import { buildCashAccountOptions } from "../../accounts/accountsService.js";
 import {
   buildCardPaymentDraft,
@@ -38,9 +42,15 @@ import {
 import CardPaymentModal from "../../creditCards/components/CardPaymentModal.jsx";
 import { getRowStatus } from "../../creditCards/creditCardStatus.js";
 import { getMonthlyBalanceDisplayRow } from "../../creditCards/monthlyBalanceDisplay.js";
-import { CARD_PAYMENT_OUTSIDE_ACCOUNT, getStatementUnpaidAmount } from "../../creditCards/statementPaymentUtils.js";
+import {
+  CARD_PAYMENT_OUTSIDE_ACCOUNT,
+  getStatementUnpaidAmount,
+} from "../../creditCards/statementPaymentUtils.js";
 import { LIQUID_ACCOUNT_TYPES } from "../../spending/spendingService.js";
-import { buildRecurringPaidDraft, RECURRING_PAID_FROM_CREDIT_CARD } from "../recurringPaymentFlow.js";
+import {
+  buildRecurringPaidDraft,
+  RECURRING_PAID_FROM_CREDIT_CARD,
+} from "../recurringPaymentFlow.js";
 import { getMonthlyRecurringRows } from "../recurringService.js";
 import RecurringPaymentForm from "./RecurringPaymentForm.jsx";
 import RecurringPaymentModal from "./RecurringPaymentModal.jsx";
@@ -84,7 +94,8 @@ function statusGroup(label) {
 }
 function badgeClass(label) {
   if (label === "Past due") return "bg-[#FEECEC] text-[#DC2626] ring-[#FECACA]";
-  if (label === "Due soon" || label === "Due now") return "bg-[#FFF4E5] text-[#EA7A0A] ring-[#FCD9B0]";
+  if (label === "Due soon" || label === "Due now")
+    return "bg-[#FFF4E5] text-[#EA7A0A] ring-[#FCD9B0]";
   if (label === "Paid") return "bg-[#EAF8EF] text-[#1D8E4B] ring-[#BFE9CD]";
   return "bg-[#EEF2FF] text-[#3559C7] ring-[#D9E3FF]";
 }
@@ -133,7 +144,9 @@ function buildCalendarCells(monthKey) {
 }
 
 function shiftMonth(monthKey, delta) {
-  const [year, month] = String(monthKey || "").split("-").map(Number);
+  const [year, month] = String(monthKey || "")
+    .split("-")
+    .map(Number);
   const shifted = new Date(year, month - 1 + delta, 1);
   return `${shifted.getFullYear()}-${String(shifted.getMonth() + 1).padStart(2, "0")}`;
 }
@@ -226,26 +239,29 @@ export default function RecurringPayments({
   }, []);
 
   const recurringRows = useMemo(() => {
-    return getMonthlyRecurringRows(recurringPayments, selectedMonth, recurringStatusByMonth).map((row) => {
-      const categoryName =
-        categories.find((category) => category.id === row.template.categoryId)?.name || "Uncategorized";
-      const dueDate = parseDateKey(row.dueDate);
-      return {
-        id: `rec-${row.template.id}`,
-        sourceType: "recurring",
-        row,
-        billName: row.template.name,
-        subtitle: row.template.notes || row.template.paymentMethod || "",
-        dueDate,
-        dueDateKey: row.dueDate,
-        amount: Number(row.amount || 0),
-        category: categoryName,
-        accountLabel: row.template.paymentMethod || "-",
-        autopayEnabled: Boolean(row.template.autopayEnabled),
-        statusLabel: row.displayStatus,
-        statusGroup: statusGroup(row.displayStatus),
-      };
-    });
+    return getMonthlyRecurringRows(recurringPayments, selectedMonth, recurringStatusByMonth).map(
+      (row) => {
+        const categoryName =
+          categories.find((category) => category.id === row.template.categoryId)?.name ||
+          "Uncategorized";
+        const dueDate = parseDateKey(row.dueDate);
+        return {
+          id: `rec-${row.template.id}`,
+          sourceType: "recurring",
+          row,
+          billName: row.template.name,
+          subtitle: row.template.notes || row.template.paymentMethod || "",
+          dueDate,
+          dueDateKey: row.dueDate,
+          amount: Number(row.amount || 0),
+          category: categoryName,
+          accountLabel: row.template.paymentMethod || "-",
+          autopayEnabled: Boolean(row.template.autopayEnabled),
+          statusLabel: row.displayStatus,
+          statusGroup: statusGroup(row.displayStatus),
+        };
+      },
+    );
   }, [categories, recurringPayments, recurringStatusByMonth, selectedMonth]);
 
   const cardRows = useMemo(() => {
@@ -280,7 +296,9 @@ export default function RecurringPayments({
   const summary = useMemo(() => {
     const total = rows.reduce((sum, row) => sum + row.amount, 0);
     const paid = rows.filter((row) => row.statusGroup === "Paid");
-    const upcoming = rows.filter((row) => row.statusGroup === "Due soon" || row.statusGroup === "Upcoming");
+    const upcoming = rows.filter(
+      (row) => row.statusGroup === "Due soon" || row.statusGroup === "Upcoming",
+    );
     const pastDue = rows.filter((row) => row.statusGroup === "Past due");
     return {
       total,
@@ -348,7 +366,8 @@ export default function RecurringPayments({
       }
       const current = map.get(row.dueDateKey);
       if (row.statusGroup === "Past due") map.set(row.dueDateKey, "Past due");
-      else if (row.statusGroup === "Due soon" && current !== "Past due") map.set(row.dueDateKey, "Due soon");
+      else if (row.statusGroup === "Due soon" && current !== "Past due")
+        map.set(row.dueDateKey, "Due soon");
     });
     return map;
   }, [rows]);
@@ -455,270 +474,586 @@ export default function RecurringPayments({
       {monthlyBalancesError ? <InlineAlert>{monthlyBalancesError}</InlineAlert> : null}
 
       <div className="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <SummaryCard label="Monthly bills total" value={formatCurrency(summary.total, { cents: true })} helper={`Across ${summary.totalCount} bills`} icon={<FileText size={18} />} iconTone="soft-green" />
-          <SummaryCard label="Paid" value={formatCurrency(summary.paidTotal, { cents: true })} helper={`${summary.paidCount} bills`} icon={<CheckCircle2 size={18} />} iconTone="solid-green" />
-          <SummaryCard label="Upcoming" value={formatCurrency(summary.upcomingTotal, { cents: true })} helper={`${summary.upcomingCount} bills`} icon={<Clock3 size={18} />} iconTone="solid-orange" />
-          <SummaryCard label="Past due" value={formatCurrency(summary.pastDueTotal, { cents: true })} helper={`${summary.pastDueCount} bills`} icon={<AlertTriangle size={18} />} iconTone="solid-red" />
+        <SummaryCard
+          label="Monthly bills total"
+          value={formatCurrency(summary.total, { cents: true })}
+          helper={`Across ${summary.totalCount} bills`}
+          icon={<FileText size={18} />}
+          iconTone="soft-green"
+        />
+        <SummaryCard
+          label="Paid"
+          value={formatCurrency(summary.paidTotal, { cents: true })}
+          helper={`${summary.paidCount} bills`}
+          icon={<CheckCircle2 size={18} />}
+          iconTone="solid-green"
+        />
+        <SummaryCard
+          label="Upcoming"
+          value={formatCurrency(summary.upcomingTotal, { cents: true })}
+          helper={`${summary.upcomingCount} bills`}
+          icon={<Clock3 size={18} />}
+          iconTone="solid-orange"
+        />
+        <SummaryCard
+          label="Past due"
+          value={formatCurrency(summary.pastDueTotal, { cents: true })}
+          helper={`${summary.pastDueCount} bills`}
+          icon={<AlertTriangle size={18} />}
+          iconTone="solid-red"
+        />
       </div>
 
       <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
-      <section className="min-w-0 rounded-2xl border border-app-border bg-white shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-app-border px-4 py-4 sm:px-5">
-          <div className="inline-flex flex-wrap items-center gap-1 rounded-xl bg-app-background p-1">
-            {TABS.map(([id, label]) => (
-              <button key={id} type="button" onClick={() => setActiveTab(id)} className={`inline-flex h-9 items-center rounded-lg px-3 text-sm font-semibold ${activeTab === id ? "bg-white text-text-main shadow-sm ring-1 ring-app-border" : "text-text-soft"}`}>{label}</button>
-            ))}
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <button type="button" onClick={() => setShowFilters((current) => !current)} className="inline-flex h-10 items-center gap-2 rounded-xl border border-app-border bg-white px-3 text-sm font-semibold text-text-main"><Funnel size={15} />Filter</button>
-            <label className="inline-flex h-10 items-center gap-2 rounded-xl border border-app-border bg-white px-3 text-sm font-semibold text-text-main"><ArrowDownUp size={15} /><select value={sortMode} onChange={(event) => setSortMode(event.target.value)} className="border-0 bg-transparent text-sm font-semibold outline-none">{SORTS.map(([id, label]) => <option key={id} value={id}>{label}</option>)}</select></label>
-          </div>
-          {showFilters ? (
-            <div className="grid w-full gap-2 sm:grid-cols-2">
-              <select value={sourceFilter} onChange={(event) => setSourceFilter(event.target.value)} className="h-10 rounded-xl border border-app-border bg-app-surface px-3 text-sm text-text-main"><option value="all">All sources</option><option value="recurring">Recurring</option><option value="credit-card">Credit card</option></select>
-              <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="h-10 rounded-xl border border-app-border bg-app-surface px-3 text-sm text-text-main"><option value="all">All statuses</option><option value="Past due">Past due</option><option value="Due soon">Due soon</option><option value="Upcoming">Upcoming</option><option value="Paid">Paid</option></select>
+        <section className="min-w-0 rounded-2xl border border-app-border bg-white shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-app-border px-4 py-4 sm:px-5">
+            <div className="inline-flex flex-wrap items-center gap-1 rounded-xl bg-app-background p-1">
+              {TABS.map(([id, label]) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => setActiveTab(id)}
+                  className={`inline-flex h-9 items-center rounded-lg px-3 text-sm font-semibold ${activeTab === id ? "bg-white text-text-main shadow-sm ring-1 ring-app-border" : "text-text-soft"}`}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
-          ) : null}
-        </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowFilters((current) => !current)}
+                className="inline-flex h-10 items-center gap-2 rounded-xl border border-app-border bg-white px-3 text-sm font-semibold text-text-main"
+              >
+                <Funnel size={15} />
+                Filter
+              </button>
+              <label className="inline-flex h-10 items-center gap-2 rounded-xl border border-app-border bg-white px-3 text-sm font-semibold text-text-main">
+                <ArrowDownUp size={15} />
+                <select
+                  value={sortMode}
+                  onChange={(event) => setSortMode(event.target.value)}
+                  className="border-0 bg-transparent text-sm font-semibold outline-none"
+                >
+                  {SORTS.map(([id, label]) => (
+                    <option key={id} value={id}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            {showFilters ? (
+              <div className="grid w-full gap-2 sm:grid-cols-2">
+                <select
+                  value={sourceFilter}
+                  onChange={(event) => setSourceFilter(event.target.value)}
+                  className="h-10 rounded-xl border border-app-border bg-app-surface px-3 text-sm text-text-main"
+                >
+                  <option value="all">All sources</option>
+                  <option value="recurring">Recurring</option>
+                  <option value="credit-card">Credit card</option>
+                </select>
+                <select
+                  value={statusFilter}
+                  onChange={(event) => setStatusFilter(event.target.value)}
+                  className="h-10 rounded-xl border border-app-border bg-app-surface px-3 text-sm text-text-main"
+                >
+                  <option value="all">All statuses</option>
+                  <option value="Past due">Past due</option>
+                  <option value="Due soon">Due soon</option>
+                  <option value="Upcoming">Upcoming</option>
+                  <option value="Paid">Paid</option>
+                </select>
+              </div>
+            ) : null}
+          </div>
 
-        <div className="hidden min-w-0 2xl:block">
-          <table className="w-full table-fixed border-collapse text-sm">
-            <thead><tr className="border-b border-app-border text-left text-xs font-semibold uppercase tracking-wide text-text-muted"><th className="w-[11%] px-3 py-3">Due date</th><th className="w-[25%] px-3 py-3">Bill</th><th className="w-[12%] px-3 py-3">Category</th><th className="w-[10%] px-3 py-3">Amount</th><th className="w-[15%] px-3 py-3">Account</th><th className="w-[8%] px-3 py-3">Auto-pay</th><th className="w-[11%] px-3 py-3">Status</th><th className="w-[8%] px-3 py-3 text-right">Actions</th></tr></thead>
-            <tbody>
-              {STATUS_GROUPS.map((group) => {
-                const rowsInGroup = groupedVisibleRows.get(group) ?? [];
-                if (!rowsInGroup.length) return null;
-                return (
-                  <Fragment key={`${group}-desktop`}>
-                    <tr>
-                      <td colSpan={8} className="px-3 pb-2 pt-4 text-sm font-semibold text-text-main">
-                        {group} ({groupedCounts.get(group) || 0})
-                      </td>
-                    </tr>
-                    {rowsInGroup.map((row) => (
-                      <tr key={row.id} className="border-b border-app-border align-middle last:border-b-0">
-                        <td className="px-3 py-2.5 text-sm text-text-main">
-                          <BillDatePill dueDate={row.dueDate} statusGroup={row.statusGroup} />
+          <div className="hidden min-w-0 2xl:block">
+            <table className="w-full table-fixed border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-app-border text-left text-xs font-semibold uppercase tracking-wide text-text-muted">
+                  <th className="w-[11%] px-3 py-3">Due date</th>
+                  <th className="w-[25%] px-3 py-3">Bill</th>
+                  <th className="w-[12%] px-3 py-3">Category</th>
+                  <th className="w-[10%] px-3 py-3">Amount</th>
+                  <th className="w-[15%] px-3 py-3">Account</th>
+                  <th className="w-[8%] px-3 py-3">Auto-pay</th>
+                  <th className="w-[11%] px-3 py-3">Status</th>
+                  <th className="w-[8%] px-3 py-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {STATUS_GROUPS.map((group) => {
+                  const rowsInGroup = groupedVisibleRows.get(group) ?? [];
+                  if (!rowsInGroup.length) return null;
+                  return (
+                    <Fragment key={`${group}-desktop`}>
+                      <tr>
+                        <td
+                          colSpan={8}
+                          className="px-3 pb-2 pt-4 text-sm font-semibold text-text-main"
+                        >
+                          {group} ({groupedCounts.get(group) || 0})
                         </td>
-                        <td className="px-3 py-2.5">
-                          <div className="flex items-start gap-2.5">
-                            <BillIconBadge row={row} />
-                            <div className="min-w-0">
-                              {row.sourceType === "recurring" ? <LinkedRecurringBillName billName={row.billName} portalUrl={row.row.template.portalUrl} showEditButton={false} /> : <LinkedCardName card={row.card} labelOptions={{ includeNetwork: false, includeLastFour: false }} />}
-                              {row.subtitle ? <p className="truncate text-xs text-text-muted">{row.subtitle}</p> : null}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="truncate px-3 py-2.5 text-sm text-text-main">{row.category}</td>
-                        <td className="px-3 py-2.5 text-sm font-semibold text-text-main">{formatCurrency(row.amount, { cents: true })}</td>
-                        <td className="truncate px-3 py-2.5 text-sm text-text-muted">{row.accountLabel || "-"}</td>
-                        <td className="px-3 py-2.5 text-sm text-text-main">
-                          <span className="inline-flex w-full justify-center text-text-muted">
-                            {row.autopayEnabled ? <RotateCcw size={14} /> : "-"}
-                          </span>
-                        </td>
-                        <td className="px-3 py-2.5"><StatusBadge label={row.statusLabel} /></td>
-                        <td className="px-3 py-2.5 text-right"><button type="button" className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-text-soft" onClick={(event) => openMenu(event, row.id)}><MoreHorizontal size={16} /></button></td>
                       </tr>
-                    ))}
-                  </Fragment>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                      {rowsInGroup.map((row) => (
+                        <tr
+                          key={row.id}
+                          className="border-b border-app-border align-middle last:border-b-0"
+                        >
+                          <td className="px-3 py-2.5 text-sm text-text-main">
+                            <BillDatePill dueDate={row.dueDate} statusGroup={row.statusGroup} />
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <div className="flex items-start gap-2.5">
+                              <BillIconBadge row={row} />
+                              <div className="min-w-0">
+                                {row.sourceType === "recurring" ? (
+                                  <LinkedRecurringBillName
+                                    billName={row.billName}
+                                    portalUrl={row.row.template.portalUrl}
+                                    showEditButton={false}
+                                  />
+                                ) : (
+                                  <LinkedCardName
+                                    card={row.card}
+                                    labelOptions={{ includeNetwork: false, includeLastFour: false }}
+                                  />
+                                )}
+                                {row.subtitle ? (
+                                  <p className="truncate text-xs text-text-muted">{row.subtitle}</p>
+                                ) : null}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="truncate px-3 py-2.5 text-sm text-text-main">
+                            {row.category}
+                          </td>
+                          <td className="px-3 py-2.5 text-sm font-semibold text-text-main">
+                            {formatCurrency(row.amount, { cents: true })}
+                          </td>
+                          <td className="truncate px-3 py-2.5 text-sm text-text-muted">
+                            {row.accountLabel || "-"}
+                          </td>
+                          <td className="px-3 py-2.5 text-sm text-text-main">
+                            <span className="inline-flex w-full justify-center text-text-muted">
+                              {row.autopayEnabled ? <RotateCcw size={14} /> : "-"}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <StatusBadge label={row.statusLabel} />
+                          </td>
+                          <td className="px-3 py-2.5 text-right">
+                            <button
+                              type="button"
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-text-soft"
+                              onClick={(event) => openMenu(event, row.id)}
+                            >
+                              <MoreHorizontal size={16} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
 
-        <div className="grid gap-3 p-4 2xl:hidden">
-          {STATUS_GROUPS.map((group) => {
-            const rowsInGroup = groupedVisibleRows.get(group) ?? [];
-            if (!rowsInGroup.length) return null;
-            return (
-              <div key={`${group}-mobile`} className="grid gap-2">
-                <p className="text-sm font-semibold text-text-main">
-                  {group} ({groupedCounts.get(group) || 0})
-                </p>
-                {rowsInGroup.map((row) => (
-                  <article key={row.id} className="rounded-2xl border border-app-border bg-white p-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <div className="flex items-start gap-2.5">
-                          <BillDatePill dueDate={row.dueDate} statusGroup={row.statusGroup} compact />
-                          <div className="flex min-w-0 items-start gap-2.5">
-                            <BillIconBadge row={row} compact />
-                            <div className="min-w-0">
-                              {row.sourceType === "recurring" ? <LinkedRecurringBillName billName={row.billName} portalUrl={row.row.template.portalUrl} showEditButton={false} /> : <LinkedCardName card={row.card} labelOptions={{ includeNetwork: false, includeLastFour: false }} />}
-                              {row.subtitle ? <p className="mt-1 truncate text-xs text-text-muted">{row.subtitle}</p> : null}
+          <div className="grid gap-3 p-4 2xl:hidden">
+            {STATUS_GROUPS.map((group) => {
+              const rowsInGroup = groupedVisibleRows.get(group) ?? [];
+              if (!rowsInGroup.length) return null;
+              return (
+                <div key={`${group}-mobile`} className="grid gap-2">
+                  <p className="text-sm font-semibold text-text-main">
+                    {group} ({groupedCounts.get(group) || 0})
+                  </p>
+                  {rowsInGroup.map((row) => (
+                    <article
+                      key={row.id}
+                      className="rounded-2xl border border-app-border bg-white p-3"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <div className="flex items-start gap-2.5">
+                            <BillDatePill
+                              dueDate={row.dueDate}
+                              statusGroup={row.statusGroup}
+                              compact
+                            />
+                            <div className="flex min-w-0 items-start gap-2.5">
+                              <BillIconBadge row={row} compact />
+                              <div className="min-w-0">
+                                {row.sourceType === "recurring" ? (
+                                  <LinkedRecurringBillName
+                                    billName={row.billName}
+                                    portalUrl={row.row.template.portalUrl}
+                                    showEditButton={false}
+                                  />
+                                ) : (
+                                  <LinkedCardName
+                                    card={row.card}
+                                    labelOptions={{ includeNetwork: false, includeLastFour: false }}
+                                  />
+                                )}
+                                {row.subtitle ? (
+                                  <p className="mt-1 truncate text-xs text-text-muted">
+                                    {row.subtitle}
+                                  </p>
+                                ) : null}
+                              </div>
                             </div>
                           </div>
                         </div>
+                        <button
+                          type="button"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-text-soft"
+                          onClick={(event) => openMenu(event, row.id)}
+                        >
+                          <MoreHorizontal size={16} />
+                        </button>
                       </div>
-                      <button type="button" className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-text-soft" onClick={(event) => openMenu(event, row.id)}><MoreHorizontal size={16} /></button>
-                    </div>
-                    <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-                      <Metric label="Category" value={row.category} />
-                      <Metric label="Amount" value={formatCurrency(row.amount, { cents: true })} />
-                      <Metric label="Account" value={row.accountLabel || "-"} muted />
-                      <Metric label="Auto-pay" value={row.autopayEnabled ? <RotateCcw size={14} /> : "-"} />
-                    </div>
-                    <div className="mt-2"><StatusBadge label={row.statusLabel} /></div>
-                  </article>
-                ))}
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-app-border px-4 py-4 text-sm text-text-muted sm:px-5">
-          <p>Showing 1-{Math.min(visibleRows.length, sortedRows.length)} of {sortedRows.length} bills</p>
-          {canLoadMore ? <button type="button" onClick={() => setVisibleCount((count) => count + PAGE_SIZE)} className="inline-flex items-center gap-1 font-semibold text-brand-primary">Load more <ChevronDown size={14} /></button> : null}
-        </div>
-      </section>
-      <aside className="grid gap-4">
-        <section className="rounded-2xl border border-app-border bg-white p-4 shadow-sm sm:p-4">
-          <div className="flex items-center justify-between">
-            <h3 className="whitespace-nowrap text-lg font-semibold leading-tight tracking-tight text-[#071F42]">Upcoming calendar</h3>
-            <div className="inline-flex items-center gap-1 text-[#071F42]">
-              <button
-                type="button"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-[#071F42]/70"
-                onClick={() => setCalendarMonth((current) => shiftMonth(current, -1))}
-                aria-label="Previous calendar month"
-              >
-                <ChevronLeft size={15} />
-              </button>
-              <button
-                type="button"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-[#071F42]/70"
-                onClick={() => setCalendarMonth((current) => shiftMonth(current, 1))}
-                aria-label="Next calendar month"
-              >
-                <ChevronRight size={15} />
-              </button>
-            </div>
-          </div>
-          <p className="mt-1 text-sm font-medium text-[#667085]">{formatMonthLabel(calendarMonth)}</p>
-          <div className="mt-2 grid grid-cols-7 gap-y-0.5 text-center text-[11px] text-text-muted">
-            {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map((day) => (
-              <span key={day} className="py-0.5 font-semibold">
-                {day}
-              </span>
-            ))}
-            {calendarCells.map((cell, index) => {
-              const marker = cell.dateKey ? calendarMarkers.get(cell.dateKey) : "";
-              const markerClass =
-                marker === "Past due"
-                  ? "bg-[#DC2626]"
-                  : marker === "Due soon" || marker === "Upcoming"
-                    ? "bg-[#EA7A0A]"
-                    : marker === "Paid"
-                      ? "bg-[#1D8E4B]"
-                      : "";
-              const ringClass =
-                marker === "Past due"
-                  ? "ring-[#FCA5A5] text-[#DC2626]"
-                  : marker === "Due soon" || marker === "Upcoming"
-                    ? "ring-[#FDBA74] text-[#EA7A0A]"
-                    : marker === "Paid"
-                      ? "ring-[#86EFAC] text-[#1D8E4B]"
-                      : "";
-              return (
-                <div key={`${cell.dateKey}-${index}`} className="grid place-items-center py-0.5">
-                  <span
-                    className={`grid h-9 w-9 place-items-center rounded-full text-sm ${
-                      cell.muted ? "text-text-muted/60" : `text-[#071F42] ${ringClass ? `ring-1 ${ringClass}` : ""}`
-                    }`}
-                  >
-                    {cell.day}
-                  </span>
-                  {markerClass ? <span className={`mt-1 h-1.5 w-1.5 rounded-full ${markerClass}`} /> : null}
+                      <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+                        <Metric label="Category" value={row.category} />
+                        <Metric
+                          label="Amount"
+                          value={formatCurrency(row.amount, { cents: true })}
+                        />
+                        <Metric label="Account" value={row.accountLabel || "-"} muted />
+                        <Metric
+                          label="Auto-pay"
+                          value={row.autopayEnabled ? <RotateCcw size={14} /> : "-"}
+                        />
+                      </div>
+                      <div className="mt-2">
+                        <StatusBadge label={row.statusLabel} />
+                      </div>
+                    </article>
+                  ))}
                 </div>
               );
             })}
           </div>
-          <div className="mt-2.5 flex items-center gap-4 text-xs">
-            <LegendDot color="bg-[#DC2626]" label="Past due" />
-            <LegendDot color="bg-[#EA7A0A]" label="Due soon" />
-            <LegendDot color="bg-[#1D8E4B]" label="Paid" />
+
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-app-border px-4 py-4 text-sm text-text-muted sm:px-5">
+            <p>
+              Showing 1-{Math.min(visibleRows.length, sortedRows.length)} of {sortedRows.length}{" "}
+              bills
+            </p>
+            {canLoadMore ? (
+              <button
+                type="button"
+                onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+                className="inline-flex items-center gap-1 font-semibold text-brand-primary"
+              >
+                Load more <ChevronDown size={14} />
+              </button>
+            ) : null}
           </div>
         </section>
-        <section className="rounded-2xl border border-app-border bg-white p-4 shadow-sm sm:p-4">
-          <h3 className="whitespace-nowrap text-lg font-semibold leading-tight tracking-tight text-[#071F42]">Coming up next</h3>
-          <div className="mt-2.5 grid gap-2">
-            {upcomingRows.length === 0 ? (
-              <p className="text-sm text-text-muted">No upcoming unpaid bills.</p>
-            ) : (
-              upcomingRows.map((row) => (
-                <div key={`next-${row.id}`} className="rounded-xl border border-app-border bg-app-background px-2.5 py-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex min-w-0 items-start gap-2">
-                      <BillDatePill dueDate={row.dueDate} statusGroup={row.statusGroup} compact />
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-text-main">{row.billName}</p>
-                        <p className="truncate text-xs text-text-muted">{row.category}</p>
+        <aside className="grid gap-4">
+          <section className="rounded-2xl border border-app-border bg-white p-4 shadow-sm sm:p-4">
+            <div className="flex items-center justify-between">
+              <h3 className="whitespace-nowrap text-lg font-semibold leading-tight tracking-tight text-[#071F42]">
+                Upcoming calendar
+              </h3>
+              <div className="inline-flex items-center gap-1 text-[#071F42]">
+                <button
+                  type="button"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-[#071F42]/70"
+                  onClick={() => setCalendarMonth((current) => shiftMonth(current, -1))}
+                  aria-label="Previous calendar month"
+                >
+                  <ChevronLeft size={15} />
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-[#071F42]/70"
+                  onClick={() => setCalendarMonth((current) => shiftMonth(current, 1))}
+                  aria-label="Next calendar month"
+                >
+                  <ChevronRight size={15} />
+                </button>
+              </div>
+            </div>
+            <p className="mt-1 text-sm font-medium text-[#667085]">
+              {formatMonthLabel(calendarMonth)}
+            </p>
+            <div className="mt-2 grid grid-cols-7 gap-y-0.5 text-center text-[11px] text-text-muted">
+              {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map((day) => (
+                <span key={day} className="py-0.5 font-semibold">
+                  {day}
+                </span>
+              ))}
+              {calendarCells.map((cell, index) => {
+                const marker = cell.dateKey ? calendarMarkers.get(cell.dateKey) : "";
+                const markerClass =
+                  marker === "Past due"
+                    ? "bg-[#DC2626]"
+                    : marker === "Due soon" || marker === "Upcoming"
+                      ? "bg-[#EA7A0A]"
+                      : marker === "Paid"
+                        ? "bg-[#1D8E4B]"
+                        : "";
+                const ringClass =
+                  marker === "Past due"
+                    ? "ring-[#FCA5A5] text-[#DC2626]"
+                    : marker === "Due soon" || marker === "Upcoming"
+                      ? "ring-[#FDBA74] text-[#EA7A0A]"
+                      : marker === "Paid"
+                        ? "ring-[#86EFAC] text-[#1D8E4B]"
+                        : "";
+                return (
+                  <div key={`${cell.dateKey}-${index}`} className="grid place-items-center py-0.5">
+                    <span
+                      className={`grid h-9 w-9 place-items-center rounded-full text-sm ${
+                        cell.muted
+                          ? "text-text-muted/60"
+                          : `text-[#071F42] ${ringClass ? `ring-1 ${ringClass}` : ""}`
+                      }`}
+                    >
+                      {cell.day}
+                    </span>
+                    {markerClass ? (
+                      <span className={`mt-1 h-1.5 w-1.5 rounded-full ${markerClass}`} />
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-2.5 flex items-center gap-4 text-xs">
+              <LegendDot color="bg-[#DC2626]" label="Past due" />
+              <LegendDot color="bg-[#EA7A0A]" label="Due soon" />
+              <LegendDot color="bg-[#1D8E4B]" label="Paid" />
+            </div>
+          </section>
+          <section className="rounded-2xl border border-app-border bg-white p-4 shadow-sm sm:p-4">
+            <h3 className="whitespace-nowrap text-lg font-semibold leading-tight tracking-tight text-[#071F42]">
+              Coming up next
+            </h3>
+            <div className="mt-2.5 grid gap-2">
+              {upcomingRows.length === 0 ? (
+                <p className="text-sm text-text-muted">No upcoming unpaid bills.</p>
+              ) : (
+                upcomingRows.map((row) => (
+                  <div
+                    key={`next-${row.id}`}
+                    className="rounded-xl border border-app-border bg-app-background px-2.5 py-2"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex min-w-0 items-start gap-2">
+                        <BillDatePill dueDate={row.dueDate} statusGroup={row.statusGroup} compact />
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-text-main">
+                            {row.billName}
+                          </p>
+                          <p className="truncate text-xs text-text-muted">{row.category}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-text-main">
+                          {formatCurrency(row.amount, { cents: true })}
+                        </p>
+                        <p className="text-xs text-[#EA7A0A]">
+                          {daysUntil(row.dueDate) <= 0
+                            ? "due now"
+                            : `in ${daysUntil(row.dueDate)} day${daysUntil(row.dueDate) === 1 ? "" : "s"}`}
+                        </p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-text-main">{formatCurrency(row.amount, { cents: true })}</p>
-                      <p className="text-xs text-[#EA7A0A]">
-                        {daysUntil(row.dueDate) <= 0
-                          ? "due now"
-                          : `in ${daysUntil(row.dueDate)} day${daysUntil(row.dueDate) === 1 ? "" : "s"}`}
-                      </p>
-                    </div>
                   </div>
-                </div>
-              ))
-            )}
-          </div>
-          <button
-            type="button"
-            onClick={() => setActiveTab("due-soon")}
-            className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-brand-primary"
-          >
-            View all upcoming bills <ChevronRight size={14} />
-          </button>
-        </section>
-      </aside>
+                ))
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => setActiveTab("due-soon")}
+              className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-brand-primary"
+            >
+              View all upcoming bills <ChevronRight size={14} />
+            </button>
+          </section>
+        </aside>
       </div>
 
       {menuRow && menuState ? (
-        <div className="fixed z-50 grid min-w-[190px] gap-1 rounded-xl border border-app-border bg-white p-1 text-left shadow-lg" style={{ left: menuState.x, top: menuState.y }} onClick={(event) => event.stopPropagation()}>
+        <div
+          className="fixed z-50 grid min-w-[190px] gap-1 rounded-xl border border-app-border bg-white p-1 text-left shadow-lg"
+          style={{ left: menuState.x, top: menuState.y }}
+          onClick={(event) => event.stopPropagation()}
+        >
           {menuRow.sourceType === "recurring" ? (
             <>
-              <MenuButton label="Edit bill" onClick={() => { setEditingTemplate(menuRow.row.template); setIsTemplateModalOpen(true); setMenuState(null); }} disabled={isSaving} />
-              <MenuButton label={menuRow.statusGroup === "Paid" ? "Mark unpaid" : "Mark paid"} onClick={() => { if (menuRow.statusGroup === "Paid") onMarkRecurringUnpaid(menuRow.row); else startRecurringPaid(menuRow); setMenuState(null); }} disabled={isSaving} />
-              <MenuButton label="Skip" onClick={() => { onSkipRecurringPayment(menuRow.row); setMenuState(null); }} disabled={isSaving || menuRow.statusGroup === "Paid"} />
-              <MenuButton label="Delete bill" danger onClick={() => deleteTemplate(menuRow.row.template)} disabled={isSaving} />
+              <MenuButton
+                label="Edit bill"
+                onClick={() => {
+                  setEditingTemplate(menuRow.row.template);
+                  setIsTemplateModalOpen(true);
+                  setMenuState(null);
+                }}
+                disabled={isSaving}
+              />
+              <MenuButton
+                label={menuRow.statusGroup === "Paid" ? "Mark unpaid" : "Mark paid"}
+                onClick={() => {
+                  if (menuRow.statusGroup === "Paid") onMarkRecurringUnpaid(menuRow.row);
+                  else startRecurringPaid(menuRow);
+                  setMenuState(null);
+                }}
+                disabled={isSaving}
+              />
+              <MenuButton
+                label="Skip"
+                onClick={() => {
+                  onSkipRecurringPayment(menuRow.row);
+                  setMenuState(null);
+                }}
+                disabled={isSaving || menuRow.statusGroup === "Paid"}
+              />
+              <MenuButton
+                label="Delete bill"
+                danger
+                onClick={() => deleteTemplate(menuRow.row.template)}
+                disabled={isSaving}
+              />
             </>
           ) : (
             <>
-              <MenuButton label="Go to Cards & Debt" onClick={() => { dispatchNavigation("credit-cards", ""); setMenuState(null); }} />
-              {menuRow.card?.url ? <MenuButton label="View card" icon={<ExternalLink size={13} />} onClick={() => { window.open(menuRow.card.url, "_blank", "noopener,noreferrer"); setMenuState(null); }} /> : null}
-              <MenuButton label={menuRow.statusGroup === "Paid" ? "Mark unpaid" : "Mark paid"} onClick={() => { if (menuRow.statusGroup === "Paid") markCardUnpaid(menuRow); else startCardPaid(menuRow); }} disabled={monthlyBalancesSaving} />
+              <MenuButton
+                label="Go to Cards & Debt"
+                onClick={() => {
+                  dispatchNavigation("credit-cards", "");
+                  setMenuState(null);
+                }}
+              />
+              {menuRow.card?.url ? (
+                <MenuButton
+                  label="View card"
+                  icon={<ExternalLink size={13} />}
+                  onClick={() => {
+                    window.open(menuRow.card.url, "_blank", "noopener,noreferrer");
+                    setMenuState(null);
+                  }}
+                />
+              ) : null}
+              <MenuButton
+                label={menuRow.statusGroup === "Paid" ? "Mark unpaid" : "Mark paid"}
+                onClick={() => {
+                  if (menuRow.statusGroup === "Paid") markCardUnpaid(menuRow);
+                  else startCardPaid(menuRow);
+                }}
+                disabled={monthlyBalancesSaving}
+              />
             </>
           )}
         </div>
       ) : null}
 
       {isTemplateModalOpen ? (
-        <div className="fixed inset-0 z-50 flex min-h-screen items-end justify-center overflow-y-auto bg-gray-950/40 px-3 py-3 sm:items-center sm:px-4 sm:py-6" role="dialog" aria-modal="true" aria-labelledby="recurring-template-modal-title">
+        <div
+          className="fixed inset-0 z-50 flex min-h-screen items-end justify-center overflow-y-auto bg-gray-950/40 px-3 py-3 sm:items-center sm:px-4 sm:py-6"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="recurring-template-modal-title"
+        >
           <div className="flex max-h-[calc(100dvh-1.5rem)] min-h-0 w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl sm:max-h-[calc(100dvh-3rem)]">
             <div className="flex shrink-0 items-start justify-between gap-4 border-b border-gray-200 px-5 py-4">
-              <div><h2 id="recurring-template-modal-title" className="text-lg font-semibold text-gray-950">{editingTemplate ? "Edit bill" : "Add bill"}</h2><p className="mt-1 text-sm text-gray-500">Templates become monthly bills you can mark paid.</p></div>
-              <button type="button" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-gray-500 transition hover:bg-gray-100 hover:text-gray-950" onClick={() => { if (isSaving) return; setIsTemplateModalOpen(false); setEditingTemplate(null); }} aria-label="Close recurring template modal" disabled={isSaving}>×</button>
+              <div>
+                <h2
+                  id="recurring-template-modal-title"
+                  className="text-lg font-semibold text-gray-950"
+                >
+                  {editingTemplate ? "Edit bill" : "Add bill"}
+                </h2>
+                <p className="mt-1 text-sm text-gray-500">
+                  Templates become monthly bills you can mark paid.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-gray-500 transition hover:bg-gray-100 hover:text-gray-950"
+                onClick={() => {
+                  if (isSaving) return;
+                  setIsTemplateModalOpen(false);
+                  setEditingTemplate(null);
+                }}
+                aria-label="Close recurring template modal"
+                disabled={isSaving}
+              >
+                ×
+              </button>
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 pb-8">
-              <RecurringPaymentForm cards={activeCards} cashAccounts={cashAccounts} categories={categories} editingTemplate={editingTemplate} onCancel={() => { if (isSaving) return; setIsTemplateModalOpen(false); setEditingTemplate(null); }} onSaved={saveTemplate} isSaving={isSaving} showHeader={false} />
+              <RecurringPaymentForm
+                cards={activeCards}
+                cashAccounts={cashAccounts}
+                categories={categories}
+                editingTemplate={editingTemplate}
+                onCancel={() => {
+                  if (isSaving) return;
+                  setIsTemplateModalOpen(false);
+                  setEditingTemplate(null);
+                }}
+                onSaved={saveTemplate}
+                isSaving={isSaving}
+                showHeader={false}
+              />
             </div>
           </div>
         </div>
       ) : null}
 
-      <RecurringPaymentModal open={Boolean(recurringRow)} billName={recurringRow?.billName || ""} draft={recurringDraft} accountOptions={recurringAccountOptions} isSaving={isSaving} onCancel={() => { setRecurringRow(null); setRecurringDraft(null); }} onSave={saveRecurringPaid} />
-      <CardPaymentModal open={Boolean(cardRow)} draft={cardDraft} paymentAccountOptions={[...cashOptions, { value: CARD_PAYMENT_OUTSIDE_ACCOUNT, label: "Outside / untracked account" }]} isSaving={monthlyBalancesSaving} onCancel={() => { setCardRow(null); setCardDraft(null); }} onSave={saveCardPaid} />
+      <RecurringPaymentModal
+        open={Boolean(recurringRow)}
+        billName={recurringRow?.billName || ""}
+        draft={recurringDraft}
+        accountOptions={recurringAccountOptions}
+        isSaving={isSaving}
+        onCancel={() => {
+          setRecurringRow(null);
+          setRecurringDraft(null);
+        }}
+        onSave={saveRecurringPaid}
+      />
+      <CardPaymentModal
+        open={Boolean(cardRow)}
+        draft={cardDraft}
+        paymentAccountOptions={[
+          ...cashOptions,
+          { value: CARD_PAYMENT_OUTSIDE_ACCOUNT, label: "Outside / untracked account" },
+        ]}
+        isSaving={monthlyBalancesSaving}
+        onCancel={() => {
+          setCardRow(null);
+          setCardDraft(null);
+        }}
+        onSave={saveCardPaid}
+      />
 
-      {isSaving || monthlyBalancesSaving || categoriesLoading ? <LoadingMessage>{isSaving ? "Saving bills..." : monthlyBalancesSaving ? "Saving card payment..." : "Loading categories..."}</LoadingMessage> : null}
-      <button type="button" onClick={() => { setEditingTemplate(null); setIsTemplateModalOpen(true); }} className="hidden" aria-hidden="true" tabIndex={-1}>Add bill</button>
+      {isSaving || monthlyBalancesSaving || categoriesLoading ? (
+        <LoadingMessage>
+          {isSaving
+            ? "Saving bills..."
+            : monthlyBalancesSaving
+              ? "Saving card payment..."
+              : "Loading categories..."}
+        </LoadingMessage>
+      ) : null}
+      <button
+        type="button"
+        onClick={() => {
+          setEditingTemplate(null);
+          setIsTemplateModalOpen(true);
+        }}
+        className="hidden"
+        aria-hidden="true"
+        tabIndex={-1}
+      >
+        Add bill
+      </button>
     </section>
   );
 }
@@ -736,10 +1071,16 @@ function SummaryCard({ label, value, helper, icon, iconTone }) {
     <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-2xl border border-[#E6E1D8] bg-white px-4 py-3 shadow-[0_1px_2px_rgba(16,24,40,0.06)]">
       <div className="min-w-0">
         <p className="truncate text-sm font-medium text-[#071F42]">{label}</p>
-        <p className="mt-1 truncate text-[1.95rem] font-semibold tracking-tight text-[#071F42]">{value}</p>
+        <p className="mt-1 truncate text-[1.95rem] font-semibold tracking-tight text-[#071F42]">
+          {value}
+        </p>
         <p className="mt-0.5 text-sm text-[#667085]">{helper}</p>
       </div>
-      <span className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${iconClass}`}>{icon}</span>
+      <span
+        className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${iconClass}`}
+      >
+        {icon}
+      </span>
     </div>
   );
 }
@@ -763,7 +1104,9 @@ function BillDatePill({ dueDate, statusGroup, compact = false }) {
       }`}
     >
       <span className="text-[10px] font-semibold leading-4">{monthLabel}</span>
-      <span className={`${compact ? "text-base" : "text-lg"} font-semibold leading-5`}>{dayLabel}</span>
+      <span className={`${compact ? "text-base" : "text-lg"} font-semibold leading-5`}>
+        {dayLabel}
+      </span>
     </span>
   );
 }
@@ -779,7 +1122,9 @@ function LegendDot({ color, label }) {
 
 function StatusBadge({ label }) {
   return (
-    <span className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${badgeClass(label)}`}>
+    <span
+      className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${badgeClass(label)}`}
+    >
       {label === "Paid" ? <CheckCircle2 size={12} /> : null}
       {label}
     </span>
@@ -790,16 +1135,22 @@ function BillIconBadge({ row, compact = false }) {
   if (row.sourceType === "credit-card") {
     const network = String(row.card?.network || "").toLowerCase();
     if (network.includes("visa")) {
-      return <NetworkBadge label="VISA" className="bg-[#E9F0FF] text-[#1D4ED8]" compact={compact} />;
+      return (
+        <NetworkBadge label="VISA" className="bg-[#E9F0FF] text-[#1D4ED8]" compact={compact} />
+      );
     }
     if (network.includes("master")) {
       return <NetworkBadge label="MC" className="bg-[#EEF2FF] text-[#1F2937]" compact={compact} />;
     }
     if (network.includes("american express") || network.includes("amex")) {
-      return <NetworkBadge label="AMEX" className="bg-[#E6F4FF] text-[#0369A1]" compact={compact} />;
+      return (
+        <NetworkBadge label="AMEX" className="bg-[#E6F4FF] text-[#0369A1]" compact={compact} />
+      );
     }
     if (network.includes("discover")) {
-      return <NetworkBadge label="DISC" className="bg-[#FFF3E8] text-[#C2410C]" compact={compact} />;
+      return (
+        <NetworkBadge label="DISC" className="bg-[#FFF3E8] text-[#C2410C]" compact={compact} />
+      );
     }
     return (
       <span
@@ -818,7 +1169,8 @@ function BillIconBadge({ row, compact = false }) {
   else if (category.includes("phone")) icon = <Smartphone size={compact ? 14 : 15} />;
   else if (category.includes("utilit")) icon = <Zap size={compact ? 14 : 15} />;
   else if (category.includes("entertain")) icon = <Play size={compact ? 14 : 15} />;
-  else if (category.includes("housing") || category.includes("rent")) icon = <Home size={compact ? 14 : 15} />;
+  else if (category.includes("housing") || category.includes("rent"))
+    icon = <Home size={compact ? 14 : 15} />;
   else if (category.includes("insurance")) icon = <Shield size={compact ? 14 : 15} />;
   else if (category.includes("subscription")) icon = <FileText size={compact ? 14 : 15} />;
   else if (category.includes("credit")) icon = <CreditCard size={compact ? 14 : 15} />;
@@ -848,7 +1200,12 @@ function NetworkBadge({ label, className, compact = false }) {
 
 function MenuButton({ label, onClick, disabled = false, danger = false, icon = null }) {
   return (
-    <button type="button" onClick={onClick} disabled={disabled} className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${danger ? "text-status-dangerDark hover:bg-status-dangerBg" : "text-text-main hover:bg-app-muted"} disabled:opacity-50`}>
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${danger ? "text-status-dangerDark hover:bg-status-dangerBg" : "text-text-main hover:bg-app-muted"} disabled:opacity-50`}
+    >
       {icon}
       {label}
     </button>
@@ -859,7 +1216,9 @@ function Metric({ label, value, muted = false }) {
   return (
     <div className="rounded-lg border border-app-border bg-app-background px-2 py-1.5">
       <p className="text-[11px] uppercase tracking-wide text-text-muted">{label}</p>
-      <p className={`mt-0.5 truncate text-sm font-semibold ${muted ? "text-text-muted" : "text-text-main"}`}>
+      <p
+        className={`mt-0.5 truncate text-sm font-semibold ${muted ? "text-text-muted" : "text-text-main"}`}
+      >
         {value}
       </p>
     </div>

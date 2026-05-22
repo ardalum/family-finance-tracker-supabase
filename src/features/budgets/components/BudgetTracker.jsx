@@ -20,11 +20,19 @@ import {
   UNCATEGORIZED_ID,
 } from "../../spending/spendingService.js";
 import { listTransactions } from "../../spending/spendingSupabaseService.js";
-import { consumeNavigationTarget, dispatchNavigation, NAVIGATE_EVENT } from "../../../lib/navigationTargets.js";
+import {
+  consumeNavigationTarget,
+  dispatchNavigation,
+  NAVIGATE_EVENT,
+} from "../../../lib/navigationTargets.js";
 import BudgetModal from "./BudgetModal.jsx";
 import BudgetTable from "./BudgetTable.jsx";
 import { getTotalMonthlyBudget } from "../budgetsService.js";
-import { getBudgetDelta, getCategorySharePercent, getSpentPercent } from "../budgetCategoryMetrics.js";
+import {
+  getBudgetDelta,
+  getCategorySharePercent,
+  getSpentPercent,
+} from "../budgetCategoryMetrics.js";
 
 const ROW_FILTER_OPTIONS = [
   { id: "all", label: "All categories" },
@@ -63,15 +71,19 @@ export default function BudgetTracker({
     () => buildBudgetRows(budgets, transactionsForBudget, totalBudget),
     [budgets, totalBudget, transactionsForBudget],
   );
-  const summary = useMemo(() => getBudgetSummary(budgetRows, totalBudget), [budgetRows, totalBudget]);
+  const summary = useMemo(
+    () => getBudgetSummary(budgetRows, totalBudget),
+    [budgetRows, totalBudget],
+  );
   const filteredRows = useMemo(
     () => applyBudgetRowFilter(budgetRows, categoryFilter),
     [budgetRows, categoryFilter],
   );
   const suggestionRows = useMemo(() => buildReallocationSuggestions(budgetRows), [budgetRows]);
-  const insightText = summary.totalBudget > 0
-    ? `You're tracking ${summary.categoryCount} budget categories this month.`
-    : "Set your first budget categories to start tracking this month.";
+  const insightText =
+    summary.totalBudget > 0
+      ? `You're tracking ${summary.categoryCount} budget categories this month.`
+      : "Set your first budget categories to start tracking this month.";
 
   useEffect(() => {
     if (transactions) return undefined;
@@ -183,7 +195,9 @@ export default function BudgetTracker({
   return (
     <section className="grid gap-5">
       {error ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B]">{error}</div>
+        <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B]">
+          {error}
+        </div>
       ) : null}
       {transactionsError ? (
         <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B]">
@@ -212,7 +226,12 @@ export default function BudgetTracker({
                 ))}
               </select>
             </FilterChip>
-            <FilterChip icon={Users} label="All members" disabled title="Member filters coming soon" />
+            <FilterChip
+              icon={Users}
+              label="All members"
+              disabled
+              title="Member filters coming soon"
+            />
             <FilterChip icon={Tag} label={getRowFilterLabel(categoryFilter)}>
               <select
                 value={categoryFilter}
@@ -227,7 +246,12 @@ export default function BudgetTracker({
                 ))}
               </select>
             </FilterChip>
-            <FilterChip icon={CheckCircle2} label="More filters" disabled title="More filters coming soon" />
+            <FilterChip
+              icon={CheckCircle2}
+              label="More filters"
+              disabled
+              title="More filters coming soon"
+            />
           </div>
         </div>
 
@@ -266,7 +290,9 @@ export default function BudgetTracker({
                 </span>
                 <div className="min-w-0">
                   <p className="truncate text-base font-semibold text-text-main">{insightText}</p>
-                  <p className="text-sm text-text-muted">Great job staying on top of your budgets.</p>
+                  <p className="text-sm text-text-muted">
+                    Great job staying on top of your budgets.
+                  </p>
                 </div>
               </div>
               <button
@@ -289,7 +315,8 @@ export default function BudgetTracker({
               <div className="grid min-w-0 gap-2">
                 <h3 className="text-xl font-semibold text-text-main">Budget tip</h3>
                 <p className="text-sm text-text-main">
-                  You're doing great: {summary.onTrackCount} of {summary.categoryCount} categories are on track.
+                  You're doing great: {summary.onTrackCount} of {summary.categoryCount} categories
+                  are on track.
                 </p>
                 <p className="truncate text-sm text-text-muted">
                   {summary.watchCategoryName
@@ -319,7 +346,10 @@ export default function BudgetTracker({
                 </p>
               ) : (
                 suggestionRows.map((suggestion, index) => (
-                  <div key={`${suggestion.from.id}-${suggestion.to.id}-${index}`} className="min-w-0 rounded-xl border border-app-border bg-app-background p-3">
+                  <div
+                    key={`${suggestion.from.id}-${suggestion.to.id}-${index}`}
+                    className="min-w-0 rounded-xl border border-app-border bg-app-background p-3"
+                  >
                     <p className="text-sm text-text-main">
                       From: <span className="font-semibold">{suggestion.from.name}</span>
                     </p>
@@ -335,8 +365,12 @@ export default function BudgetTracker({
                       {formatCurrency(Math.max(suggestion.to.overAmount || 0, 0))}
                     </p>
                     <div className="mt-2 flex items-center justify-between text-sm font-semibold">
-                      <span className="text-status-success">-{formatCurrency(suggestion.amount)}</span>
-                      <span className="text-status-danger">+{formatCurrency(suggestion.amount)}</span>
+                      <span className="text-status-success">
+                        -{formatCurrency(suggestion.amount)}
+                      </span>
+                      <span className="text-status-danger">
+                        +{formatCurrency(suggestion.amount)}
+                      </span>
                     </div>
                     <button
                       type="button"
@@ -371,7 +405,10 @@ export default function BudgetTracker({
         >
           <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white shadow-xl">
             <div className="border-b border-gray-200 p-5">
-              <h2 id="apply-budget-suggestion-title" className="text-lg font-semibold text-gray-950">
+              <h2
+                id="apply-budget-suggestion-title"
+                className="text-lg font-semibold text-gray-950"
+              >
                 Apply budget suggestion?
               </h2>
               <p className="mt-1 text-sm text-gray-500">
@@ -387,7 +424,8 @@ export default function BudgetTracker({
                 <p className="text-text-muted">
                   Suggested budget:{" "}
                   {formatCurrency(
-                    Number(pendingSuggestion.to.monthlyAmount || 0) + Number(pendingSuggestion.amount || 0),
+                    Number(pendingSuggestion.to.monthlyAmount || 0) +
+                      Number(pendingSuggestion.amount || 0),
                   )}
                 </p>
               </div>
@@ -451,7 +489,8 @@ function BudgetSummaryCards({ summary }) {
       value: String(summary.overBudgetCount),
       helper: "Categories",
       icon: AlertTriangle,
-      iconTone: summary.overBudgetCount > 0 ? "bg-[#FEECEF] text-[#CC2E47]" : "bg-[#F3F4F6] text-[#6B7280]",
+      iconTone:
+        summary.overBudgetCount > 0 ? "bg-[#FEECEF] text-[#CC2E47]" : "bg-[#F3F4F6] text-[#6B7280]",
       valueTone: summary.overBudgetCount > 0 ? "text-status-danger" : "text-text-main",
     },
   ];
@@ -461,7 +500,10 @@ function BudgetSummaryCards({ summary }) {
       {cards.map((card) => {
         const Icon = card.icon;
         return (
-          <Card key={card.label} className="min-w-0 rounded-2xl border border-app-border bg-white p-4">
+          <Card
+            key={card.label}
+            className="min-w-0 rounded-2xl border border-app-border bg-white p-4"
+          >
             <div className="grid min-w-0 gap-2">
               <div className="flex min-w-0 items-start justify-between gap-3">
                 <p className="text-base font-medium text-text-main">{card.label}</p>
@@ -489,7 +531,9 @@ function FilterChip({ icon: Icon, label, disabled = false, children = null, titl
   return (
     <label
       className={`relative inline-flex min-h-11 items-center gap-2 rounded-xl border px-3 py-2 text-sm ${
-        disabled ? "cursor-not-allowed border-app-border bg-app-muted text-text-muted" : "border-app-border bg-white text-text-main"
+        disabled
+          ? "cursor-not-allowed border-app-border bg-app-muted text-text-muted"
+          : "border-app-border bg-white text-text-main"
       }`}
       title={title || undefined}
     >
@@ -554,7 +598,8 @@ function getBudgetSummary(rows, totalBudget) {
   const categoryCount = rows.length;
   const spentPercent = totalBudget > 0 ? (baseSummary.totalSpent / totalBudget) * 100 : 0;
   const remainingPercent = totalBudget > 0 ? (baseSummary.totalRemaining / totalBudget) * 100 : 0;
-  const watchRow = rows.find((row) => row.status === "over") ?? rows.find((row) => row.status === "near");
+  const watchRow =
+    rows.find((row) => row.status === "over") ?? rows.find((row) => row.status === "near");
 
   return {
     ...baseSummary,
@@ -589,7 +634,10 @@ function buildReallocationSuggestions(rows) {
     const to = needsTo[index];
     if (!from || !to) continue;
 
-    const targetNeed = to.status === "over" ? Math.max(to.overAmount || 0, 0) : Math.max((to.monthlyAmount || 0) * 0.1, 0);
+    const targetNeed =
+      to.status === "over"
+        ? Math.max(to.overAmount || 0, 0)
+        : Math.max((to.monthlyAmount || 0) * 0.1, 0);
     const amount = Math.max(Math.min(from.remaining, targetNeed), 0);
     if (amount <= 0) continue;
     suggestions.push({ from, to, amount });
