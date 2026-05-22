@@ -77,17 +77,23 @@ test("money center trend summary uses compact currency formatting for very large
 
 test("money center trend chart renders combined bars and connected cash-position line", () => {
   assert.ok(moneyCenterSource.includes('aria-label="Income and cash trend chart"'));
-  assert.ok(moneyCenterSource.includes('viewBox="0 0 100 100"'));
+  assert.ok(
+    moneyCenterSource.includes("viewBox={`0 0 ${trendPlot.chartWidth} ${trendPlot.chartHeight}`}"),
+  );
   assert.ok(moneyCenterSource.includes("<path"));
   assert.ok(moneyCenterSource.includes('stroke="rgba(15, 42, 74, 0.92)"'));
-  assert.ok(moneyCenterSource.includes("grid-cols-[42px_minmax(0,1fr)_42px]"));
+  assert.ok(moneyCenterSource.includes("clipPath"));
+  assert.ok(moneyCenterSource.includes('strokeWidth="3"'));
   assert.ok(moneyCenterSource.includes("<rect"));
   assert.ok(moneyCenterSource.includes("<circle"));
+  assert.ok(moneyCenterSource.includes("plotLeft"));
+  assert.ok(moneyCenterSource.includes("plotRight"));
+  assert.ok(moneyCenterSource.includes("plotTop"));
+  assert.ok(moneyCenterSource.includes("plotBottom"));
   assert.ok(moneyCenterSource.includes("Income received"));
   assert.ok(moneyCenterSource.includes("Cash position trend"));
-  assert.ok(
-    moneyCenterSource.includes("clamp((row.income / incomeMax) * (plotMaxY - plotMinY), 6, 64)"),
-  );
+  assert.ok(moneyCenterSource.includes("h-full w-full overflow-hidden"));
+  assert.equal(moneyCenterSource.includes("overflow-visible"), false);
 });
 
 test("money center uses tracked income deposits for selected-month cash position display", () => {
