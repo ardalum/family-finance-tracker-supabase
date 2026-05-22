@@ -62,6 +62,24 @@ test("money center summary metrics use balanced value sizing", () => {
     moneyCenterSource.includes("text-4xl font-semibold tracking-tight text-text-main"),
     false,
   );
+  assert.equal(
+    moneyCenterSource.includes("mt-2 text-4xl font-semibold text-status-successDark"),
+    false,
+  );
+});
+
+test("money center trend summary uses compact currency formatting for very large values", () => {
+  assert.ok(moneyCenterSource.includes("function formatTrendCurrency(value)"));
+  assert.ok(moneyCenterSource.includes('notation: "compact"'));
+  assert.ok(moneyCenterSource.includes("formatTrendCurrency(receivedIncome)"));
+  assert.ok(moneyCenterSource.includes("formatTrendCurrency(projectedCashPosition)"));
+});
+
+test("money center trend chart uses calmer sizing and clamped visual heights", () => {
+  assert.ok(moneyCenterSource.includes("grid h-44 grid-cols-5 items-end gap-3 sm:h-48"));
+  assert.ok(moneyCenterSource.includes("Math.min("));
+  assert.ok(moneyCenterSource.includes("(row.income / maxTrendValue) * 82"));
+  assert.ok(moneyCenterSource.includes("Math.min(90, Math.max(8"));
 });
 
 test("money center renders info tooltips for summary cards and key sections", () => {

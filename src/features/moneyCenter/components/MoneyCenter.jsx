@@ -97,6 +97,19 @@ function buildTrendMonths(selectedMonth) {
   return [-4, -3, -2, -1, 0].map((offset) => shiftMonth(selectedMonth, offset));
 }
 
+function formatTrendCurrency(value) {
+  const numericValue = Number(value || 0);
+  if (Math.abs(numericValue) >= 1_000_000) {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      notation: "compact",
+      maximumFractionDigits: 2,
+    }).format(numericValue);
+  }
+  return formatCurrency(numericValue);
+}
+
 export default function MoneyCenter({
   activeView = "financial-position",
   selectedMonth = getCurrentMonthKey(),
@@ -925,19 +938,27 @@ export default function MoneyCenter({
                 />
               </h3>
             </div>
-            <div className="grid gap-5 p-4 lg:grid-cols-[minmax(0,1fr)_240px]">
-              <div>
-                <div className="grid h-56 grid-cols-5 items-end gap-4">
+            <div className="grid gap-5 p-4 lg:grid-cols-[minmax(0,1fr)_260px]">
+              <div className="min-w-0">
+                <div className="grid h-44 grid-cols-5 items-end gap-3 sm:h-48">
                   {trendRows.map((row) => {
                     const isActive = row.monthKey === selectedMonth;
-                    const barHeightPct = Math.max(8, (row.income / maxTrendValue) * 100);
-                    const lineY = 100 - Math.min(100, (row.cash / maxTrendValue) * 100);
+                    const barHeightPct = Math.min(
+                      88,
+                      Math.max(8, (row.income / maxTrendValue) * 82),
+                    );
+                    const lineY = 100 - Math.min(90, Math.max(8, (row.cash / maxTrendValue) * 82));
                     return (
-                      <div key={row.monthKey} className="grid h-full grid-rows-[1fr_auto] gap-2">
+                      <div
+                        key={row.monthKey}
+                        className="grid h-full min-w-0 grid-rows-[1fr_auto] gap-2"
+                      >
                         <div
                           className={`relative rounded-lg border ${
-                            isActive ? "border-brand-primary/50" : "border-app-border"
-                          } bg-app-surfaceSoft px-2 py-2`}
+                            isActive
+                              ? "border-brand-primary/35 bg-brand-primary/[0.03]"
+                              : "border-app-border"
+                          } bg-app-surfaceSoft px-1.5 py-2`}
                         >
                           <div
                             className="absolute bottom-2 left-2 right-2 rounded-md bg-status-success/75"
@@ -962,14 +983,14 @@ export default function MoneyCenter({
                   </span>
                 </div>
               </div>
-              <div className="rounded-xl border border-app-border bg-app-surfaceSoft p-4">
+              <div className="min-w-0 rounded-xl border border-app-border bg-app-surfaceSoft p-4">
                 <p className="text-sm text-text-muted">{formatMonthLabel(selectedMonth)}</p>
-                <p className="mt-2 text-4xl font-semibold text-status-successDark">
-                  {formatCurrency(receivedIncome)}
+                <p className="mt-2 break-words text-2xl font-semibold text-status-successDark sm:text-3xl">
+                  {formatTrendCurrency(receivedIncome)}
                 </p>
                 <p className="text-sm text-text-muted">Income received</p>
-                <p className="mt-4 text-3xl font-semibold text-text-main">
-                  {formatCurrency(projectedCashPosition)}
+                <p className="mt-4 break-words text-xl font-semibold text-text-main sm:text-2xl">
+                  {formatTrendCurrency(projectedCashPosition)}
                 </p>
                 <p className="text-sm text-text-muted">Projected cash position</p>
               </div>
