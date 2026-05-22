@@ -49,7 +49,6 @@ import {
   summarizeIncomeForMonth,
 } from "../../income/incomeService.js";
 import { summarizeFinancialPositionForMonth } from "../../financialPosition/financialPositionService.js";
-import { getMonthTransactions, getTotalSpending } from "../../spending/spendingService.js";
 import { getRecurringSummary } from "../../recurring/recurringService.js";
 import { summarizeSavingsForMonth } from "../../savings/savingsService.js";
 
@@ -126,6 +125,18 @@ function sumTrackedIncomeDepositsForMonth(movements = [], monthKey = "") {
   }, 0);
 }
 
+function sumTrackedSpendingOutflowsForMonth(movements = [], monthKey = "") {
+  return movements.reduce((sum, movement) => {
+    if (movement?.monthKey !== monthKey) return sum;
+    if (movement?.sourceType !== "spending_transaction") return sum;
+    if (movement?.movementType !== "spending_payment") return sum;
+    if (movement?.direction !== "outflow") return sum;
+    if (movement?.isTracked === false) return sum;
+    if (!movement?.accountId) return sum;
+    return sum + Number(movement.amount || 0);
+  }, 0);
+}
+
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
@@ -137,6 +148,7 @@ export default function MoneyCenter({
   error = "",
   isSaving = false,
   transactions = [],
+  spendingOutflowMovements = [],
   recurringPayments = [],
   recurringStatusByMonth = {},
   incomeSources = [],
@@ -280,7 +292,11 @@ export default function MoneyCenter({
     (sum, source) => sum + Number(source.expectedAmount || 0),
     0,
   );
-  const spendingTotal = getTotalSpending(getMonthTransactions(transactions, selectedMonth));
+  const selectedMonthTrackedSpendingOutflows = sumTrackedSpendingOutflowsForMonth(
+    spendingOutflowMovements,
+    selectedMonth,
+  );
+  const spendingTotal = selectedMonthTrackedSpendingOutflows;
   const savingsContributionTotal = summarizeSavingsForMonth(savingsContributions, selectedMonth);
   const billsPaidTotal = recurringSummary.paidTotal;
   const selectedMonthStartingCash = summarizeLiquidCashForMonth(
@@ -334,7 +350,7 @@ export default function MoneyCenter({
             shiftMonth(monthKey, -1),
           ) +
           sumTrackedIncomeDepositsForMonth(incomeDepositMovements, monthKey) -
-          getTotalSpending(getMonthTransactions(transactions, monthKey)) -
+          sumTrackedSpendingOutflowsForMonth(spendingOutflowMovements, monthKey) -
           getRecurringSummary(recurringPayments, monthKey, recurringStatusByMonth).paidTotal -
           summarizeSavingsForMonth(savingsContributions, monthKey),
       })),
@@ -346,7 +362,7 @@ export default function MoneyCenter({
       recurringPayments,
       recurringStatusByMonth,
       savingsContributions,
-      transactions,
+      spendingOutflowMovements,
       trendMonths,
     ],
   );
@@ -357,6 +373,53 @@ export default function MoneyCenter({
   const axisSteps = 4;
   const selectedTrendRow =
     trendRows.find((row) => row.monthKey === selectedMonth) ?? trendRows.at(-1);
+  const trendPlot = useMemo(() => {
+    const plotMinX = 8;
+    const plotMaxX = 92;
+    const plotMinY = 12;
+    const plotMaxY = 88;
+    const xStep = trendRows.length <= 1 ? 0 : (plotMaxX - plotMinX) / (trendRows.length - 1);
+    const barWidth = 6.5;
+
+    const points = trendRows.map((row, index) => {
+      const x = plotMinX + xStep * index;
+      const incomeHeight =
+        row.income <= 0 ? 0 : clamp((row.income / incomeMax) * (plotMaxY - plotMinY), 6, 64);
+      const incomeY = plotMaxY - incomeHeight;
+      const cashY = clamp(
+        plotMaxY - ((row.cash - cashMin) / cashRange) * (plotMaxY - plotMinY),
+        plotMinY,
+        plotMaxY,
+      );
+
+      return {
+        monthKey: row.monthKey,
+        x,
+        incomeY,
+        incomeHeight,
+        cashY,
+        isActive: row.monthKey === selectedMonth,
+      };
+    });
+
+    const pathD =
+      points.length < 2
+        ? ""
+        : points
+            .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.cashY}`)
+            .join(" ");
+
+    const ticks = Array.from({ length: axisSteps + 1 }).map((_, index) => {
+      const ratio = (axisSteps - index) / axisSteps;
+      return {
+        y: plotMinY + (1 - ratio) * (plotMaxY - plotMinY),
+        incomeValue: ratio * incomeMax,
+        cashValue: cashMin + ratio * cashRange,
+      };
+    });
+
+    return { points, pathD, ticks, barWidth };
+  }, [axisSteps, cashMin, cashRange, incomeMax, selectedMonth, trendRows]);
 
   useEffect(() => {
     setEntryDraft((draft) => ({ ...draft, monthKey: selectedMonth }));
@@ -991,95 +1054,98 @@ export default function MoneyCenter({
             </div>
             <div className="grid gap-5 p-4 lg:grid-cols-[minmax(0,1fr)_240px]">
               <div className="min-w-0">
-                <div className="relative grid h-[200px] grid-cols-[42px_minmax(0,1fr)_42px] gap-2">
+                <div className="relative grid h-[205px] grid-cols-[42px_minmax(0,1fr)_42px] gap-2">
                   <div className="grid grid-rows-5 content-between py-2 text-[11px] text-text-muted">
-                    {Array.from({ length: axisSteps + 1 }).map((_, index) => {
-                      const tickValue = ((axisSteps - index) / axisSteps) * incomeMax;
-                      return (
-                        <span key={`income-axis-${index}`} className="self-center">
-                          {formatCompactCurrency(tickValue)}
-                        </span>
-                      );
-                    })}
+                    {trendPlot.ticks.map((tick, index) => (
+                      <span key={`income-axis-${index}`} className="self-center">
+                        {formatCompactCurrency(tick.incomeValue)}
+                      </span>
+                    ))}
                   </div>
 
                   <div className="relative min-w-0">
-                    <div className="pointer-events-none absolute inset-0 grid grid-rows-5">
-                      {Array.from({ length: axisSteps + 1 }).map((_, index) => (
-                        <div
-                          key={`grid-line-${index}`}
-                          className={`border-t ${index === axisSteps ? "border-app-border/60" : "border-app-border/35"}`}
-                        />
-                      ))}
-                    </div>
-
                     <svg
                       viewBox="0 0 100 100"
-                      preserveAspectRatio="none"
-                      className="pointer-events-none absolute inset-0 z-20"
-                      aria-hidden="true"
+                      preserveAspectRatio="xMidYMid meet"
+                      className="h-full w-full overflow-hidden rounded-lg border border-app-border bg-app-surfaceSoft"
+                      aria-label="Income and cash trend chart"
                     >
-                      <path
-                        d={trendRows
-                          .map((row, index) => {
-                            const x =
-                              trendRows.length === 1 ? 50 : (index / (trendRows.length - 1)) * 100;
-                            const y = clamp(((cashMax - row.cash) / cashRange) * 100, 6, 94);
-                            return `${index === 0 ? "M" : "L"} ${x} ${y}`;
-                          })
-                          .join(" ")}
-                        fill="none"
-                        stroke="rgba(15, 42, 74, 0.92)"
-                        strokeWidth="1.9"
-                      />
-                    </svg>
+                      <defs>
+                        <clipPath id="income-cash-trend-plot-clip">
+                          <rect x="0" y="0" width="100" height="100" rx="2.8" />
+                        </clipPath>
+                      </defs>
+                      <g clipPath="url(#income-cash-trend-plot-clip)">
+                        {trendPlot.ticks.map((tick, index) => (
+                          <line
+                            key={`grid-${index}`}
+                            x1="0"
+                            y1={tick.y}
+                            x2="100"
+                            y2={tick.y}
+                            stroke="rgba(148, 163, 184, 0.35)"
+                            strokeWidth="0.5"
+                          />
+                        ))}
 
-                    <div className="absolute inset-0 z-10 grid grid-cols-5 gap-2.5 sm:gap-3">
-                      {trendRows.map((row) => {
-                        const isActive = row.monthKey === selectedMonth;
-                        const incomeHeightPct =
-                          row.income <= 0 ? 4 : clamp((row.income / incomeMax) * 84, 10, 84);
-                        const lineY = clamp(((cashMax - row.cash) / cashRange) * 100, 6, 94);
-                        return (
-                          <div
-                            key={row.monthKey}
-                            className="grid min-w-0 grid-rows-[1fr_auto] gap-2"
-                          >
-                            <div
-                              className={`relative rounded-lg border ${
-                                isActive
-                                  ? "border-brand-primary/35 bg-brand-primary/[0.03]"
-                                  : "border-app-border"
-                              } bg-app-surfaceSoft px-1 py-2`}
-                            >
-                              <div
-                                className="absolute bottom-2 left-1/2 w-6 -translate-x-1/2 rounded-[4px] bg-status-success/80 sm:w-7"
-                                style={{ height: `${incomeHeightPct}%` }}
-                              />
-                              <span
-                                className="absolute z-30 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white bg-brand-primary shadow-sm"
-                                style={{ left: "50%", top: `${lineY}%` }}
-                                aria-hidden="true"
-                              />
-                            </div>
-                            <p className="truncate text-center text-xs text-text-muted">
-                              {row.label}
-                            </p>
-                          </div>
-                        );
-                      })}
-                    </div>
+                        {trendPlot.points.map((point) =>
+                          point.isActive ? (
+                            <rect
+                              key={`${point.monthKey}-active`}
+                              x={point.x - 9}
+                              y="4"
+                              width="18"
+                              height="92"
+                              rx="2.8"
+                              fill="rgba(15, 42, 74, 0.05)"
+                              stroke="rgba(15, 42, 74, 0.25)"
+                              strokeWidth="0.35"
+                            />
+                          ) : null,
+                        )}
+
+                        {trendPlot.points.map((point) => (
+                          <rect
+                            key={`${point.monthKey}-bar`}
+                            x={point.x - trendPlot.barWidth / 2}
+                            y={point.incomeY}
+                            width={trendPlot.barWidth}
+                            height={Math.max(2, point.incomeHeight)}
+                            rx="1.4"
+                            fill="rgba(34, 197, 94, 0.78)"
+                          />
+                        ))}
+
+                        {trendPlot.pathD ? (
+                          <path
+                            d={trendPlot.pathD}
+                            fill="none"
+                            stroke="rgba(15, 42, 74, 0.92)"
+                            strokeWidth="1.6"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        ) : null}
+
+                        {trendPlot.points.map((point) => (
+                          <circle
+                            key={`${point.monthKey}-dot`}
+                            cx={point.x}
+                            cy={point.cashY}
+                            r="1.5"
+                            fill="rgba(15, 42, 74, 0.96)"
+                          />
+                        ))}
+                      </g>
+                    </svg>
                   </div>
 
                   <div className="grid grid-rows-5 content-between py-2 text-right text-[11px] text-text-muted">
-                    {Array.from({ length: axisSteps + 1 }).map((_, index) => {
-                      const tickValue = cashMin + ((axisSteps - index) / axisSteps) * cashRange;
-                      return (
-                        <span key={`cash-axis-${index}`} className="self-center">
-                          {formatCompactCurrency(tickValue)}
-                        </span>
-                      );
-                    })}
+                    {trendPlot.ticks.map((tick, index) => (
+                      <span key={`cash-axis-${index}`} className="self-center">
+                        {formatCompactCurrency(tick.cashValue)}
+                      </span>
+                    ))}
                   </div>
                 </div>
 

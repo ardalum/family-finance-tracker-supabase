@@ -210,6 +210,50 @@ describe("app view props", () => {
     assert.equal(accountsMonth, "2026-06");
   });
 
+  it("maps money center transactions from spending transactions", () => {
+    const props = createAppViewProps({
+      ...input,
+      spendingTransactions: [{ id: "supabase-spending-1" }],
+      appData: {
+        ...input.appData,
+        transactions: [{ id: "local-fallback-1" }],
+      },
+    });
+
+    assert.deepEqual(props.moneyCenterProps.transactions, [{ id: "supabase-spending-1" }]);
+  });
+
+  it("falls back to local transactions when spending transactions are unavailable", () => {
+    const props = createAppViewProps({
+      ...input,
+      spendingTransactions: null,
+      appData: {
+        ...input.appData,
+        transactions: [{ id: "local-fallback-2" }],
+      },
+    });
+
+    assert.deepEqual(props.moneyCenterProps.transactions, [{ id: "local-fallback-2" }]);
+  });
+
+  it("passes spending outflow movements into money center props", () => {
+    const props = createAppViewProps({
+      ...input,
+      spendingOutflowMovements: [
+        {
+          id: "movement-1",
+          sourceType: "spending_transaction",
+          movementType: "spending_payment",
+          direction: "outflow",
+          amount: 120,
+        },
+      ],
+    });
+
+    assert.equal(props.moneyCenterProps.spendingOutflowMovements.length, 1);
+    assert.equal(props.moneyCenterProps.spendingOutflowMovements[0].id, "movement-1");
+  });
+
   it("maps calendar props", () => {
     const props = createAppViewProps({
       ...input,
