@@ -10,6 +10,10 @@ const onboardingSteps = [
     copy: "Spedger helps your household track income, accounts, spending, budgets, bills, cards, goals, and insights in one place.",
     icon: Sparkles,
     primaryLabel: "Start walkthrough",
+    helperTitle: "What you can do here",
+    helperCopy:
+      "Spedger brings your household's income, accounts, bills, cards, budgets, and goals into one workspace.",
+    iconTone: "bg-[#EAF2FF] text-[#0A1F46]",
   },
   {
     id: "money-center",
@@ -17,6 +21,10 @@ const onboardingSteps = [
     copy: "Add income, tracked accounts, and balance snapshots so Cash Position has a reliable starting point.",
     icon: WalletCards,
     actions: [{ label: "Open Money Center", view: "financial-position" }],
+    helperTitle: "Suggested first step",
+    helperCopy:
+      "Add your tracked accounts and starting balance snapshots so Cash Position has a reliable baseline.",
+    iconTone: "bg-[#ECF3FF] text-[#0A1F46]",
   },
   {
     id: "transactions",
@@ -24,6 +32,9 @@ const onboardingSteps = [
     copy: "Track spending and income activity so budgets and insights stay accurate.",
     icon: ArrowRight,
     actions: [{ label: "Open Transactions", view: "spending" }],
+    helperTitle: "What to do here",
+    helperCopy: "Log everyday spending and income activity so budgets and insights stay accurate.",
+    iconTone: "bg-[#FFF4E6] text-[#9A4F00]",
   },
   {
     id: "budgets",
@@ -31,6 +42,10 @@ const onboardingSteps = [
     copy: "Set category budgets and compare actual spending against your plan.",
     icon: ArrowRight,
     actions: [{ label: "Open Budgets", view: "budgets" }],
+    helperTitle: "What to do here",
+    helperCopy:
+      "Set category limits for the month, then compare your actual spending against your plan.",
+    iconTone: "bg-[#EEF8F1] text-[#166534]",
   },
   {
     id: "bills-cards",
@@ -41,6 +56,10 @@ const onboardingSteps = [
       { label: "Open Bills", view: "recurring" },
       { label: "Open Cards & Debt", view: "credit-cards" },
     ],
+    helperTitle: "What to do here",
+    helperCopy:
+      "Add recurring bills and cards so Spedger can help track due dates, balances, and payment status.",
+    iconTone: "bg-[#FFF6EB] text-[#9A4F00]",
   },
   {
     id: "goals-insights",
@@ -51,6 +70,9 @@ const onboardingSteps = [
       { label: "Open Goals", view: "savings" },
       { label: "Open Insights", view: "insights" },
     ],
+    helperTitle: "What to do here",
+    helperCopy: "Track progress toward savings goals and review trends that need attention.",
+    iconTone: "bg-[#ECF3FF] text-[#0A1F46]",
   },
   {
     id: "ready",
@@ -58,6 +80,10 @@ const onboardingSteps = [
     copy: "You can restart this walkthrough anytime from Help Center or Settings.",
     icon: CheckCircle2,
     primaryLabel: "Finish",
+    helperTitle: "You can come back anytime",
+    helperCopy:
+      "Restart this walkthrough from Help Center or Settings whenever you want a quick refresher.",
+    iconTone: "bg-[#EAF8EF] text-[#166534]",
   },
 ];
 
@@ -67,8 +93,9 @@ export default function OnboardingWalkthrough({ open, onClose, onFinish, onSkip,
   const step = onboardingSteps[stepIndex];
   const isFirstStep = stepIndex === 0;
   const isLastStep = stepIndex === totalSteps - 1;
-  const progressWidth = `${((stepIndex + 1) / totalSteps) * 100}%`;
+  const progressValue = stepIndex + 1;
   const Icon = step.icon;
+  const stepTitleId = useMemo(() => `onboarding-step-title-${step.id}`, [step.id]);
 
   useEffect(() => {
     if (!open) return;
@@ -86,8 +113,6 @@ export default function OnboardingWalkthrough({ open, onClose, onFinish, onSkip,
     window.addEventListener("keydown", handleEscClose);
     return () => window.removeEventListener("keydown", handleEscClose);
   }, [onSkip, open]);
-
-  const stepTitleId = useMemo(() => `onboarding-step-title-${step.id}`, [step.id]);
 
   if (!open) return null;
 
@@ -108,21 +133,24 @@ export default function OnboardingWalkthrough({ open, onClose, onFinish, onSkip,
   }
 
   return (
-    <div className="fixed inset-0 z-[90] grid place-items-center bg-[#F9FAFB]/85 px-4 py-4 backdrop-blur-[1px] sm:py-8">
-      <Card className="w-full max-w-2xl overflow-hidden">
+    <div className="fixed inset-0 z-[90] grid place-items-center bg-[#F6F3EC]/70 p-3 backdrop-blur-[2px] sm:p-6">
+      <Card
+        className="w-full max-w-[680px] overflow-hidden rounded-[24px] border-[#E8E2D6] bg-[#FBF8F2] shadow-[0_30px_90px_-40px_rgba(15,23,42,0.48)]"
+        data-testid="onboarding-modal"
+      >
         <div
           role="dialog"
           aria-modal="true"
           aria-labelledby={stepTitleId}
-          className="grid max-h-[90vh] min-h-[360px] grid-rows-[auto_auto_1fr_auto] bg-app-surface"
+          className="grid max-h-[88vh] grid-rows-[auto_auto_1fr_auto]"
         >
-          <div className="flex items-center justify-between border-b border-app-border px-5 py-4">
+          <div className="flex items-center justify-between px-5 pb-3 pt-5 sm:px-7 sm:pb-4 sm:pt-6">
             <p className="text-sm font-semibold text-text-soft">
-              Step {stepIndex + 1} of {totalSteps}
+              Step {progressValue} of {totalSteps}
             </p>
             <button
               type="button"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-text-soft transition hover:bg-app-muted hover:text-text-main"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-text-soft transition hover:bg-app-muted hover:text-text-main"
               onClick={onClose}
               aria-label="Close walkthrough"
             >
@@ -130,34 +158,63 @@ export default function OnboardingWalkthrough({ open, onClose, onFinish, onSkip,
             </button>
           </div>
 
-          <div className="h-1.5 w-full bg-app-muted">
-            <div
-              className="h-full bg-brand-primary transition-all duration-300"
-              style={{ width: progressWidth }}
-            />
+          <div className="px-5 pb-4 sm:px-7">
+            <div className="h-2 rounded-full bg-[#ECE7DC]" aria-label="Walkthrough progress">
+              <div
+                className="h-2 rounded-full bg-brand-primary transition-all duration-300"
+                style={{ width: `${(progressValue / totalSteps) * 100}%` }}
+              />
+            </div>
+            <div className="mt-3 flex items-center gap-1.5" aria-hidden="true">
+              {onboardingSteps.map((currentStep, index) => {
+                const isCurrent = index === stepIndex;
+                const isComplete = index < stepIndex;
+                return (
+                  <span
+                    key={currentStep.id}
+                    className={`h-2.5 w-2.5 rounded-full ${
+                      isCurrent
+                        ? "bg-brand-primary"
+                        : isComplete
+                          ? "bg-brand-primary/50"
+                          : "bg-[#D8D1C1]"
+                    }`}
+                  />
+                );
+              })}
+            </div>
           </div>
 
-          <div className="overflow-y-auto px-5 py-5 sm:px-6">
-            <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-primary text-white">
-              <Icon size={21} aria-hidden="true" />
+          <div className="overflow-y-auto px-5 pb-5 sm:px-7 sm:pb-6">
+            <div
+              className={`inline-flex h-14 w-14 items-center justify-center rounded-2xl ${step.iconTone}`}
+            >
+              <Icon size={24} aria-hidden="true" />
             </div>
 
             <h2
               id={stepTitleId}
-              className="mt-4 text-2xl font-semibold tracking-tight text-text-main"
+              className="mt-4 text-3xl font-semibold tracking-tight text-text-main"
             >
               {step.title}
             </h2>
-            <p className="mt-2 text-sm leading-6 text-text-muted sm:text-base">{step.copy}</p>
+            <p className="mt-2 max-w-[56ch] text-[15px] leading-7 text-text-muted">{step.copy}</p>
+
+            <div className="mt-5 rounded-2xl border border-[#E7DFD1] bg-white/85 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-text-soft">
+                {step.helperTitle}
+              </p>
+              <p className="mt-2 text-sm leading-6 text-text-main">{step.helperCopy}</p>
+            </div>
 
             {step.actions?.length ? (
-              <div className="mt-5 flex flex-wrap gap-2">
+              <div className="mt-5 flex flex-wrap gap-2.5">
                 {step.actions.map((action) => (
                   <Button
                     key={action.label}
                     type="button"
                     variant="secondary"
-                    className="justify-start text-left"
+                    className="bg-white/90 text-sm"
                     onClick={() => onNavigate?.(action.view)}
                   >
                     {action.label}
@@ -167,21 +224,20 @@ export default function OnboardingWalkthrough({ open, onClose, onFinish, onSkip,
             ) : null}
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-app-border px-5 py-4 sm:px-6">
-            <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={goToPreviousStep}
-                disabled={isFirstStep}
-              >
-                Back
-              </Button>
-              <Button type="button" variant="ghost" onClick={onSkip}>
-                Skip
-              </Button>
-            </div>
-            <Button type="button" onClick={handlePrimaryAction}>
+          <div className="flex flex-wrap items-center gap-2 border-t border-[#E8E2D6] bg-[#F8F4EC] px-5 py-4 sm:px-7">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={goToPreviousStep}
+              disabled={isFirstStep}
+              className="text-sm"
+            >
+              Back
+            </Button>
+            <Button type="button" variant="ghost" onClick={onSkip} className="text-sm">
+              Skip
+            </Button>
+            <Button type="button" onClick={handlePrimaryAction} className="ml-auto text-sm">
               {step.primaryLabel ?? "Next"}
             </Button>
           </div>

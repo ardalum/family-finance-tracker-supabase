@@ -51,9 +51,15 @@ test("walkthrough includes required step titles, controls, and navigation action
   assert.match(walkthroughSource, /Skip/);
   assert.match(walkthroughSource, /Finish/);
   assert.match(walkthroughSource, /aria-label="Close walkthrough"/);
-  assert.match(walkthroughSource, /Step \{stepIndex \+ 1\} of \{totalSteps\}/);
+  assert.match(walkthroughSource, /Step \{progressValue\} of \{totalSteps\}/);
   assert.match(walkthroughSource, /window\.addEventListener\("keydown", handleEscClose\)/);
   assert.match(walkthroughSource, /onNavigate\?\.\(action\.view\)/);
+  assert.match(walkthroughSource, /role="dialog"/);
+  assert.match(walkthroughSource, /data-testid="onboarding-modal"/);
+  assert.match(walkthroughSource, /grid place-items-center/);
+  assert.match(walkthroughSource, /max-w-\[680px\]/);
+  assert.match(walkthroughSource, /aria-label="Walkthrough progress"/);
+  assert.match(walkthroughSource, /onboardingSteps\.map\(\(currentStep, index\)/);
 });
 
 test("restart walkthrough action exists in help center and settings", () => {
@@ -61,4 +67,12 @@ test("restart walkthrough action exists in help center and settings", () => {
   assert.match(helpSupportSource, /Restart walkthrough/);
   assert.match(appSettingsSource, /onRestartOnboarding/);
   assert.match(appSettingsSource, /Review the main Spedger workflows again\./);
+});
+
+test("walkthrough helper copy uses onboarding language instead of location documentation", () => {
+  assert.match(walkthroughSource, /What you can do here/);
+  assert.match(walkthroughSource, /Suggested first step/);
+  assert.match(walkthroughSource, /What to do here/);
+  assert.match(walkthroughSource, /You can come back anytime/);
+  assert.doesNotMatch(walkthroughSource, /WHERE TO FIND THIS/);
 });
