@@ -63,7 +63,7 @@ function normalizeSettings(settings = defaultAppSettings) {
   };
 }
 
-export default function AppSettings() {
+export default function AppSettings({ exportData = null }) {
   const { user } = useAuth();
   const { activeHousehold, memberships } = useHouseholds();
   const [savedSettings, setSavedSettings] = useState(() => normalizeSettings(readAppSettings()));
@@ -118,6 +118,36 @@ export default function AppSettings() {
   function handleSyncNow() {
     setLastSyncedLabel("Just now");
     setSaveMessage("Settings refreshed");
+    window.setTimeout(() => setSaveMessage(""), 1600);
+  }
+
+  function handleExportData() {
+    if (!exportData) {
+      setSaveMessage("Export coming soon");
+      window.setTimeout(() => setSaveMessage(""), 1600);
+      return;
+    }
+
+    const payload = {
+      metadata: {
+        exportedAt: new Date().toISOString(),
+        appName: "Spedger",
+        version: 1,
+      },
+      data: exportData,
+    };
+
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const dateLabel = new Date().toISOString().slice(0, 10);
+    const anchor = document.createElement("a");
+    anchor.href = downloadUrl;
+    anchor.download = `spedger-export-${dateLabel}.json`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    window.URL.revokeObjectURL(downloadUrl);
+    setSaveMessage("Export downloaded");
     window.setTimeout(() => setSaveMessage(""), 1600);
   }
 
@@ -329,16 +359,16 @@ export default function AppSettings() {
             <ActionRow
               icon={<FileText size={17} />}
               title="Export data"
-              helper="Download your financial data (CSV)."
-              disabled
-              disabledTitle="Export coming soon"
+              helper="Download your financial data (JSON)."
+              onClick={handleExportData}
             />
             <ActionRow
               icon={<Upload size={17} />}
               title="Import data"
               helper="Import transactions or budgets."
               disabled
-              disabledTitle="Import coming soon"
+              // TODO: Wire import after validation/mapping workflow exists.
+              disabledTitle="Import workflow coming soon."
             />
             <ActionRow
               icon={<Cloud size={17} />}
@@ -352,6 +382,7 @@ export default function AppSettings() {
               helper="Permanently delete this household and all data."
               danger
               disabled
+              disabledTitle="Coming soon"
             />
             <ActionRow
               icon={<Trash2 size={17} />}
@@ -359,6 +390,7 @@ export default function AppSettings() {
               helper="Permanently delete all your data. This cannot be undone."
               danger
               disabled
+              disabledTitle="Coming soon"
             />
           </Card>
 
@@ -466,6 +498,7 @@ function LabeledSelect({ label, value, options, onChange }) {
 }
 
 function MemberRow({ membership, fallbackEmail, isFirst }) {
+  const [menuOpen, setMenuOpen] = useState(false);
   const role = String(membership.role || "member");
   const roleLabel = role.charAt(0).toUpperCase() + role.slice(1);
   const baseEmail = membership.user?.email || membership.userProfile?.email || "";
@@ -503,15 +536,39 @@ function MemberRow({ membership, fallbackEmail, isFirst }) {
         <PermissionIcon icon={<Home size={12} />} title="Goals" />
         <PermissionIcon icon={<Settings size={12} />} title="Settings" />
       </div>
-      <button
-        type="button"
-        className="inline-flex h-8 w-8 items-center justify-center justify-self-end rounded-lg border border-app-border bg-white text-text-muted disabled:cursor-not-allowed disabled:opacity-70"
-        disabled
-        title="Change role / remove member coming soon"
-        aria-label="Member actions coming soon"
-      >
-        <MoreVertical size={14} />
-      </button>
+      <div className="relative justify-self-end">
+        <button
+          type="button"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-text-muted"
+          title="Member actions coming soon"
+          aria-label="Open member actions"
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((current) => !current)}
+        >
+          <MoreVertical size={14} />
+        </button>
+        {menuOpen ? (
+          <div className="absolute right-0 top-9 z-10 w-44 rounded-lg border border-app-border bg-white p-1.5 shadow-lg">
+            {/* TODO: Wire member role/remove actions after household permission services exist. */}
+            <button
+              type="button"
+              disabled
+              title="Coming soon"
+              className="w-full cursor-not-allowed rounded-md px-2 py-1.5 text-left text-xs font-medium text-text-muted opacity-80"
+            >
+              Change role - Coming soon
+            </button>
+            <button
+              type="button"
+              disabled
+              title="Coming soon"
+              className="w-full cursor-not-allowed rounded-md px-2 py-1.5 text-left text-xs font-medium text-text-muted opacity-80"
+            >
+              Remove member - Coming soon
+            </button>
+          </div>
+        ) : null}
+      </div>
     </article>
   );
 }

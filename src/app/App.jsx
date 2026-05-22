@@ -562,6 +562,26 @@ function FinanceTrackerApp() {
     () => getAlerts(getDashboardData(dashboardAppData, selectedDashboardMonth)),
     [dashboardAppData, selectedDashboardMonth],
   );
+  const settingsExportData = useMemo(
+    () => ({
+      transactions: appData?.transactions ?? [],
+      budgetsByMonth: appData?.budgetsByMonth ?? {},
+      creditCards: appData?.creditCards ?? [],
+      monthlyBalancesByMonth: appData?.monthlyBalancesByMonth ?? {},
+      recurringPayments: appData?.recurringPayments ?? [],
+      recurringStatusByMonth: appData?.recurringStatusByMonth ?? {},
+      savingsGoals: appData?.savingsGoals ?? [],
+      savingsContributions: appData?.savingsContributions ?? [],
+      categories: appData?.categories ?? [],
+      cashAccounts: appData?.cashAccounts ?? [],
+      accountBalanceSnapshots: appData?.accountBalanceSnapshots ?? [],
+      liabilityAccounts: appData?.liabilityAccounts ?? [],
+      liabilityBalanceSnapshots: appData?.liabilityBalanceSnapshots ?? [],
+      incomeSources: appData?.incomeSources ?? [],
+      incomeEntries: appData?.incomeEntries ?? [],
+    }),
+    [appData],
+  );
 
   useEffect(() => {
     if (
@@ -777,6 +797,7 @@ function FinanceTrackerApp() {
     createSupabaseSavingsContribution,
     updateSupabaseSavingsContribution,
     deleteSupabaseSavingsContribution,
+    settingsExportData,
   });
 
   function openQuickAdd() {

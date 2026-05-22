@@ -44,6 +44,7 @@ export default function AppViewRenderer({
   savingsProps,
   backupProps,
   householdSettingsProps,
+  appSettingsProps,
 }) {
   return (
     <>
@@ -73,7 +74,7 @@ export default function AppViewRenderer({
       {activeView === "household-settings" ? (
         <HouseholdSettings {...householdSettingsProps} />
       ) : null}
-      {activeView === "app-settings" ? <AppSettings /> : null}
+      {activeView === "app-settings" ? <AppSettings {...appSettingsProps} /> : null}
       {activeView === "account-settings" ? <AccountSettings /> : null}
       {activeView === "about" ? <AboutSpedger /> : null}
       {activeView === "privacy-policy" ? <PrivacyPolicy /> : null}

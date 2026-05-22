@@ -54,6 +54,8 @@ export default function BudgetTracker({
   const [transactionsLoading, setTransactionsLoading] = useState(false);
   const [transactionsError, setTransactionsError] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [pendingSuggestion, setPendingSuggestion] = useState(null);
+  const [isApplyingSuggestion, setIsApplyingSuggestion] = useState(false);
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const totalBudget = getTotalMonthlyBudget(budgets);
   const transactionsForBudget = transactions ?? budgetTransactions;
@@ -149,6 +151,33 @@ export default function BudgetTracker({
     if (isSaving) return;
     setModalOpen(false);
     setEditingBudget(null);
+  }
+
+  function openApplySuggestionDialog(suggestion) {
+    if (isSaving || isApplyingSuggestion) return;
+    if (!suggestion?.to) return;
+    setPendingSuggestion(suggestion);
+  }
+
+  async function confirmApplySuggestion() {
+    if (!pendingSuggestion?.to) return;
+
+    const targetBudget = pendingSuggestion.to;
+    const targetBudgetId = targetBudget.supabaseId ?? targetBudget.id;
+    const currentAmount = Number(targetBudget.monthlyAmount || 0);
+    const nextAmount = currentAmount + Number(pendingSuggestion.amount || 0);
+
+    setIsApplyingSuggestion(true);
+    try {
+      await onUpdateBudget(targetBudgetId, {
+        name: targetBudget.name || "",
+        monthlyAmount: nextAmount,
+        notes: targetBudget.notes || "",
+      });
+      setPendingSuggestion(null);
+    } finally {
+      setIsApplyingSuggestion(false);
+    }
   }
 
   return (
@@ -312,9 +341,10 @@ export default function BudgetTracker({
                     <button
                       type="button"
                       className="mt-3 inline-flex w-full items-center justify-center rounded-lg border border-app-border bg-white px-3 py-1.5 text-sm font-semibold text-text-soft"
-                      disabled
+                      onClick={() => openApplySuggestionDialog(suggestion)}
+                      disabled={isSaving || isApplyingSuggestion}
                     >
-                      Apply suggestion
+                      {isApplyingSuggestion ? "Applying..." : "Apply suggestion"}
                     </button>
                   </div>
                 ))
@@ -331,6 +361,61 @@ export default function BudgetTracker({
         onSaved={handleSave}
         isSaving={isSaving}
       />
+
+      {pendingSuggestion?.to ? (
+        <div
+          className="fixed inset-0 z-50 flex min-h-screen items-center justify-center bg-gray-950/40 px-4 py-6"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="apply-budget-suggestion-title"
+        >
+          <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white shadow-xl">
+            <div className="border-b border-gray-200 p-5">
+              <h2 id="apply-budget-suggestion-title" className="text-lg font-semibold text-gray-950">
+                Apply budget suggestion?
+              </h2>
+              <p className="mt-1 text-sm text-gray-500">
+                This updates one existing budget category using your current suggestion.
+              </p>
+            </div>
+            <div className="grid gap-3 p-5 text-sm">
+              <div className="rounded-xl border border-app-border bg-app-background px-3 py-2">
+                <p className="font-semibold text-text-main">{pendingSuggestion.to.name}</p>
+                <p className="mt-1 text-text-muted">
+                  Current budget: {formatCurrency(Number(pendingSuggestion.to.monthlyAmount || 0))}
+                </p>
+                <p className="text-text-muted">
+                  Suggested budget:{" "}
+                  {formatCurrency(
+                    Number(pendingSuggestion.to.monthlyAmount || 0) + Number(pendingSuggestion.amount || 0),
+                  )}
+                </p>
+              </div>
+              <p className="text-xs text-text-muted">
+                This action does not modify the source category automatically.
+              </p>
+              <div className="mt-1 flex flex-wrap justify-end gap-3">
+                <button
+                  type="button"
+                  className="inline-flex items-center rounded-xl border border-app-border bg-white px-3 py-1.5 text-sm font-semibold text-text-main"
+                  onClick={() => setPendingSuggestion(null)}
+                  disabled={isApplyingSuggestion}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex items-center rounded-xl bg-brand-primary px-3 py-1.5 text-sm font-semibold text-white"
+                  onClick={confirmApplySuggestion}
+                  disabled={isApplyingSuggestion}
+                >
+                  {isApplyingSuggestion ? "Applying..." : "Confirm"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }

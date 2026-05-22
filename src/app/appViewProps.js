@@ -152,6 +152,7 @@ export function createAppViewProps({
   createSupabaseSavingsContribution,
   updateSupabaseSavingsContribution,
   deleteSupabaseSavingsContribution,
+  settingsExportData,
 } = {}) {
   const resolvedCopyPreviousMonthBudgets =
     copyPreviousMonthBudgetsToSupabase ?? copyPreviousMonthBudgetCategories;
@@ -388,6 +389,9 @@ export function createAppViewProps({
       onUpdateProfile: saveHouseholdProfile,
       onDeactivateProfile: deactivateProfile,
       onCreateDefaultProfiles: addDefaultProfiles,
+    },
+    appSettingsProps: {
+      exportData: settingsExportData,
     },
   };
 }
