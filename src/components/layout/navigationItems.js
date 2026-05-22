@@ -180,7 +180,6 @@ export const dashboardV2SidebarItems = [
   { id: "insights", label: "Insights", icon: LineChart, disabled: false },
   { id: null, label: "Family Activity", icon: Users, disabled: true },
   { id: "app-settings", label: "Settings", icon: Settings, disabled: false },
-  { id: "help-support", label: "Help Center", icon: CircleHelp, disabled: false },
 ];
 
 export function getSectionIdByView(viewId) {

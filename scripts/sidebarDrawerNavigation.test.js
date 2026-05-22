@@ -12,6 +12,9 @@ test("app shell uses true sidebar and mobile drawer navigation", () => {
   assert.ok(appShellSource.includes("lg:block"));
   assert.ok(appShellSource.includes("fixed inset-0 z-40 lg:hidden"));
   assert.ok(appShellSource.includes("setMobileDrawerOpen(false)"));
+  assert.ok(appShellSource.includes('aria-label="Collapse sidebar"'));
+  assert.ok(appShellSource.includes('aria-label="Expand sidebar"'));
+  assert.ok(appShellSource.includes('aria-label="Open Help Center"'));
 });
 
 test("sidebar navigation groups include Money Setup and system groups", () => {
@@ -33,6 +36,13 @@ test("navigation supports disabled coming-soon items without navigation", () => 
   assert.ok(
     navigationSource.includes("title={isDisabled ? `${item.label} (coming soon)` : item.label}"),
   );
+});
+
+test("v2 sidebar keeps help center only in support card and mobile support section", () => {
+  assert.equal(navItemsSource.includes('{ id: "help-support", label: "Help Center"'), false);
+  assert.ok(appShellSource.includes("Support"));
+  assert.ok(appShellSource.includes("Help center"));
+  assert.ok(appShellSource.includes('onViewChange("help-support")'));
 });
 
 test("navigation default group expansion and active-group auto-expand are defined", () => {
