@@ -241,6 +241,7 @@ export default function HelpSupport({ onRestartOnboarding = null }) {
             type="button"
             className="inline-flex items-center gap-2 rounded-xl border border-app-border bg-app-surface px-4 py-2 text-sm font-semibold text-text-main transition hover:bg-app-surfaceSoft"
             onClick={onRestartOnboarding}
+            data-onboarding-target="restart-walkthrough-help"
           >
             <Rocket size={16} aria-hidden="true" />
             Restart walkthrough
@@ -501,6 +502,7 @@ export default function HelpSupport({ onRestartOnboarding = null }) {
                   type="button"
                   className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary"
                   onClick={onRestartOnboarding}
+                  data-onboarding-target="restart-walkthrough-help"
                 >
                   Restart walkthrough
                   <ArrowRight size={14} aria-hidden="true" />

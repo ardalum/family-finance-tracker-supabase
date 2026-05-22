@@ -408,6 +408,7 @@ export default function AppSettings({ exportData = null, onRestartOnboarding = n
                   type="button"
                   className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-brand-primary"
                   onClick={onRestartOnboarding}
+                  data-onboarding-target="restart-walkthrough-settings"
                 >
                   Restart walkthrough
                   <ChevronRight size={14} aria-hidden="true" />

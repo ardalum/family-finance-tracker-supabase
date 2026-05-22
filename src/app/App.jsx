@@ -89,6 +89,17 @@ function FinanceTrackerApp() {
   const [setupJustCompleted, setSetupJustCompleted] = useState(false);
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const creditCardDebtSyncInFlight = useRef(false);
+
+  useEffect(() => {
+    if (!setupJustCompleted || !activeHousehold?.setupComplete || !activeHouseholdId) return;
+    if (hasCompletedOrDismissedOnboarding(activeHouseholdId)) {
+      setSetupJustCompleted(false);
+      return;
+    }
+
+    setOnboardingOpen(true);
+    setSetupJustCompleted(false);
+  }, [activeHousehold?.setupComplete, activeHouseholdId, setupJustCompleted]);
   useEffect(() => {
     let isCurrent = true;
 
@@ -932,13 +943,3 @@ function FinanceTrackerApp() {
     </AppShellFrame>
   );
 }
-useEffect(() => {
-  if (!setupJustCompleted || !activeHousehold?.setupComplete || !activeHouseholdId) return;
-  if (hasCompletedOrDismissedOnboarding(activeHouseholdId)) {
-    setSetupJustCompleted(false);
-    return;
-  }
-
-  setOnboardingOpen(true);
-  setSetupJustCompleted(false);
-}, [activeHousehold?.setupComplete, activeHouseholdId, setupJustCompleted]);
