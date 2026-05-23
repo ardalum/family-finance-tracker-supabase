@@ -616,9 +616,9 @@ export default function MoneyCenter({
         </Card>
       ) : null}
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="grid gap-4">
-          <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-4">
+      <div className="grid min-w-0 gap-4 2xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="grid min-w-0 gap-4">
+          <div className="grid min-w-0 grid-cols-[repeat(auto-fit,minmax(min(100%,250px),1fr))] gap-4">
             <SummaryMetricCard
               title="Cash Position"
               value={formatCurrency(selectedMonthRegisterCashPosition)}
@@ -653,7 +653,7 @@ export default function MoneyCenter({
             />
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
+          <div className="grid min-w-0 gap-4 min-[1600px]:grid-cols-[360px_minmax(0,1fr)]">
             <Card className="overflow-hidden">
               <div className="border-b border-app-border p-5">
                 <h3 className="flex items-center gap-1.5 text-xl font-semibold text-text-main">
@@ -1842,22 +1842,22 @@ function SummaryMetricCard({ title, value, helper, icon, tone = "soft", infoCont
           ? "bg-[#E8EEF8] text-brand-primary"
           : "bg-app-muted text-text-soft";
   return (
-    <Card className="p-4">
-      <div className="flex items-start justify-between gap-2">
-        <div>
+    <Card className="min-w-0 overflow-hidden p-4">
+      <div className="flex min-w-0 items-start justify-between gap-3">
+        <div className="min-w-0">
           <p className="flex items-center gap-1.5 text-sm font-semibold text-text-main">
             {title}
             {infoContent ? (
               <InfoTooltip label={`${title} calculation info`} content={infoContent} />
             ) : null}
           </p>
-          <p className="mt-2 text-2xl font-semibold tracking-tight text-text-main sm:text-3xl">
+          <p className="mt-2 break-words text-[clamp(1.35rem,2vw,1.875rem)] font-semibold leading-tight tracking-tight text-text-main tabular-nums">
             {value}
           </p>
           <p className="mt-1 text-sm text-text-muted">{helper}</p>
         </div>
         <span
-          className={`inline-flex h-12 w-12 items-center justify-center rounded-full ${iconToneClass}`}
+          className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${iconToneClass}`}
         >
           {icon}
         </span>
