@@ -1,7 +1,7 @@
 export default function InlineAlert({ children, tone = "danger", className = "" }) {
   const tones = {
-    danger: "border-red-200 bg-red-50 text-[#991B1B]",
-    warning: "border-amber-200 bg-amber-50 text-amber-800",
+    danger: "border-status-danger/40 bg-status-dangerBg/35 text-status-dangerDark",
+    warning: "border-status-warning/40 bg-status-warningBg/35 text-status-warningDark",
     info: "border-app-border bg-app-background text-text-soft",
   };
 

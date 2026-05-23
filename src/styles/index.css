@@ -7,14 +7,71 @@
 :root {
   color-scheme: light;
   font-family: Manrope, ui-sans-serif, system-ui, sans-serif;
-  background: #fefdfb;
-  color: #111827;
+  background: rgb(var(--color-app-background));
+  color: rgb(var(--color-text-main));
+  --color-brand-primary: 11 27 59;
+  --color-brand-dark: 7 21 46;
+  --color-brand-accent: 34 160 107;
+  --color-brand-secondary: 30 58 95;
+  --color-app-background: 254 253 251;
+  --color-app-sidebar: 250 248 244;
+  --color-app-surface: 255 255 255;
+  --color-app-surface-soft: 251 248 242;
+  --color-app-muted: 243 241 234;
+  --color-app-border: 232 226 216;
+  --color-text-main: 17 24 39;
+  --color-text-muted: 107 114 128;
+  --color-text-soft: 55 65 81;
+  --color-status-success: 22 163 74;
+  --color-status-success-dark: 22 101 52;
+  --color-status-success-bg: 220 252 231;
+  --color-status-warning: 245 158 11;
+  --color-status-warning-dark: 146 64 14;
+  --color-status-warning-bg: 254 243 199;
+  --color-status-danger: 239 68 68;
+  --color-status-danger-dark: 153 27 27;
+  --color-status-danger-bg: 254 226 226;
+  --color-status-info-bg: 219 234 254;
+  --color-status-info-dark: 30 64 175;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-brand-primary: 147 197 253;
+  --color-brand-dark: 125 211 252;
+  --color-brand-accent: 74 222 128;
+  --color-brand-secondary: 96 165 250;
+  --color-app-background: 11 18 32;
+  --color-app-sidebar: 16 24 40;
+  --color-app-surface: 23 33 53;
+  --color-app-surface-soft: 29 42 68;
+  --color-app-muted: 45 62 95;
+  --color-app-border: 62 81 118;
+  --color-text-main: 241 245 249;
+  --color-text-muted: 173 186 209;
+  --color-text-soft: 203 213 225;
+  --color-status-success: 74 222 128;
+  --color-status-success-dark: 187 247 208;
+  --color-status-success-bg: 20 83 45;
+  --color-status-warning: 250 204 21;
+  --color-status-warning-dark: 254 240 138;
+  --color-status-warning-bg: 120 53 15;
+  --color-status-danger: 248 113 113;
+  --color-status-danger-dark: 254 202 202;
+  --color-status-danger-bg: 127 29 29;
+  --color-status-info-bg: 30 64 175;
+  --color-status-info-dark: 191 219 254;
 }
 
 body {
   margin: 0;
   min-width: 320px;
-  background: #fefdfb;
+  background: rgb(var(--color-app-background));
+  color: rgb(var(--color-text-main));
   overflow-x: hidden;
 }
 
@@ -36,7 +93,7 @@ select {
 .walletflow-calendar .fc-daygrid-day-number {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #374151;
+  color: rgb(var(--color-text-soft));
 }
 
 .walletflow-calendar .fc-daygrid-event {
@@ -67,32 +124,32 @@ select {
 }
 
 .walletflow-calendar .wf-calendar-day-selected {
-  background: rgba(37, 99, 235, 0.08);
+  background: rgb(var(--color-status-info-bg) / 0.22);
 }
 
 .walletflow-calendar .wf-calendar-severity-danger {
-  background: #fee2e2;
-  color: #b91c1c;
+  background: rgb(var(--color-status-danger-bg));
+  color: rgb(var(--color-status-danger-dark));
 }
 
 .walletflow-calendar .wf-calendar-severity-warning {
-  background: #fef3c7;
-  color: #92400e;
+  background: rgb(var(--color-status-warning-bg));
+  color: rgb(var(--color-status-warning-dark));
 }
 
 .walletflow-calendar .wf-calendar-severity-success {
-  background: #dcfce7;
-  color: #166534;
+  background: rgb(var(--color-status-success-bg));
+  color: rgb(var(--color-status-success-dark));
 }
 
 .walletflow-calendar .wf-calendar-severity-muted {
-  background: #e5e7eb;
-  color: #4b5563;
+  background: rgb(var(--color-app-muted));
+  color: rgb(var(--color-text-soft));
 }
 
 .walletflow-calendar .wf-calendar-severity-info {
-  background: #dbeafe;
-  color: #1e40af;
+  background: rgb(var(--color-status-info-bg));
+  color: rgb(var(--color-status-info-dark));
 }
 
 @media (max-width: 640px) {
