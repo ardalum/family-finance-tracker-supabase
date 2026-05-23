@@ -37,6 +37,7 @@ import {
   readAppSettings,
   writeAppSettings,
 } from "../appSettings.js";
+import { applyThemePreference, THEME_OPTIONS } from "../themeMode.js";
 
 const MONTH_BEHAVIOR_OPTIONS = [
   { value: "current", label: "Roll over to current month" },
@@ -109,6 +110,7 @@ export default function AppSettings({ exportData = null, onRestartOnboarding = n
   function handleSave() {
     const normalized = normalizeSettings(draftSettings);
     writeAppSettings(normalized);
+    applyThemePreference(normalized.theme);
     setSavedSettings(normalized);
     setDraftSettings(normalized);
     setSaveMessage("Changes saved");
@@ -178,28 +180,28 @@ export default function AppSettings({ exportData = null, onRestartOnboarding = n
       <section className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-4">
         <SummaryCard
           icon={<Home size={27} />}
-          iconClassName="bg-[#ECF3FF] text-[#2158B6]"
+          iconClassName="bg-status-infoBg/20 text-status-infoDark"
           label="Household"
           value={householdLabel}
           helper={`${memberCount} members`}
         />
         <SummaryCard
           icon={<Bell size={27} />}
-          iconClassName="bg-[#FFF4E5] text-[#EA7A0A]"
+          iconClassName="bg-status-warningBg/35 text-status-warningDark"
           label="Notifications"
           value={`${notificationEnabledCount} enabled`}
           helper="Bills, cards, budgets"
         />
         <SummaryCard
           icon={<ShieldCheck size={27} />}
-          iconClassName="bg-[#EAF8EF] text-[#1D8E4B]"
+          iconClassName="bg-status-successBg/30 text-status-successDark"
           label="Data & security"
           value="Protected"
           helper="Account settings"
         />
         <SummaryCard
           icon={<SlidersHorizontal size={27} />}
-          iconClassName="bg-[#ECF3FF] text-[#2158B6]"
+          iconClassName="bg-status-infoBg/20 text-status-infoDark"
           label="Preferences"
           value={preferenceValue}
           helper="Currency and display"
@@ -208,9 +210,9 @@ export default function AppSettings({ exportData = null, onRestartOnboarding = n
 
       <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_390px]">
         <div className="grid min-w-0 gap-4">
-          <Card className="rounded-2xl border border-app-border bg-white p-5">
+          <Card className="rounded-2xl border border-app-border bg-app-surface p-5">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-2xl font-semibold tracking-tight text-[#071F42]">
+              <h3 className="text-2xl font-semibold tracking-tight text-text-main">
                 Household settings
               </h3>
               <ChevronRight size={18} className="text-text-muted" />
@@ -251,9 +253,9 @@ export default function AppSettings({ exportData = null, onRestartOnboarding = n
             </div>
           </Card>
 
-          <Card className="rounded-2xl border border-app-border bg-white p-5">
+          <Card className="rounded-2xl border border-app-border bg-app-surface p-5">
             <div className="mb-4 flex items-center justify-between gap-3">
-              <h3 className="text-2xl font-semibold tracking-tight text-[#071F42]">
+              <h3 className="text-2xl font-semibold tracking-tight text-text-main">
                 Members & permissions
               </h3>
               <button
@@ -288,8 +290,8 @@ export default function AppSettings({ exportData = null, onRestartOnboarding = n
             </div>
           </Card>
 
-          <Card className="rounded-2xl border border-app-border bg-white p-5">
-            <h3 className="mb-2 text-2xl font-semibold tracking-tight text-[#071F42]">
+          <Card className="rounded-2xl border border-app-border bg-app-surface p-5">
+            <h3 className="mb-2 text-2xl font-semibold tracking-tight text-text-main">
               Notification preferences
             </h3>
             <div className="grid gap-2">
@@ -326,8 +328,8 @@ export default function AppSettings({ exportData = null, onRestartOnboarding = n
         </div>
 
         <aside className="grid content-start gap-3">
-          <Card className="rounded-2xl border border-app-border bg-white p-5">
-            <h3 className="mb-2 text-2xl font-semibold tracking-tight text-[#071F42]">
+          <Card className="rounded-2xl border border-app-border bg-app-surface p-5">
+            <h3 className="mb-2 text-2xl font-semibold tracking-tight text-text-main">
               Account status
             </h3>
             <StatusRow
@@ -352,8 +354,8 @@ export default function AppSettings({ exportData = null, onRestartOnboarding = n
             />
           </Card>
 
-          <Card className="rounded-2xl border border-app-border bg-white p-5">
-            <h3 className="mb-2 text-2xl font-semibold tracking-tight text-[#071F42]">
+          <Card className="rounded-2xl border border-app-border bg-app-surface p-5">
+            <h3 className="mb-2 text-2xl font-semibold tracking-tight text-text-main">
               Data management
             </h3>
             <ActionRow
@@ -394,8 +396,8 @@ export default function AppSettings({ exportData = null, onRestartOnboarding = n
             />
           </Card>
 
-          <Card className="rounded-2xl border border-app-border bg-white p-5">
-            <h3 className="mb-2 text-2xl font-semibold tracking-tight text-[#071F42]">
+          <Card className="rounded-2xl border border-app-border bg-app-surface p-5">
+            <h3 className="mb-2 text-2xl font-semibold tracking-tight text-text-main">
               App preferences
             </h3>
             {onRestartOnboarding ? (
@@ -419,10 +421,7 @@ export default function AppSettings({ exportData = null, onRestartOnboarding = n
               icon={<Sun size={17} />}
               title="Theme"
               value={draftSettings.theme || "light"}
-              options={[
-                { value: "light", label: "Light" },
-                { value: "system", label: "System" },
-              ]}
+              options={THEME_OPTIONS}
               onChange={(value) => updateDraft({ theme: value })}
             />
             <PreferenceSelectRow
@@ -462,7 +461,7 @@ export default function AppSettings({ exportData = null, onRestartOnboarding = n
 
 function SummaryCard({ icon, iconClassName, label, value, helper }) {
   return (
-    <Card className="rounded-2xl border border-app-border bg-white p-4 shadow-sm">
+    <Card className="rounded-2xl border border-app-border bg-app-surface p-4 shadow-sm">
       <div className="flex items-center gap-3.5">
         <span
           className={`inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-full ${iconClassName}`}
@@ -471,7 +470,7 @@ function SummaryCard({ icon, iconClassName, label, value, helper }) {
         </span>
         <div className="min-w-0">
           <p className="text-xs font-medium uppercase tracking-wide text-text-muted">{label}</p>
-          <p className="truncate text-xl font-semibold tracking-tight text-[#071F42] sm:text-2xl">
+          <p className="truncate text-xl font-semibold tracking-tight text-text-main sm:text-2xl">
             {value}
           </p>
           <p className="truncate text-sm text-text-muted">{helper}</p>
@@ -532,15 +531,15 @@ function MemberRow({ membership, fallbackEmail, isFirst }) {
   const initial = (name || "H").trim().charAt(0).toUpperCase();
   const roleClass =
     role === "owner"
-      ? "bg-[#ECF3FF] text-[#2158B6]"
+      ? "bg-status-infoBg/20 text-status-infoDark"
       : role === "admin"
-        ? "bg-[#EEF2FF] text-[#334155]"
+        ? "bg-app-muted text-text-soft"
         : "bg-app-muted text-text-muted";
 
   return (
-    <article className="grid gap-2 border-b border-app-border bg-white px-3 py-3 last:border-b-0 md:grid-cols-[minmax(0,1fr)_110px_220px_58px] md:items-center">
+    <article className="grid gap-2 border-b border-app-border bg-app-surface px-3 py-3 last:border-b-0 md:grid-cols-[minmax(0,1fr)_110px_220px_58px] md:items-center">
       <div className="flex min-w-0 items-center gap-2.5">
-        <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#ECF3FF] text-sm font-semibold text-[#2158B6]">
+        <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-status-infoBg/20 text-sm font-semibold text-status-infoDark">
           {initial}
         </span>
         <div className="min-w-0">
@@ -565,7 +564,7 @@ function MemberRow({ membership, fallbackEmail, isFirst }) {
       <div className="relative justify-self-end">
         <button
           type="button"
-          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-text-muted"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-app-surface text-text-muted"
           title="Member actions coming soon"
           aria-label="Open member actions"
           aria-expanded={menuOpen}
@@ -574,7 +573,7 @@ function MemberRow({ membership, fallbackEmail, isFirst }) {
           <MoreVertical size={14} />
         </button>
         {menuOpen ? (
-          <div className="absolute right-0 top-9 z-10 w-44 rounded-lg border border-app-border bg-white p-1.5 shadow-lg">
+          <div className="absolute right-0 top-9 z-10 w-44 rounded-lg border border-app-border bg-app-surface p-1.5 shadow-lg">
             {/* TODO: Wire member role/remove actions after household permission services exist. */}
             <button
               type="button"
@@ -603,7 +602,7 @@ function PermissionIcon({ icon, title }) {
   return (
     <span
       title={title}
-      className="relative inline-flex h-7 w-7 items-center justify-center rounded-full border border-app-border bg-white text-[#071F42]"
+      className="relative inline-flex h-7 w-7 items-center justify-center rounded-full border border-app-border bg-app-surface text-text-main"
     >
       {icon}
       <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-status-success" />
@@ -633,7 +632,7 @@ function TogglePreferenceRow({ icon, title, description, enabled, onToggle, comp
         }`}
       >
         <span
-          className={`inline-block h-5 w-5 transform rounded-full bg-white transition ${
+          className={`inline-block h-5 w-5 transform rounded-full bg-app-surface transition ${
             enabled ? "translate-x-6" : "translate-x-1"
           }`}
         />
@@ -662,7 +661,7 @@ function StatusRow({
         </div>
       </div>
       {badge ? (
-        <span className="rounded-full bg-[#EAF8EF] px-2 py-1 text-xs font-semibold text-[#1D8E4B]">
+        <span className="rounded-full bg-status-successBg px-2 py-1 text-xs font-semibold text-status-successDark">
           {badge}
         </span>
       ) : actionText ? (
@@ -698,7 +697,7 @@ function ActionRow({
       title={disabledTitle || undefined}
       className={`flex w-full items-start justify-between gap-3 border-b px-0 py-2.5 text-left last:border-b-0 ${
         danger
-          ? "mt-2 rounded-xl border border-status-danger/30 bg-red-50/50 px-3 text-status-danger first:mt-3 last:mb-0"
+          ? "mt-2 rounded-xl border border-status-danger/40 bg-status-dangerBg/35 px-3 text-status-danger first:mt-3 last:mb-0"
           : "border-app-border text-text-main"
       } ${disabled ? "cursor-not-allowed opacity-90" : ""}`}
     >
@@ -710,7 +709,7 @@ function ActionRow({
         </div>
       </div>
       {badge ? (
-        <span className="rounded-full bg-[#EAF8EF] px-2 py-1 text-xs font-semibold text-[#1D8E4B]">
+        <span className="rounded-full bg-status-successBg px-2 py-1 text-xs font-semibold text-status-successDark">
           {badge}
         </span>
       ) : (
@@ -759,7 +758,7 @@ function InfoRow({ icon, title, helper, badge }) {
         </div>
       </div>
       {badge ? (
-        <span className="rounded-full bg-[#EAF8EF] px-2 py-1 text-xs font-semibold text-[#1D8E4B]">
+        <span className="rounded-full bg-status-successBg px-2 py-1 text-xs font-semibold text-status-successDark">
           {badge}
         </span>
       ) : null}

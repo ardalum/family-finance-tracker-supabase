@@ -66,44 +66,44 @@ function shiftMonth(monthKey, delta) {
 function getGoalIconConfig(goal) {
   const haystack = `${goal?.name || ""} ${goal?.goalType || ""} ${goal?.notes || ""}`.toLowerCase();
   if (haystack.includes("vacation") || haystack.includes("travel") || haystack.includes("trip")) {
-    return { icon: Palmtree, className: "bg-[#EAF8EF] text-[#1D8E4B]" };
+    return { icon: Palmtree, className: "bg-status-successBg text-status-successDark" };
   }
   if (
     haystack.includes("college") ||
     haystack.includes("education") ||
     haystack.includes("school")
   ) {
-    return { icon: GraduationCap, className: "bg-[#ECF3FF] text-[#2158B6]" };
+    return { icon: GraduationCap, className: "bg-status-infoBg text-status-infoDark" };
   }
   if (haystack.includes("emergency") || haystack.includes("safety")) {
-    return { icon: ShieldPlus, className: "bg-[#EAF8EF] text-[#1D8E4B]" };
+    return { icon: ShieldPlus, className: "bg-status-successBg text-status-successDark" };
   }
   if (
     haystack.includes("home") ||
     haystack.includes("house") ||
     haystack.includes("down payment")
   ) {
-    return { icon: Home, className: "bg-[#ECF3FF] text-[#0D2F6F]" };
+    return { icon: Home, className: "bg-status-infoBg text-status-infoDark" };
   }
   if (haystack.includes("car") || haystack.includes("vehicle")) {
-    return { icon: Car, className: "bg-[#EEF2FF] text-[#334155]" };
+    return { icon: Car, className: "bg-app-muted text-text-soft" };
   }
   if (haystack.includes("medical") || haystack.includes("health")) {
-    return { icon: HeartPulse, className: "bg-[#FEECEC] text-[#DC2626]" };
+    return { icon: HeartPulse, className: "bg-status-dangerBg text-status-dangerDark" };
   }
   if (haystack.includes("baby") || haystack.includes("kids") || haystack.includes("family")) {
-    return { icon: Baby, className: "bg-[#F3E8FF] text-[#7E22CE]" };
+    return { icon: Baby, className: "bg-app-muted text-text-soft" };
   }
   if (haystack.includes("wedding")) {
-    return { icon: Heart, className: "bg-[#FCE7F3] text-[#BE185D]" };
+    return { icon: Heart, className: "bg-app-muted text-text-soft" };
   }
   if (haystack.includes("plane") || haystack.includes("flight")) {
-    return { icon: Plane, className: "bg-[#EAF8EF] text-[#1D8E4B]" };
+    return { icon: Plane, className: "bg-status-successBg text-status-successDark" };
   }
   if (haystack.includes("group")) {
-    return { icon: Users, className: "bg-[#ECF3FF] text-[#2158B6]" };
+    return { icon: Users, className: "bg-status-infoBg text-status-infoDark" };
   }
-  return { icon: Target, className: "bg-[#EEF2FF] text-[#334155]" };
+  return { icon: Target, className: "bg-app-muted text-text-soft" };
 }
 
 function GoalIconBadge({ goal }) {
@@ -155,27 +155,27 @@ function GoalStatusBadge({ goal }) {
   }
   if (goal.status === "Complete") {
     return (
-      <span className="inline-flex rounded-full bg-[#EAF8EF] px-2.5 py-1 text-xs font-semibold text-[#1D8E4B]">
+      <span className="inline-flex rounded-full bg-status-successBg px-2.5 py-1 text-xs font-semibold text-status-successDark">
         Complete
       </span>
     );
   }
   if (goal.status === "On track") {
     return (
-      <span className="inline-flex rounded-full bg-[#EAF8EF] px-2.5 py-1 text-xs font-semibold text-[#1D8E4B]">
+      <span className="inline-flex rounded-full bg-status-successBg px-2.5 py-1 text-xs font-semibold text-status-successDark">
         On track
       </span>
     );
   }
   if (goal.status === "At risk") {
     return (
-      <span className="inline-flex rounded-full bg-[#FFF4E5] px-2.5 py-1 text-xs font-semibold text-[#EA7A0A]">
+      <span className="inline-flex rounded-full bg-status-warningBg px-2.5 py-1 text-xs font-semibold text-status-warningDark">
         At risk
       </span>
     );
   }
   return (
-    <span className="inline-flex rounded-full bg-[#FEECEC] px-2.5 py-1 text-xs font-semibold text-[#DC2626]">
+    <span className="inline-flex rounded-full bg-status-dangerBg px-2.5 py-1 text-xs font-semibold text-status-dangerDark">
       Behind
     </span>
   );
@@ -226,7 +226,7 @@ function ProgressRing({ percent }) {
       }}
       aria-label={`${safePercent}% complete`}
     >
-      <span className="absolute h-8 w-8 rounded-full bg-white" />
+      <span className="absolute h-8 w-8 rounded-full bg-app-surface" />
     </span>
   );
 }
@@ -234,13 +234,13 @@ function ProgressRing({ percent }) {
 function SummaryCard({ label, value, helper, icon, customVisual, tone = "green" }) {
   const toneClasses =
     tone === "blue"
-      ? "bg-[#ECF3FF] text-[#2158B6]"
+      ? "bg-status-infoBg text-status-infoDark"
       : tone === "orange"
-        ? "bg-[#FFF4E5] text-[#EA7A0A]"
-        : "bg-[#EAF8EF] text-[#1D8E4B]";
+        ? "bg-status-warningBg text-status-warningDark"
+        : "bg-status-successBg text-status-successDark";
 
   return (
-    <Card className="rounded-2xl border border-[#E6E1D8] bg-white p-4 shadow-[0_1px_2px_rgba(16,24,40,0.06)]">
+    <Card className="rounded-2xl border border-app-border bg-app-surface p-4 shadow-[0_1px_2px_rgba(16,24,40,0.06)]">
       <div className="flex items-center gap-3">
         {customVisual ? (
           customVisual
@@ -252,11 +252,11 @@ function SummaryCard({ label, value, helper, icon, customVisual, tone = "green" 
           </span>
         )}
         <div className="min-w-0">
-          <p className="text-sm font-medium text-[#071F42]">{label}</p>
-          <p className="mt-0.5 truncate text-[1.75rem] font-semibold tracking-tight text-[#071F42]">
+          <p className="text-sm font-medium text-text-main">{label}</p>
+          <p className="mt-0.5 truncate text-[1.75rem] font-semibold tracking-tight text-text-main">
             {value}
           </p>
-          <p className="mt-1 text-sm text-[#667085]">{helper}</p>
+          <p className="mt-1 text-sm text-text-muted">{helper}</p>
         </div>
       </div>
     </Card>
@@ -504,7 +504,7 @@ export default function Savings({
     if (previousMonthTotal <= 0 && monthSavingsTotal > 0) {
       return {
         text: `New contributions vs ${formatMonthLabel(previousMonthKey)}`,
-        tone: "text-[#1D8E4B]",
+        tone: "text-status-successDark",
       };
     }
     const deltaPercent = Math.round(
@@ -513,7 +513,7 @@ export default function Savings({
     const sign = deltaPercent > 0 ? "+" : "";
     return {
       text: `${sign}${deltaPercent}% vs ${formatMonthLabel(previousMonthKey)}`,
-      tone: deltaPercent >= 0 ? "text-[#1D8E4B]" : "text-[#DC2626]",
+      tone: deltaPercent >= 0 ? "text-status-successDark" : "text-status-dangerDark",
     };
   }, [monthSavingsTotal, previousMonthKey, previousMonthTotal]);
 
@@ -598,7 +598,7 @@ export default function Savings({
     <section className="grid min-w-0 gap-5 overflow-x-hidden">
       {error ? <InlineAlert>{error}</InlineAlert> : null}
       {loading ? (
-        <Card className="rounded-2xl border border-app-border bg-white p-5">
+        <Card className="rounded-2xl border border-app-border bg-app-surface p-5">
           <p className="text-sm text-text-muted">Loading savings goals...</p>
         </Card>
       ) : null}
@@ -614,7 +614,7 @@ export default function Savings({
       </div>
 
       {showGoalForm || editingGoalId ? (
-        <Card ref={addGoalRef} className="rounded-2xl border border-app-border bg-white p-5">
+        <Card ref={addGoalRef} className="rounded-2xl border border-app-border bg-app-surface p-5">
           <h3 className="text-base font-semibold text-text-main">
             {editingGoalId ? "Edit goal" : "Add goal"}
           </h3>
@@ -717,7 +717,7 @@ export default function Savings({
       ) : null}
 
       {showContributionForm ? (
-        <Card className="rounded-2xl border border-app-border bg-white p-5">
+        <Card className="rounded-2xl border border-app-border bg-app-surface p-5">
           <h3 className="text-base font-semibold text-text-main">Add contribution</h3>
           <form className="mt-4 grid gap-3" onSubmit={submitContribution}>
             <Input
@@ -890,15 +890,15 @@ export default function Savings({
             />
           </div>
 
-          <Card className="rounded-2xl border border-app-border bg-white p-0 shadow-sm">
+          <Card className="rounded-2xl border border-app-border bg-app-surface p-0 shadow-sm">
             <div className="flex items-center justify-between border-b border-app-border px-4 py-4">
-              <h3 className="text-2xl font-semibold tracking-tight text-[#071F42]">Your goals</h3>
+              <h3 className="text-2xl font-semibold tracking-tight text-text-main">Your goals</h3>
               <label className="inline-flex items-center gap-2 text-sm text-text-muted">
                 <span>Sort by:</span>
                 <select
                   value={goalSortMode}
                   onChange={(event) => setGoalSortMode(event.target.value)}
-                  className="rounded-lg border border-app-border bg-white px-2 py-1 text-sm font-semibold text-text-main outline-none"
+                  className="rounded-lg border border-app-border bg-app-surface px-2 py-1 text-sm font-semibold text-text-main outline-none"
                 >
                   {GOAL_SORT_OPTIONS.map(([value, label]) => (
                     <option key={value} value={value}>
@@ -929,10 +929,10 @@ export default function Savings({
                     const percent = row.percent;
                     const progressBarClass =
                       row.status === "At risk"
-                        ? "bg-[#EA7A0A]"
+                        ? "bg-status-warning"
                         : row.status === "Behind"
-                          ? "bg-[#DC2626]"
-                          : "bg-[#1D8E4B]";
+                          ? "bg-status-danger"
+                          : "bg-status-success";
                     return (
                       <div
                         key={row.id}
@@ -974,7 +974,7 @@ export default function Savings({
                           <div className="relative text-right">
                             <button
                               type="button"
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-text-soft"
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-app-surface text-text-soft"
                               onClick={() =>
                                 setOpenGoalMenuId((current) => (current === row.id ? "" : row.id))
                               }
@@ -982,7 +982,7 @@ export default function Savings({
                               <MoreHorizontal size={16} />
                             </button>
                             {openGoalMenuId === row.id ? (
-                              <div className="absolute right-0 top-9 z-20 grid min-w-[140px] gap-1 rounded-xl border border-app-border bg-white p-1 text-left shadow-lg">
+                              <div className="absolute right-0 top-9 z-20 grid min-w-[140px] gap-1 rounded-xl border border-app-border bg-app-surface p-1 text-left shadow-lg">
                                 <button
                                   type="button"
                                   className="rounded-lg px-3 py-2 text-left text-sm hover:bg-app-muted"
@@ -1039,10 +1039,10 @@ export default function Savings({
                   const percent = row.percent;
                   const progressBarClass =
                     row.status === "At risk"
-                      ? "bg-[#EA7A0A]"
+                      ? "bg-status-warning"
                       : row.status === "Behind"
-                        ? "bg-[#DC2626]"
-                        : "bg-[#1D8E4B]";
+                        ? "bg-status-danger"
+                        : "bg-status-success";
                   return (
                     <article
                       key={`mobile-${row.id}`}
@@ -1063,13 +1063,13 @@ export default function Savings({
                         <GoalStatusBadge goal={{ ...row.goal, percent, status: row.status }} />
                       </div>
                       <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-                        <div className="rounded-lg border border-app-border bg-white px-2 py-1.5">
+                        <div className="rounded-lg border border-app-border bg-app-surface px-2 py-1.5">
                           <p className="text-text-muted">Saved</p>
                           <p className="text-sm font-semibold text-text-main">
                             {formatCurrency(row.saved)}
                           </p>
                         </div>
-                        <div className="rounded-lg border border-app-border bg-white px-2 py-1.5">
+                        <div className="rounded-lg border border-app-border bg-app-surface px-2 py-1.5">
                           <p className="text-text-muted">Target</p>
                           <p className="text-sm font-semibold text-text-main">
                             {formatCurrency(row.goal.targetAmount || 0)}
@@ -1134,9 +1134,9 @@ export default function Savings({
             ) : null}
           </Card>
 
-          <Card className="rounded-2xl border border-app-border bg-white p-5 shadow-sm">
+          <Card className="rounded-2xl border border-app-border bg-app-surface p-5 shadow-sm">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="inline-flex items-center gap-1 text-lg font-semibold text-[#071F42]">
+              <h3 className="inline-flex items-center gap-1 text-lg font-semibold text-text-main">
                 Monthly contributions trend <Info size={14} className="text-text-muted" />
               </h3>
             </div>
@@ -1169,10 +1169,10 @@ export default function Savings({
                             <div
                               className={`w-full rounded-sm ${
                                 index === trendRows.rows.length - 1
-                                  ? "bg-[#1D8E4B]"
+                                  ? "bg-status-success"
                                   : row.value > 0
-                                    ? "bg-[#93C5A8]"
-                                    : "bg-[#DCE9E1]"
+                                    ? "bg-status-success/55"
+                                    : "bg-status-successBg/55"
                               }`}
                               style={{ height: `${heightPercent}%` }}
                               title={`${formatMonthLabel(row.monthKey)}: ${formatCurrency(row.value)}`}
@@ -1199,7 +1199,7 @@ export default function Savings({
                 <p className="text-sm font-medium text-text-muted">
                   {formatMonthLabel(selectedMonth)}
                 </p>
-                <p className="mt-1 text-2xl font-semibold tracking-tight text-[#1D8E4B]">
+                <p className="mt-1 text-2xl font-semibold tracking-tight text-status-successDark">
                   {formatCurrency(monthSavingsTotal)}
                 </p>
                 <p className="mt-1 text-xs text-text-muted">Total contributed</p>
@@ -1212,9 +1212,9 @@ export default function Savings({
         </div>
 
         <aside className="grid gap-4">
-          <Card className="rounded-2xl border border-app-border bg-white p-4 shadow-sm">
+          <Card className="rounded-2xl border border-app-border bg-app-surface p-4 shadow-sm">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold tracking-tight text-[#071F42]">
+              <h3 className="text-lg font-semibold tracking-tight text-text-main">
                 Recent contributions
               </h3>
               <button
@@ -1248,7 +1248,7 @@ export default function Savings({
                             </p>
                           </div>
                         </div>
-                        <p className="text-sm font-semibold text-[#1D8E4B]">
+                        <p className="text-sm font-semibold text-status-successDark">
                           +{formatCurrency(contribution.amount)}
                         </p>
                       </div>
@@ -1259,9 +1259,9 @@ export default function Savings({
             </div>
           </Card>
 
-          <Card className="rounded-2xl border border-app-border bg-white p-4 shadow-sm">
+          <Card className="rounded-2xl border border-app-border bg-app-surface p-4 shadow-sm">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold tracking-tight text-[#071F42]">
+              <h3 className="text-lg font-semibold tracking-tight text-text-main">
                 Upcoming milestones
               </h3>
               <button
@@ -1304,16 +1304,16 @@ export default function Savings({
             </div>
           </Card>
 
-          <Card className="rounded-2xl border border-[#F2DFC2] bg-[#FFF9F1] p-4 shadow-sm">
+          <Card className="rounded-2xl border border-status-warning/35 bg-status-warningBg/25 p-4 shadow-sm">
             <div className="flex items-center gap-2">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#FFF1DC] text-[#D97706]">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-status-warningBg/60 text-status-warningDark">
                 <Sun size={16} />
               </span>
-              <h3 className="text-lg font-semibold tracking-tight text-[#071F42]">
+              <h3 className="text-lg font-semibold tracking-tight text-text-main">
                 Great progress!
               </h3>
             </div>
-            <p className="mt-2 text-sm text-[#667085]">
+            <p className="mt-2 text-sm text-text-muted">
               {activeGoals.length
                 ? `You're on track to reach ${onTrackOrCompleteCount} of ${activeGoals.length} goals.`
                 : "Create your first savings goal to start tracking progress."}

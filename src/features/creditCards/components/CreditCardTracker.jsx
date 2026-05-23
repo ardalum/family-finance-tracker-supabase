@@ -382,14 +382,14 @@ export default function CreditCardTracker({
           value={formatCurrency(summary.totalBalance, { cents: true })}
           helper={`Across ${summary.activeCardCount} cards`}
           icon={<CreditCard size={19} />}
-          iconClassName="bg-[#E8F0FF] text-[#1E3A8A]"
+          iconClassName="bg-status-infoBg/30 text-status-infoDark"
         />
         <SummaryCard
           label="Credit utilization"
           value={`${Math.round(summary.utilizationPercent)}%`}
           helper={`${formatCurrency(summary.totalBalance, { cents: false })} of ${formatCurrency(summary.totalLimit, { cents: false })} limit`}
           icon={<CreditCard size={19} />}
-          iconClassName="bg-[#E8F0FF] text-[#1E3A8A]"
+          iconClassName="bg-status-infoBg/30 text-status-infoDark"
           rightAdornment={<ProgressRing value={summary.utilizationPercent} color="#16A34A" />}
         />
         <SummaryCard
@@ -397,7 +397,7 @@ export default function CreditCardTracker({
           value={formatCurrency(summary.dueSoonAmount, { cents: true })}
           helper="In the next 7 days"
           icon={<CalendarClock size={19} />}
-          iconClassName="bg-[#FFF1EA] text-[#DD6B20]"
+          iconClassName="bg-status-warningBg/40 text-status-warningDark"
           valueClassName={summary.dueSoonAmount > 0 ? "text-status-warningDark" : ""}
         />
         <SummaryCard
@@ -409,11 +409,11 @@ export default function CreditCardTracker({
               : "Add minimum payment details to track this."
           }
           icon={<Banknote size={19} />}
-          iconClassName="bg-[#E8F0FF] text-[#2563EB]"
+          iconClassName="bg-status-infoBg/30 text-status-infoDark"
         />
       </div>
 
-      <section className="min-w-0 rounded-2xl border border-app-border bg-white shadow-sm">
+      <section className="min-w-0 rounded-2xl border border-app-border bg-app-surface shadow-sm">
         <div className="border-b border-app-border px-4 py-4 sm:px-5">
           <h3 className="text-xl font-semibold tracking-tight text-text-main">
             Your cards & debts
@@ -502,7 +502,7 @@ export default function CreditCardTracker({
           <button
             type="button"
             onClick={resetControls}
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-app-border bg-white px-3 text-sm font-semibold text-text-main hover:bg-app-muted"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-app-border bg-app-surface px-3 text-sm font-semibold text-text-main hover:bg-app-muted"
           >
             <RotateCcw size={14} />
             Reset
@@ -600,7 +600,7 @@ export default function CreditCardTracker({
                         <td className="px-2 py-3 text-right">
                           <button
                             type="button"
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-text-soft hover:text-text-main"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-app-surface text-text-soft hover:text-text-main"
                             onClick={(event) => openMenu(event, row.card.id)}
                             aria-label={`Actions for ${row.card.name}`}
                           >
@@ -621,7 +621,7 @@ export default function CreditCardTracker({
                 return (
                   <article
                     key={row.card.id}
-                    className="rounded-2xl border border-app-border bg-white p-3"
+                    className="rounded-2xl border border-app-border bg-app-surface p-3"
                   >
                     <div className="flex min-w-0 items-start justify-between gap-2">
                       <div className="min-w-0">
@@ -638,7 +638,7 @@ export default function CreditCardTracker({
                       </div>
                       <button
                         type="button"
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-text-soft"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-app-surface text-text-soft"
                         onClick={(event) => openMenu(event, row.card.id)}
                         aria-label={`Actions for ${row.card.name}`}
                       >
@@ -701,7 +701,7 @@ export default function CreditCardTracker({
               <div className="inline-flex items-center gap-2">
                 <button
                   type="button"
-                  className="inline-flex h-9 items-center gap-1 rounded-lg border border-app-border bg-white px-2.5 text-text-main disabled:opacity-50"
+                  className="inline-flex h-9 items-center gap-1 rounded-lg border border-app-border bg-app-surface px-2.5 text-text-main disabled:opacity-50"
                   disabled={pagination.safePage <= 1}
                   onClick={() => setCurrentPage((page) => Math.max(page - 1, 1))}
                 >
@@ -713,7 +713,7 @@ export default function CreditCardTracker({
                 </span>
                 <button
                   type="button"
-                  className="inline-flex h-9 items-center gap-1 rounded-lg border border-app-border bg-white px-2.5 text-text-main disabled:opacity-50"
+                  className="inline-flex h-9 items-center gap-1 rounded-lg border border-app-border bg-app-surface px-2.5 text-text-main disabled:opacity-50"
                   disabled={pagination.safePage >= pagination.totalPages}
                   onClick={() =>
                     setCurrentPage((page) => Math.min(page + 1, pagination.totalPages))
@@ -729,7 +729,7 @@ export default function CreditCardTracker({
       </section>
 
       <div className="grid min-w-0 gap-4 xl:grid-cols-2">
-        <section className="min-w-0 rounded-2xl border border-app-border bg-white p-4 shadow-sm sm:p-5">
+        <section className="min-w-0 rounded-2xl border border-app-border bg-app-surface p-4 shadow-sm sm:p-5">
           <div className="flex min-w-0 items-start justify-between gap-3">
             <div className="min-w-0">
               <h3 className="text-xl font-semibold tracking-tight text-text-main">
@@ -739,7 +739,7 @@ export default function CreditCardTracker({
                 See how extra payments can save you time and money.
               </p>
             </div>
-            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#EEF2FF] text-[#1E40AF]">
+            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-app-muted text-status-infoDark">
               <Pencil size={16} />
             </span>
           </div>
@@ -784,14 +784,14 @@ export default function CreditCardTracker({
               />
             </div>
           ) : (
-            <div className="mt-4 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+            <div className="mt-4 flex items-start gap-2 rounded-xl border border-status-warning/40 bg-status-warningBg/35 px-3 py-2 text-sm text-status-warningDark">
               <AlertCircle size={16} className="mt-0.5 shrink-0" />
               <p>Add APR and minimum payment details to calculate payoff savings.</p>
             </div>
           )}
         </section>
 
-        <section className="min-w-0 rounded-2xl border border-app-border bg-white p-4 shadow-sm sm:p-5">
+        <section className="min-w-0 rounded-2xl border border-app-border bg-app-surface p-4 shadow-sm sm:p-5">
           <h3 className="text-xl font-semibold tracking-tight text-text-main">
             Utilization breakdown
           </h3>
@@ -801,7 +801,7 @@ export default function CreditCardTracker({
               className="mx-auto grid h-[190px] w-[190px] place-items-center rounded-full"
               style={{ background: utilizationGradient }}
             >
-              <div className="grid h-[136px] w-[136px] place-items-center rounded-full bg-white text-center">
+              <div className="grid h-[136px] w-[136px] place-items-center rounded-full bg-app-surface text-center">
                 <p className="text-4xl font-semibold tracking-tight text-text-main">
                   {Math.round(summary.utilizationPercent)}%
                 </p>
@@ -839,7 +839,7 @@ export default function CreditCardTracker({
 
       {menuRow && menuState ? (
         <div
-          className="fixed z-50 grid min-w-[170px] gap-1 rounded-xl border border-app-border bg-white p-1 text-left shadow-lg"
+          className="fixed z-50 grid min-w-[170px] gap-1 rounded-xl border border-app-border bg-app-surface p-1 text-left shadow-lg"
           style={{ left: menuState.x, top: menuState.y }}
           onClick={(event) => event.stopPropagation()}
         >
@@ -931,7 +931,7 @@ function SummaryCard({
   iconClassName = "",
 }) {
   return (
-    <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-app-border bg-white p-4 shadow-sm">
+    <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-app-border bg-app-surface p-4 shadow-sm">
       <span
         className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${iconClassName}`}
       >
@@ -997,11 +997,11 @@ function ProgressRing({ value, color = "#16A34A" }) {
   const clamped = Math.min(Math.max(value, 0), 100);
   return (
     <span
-      className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-app-border bg-white"
+      className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-app-border bg-app-surface"
       style={{ background: `conic-gradient(${color} ${clamped * 3.6}deg, #E2E8F0 0deg)` }}
       aria-hidden="true"
     >
-      <span className="h-7 w-7 rounded-full bg-white" />
+      <span className="h-7 w-7 rounded-full bg-app-surface" />
     </span>
   );
 }
@@ -1014,7 +1014,7 @@ function UtilizationCompact({ utilization, compact = false }) {
   return (
     <div className="inline-flex items-center gap-2">
       <span
-        className="inline-flex items-center justify-center rounded-full border border-app-border bg-white"
+        className="inline-flex items-center justify-center rounded-full border border-app-border bg-app-surface"
         style={{
           width: `${size}px`,
           height: `${size}px`,
@@ -1023,7 +1023,7 @@ function UtilizationCompact({ utilization, compact = false }) {
         aria-hidden="true"
       >
         <span
-          className="rounded-full bg-white"
+          className="rounded-full bg-app-surface"
           style={{ width: `${size - 10}px`, height: `${size - 10}px` }}
         />
       </span>
@@ -1056,41 +1056,41 @@ function NetworkBadge({ network = "" }) {
   const normalized = String(network).toLowerCase();
   if (normalized.includes("visa")) {
     return (
-      <span className="inline-flex h-8 min-w-[48px] items-center justify-center rounded-md bg-[#1D4ED8] px-2 text-xs font-bold text-white">
+      <span className="inline-flex h-8 min-w-[48px] items-center justify-center rounded-md bg-brand-primary px-2 text-xs font-bold text-white">
         VISA
       </span>
     );
   }
   if (normalized.includes("master")) {
     return (
-      <span className="inline-flex h-8 min-w-[48px] items-center justify-center rounded-md bg-[#111827] px-2 text-[10px] font-semibold text-white">
+      <span className="inline-flex h-8 min-w-[48px] items-center justify-center rounded-md bg-text-main px-2 text-[10px] font-semibold text-white">
         MC
       </span>
     );
   }
   if (normalized.includes("amex") || normalized.includes("american")) {
     return (
-      <span className="inline-flex h-8 min-w-[48px] items-center justify-center rounded-md bg-[#1D4ED8] px-2 text-[10px] font-semibold text-white">
+      <span className="inline-flex h-8 min-w-[48px] items-center justify-center rounded-md bg-brand-primary px-2 text-[10px] font-semibold text-white">
         AMEX
       </span>
     );
   }
   if (normalized.includes("discover")) {
     return (
-      <span className="inline-flex h-8 min-w-[48px] items-center justify-center rounded-md bg-[#F97316] px-2 text-[10px] font-semibold text-white">
+      <span className="inline-flex h-8 min-w-[48px] items-center justify-center rounded-md bg-status-warning px-2 text-[10px] font-semibold text-white">
         DISC
       </span>
     );
   }
   if (normalized.includes("loan") || normalized.includes("debt")) {
     return (
-      <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-[#E2E8F0] text-[#1E293B]">
+      <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-app-muted text-text-main">
         <Landmark size={14} />
       </span>
     );
   }
   return (
-    <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-[#E2E8F0] text-[#1E293B]">
+    <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-app-muted text-text-main">
       <CreditCard size={14} />
     </span>
   );
@@ -1101,7 +1101,9 @@ function MenuButton({ label, onClick, disabled = false, danger = false }) {
     <button
       type="button"
       className={`rounded-lg px-2 py-1.5 text-left text-sm font-medium ${
-        danger ? "text-status-danger hover:bg-red-50" : "text-text-main hover:bg-app-muted"
+        danger
+          ? "text-status-danger hover:bg-status-dangerBg/35"
+          : "text-text-main hover:bg-app-muted"
       }`}
       onClick={onClick}
       disabled={disabled}
@@ -1141,7 +1143,7 @@ function BarEstimate({ label, months, highlight = false }) {
       <p className="text-sm text-text-soft">{label}</p>
       <div className="h-3 rounded-full bg-app-muted">
         <div
-          className={`h-full rounded-full ${highlight ? "bg-brand-primary" : "bg-[#9DB8E8]"}`}
+          className={`h-full rounded-full ${highlight ? "bg-brand-primary" : "bg-brand-primary/45"}`}
           style={{ width: `${width}%` }}
         />
       </div>

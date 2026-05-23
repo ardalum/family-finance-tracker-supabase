@@ -2,7 +2,7 @@ export default function Input({ label, hideLabel = false, className = "", ...pro
   const { onFocus, type, ...inputProps } = props;
   const isInvalid = inputProps["aria-invalid"] === true || inputProps["aria-invalid"] === "true";
   const invalidClassName = isInvalid
-    ? "border-red-300 bg-red-50/50 focus:border-red-400 focus:ring-red-100"
+    ? "border-status-danger/50 bg-status-dangerBg/20 focus:border-status-danger focus:ring-status-danger/20"
     : "border-app-border focus:border-brand-primary focus:ring-brand-primary/10";
 
   function handleFocus(event) {

@@ -49,7 +49,7 @@ export default function BudgetTable({
 
   return (
     <>
-      <Card className="min-w-0 overflow-hidden rounded-2xl border border-app-border bg-white">
+      <Card className="min-w-0 overflow-hidden rounded-2xl border border-app-border bg-app-surface">
         {fullRows.length === 0 ? (
           <div className="grid justify-items-center gap-4 p-8 text-center">
             <div>
@@ -254,7 +254,7 @@ function BudgetMobileCard({ budget, onEdit, onDelete, isSaving }) {
   }, []);
 
   return (
-    <article ref={cardRef} className="rounded-2xl border border-app-border bg-white p-4">
+    <article ref={cardRef} className="rounded-2xl border border-app-border bg-app-surface p-4">
       <div className="flex min-w-0 items-start justify-between gap-2">
         <div className="min-w-0">
           <h4 className="truncate text-base font-semibold text-text-main">{budget.name}</h4>
@@ -309,7 +309,7 @@ function BudgetActionMenu({
     <div className="relative">
       <button
         type="button"
-        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-text-soft hover:text-text-main"
+        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-app-surface text-text-soft hover:text-text-main"
         onClick={(event) => {
           event.stopPropagation();
           onToggleMenu();
@@ -321,7 +321,7 @@ function BudgetActionMenu({
       </button>
       {menuOpen ? (
         <div
-          className={`absolute z-20 grid min-w-[144px] gap-1 rounded-xl border border-app-border bg-white p-1 shadow-lg ${alignmentClass}`}
+          className={`absolute z-20 grid min-w-[144px] gap-1 rounded-xl border border-app-border bg-app-surface p-1 shadow-lg ${alignmentClass}`}
           onClick={(event) => event.stopPropagation()}
         >
           <button
@@ -337,7 +337,7 @@ function BudgetActionMenu({
           </button>
           <button
             type="button"
-            className="rounded-lg px-2 py-1.5 text-left text-sm font-medium text-status-danger hover:bg-red-50"
+            className="rounded-lg px-2 py-1.5 text-left text-sm font-medium text-status-danger hover:bg-status-dangerBg/35"
             onClick={() => {
               onDelete(budget);
               onToggleMenu();
@@ -360,8 +360,8 @@ function DeleteDialog({ budget, onCancel, onConfirm, isSaving }) {
       aria-modal="true"
       aria-labelledby="delete-budget-title"
     >
-      <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white shadow-xl">
-        <div className="border-b border-gray-200 p-5">
+      <div className="w-full max-w-md rounded-2xl border border-app-border bg-app-surface shadow-xl">
+        <div className="border-b border-app-border p-5">
           <h2 id="delete-budget-title" className="text-lg font-semibold text-gray-950">
             Delete budget category?
           </h2>
@@ -371,7 +371,7 @@ function DeleteDialog({ budget, onCancel, onConfirm, isSaving }) {
           </p>
         </div>
         <div className="grid gap-4 p-5">
-          <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-800">
+          <div className="rounded-xl border border-red-100 bg-status-dangerBg/35 px-4 py-3 text-sm text-status-dangerDark">
             <p className="font-semibold">{budget.name}</p>
             <p className="mt-1">
               Budget {formatCurrency(budget.monthlyAmount)} · Spent{" "}
@@ -414,7 +414,7 @@ function getStatusDisplay(budget) {
       label: "Over budget",
       pill: "bg-red-100 text-status-danger",
       progress: "bg-status-danger",
-      iconBg: "bg-red-50",
+      iconBg: "bg-status-dangerBg/35",
       iconText: "text-status-danger",
     };
   }
@@ -423,8 +423,8 @@ function getStatusDisplay(budget) {
     return {
       label: "Near limit",
       pill: "bg-amber-100 text-amber-700",
-      progress: "bg-amber-500",
-      iconBg: "bg-amber-50",
+      progress: "bg-status-warningBg/350",
+      iconBg: "bg-status-warningBg/35",
       iconText: "text-amber-600",
     };
   }
@@ -433,7 +433,7 @@ function getStatusDisplay(budget) {
     label: "On track",
     pill: "bg-green-100 text-green-700",
     progress: "bg-status-success",
-    iconBg: "bg-green-50",
+    iconBg: "bg-status-successBg/40",
     iconText: "text-green-600",
   };
 }

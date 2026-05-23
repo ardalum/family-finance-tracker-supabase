@@ -13,6 +13,9 @@ describe("app settings honesty", () => {
     assert.equal(source.includes("Save changes"), true);
     assert.equal(source.includes("Sync now"), true);
     assert.equal(source.includes("Export data"), true);
+    assert.equal(source.includes("Theme"), true);
+    assert.equal(source.includes("options={THEME_OPTIONS}"), true);
+    assert.equal(source.includes("applyThemePreference(normalized.theme)"), true);
     assert.equal(source.includes("Automatic backups"), true);
     assert.equal(source.includes("InfoRow"), true);
     assert.equal(source.includes("Import workflow coming soon."), true);

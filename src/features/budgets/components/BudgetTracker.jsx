@@ -195,12 +195,12 @@ export default function BudgetTracker({
   return (
     <section className="grid gap-5">
       {error ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B]">
+        <div className="rounded-xl border border-status-danger/40 bg-status-dangerBg/35 px-3 py-2 text-sm text-status-dangerDark">
           {error}
         </div>
       ) : null}
       {transactionsError ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-[#991B1B]">
+        <div className="rounded-xl border border-status-danger/40 bg-status-dangerBg/35 px-3 py-2 text-sm text-status-dangerDark">
           {transactionsError}
         </div>
       ) : null}
@@ -282,10 +282,10 @@ export default function BudgetTracker({
             isSaving={isSaving}
           />
 
-          <Card className="min-w-0 border border-[#D8E8FF] bg-[#F7FBFF] p-4">
+          <Card className="min-w-0 border border-app-border bg-app-surfaceSoft p-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex min-w-0 items-start gap-3">
-                <span className="mt-0.5 inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#DCEBFF] text-[#245DA8]">
+                <span className="mt-0.5 inline-flex h-9 w-9 items-center justify-center rounded-full bg-status-infoBg/40 text-status-infoDark">
                   <DollarSign size={16} />
                 </span>
                 <div className="min-w-0">
@@ -297,7 +297,7 @@ export default function BudgetTracker({
               </div>
               <button
                 type="button"
-                className="inline-flex items-center gap-2 rounded-xl border border-[#CCDDF8] bg-white px-3 py-2 text-sm font-semibold text-[#1F4D8F]"
+                className="inline-flex items-center gap-2 rounded-xl border border-app-border bg-app-surface px-3 py-2 text-sm font-semibold text-brand-primary"
                 onClick={() => dispatchNavigation("insights", "budget-report")}
               >
                 View trends
@@ -309,7 +309,7 @@ export default function BudgetTracker({
         <aside className="grid min-w-0 gap-4">
           <Card className="min-w-0 border border-app-border p-4">
             <div className="flex items-start gap-3">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF5DF] text-[#D38A15]">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-status-warningBg/60 text-status-warningDark">
                 <Lightbulb size={18} />
               </span>
               <div className="grid min-w-0 gap-2">
@@ -330,7 +330,7 @@ export default function BudgetTracker({
           <Card className="min-w-0 border border-app-border p-4">
             <div className="grid gap-3">
               <div className="flex items-start gap-3">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#EAF2FF] text-[#275EAB]">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-status-infoBg/30 text-status-infoDark">
                   <ArrowRightLeft size={16} />
                 </span>
                 <div className="min-w-0">
@@ -374,7 +374,7 @@ export default function BudgetTracker({
                     </div>
                     <button
                       type="button"
-                      className="mt-3 inline-flex w-full items-center justify-center rounded-lg border border-app-border bg-white px-3 py-1.5 text-sm font-semibold text-text-soft"
+                      className="mt-3 inline-flex w-full items-center justify-center rounded-lg border border-app-border bg-app-surface px-3 py-1.5 text-sm font-semibold text-text-soft"
                       onClick={() => openApplySuggestionDialog(suggestion)}
                       disabled={isSaving || isApplyingSuggestion}
                     >
@@ -403,8 +403,8 @@ export default function BudgetTracker({
           aria-modal="true"
           aria-labelledby="apply-budget-suggestion-title"
         >
-          <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white shadow-xl">
-            <div className="border-b border-gray-200 p-5">
+          <div className="w-full max-w-md rounded-2xl border border-app-border bg-app-surface shadow-xl">
+            <div className="border-b border-app-border p-5">
               <h2
                 id="apply-budget-suggestion-title"
                 className="text-lg font-semibold text-gray-950"
@@ -435,7 +435,7 @@ export default function BudgetTracker({
               <div className="mt-1 flex flex-wrap justify-end gap-3">
                 <button
                   type="button"
-                  className="inline-flex items-center rounded-xl border border-app-border bg-white px-3 py-1.5 text-sm font-semibold text-text-main"
+                  className="inline-flex items-center rounded-xl border border-app-border bg-app-surface px-3 py-1.5 text-sm font-semibold text-text-main"
                   onClick={() => setPendingSuggestion(null)}
                   disabled={isApplyingSuggestion}
                 >
@@ -465,7 +465,7 @@ function BudgetSummaryCards({ summary }) {
       value: formatCurrency(summary.totalBudget),
       helper: "100% of budget",
       icon: WalletCards,
-      iconTone: "bg-[#EEF2FF] text-[#253A74]",
+      iconTone: "bg-app-muted text-status-infoDark",
       valueTone: "text-text-main",
     },
     {
@@ -473,7 +473,7 @@ function BudgetSummaryCards({ summary }) {
       value: formatCurrency(summary.totalSpent),
       helper: `${summary.spentPercent.toFixed(0)}% of budget`,
       icon: DollarSign,
-      iconTone: "bg-[#EAF2FF] text-[#2A66B2]",
+      iconTone: "bg-status-infoBg/30 text-status-infoDark",
       valueTone: "text-text-main",
     },
     {
@@ -481,7 +481,7 @@ function BudgetSummaryCards({ summary }) {
       value: formatCurrency(summary.totalRemaining),
       helper: `${summary.remainingPercent.toFixed(0)}% of budget`,
       icon: CheckCircle2,
-      iconTone: "bg-[#E9F8EE] text-[#268048]",
+      iconTone: "bg-status-successBg/40 text-status-successDark",
       valueTone: summary.totalRemaining < 0 ? "text-status-danger" : "text-status-success",
     },
     {
@@ -490,7 +490,9 @@ function BudgetSummaryCards({ summary }) {
       helper: "Categories",
       icon: AlertTriangle,
       iconTone:
-        summary.overBudgetCount > 0 ? "bg-[#FEECEF] text-[#CC2E47]" : "bg-[#F3F4F6] text-[#6B7280]",
+        summary.overBudgetCount > 0
+          ? "bg-status-dangerBg/60 text-status-dangerDark"
+          : "bg-app-muted text-text-muted",
       valueTone: summary.overBudgetCount > 0 ? "text-status-danger" : "text-text-main",
     },
   ];
@@ -502,7 +504,7 @@ function BudgetSummaryCards({ summary }) {
         return (
           <Card
             key={card.label}
-            className="min-w-0 rounded-2xl border border-app-border bg-white p-4"
+            className="min-w-0 rounded-2xl border border-app-border bg-app-surface p-4"
           >
             <div className="grid min-w-0 gap-2">
               <div className="flex min-w-0 items-start justify-between gap-3">
@@ -533,7 +535,7 @@ function FilterChip({ icon: Icon, label, disabled = false, children = null, titl
       className={`relative inline-flex min-h-11 items-center gap-2 rounded-xl border px-3 py-2 text-sm ${
         disabled
           ? "cursor-not-allowed border-app-border bg-app-muted text-text-muted"
-          : "border-app-border bg-white text-text-main"
+          : "border-app-border bg-app-surface text-text-main"
       }`}
       title={title || undefined}
     >

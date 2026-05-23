@@ -19,7 +19,7 @@ export default function TransactionQuickFilters({
               type="button"
               className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
                 isActive
-                  ? "border-text-main bg-text-main text-white shadow-sm"
+                  ? "border-brand-primary bg-brand-primary text-white shadow-sm"
                   : "border-app-border bg-app-surface text-text-soft hover:border-brand-primary/40 hover:text-text-main"
               }`}
               onClick={() => onApplyQuickFilter(option.id)}

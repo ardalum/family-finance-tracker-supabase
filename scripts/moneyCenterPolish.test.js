@@ -48,16 +48,15 @@ test("money center uses modal shells and keeps inline forms out of default card 
   assert.ok(moneyCenterSource.includes("snapshotModalOpen"));
 });
 
-test("money center keeps monthly income wider than cash position and avoids forced desktop overflow", () => {
-  assert.ok(moneyCenterSource.includes("xl:grid-cols-[360px_minmax(0,1fr)]"));
+test("money center keeps monthly income wider than cash position without forcing laptop overflow", () => {
+  assert.ok(moneyCenterSource.includes("min-[1600px]:grid-cols-[360px_minmax(0,1fr)]"));
   assert.equal(moneyCenterSource.includes("min-w-[720px]"), false);
   assert.ok(moneyCenterSource.includes("xl:overflow-x-visible"));
 });
 
-test("money center summary metrics use balanced value sizing", () => {
-  assert.ok(
-    moneyCenterSource.includes("text-2xl font-semibold tracking-tight text-text-main sm:text-3xl"),
-  );
+test("money center summary metrics use responsive value sizing", () => {
+  assert.ok(moneyCenterSource.includes("break-words text-[clamp(1.35rem,2vw,1.875rem)]"));
+  assert.ok(moneyCenterSource.includes("shrink-0 items-center"));
   assert.equal(
     moneyCenterSource.includes("text-4xl font-semibold tracking-tight text-text-main"),
     false,
@@ -130,9 +129,11 @@ test("money center renders info tooltips for summary cards and key sections", ()
   assert.ok(moneyCenterSource.includes("Expected income from active income sources."));
 });
 
-test("money center right rail remains a sibling column aligned with the summary row", () => {
+test("money center right rail remains a sibling column without forcing laptop overflow", () => {
   assert.ok(
-    moneyCenterSource.includes('className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]"'),
+    moneyCenterSource.includes(
+      'className="grid min-w-0 gap-4 2xl:grid-cols-[minmax(0,1fr)_320px]"',
+    ),
   );
   assert.ok(moneyCenterSource.includes('className="grid content-start gap-4"'));
 });
