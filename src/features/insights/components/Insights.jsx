@@ -233,7 +233,7 @@ export default function Insights({
   const budgetUsedPercent = Math.min(Math.max(budgetUsageRawPercent, 0), 100);
   const budgetBarTone =
     Number(data.summary.budgetTotal || 0) <= 0
-      ? "bg-[#CBD5E1]"
+      ? "bg-app-muted"
       : budgetUsageRawPercent > 100
         ? "bg-status-danger"
         : budgetUsageRawPercent > 80
@@ -447,9 +447,9 @@ export default function Insights({
       </div>
 
       <section className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-4">
-        <Card className="rounded-2xl border border-[#E6E1D8] bg-white p-5">
+        <Card className="rounded-2xl border border-app-border bg-app-surface p-5">
           <div className="flex items-center justify-between">
-            <p className="inline-flex items-center gap-1 text-sm font-semibold text-[#071F42]">
+            <p className="inline-flex items-center gap-1 text-sm font-semibold text-text-main">
               Spending trend <Info size={13} className="text-text-muted" />
             </p>
             {!hasSpendingBaseline ? (
@@ -460,7 +460,7 @@ export default function Insights({
               <TrendingUp size={16} className="text-status-warningDark" />
             )}
           </div>
-          <p className="mt-2 text-4xl font-semibold tracking-tight text-[#071F42]">
+          <p className="mt-2 text-4xl font-semibold tracking-tight text-text-main">
             {formatCurrency(data.summary.spendingTotal || 0)}
           </p>
           <p className="text-sm text-text-muted">This month</p>
@@ -490,11 +490,11 @@ export default function Insights({
           />
         </Card>
 
-        <Card className="rounded-2xl border border-[#E6E1D8] bg-white p-5">
-          <p className="inline-flex items-center gap-1 text-sm font-semibold text-[#071F42]">
+        <Card className="rounded-2xl border border-app-border bg-app-surface p-5">
+          <p className="inline-flex items-center gap-1 text-sm font-semibold text-text-main">
             Budget performance <Info size={13} className="text-text-muted" />
           </p>
-          <p className="mt-2 text-4xl font-semibold tracking-tight text-[#071F42]">
+          <p className="mt-2 text-4xl font-semibold tracking-tight text-text-main">
             {Math.round(budgetUsedPercent)}%
           </p>
           <p className="text-sm text-text-muted">
@@ -527,11 +527,11 @@ export default function Insights({
           </p>
         </Card>
 
-        <Card className="rounded-2xl border border-[#E6E1D8] bg-white p-5">
-          <p className="inline-flex items-center gap-1 text-sm font-semibold text-[#071F42]">
+        <Card className="rounded-2xl border border-app-border bg-app-surface p-5">
+          <p className="inline-flex items-center gap-1 text-sm font-semibold text-text-main">
             Category change <Info size={13} className="text-text-muted" />
           </p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-[#071F42]">
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-text-main">
             {topCategoryChange
               ? `${topCategoryChange.delta >= 0 ? "+" : ""}${formatCurrency(topCategoryChange.delta)}`
               : formatCurrency(0)}
@@ -556,11 +556,11 @@ export default function Insights({
           </p>
         </Card>
 
-        <Card className="rounded-2xl border border-[#E6E1D8] bg-white p-5">
-          <p className="inline-flex items-center gap-1 text-sm font-semibold text-[#071F42]">
+        <Card className="rounded-2xl border border-app-border bg-app-surface p-5">
+          <p className="inline-flex items-center gap-1 text-sm font-semibold text-text-main">
             Cash flow insight <Info size={13} className="text-text-muted" />
           </p>
-          <p className="mt-2 text-4xl font-semibold tracking-tight text-[#071F42]">
+          <p className="mt-2 text-4xl font-semibold tracking-tight text-text-main">
             {formatCurrency(netCashFlow)}
           </p>
           <p className="text-sm text-text-muted">Estimated cash left</p>
@@ -580,8 +580,8 @@ export default function Insights({
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1.1fr_1.05fr_1fr]">
-        <Card className="rounded-2xl border border-[#E6E1D8] bg-white p-5">
-          <h3 className="inline-flex items-center gap-2 text-2xl font-semibold tracking-tight text-[#071F42]">
+        <Card className="rounded-2xl border border-app-border bg-app-surface p-5">
+          <h3 className="inline-flex items-center gap-2 text-2xl font-semibold tracking-tight text-text-main">
             Spending breakdown <Info size={15} className="text-text-muted" />
           </h3>
           <p className="mt-1 text-sm text-text-muted">Where your money went this month</p>
@@ -620,7 +620,7 @@ export default function Insights({
                       />
                       <span className="truncate">{row.label}</span>
                     </p>
-                    <p className="text-right font-medium text-[#071F42]">
+                    <p className="text-right font-medium text-text-main">
                       {formatCurrency(row.value)}
                     </p>
                     <p className="text-right font-medium text-text-muted">
@@ -629,7 +629,7 @@ export default function Insights({
                   </div>
                 ))}
                 <div className="mt-2 border-t border-app-border pt-2">
-                  <div className="grid grid-cols-[minmax(0,1fr)_110px_80px] items-center gap-3 text-sm font-semibold text-[#071F42]">
+                  <div className="grid grid-cols-[minmax(0,1fr)_110px_80px] items-center gap-3 text-sm font-semibold text-text-main">
                     <span>Total</span>
                     <span className="text-right">
                       {formatCurrency(Number(data.summary.spendingTotal || 0))}
@@ -642,13 +642,13 @@ export default function Insights({
           )}
         </Card>
 
-        <Card className="rounded-2xl border border-[#E6E1D8] bg-white p-5">
-          <h3 className="inline-flex items-center gap-2 text-xl font-semibold tracking-tight text-[#071F42]">
+        <Card className="rounded-2xl border border-app-border bg-app-surface p-5">
+          <h3 className="inline-flex items-center gap-2 text-xl font-semibold tracking-tight text-text-main">
             Spending over time <Info size={15} className="text-text-muted" />
           </h3>
           <div className="mt-3 inline-flex items-center gap-4 text-sm">
-            <span className="inline-flex items-center gap-1 text-[#071F42]">
-              <span className="h-0.5 w-6 bg-[#102A63]" />
+            <span className="inline-flex items-center gap-1 text-text-main">
+              <span className="h-0.5 w-6 bg-brand-primary" />
               This year
             </span>
             <span className="inline-flex items-center gap-1 text-text-muted">
@@ -661,7 +661,7 @@ export default function Insights({
             <p className="text-sm text-text-muted">Average monthly spending</p>
             <div className="mt-1 flex items-end gap-6">
               <div>
-                <p className="text-2xl font-semibold text-[#071F42]">
+                <p className="text-2xl font-semibold text-text-main">
                   {formatCurrency(
                     chartCurrentRows.length
                       ? chartCurrentRows.reduce((sum, row) => sum + row.value, 0) /
@@ -672,7 +672,7 @@ export default function Insights({
                 <p className="text-xs text-text-muted">This year</p>
               </div>
               <div>
-                <p className="text-2xl font-semibold text-[#667085]">
+                <p className="text-2xl font-semibold text-text-muted">
                   {formatCurrency(
                     chartPreviousRows.length
                       ? chartPreviousRows.reduce((sum, row) => sum + row.value, 0) /
@@ -686,8 +686,8 @@ export default function Insights({
           </div>
         </Card>
 
-        <Card className="rounded-2xl border border-[#E6E1D8] bg-white p-5">
-          <h3 className="inline-flex items-center gap-2 text-2xl font-semibold tracking-tight text-[#071F42]">
+        <Card className="rounded-2xl border border-app-border bg-app-surface p-5">
+          <h3 className="inline-flex items-center gap-2 text-2xl font-semibold tracking-tight text-text-main">
             Month-over-month comparison <Info size={15} className="text-text-muted" />
           </h3>
           <div className="mt-4 rounded-xl border border-app-border">
@@ -751,7 +751,7 @@ export default function Insights({
       </section>
 
       <section className="grid gap-3">
-        <h3 className="text-2xl font-semibold tracking-tight text-[#071F42]">
+        <h3 className="text-2xl font-semibold tracking-tight text-text-main">
           Top insights this month
         </h3>
         <div className="grid gap-4 xl:grid-cols-3">
@@ -766,8 +766,8 @@ export default function Insights({
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
-        <Card className="rounded-2xl border border-[#E6E1D8] bg-white p-5">
-          <h3 className="inline-flex items-center gap-2 text-2xl font-semibold tracking-tight text-[#071F42]">
+        <Card className="rounded-2xl border border-app-border bg-app-surface p-5">
+          <h3 className="inline-flex items-center gap-2 text-2xl font-semibold tracking-tight text-text-main">
             Category deep dive <Info size={15} className="text-text-muted" />
           </h3>
           <p className="text-sm text-text-muted">Explore how specific categories are trending.</p>
@@ -817,13 +817,13 @@ export default function Insights({
           )}
         </Card>
 
-        <Card className="rounded-2xl border border-[#E6E1D8] bg-white p-5">
-          <h3 className="inline-flex items-center gap-2 text-2xl font-semibold tracking-tight text-[#071F42]">
+        <Card className="rounded-2xl border border-app-border bg-app-surface p-5">
+          <h3 className="inline-flex items-center gap-2 text-2xl font-semibold tracking-tight text-text-main">
             Savings rate <Info size={15} className="text-text-muted" />
           </h3>
           {incomeTotal <= 0 ? (
             <div className="mt-4 flex items-center gap-4 rounded-xl border border-dashed border-app-border bg-app-background p-4">
-              <span className="inline-flex h-14 w-14 items-center justify-center rounded-full border border-app-border bg-white text-text-muted">
+              <span className="inline-flex h-14 w-14 items-center justify-center rounded-full border border-app-border bg-app-surface text-text-muted">
                 <CircleDollarSign size={20} />
               </span>
               <p className="text-sm text-text-muted">Add income data to calculate savings rate.</p>
@@ -834,7 +834,7 @@ export default function Insights({
                 percent={Math.max(0, Math.round((netCashFlow / incomeTotal) * 100))}
               />
               <div>
-                <p className="text-3xl font-semibold tracking-tight text-[#071F42]">
+                <p className="text-3xl font-semibold tracking-tight text-text-main">
                   {formatCurrency(Math.max(netCashFlow, 0))}
                 </p>
                 <p className="text-sm text-text-muted">of {formatCurrency(incomeTotal)} income</p>
@@ -847,7 +847,7 @@ export default function Insights({
         </Card>
       </section>
       <div ref={detailedReportsRef} tabIndex={-1} className="outline-none">
-        <Card className="rounded-2xl border border-app-border bg-white p-4">
+        <Card className="rounded-2xl border border-app-border bg-app-surface p-4">
           <button
             type="button"
             className="text-sm font-semibold text-brand-primary"
@@ -1494,7 +1494,7 @@ function ComparisonRow({ label, previous, current, trend = "lower-better" }) {
       <td className="px-2 py-2 text-text-main" title={label}>
         <span className="block truncate">{label}</span>
       </td>
-      <td className="px-2 py-2 text-right font-medium text-[#071F42]">
+      <td className="px-2 py-2 text-right font-medium text-text-main">
         <span
           className="block max-w-full truncate tabular-nums"
           title={formatCurrency(previous || 0)}
@@ -1502,7 +1502,7 @@ function ComparisonRow({ label, previous, current, trend = "lower-better" }) {
           {formatCompactCurrencyForTable(previous)}
         </span>
       </td>
-      <td className="px-2 py-2 text-right font-medium text-[#071F42]">
+      <td className="px-2 py-2 text-right font-medium text-text-main">
         <span
           className="block max-w-full truncate tabular-nums"
           title={formatCurrency(current || 0)}
@@ -1555,7 +1555,7 @@ function TopInsightCard({ card, tone = "positive" }) {
           <Icon size={18} />
         </span>
         <div className="min-w-0">
-          <p className="text-lg font-semibold tracking-tight text-[#071F42]">{card.title}</p>
+          <p className="text-lg font-semibold tracking-tight text-text-main">{card.title}</p>
           <p className="mt-1 text-sm text-text-main">{card.explanation}</p>
           <button
             type="button"
@@ -1577,7 +1577,7 @@ function MetricPill({ label, value, tone = "neutral" }) {
       ? "text-status-danger"
       : tone === "success"
         ? "text-status-success"
-        : "text-[#071F42]";
+        : "text-text-main";
   return (
     <div className="rounded-xl border border-app-border bg-app-background px-3 py-2">
       <p className="text-xs text-text-muted">{label}</p>
@@ -1595,8 +1595,8 @@ function SavingsRateRing({ percent = 0 }) {
         background: `conic-gradient(#1D8E4B ${safePercent * 3.6}deg, #E6E1D8 0deg)`,
       }}
     >
-      <span className="absolute h-16 w-16 rounded-full bg-white" />
-      <span className="relative text-2xl font-semibold text-[#071F42]">{safePercent}%</span>
+      <span className="absolute h-16 w-16 rounded-full bg-app-surface" />
+      <span className="relative text-2xl font-semibold text-text-main">{safePercent}%</span>
     </span>
   );
 }

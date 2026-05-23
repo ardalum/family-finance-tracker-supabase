@@ -93,11 +93,11 @@ function statusGroup(label) {
   return "Upcoming";
 }
 function badgeClass(label) {
-  if (label === "Past due") return "bg-[#FEECEC] text-[#DC2626] ring-[#FECACA]";
+  if (label === "Past due") return "bg-status-dangerBg text-status-dangerDark ring-[#FECACA]";
   if (label === "Due soon" || label === "Due now")
-    return "bg-[#FFF4E5] text-[#EA7A0A] ring-[#FCD9B0]";
-  if (label === "Paid") return "bg-[#EAF8EF] text-[#1D8E4B] ring-[#BFE9CD]";
-  return "bg-[#EEF2FF] text-[#3559C7] ring-[#D9E3FF]";
+    return "bg-status-warningBg text-status-warningDark ring-[#FCD9B0]";
+  if (label === "Paid") return "bg-status-successBg text-status-successDark ring-[#BFE9CD]";
+  return "bg-app-muted text-status-infoDark ring-status-infoBg/60";
 }
 function detailLine(card) {
   const parts = [];
@@ -505,7 +505,7 @@ export default function RecurringPayments({
       </div>
 
       <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
-        <section className="min-w-0 rounded-2xl border border-app-border bg-white shadow-sm">
+        <section className="min-w-0 rounded-2xl border border-app-border bg-app-surface shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-app-border px-4 py-4 sm:px-5">
             <div className="inline-flex flex-wrap items-center gap-1 rounded-xl bg-app-background p-1">
               {TABS.map(([id, label]) => (
@@ -513,7 +513,7 @@ export default function RecurringPayments({
                   key={id}
                   type="button"
                   onClick={() => setActiveTab(id)}
-                  className={`inline-flex h-9 items-center rounded-lg px-3 text-sm font-semibold ${activeTab === id ? "bg-white text-text-main shadow-sm ring-1 ring-app-border" : "text-text-soft"}`}
+                  className={`inline-flex h-9 items-center rounded-lg px-3 text-sm font-semibold ${activeTab === id ? "bg-app-surface text-text-main shadow-sm ring-1 ring-app-border" : "text-text-soft"}`}
                 >
                   {label}
                 </button>
@@ -523,12 +523,12 @@ export default function RecurringPayments({
               <button
                 type="button"
                 onClick={() => setShowFilters((current) => !current)}
-                className="inline-flex h-10 items-center gap-2 rounded-xl border border-app-border bg-white px-3 text-sm font-semibold text-text-main"
+                className="inline-flex h-10 items-center gap-2 rounded-xl border border-app-border bg-app-surface px-3 text-sm font-semibold text-text-main"
               >
                 <Funnel size={15} />
                 Filter
               </button>
-              <label className="inline-flex h-10 items-center gap-2 rounded-xl border border-app-border bg-white px-3 text-sm font-semibold text-text-main">
+              <label className="inline-flex h-10 items-center gap-2 rounded-xl border border-app-border bg-app-surface px-3 text-sm font-semibold text-text-main">
                 <ArrowDownUp size={15} />
                 <select
                   value={sortMode}
@@ -647,7 +647,7 @@ export default function RecurringPayments({
                           <td className="px-3 py-2.5 text-right">
                             <button
                               type="button"
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-text-soft"
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-app-surface text-text-soft"
                               onClick={(event) => openMenu(event, row.id)}
                             >
                               <MoreHorizontal size={16} />
@@ -674,7 +674,7 @@ export default function RecurringPayments({
                   {rowsInGroup.map((row) => (
                     <article
                       key={row.id}
-                      className="rounded-2xl border border-app-border bg-white p-3"
+                      className="rounded-2xl border border-app-border bg-app-surface p-3"
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
@@ -710,7 +710,7 @@ export default function RecurringPayments({
                         </div>
                         <button
                           type="button"
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-text-soft"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-app-surface text-text-soft"
                           onClick={(event) => openMenu(event, row.id)}
                         >
                           <MoreHorizontal size={16} />
@@ -755,15 +755,15 @@ export default function RecurringPayments({
           </div>
         </section>
         <aside className="grid gap-4">
-          <section className="rounded-2xl border border-app-border bg-white p-4 shadow-sm sm:p-4">
+          <section className="rounded-2xl border border-app-border bg-app-surface p-4 shadow-sm sm:p-4">
             <div className="flex items-center justify-between">
-              <h3 className="whitespace-nowrap text-lg font-semibold leading-tight tracking-tight text-[#071F42]">
+              <h3 className="whitespace-nowrap text-lg font-semibold leading-tight tracking-tight text-text-main">
                 Upcoming calendar
               </h3>
-              <div className="inline-flex items-center gap-1 text-[#071F42]">
+              <div className="inline-flex items-center gap-1 text-text-main">
                 <button
                   type="button"
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-[#071F42]/70"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-app-surface text-text-main/70"
                   onClick={() => setCalendarMonth((current) => shiftMonth(current, -1))}
                   aria-label="Previous calendar month"
                 >
@@ -771,7 +771,7 @@ export default function RecurringPayments({
                 </button>
                 <button
                   type="button"
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-white text-[#071F42]/70"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-app-border bg-app-surface text-text-main/70"
                   onClick={() => setCalendarMonth((current) => shiftMonth(current, 1))}
                   aria-label="Next calendar month"
                 >
@@ -779,7 +779,7 @@ export default function RecurringPayments({
                 </button>
               </div>
             </div>
-            <p className="mt-1 text-sm font-medium text-[#667085]">
+            <p className="mt-1 text-sm font-medium text-text-muted">
               {formatMonthLabel(calendarMonth)}
             </p>
             <div className="mt-2 grid grid-cols-7 gap-y-0.5 text-center text-[11px] text-text-muted">
@@ -792,19 +792,19 @@ export default function RecurringPayments({
                 const marker = cell.dateKey ? calendarMarkers.get(cell.dateKey) : "";
                 const markerClass =
                   marker === "Past due"
-                    ? "bg-[#DC2626]"
+                    ? "bg-status-danger"
                     : marker === "Due soon" || marker === "Upcoming"
-                      ? "bg-[#EA7A0A]"
+                      ? "bg-status-warning"
                       : marker === "Paid"
-                        ? "bg-[#1D8E4B]"
+                        ? "bg-status-success"
                         : "";
                 const ringClass =
                   marker === "Past due"
-                    ? "ring-[#FCA5A5] text-[#DC2626]"
+                    ? "ring-status-danger/50 text-status-dangerDark"
                     : marker === "Due soon" || marker === "Upcoming"
-                      ? "ring-[#FDBA74] text-[#EA7A0A]"
+                      ? "ring-status-warning/50 text-status-warningDark"
                       : marker === "Paid"
-                        ? "ring-[#86EFAC] text-[#1D8E4B]"
+                        ? "ring-status-success/50 text-status-successDark"
                         : "";
                 return (
                   <div key={`${cell.dateKey}-${index}`} className="grid place-items-center py-0.5">
@@ -812,7 +812,7 @@ export default function RecurringPayments({
                       className={`grid h-9 w-9 place-items-center rounded-full text-sm ${
                         cell.muted
                           ? "text-text-muted/60"
-                          : `text-[#071F42] ${ringClass ? `ring-1 ${ringClass}` : ""}`
+                          : `text-text-main ${ringClass ? `ring-1 ${ringClass}` : ""}`
                       }`}
                     >
                       {cell.day}
@@ -825,13 +825,13 @@ export default function RecurringPayments({
               })}
             </div>
             <div className="mt-2.5 flex items-center gap-4 text-xs">
-              <LegendDot color="bg-[#DC2626]" label="Past due" />
-              <LegendDot color="bg-[#EA7A0A]" label="Due soon" />
-              <LegendDot color="bg-[#1D8E4B]" label="Paid" />
+              <LegendDot color="bg-status-danger" label="Past due" />
+              <LegendDot color="bg-status-warning" label="Due soon" />
+              <LegendDot color="bg-status-success" label="Paid" />
             </div>
           </section>
-          <section className="rounded-2xl border border-app-border bg-white p-4 shadow-sm sm:p-4">
-            <h3 className="whitespace-nowrap text-lg font-semibold leading-tight tracking-tight text-[#071F42]">
+          <section className="rounded-2xl border border-app-border bg-app-surface p-4 shadow-sm sm:p-4">
+            <h3 className="whitespace-nowrap text-lg font-semibold leading-tight tracking-tight text-text-main">
               Coming up next
             </h3>
             <div className="mt-2.5 grid gap-2">
@@ -857,7 +857,7 @@ export default function RecurringPayments({
                         <p className="text-sm font-semibold text-text-main">
                           {formatCurrency(row.amount, { cents: true })}
                         </p>
-                        <p className="text-xs text-[#EA7A0A]">
+                        <p className="text-xs text-status-warningDark">
                           {daysUntil(row.dueDate) <= 0
                             ? "due now"
                             : `in ${daysUntil(row.dueDate)} day${daysUntil(row.dueDate) === 1 ? "" : "s"}`}
@@ -881,7 +881,7 @@ export default function RecurringPayments({
 
       {menuRow && menuState ? (
         <div
-          className="fixed z-50 grid min-w-[190px] gap-1 rounded-xl border border-app-border bg-white p-1 text-left shadow-lg"
+          className="fixed z-50 grid min-w-[190px] gap-1 rounded-xl border border-app-border bg-app-surface p-1 text-left shadow-lg"
           style={{ left: menuState.x, top: menuState.y }}
           onClick={(event) => event.stopPropagation()}
         >
@@ -959,8 +959,8 @@ export default function RecurringPayments({
           aria-modal="true"
           aria-labelledby="recurring-template-modal-title"
         >
-          <div className="flex max-h-[calc(100dvh-1.5rem)] min-h-0 w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl sm:max-h-[calc(100dvh-3rem)]">
-            <div className="flex shrink-0 items-start justify-between gap-4 border-b border-gray-200 px-5 py-4">
+          <div className="flex max-h-[calc(100dvh-1.5rem)] min-h-0 w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-app-border bg-app-surface shadow-xl sm:max-h-[calc(100dvh-3rem)]">
+            <div className="flex shrink-0 items-start justify-between gap-4 border-b border-app-border px-5 py-4">
               <div>
                 <h2
                   id="recurring-template-modal-title"
@@ -1061,20 +1061,20 @@ export default function RecurringPayments({
 function SummaryCard({ label, value, helper, icon, iconTone }) {
   const iconClass =
     iconTone === "solid-green"
-      ? "bg-[#16A34A] text-white"
+      ? "bg-status-success text-white"
       : iconTone === "solid-orange"
-        ? "bg-[#F59E0B] text-white"
+        ? "bg-status-warning text-white"
         : iconTone === "solid-red"
-          ? "bg-[#DC2626] text-white"
-          : "bg-[#EAF8EF] text-[#16A34A]";
+          ? "bg-status-danger text-white"
+          : "bg-status-successBg text-status-successDark";
   return (
-    <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-2xl border border-[#E6E1D8] bg-white px-4 py-3 shadow-[0_1px_2px_rgba(16,24,40,0.06)]">
+    <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-2xl border border-app-border bg-app-surface px-4 py-3 shadow-[0_1px_2px_rgba(16,24,40,0.06)]">
       <div className="min-w-0">
-        <p className="truncate text-sm font-medium text-[#071F42]">{label}</p>
-        <p className="mt-1 truncate text-[1.95rem] font-semibold tracking-tight text-[#071F42]">
+        <p className="truncate text-sm font-medium text-text-main">{label}</p>
+        <p className="mt-1 truncate text-[1.95rem] font-semibold tracking-tight text-text-main">
           {value}
         </p>
-        <p className="mt-0.5 text-sm text-[#667085]">{helper}</p>
+        <p className="mt-0.5 text-sm text-text-muted">{helper}</p>
       </div>
       <span
         className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${iconClass}`}
@@ -1090,16 +1090,16 @@ function BillDatePill({ dueDate, statusGroup, compact = false }) {
   const dayLabel = String(dueDate.getDate()).padStart(2, "0");
   const accentClass =
     statusGroup === "Past due"
-      ? "border-[#FCA5A5] text-[#DC2626]"
+      ? "border-status-danger/50 text-status-dangerDark"
       : statusGroup === "Due soon" || statusGroup === "Upcoming"
-        ? "border-[#FDBA74] text-[#EA7A0A]"
+        ? "border-status-warning/50 text-status-warningDark"
         : statusGroup === "Paid"
-          ? "border-[#86EFAC] text-[#1D8E4B]"
-          : "border-[#E6E1D8] text-[#071F42]";
+          ? "border-status-success/50 text-status-successDark"
+          : "border-app-border text-text-main";
 
   return (
     <span
-      className={`inline-grid rounded-xl border bg-white text-center ${accentClass} ${
+      className={`inline-grid rounded-xl border bg-app-surface text-center ${accentClass} ${
         compact ? "min-w-[44px] px-1.5 py-1" : "min-w-[52px] px-2 py-1.5"
       }`}
     >
@@ -1113,7 +1113,7 @@ function BillDatePill({ dueDate, statusGroup, compact = false }) {
 
 function LegendDot({ color, label }) {
   return (
-    <p className="inline-flex items-center gap-1.5 text-xs text-[#667085]">
+    <p className="inline-flex items-center gap-1.5 text-xs text-text-muted">
       <span className={`h-2.5 w-2.5 rounded-full ${color}`} />
       {label}
     </p>
@@ -1136,20 +1136,32 @@ function BillIconBadge({ row, compact = false }) {
     const network = String(row.card?.network || "").toLowerCase();
     if (network.includes("visa")) {
       return (
-        <NetworkBadge label="VISA" className="bg-[#E9F0FF] text-[#1D4ED8]" compact={compact} />
+        <NetworkBadge
+          label="VISA"
+          className="bg-status-infoBg/30 text-status-infoDark"
+          compact={compact}
+        />
       );
     }
     if (network.includes("master")) {
-      return <NetworkBadge label="MC" className="bg-[#EEF2FF] text-[#1F2937]" compact={compact} />;
+      return <NetworkBadge label="MC" className="bg-app-muted text-text-main" compact={compact} />;
     }
     if (network.includes("american express") || network.includes("amex")) {
       return (
-        <NetworkBadge label="AMEX" className="bg-[#E6F4FF] text-[#0369A1]" compact={compact} />
+        <NetworkBadge
+          label="AMEX"
+          className="bg-status-infoBg/30 text-status-infoDark"
+          compact={compact}
+        />
       );
     }
     if (network.includes("discover")) {
       return (
-        <NetworkBadge label="DISC" className="bg-[#FFF3E8] text-[#C2410C]" compact={compact} />
+        <NetworkBadge
+          label="DISC"
+          className="bg-status-warningBg/35 text-status-warningDark"
+          compact={compact}
+        />
       );
     }
     return (
