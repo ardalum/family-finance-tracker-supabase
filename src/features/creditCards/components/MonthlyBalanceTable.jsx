@@ -106,8 +106,8 @@ export default function MonthlyBalanceTable({
 
   function handleBalanceFocus(cardId) {
     setActiveBalanceEditCardId(cardId);
-    setBalanceEditCardOrder((currentOrder) =>
-      currentOrder ?? liveSortedCards.map((card) => card.id),
+    setBalanceEditCardOrder(
+      (currentOrder) => currentOrder ?? liveSortedCards.map((card) => card.id),
     );
   }
 
