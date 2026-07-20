@@ -39,7 +39,16 @@ jobs:
         run: npm run build
 
       - name: Run tests
-        run: npm run test:run
+        shell: bash
+        run: |
+          set +e
+          npm run test:run > test-output.log 2>&1
+          status=$?
+          if [ "$status" -ne 0 ]; then
+            tail -n 200 test-output.log
+            exit "$status"
+          fi
+          cat test-output.log
 
       - name: Lint app
         run: npm run lint
