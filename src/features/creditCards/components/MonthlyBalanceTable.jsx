@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Card from "../../../components/ui/Card.jsx";
 import EmptyState from "../../../components/ui/EmptyState.jsx";
 import LoadingMessage from "../../../components/ui/LoadingMessage.jsx";
@@ -56,6 +56,8 @@ export default function MonthlyBalanceTable({
   const [paymentModalDraft, setPaymentModalDraft] = useState(null);
   const [activeBalanceEditCardId, setActiveBalanceEditCardId] = useState(null);
   const [balanceEditCardOrder, setBalanceEditCardOrder] = useState(null);
+  const activeBalanceEditCardIdRef = useRef(null);
+  const balanceEditCardOrderRef = useRef(null);
   const monthBalances = monthlyBalances[selectedMonth] ?? {};
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const summary = useMemo(
@@ -105,13 +107,18 @@ export default function MonthlyBalanceTable({
   );
 
   function handleBalanceFocus(cardId) {
+    activeBalanceEditCardIdRef.current = cardId;
     setActiveBalanceEditCardId(cardId);
-    setBalanceEditCardOrder(
-      (currentOrder) => currentOrder ?? liveSortedCards.map((card) => card.id),
-    );
+    if (!balanceEditCardOrderRef.current) {
+      balanceEditCardOrderRef.current = liveSortedCards.map((card) => card.id);
+      setBalanceEditCardOrder(balanceEditCardOrderRef.current);
+    }
   }
 
   function handleBalanceBlur(cardId) {
+    if (activeBalanceEditCardIdRef.current !== cardId) return;
+    activeBalanceEditCardIdRef.current = null;
+    balanceEditCardOrderRef.current = null;
     setActiveBalanceEditCardId((currentCardId) =>
       currentCardId === cardId ? null : currentCardId,
     );

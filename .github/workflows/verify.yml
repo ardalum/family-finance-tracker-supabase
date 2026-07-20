@@ -32,32 +32,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Check formatting
-        run: npm run format:check
-
-      - name: Build app
-        run: npm run build
-
-      - name: Run tests
-        id: tests
-        shell: bash
-        run: |
-          set +e
-          npm run test:run > test-output.log 2>&1
-          status=$?
-          if [ "$status" -ne 0 ]; then
-            tail -n 200 test-output.log
-            exit "$status"
-          fi
-          cat test-output.log
-
-      - name: Upload failed test output
-        if: failure() && steps.tests.outcome == 'failure'
-        uses: actions/upload-artifact@v4
-        with:
-          name: failed-test-output
-          path: test-output.log
-          retention-days: 1
-
-      - name: Lint app
-        run: npm run lint
+      - name: Verify app
+        run: npm run verify
