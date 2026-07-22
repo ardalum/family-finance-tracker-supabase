@@ -45,7 +45,7 @@ describe("calendar service", () => {
       creditCards: [CARD],
       monthlyBalances: { [CARD.id]: { balance: 120, paid: false } },
       selectedMonth: "2026-05",
-      today: new Date("2026-05-01T00:00:00"),
+      today: new Date("2026-06-01T00:00:00"),
     });
 
     assert.equal(events.length, 1);

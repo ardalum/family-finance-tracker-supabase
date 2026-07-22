@@ -1,13 +1,13 @@
 ﻿import { getStatementDaysUntilDue } from "./statementCycleUtils.js";
 import { isStatementPaid } from "./statementPaymentUtils.js";
 
-export function getRowStatus(card, monthKey, entry) {
+export function getRowStatus(card, monthKey, entry, today = new Date()) {
   const hasEntry = Boolean(entry);
   const balance = Number(entry?.balance || 0);
   const checkedNoBalance =
     Boolean(entry?.checkedNoBalance) || (balance <= 0 && Boolean(entry?.paid));
   const paid = balance > 0 ? isStatementPaid(entry) : false;
-  const daysUntilDue = getStatementDaysUntilDue(entry, monthKey, card);
+  const daysUntilDue = getStatementDaysUntilDue(entry, monthKey, card, today);
 
   if (!hasEntry) {
     return {

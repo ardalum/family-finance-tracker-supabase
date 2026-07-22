@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Card from "../../../components/ui/Card.jsx";
 import EmptyState from "../../../components/ui/EmptyState.jsx";
 import LoadingMessage from "../../../components/ui/LoadingMessage.jsx";
@@ -10,6 +10,7 @@ import {
   buildPaidEntryFromDraft,
   shouldOpenCardPaymentModal,
 } from "../cardPaymentModalState.js";
+import { applyCardOrderSnapshot } from "../cardOrderSnapshot.js";
 import { getSortedCards } from "../creditCardSort.js";
 import { getMonthlyBalanceSummary } from "../creditCardsService.js";
 import { getMonthlyBalanceDisplayRow } from "../monthlyBalanceDisplay.js";
@@ -54,6 +55,9 @@ export default function MonthlyBalanceTable({
   const [filters, setFilters] = useState(defaultFilters);
   const [paymentModalDraft, setPaymentModalDraft] = useState(null);
   const [activeBalanceEditCardId, setActiveBalanceEditCardId] = useState(null);
+  const [balanceEditCardOrder, setBalanceEditCardOrder] = useState(null);
+  const activeBalanceEditCardIdRef = useRef(null);
+  const balanceEditCardOrderRef = useRef(null);
   const monthBalances = monthlyBalances[selectedMonth] ?? {};
   const monthOptions = useMemo(() => buildMonthOptions(selectedMonth), [selectedMonth]);
   const summary = useMemo(
@@ -71,9 +75,13 @@ export default function MonthlyBalanceTable({
       ),
     [cashAccounts],
   );
-  const sortedCards = useMemo(
+  const liveSortedCards = useMemo(
     () => getSortedCards(cards, monthBalances, selectedMonth, sortMode),
     [cards, monthBalances, selectedMonth, sortMode],
+  );
+  const sortedCards = useMemo(
+    () => applyCardOrderSnapshot(liveSortedCards, balanceEditCardOrder),
+    [balanceEditCardOrder, liveSortedCards],
   );
   const visibleCards = useMemo(() => {
     const searchTerm = filters.search.trim().toLowerCase();
@@ -99,13 +107,22 @@ export default function MonthlyBalanceTable({
   );
 
   function handleBalanceFocus(cardId) {
+    activeBalanceEditCardIdRef.current = cardId;
     setActiveBalanceEditCardId(cardId);
+    if (!balanceEditCardOrderRef.current) {
+      balanceEditCardOrderRef.current = liveSortedCards.map((card) => card.id);
+      setBalanceEditCardOrder(balanceEditCardOrderRef.current);
+    }
   }
 
   function handleBalanceBlur(cardId) {
+    if (activeBalanceEditCardIdRef.current !== cardId) return;
+    activeBalanceEditCardIdRef.current = null;
+    balanceEditCardOrderRef.current = null;
     setActiveBalanceEditCardId((currentCardId) =>
       currentCardId === cardId ? null : currentCardId,
     );
+    setBalanceEditCardOrder(null);
   }
 
   function handleBalanceChange(cardId, value) {

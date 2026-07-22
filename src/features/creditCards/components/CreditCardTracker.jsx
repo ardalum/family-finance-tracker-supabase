@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertCircle,
   Banknote,
@@ -31,6 +31,12 @@ import {
   CARD_PAYMENT_OUTSIDE_ACCOUNT,
   getStatementUnpaidAmount,
 } from "../statementPaymentUtils.js";
+import { applyCardOrderSnapshot } from "../cardOrderSnapshot.js";
+import {
+  getBalanceEditOrderSnapshot,
+  paginateCreditCardBalanceRows,
+  shouldShowCreditCardBalanceRow,
+} from "../balanceEditViewState.js";
 import CardPaymentModal from "./CardPaymentModal.jsx";
 import CreditCardModal from "./CreditCardModal.jsx";
 
@@ -89,6 +95,10 @@ export default function CreditCardTracker({
   const [pageSize, setPageSize] = useState("10");
   const [currentPage, setCurrentPage] = useState(1);
   const [menuState, setMenuState] = useState(null);
+  const [activeBalanceEditCardId, setActiveBalanceEditCardId] = useState(null);
+  const [balanceEditCardOrder, setBalanceEditCardOrder] = useState(null);
+  const activeBalanceEditCardIdRef = useRef(null);
+  const balanceEditCardOrderRef = useRef(null);
 
   const activeCards = useMemo(() => creditCards.filter((card) => card.isActive), [creditCards]);
   const monthBalances = monthlyBalances[selectedBalanceMonth] ?? {};
@@ -181,9 +191,13 @@ export default function CreditCardTracker({
     };
   }, [activeCards.length, monthBalances, selectedBalanceMonth, summaryRows]);
 
-  const sortedCards = useMemo(
+  const liveSortedCards = useMemo(
     () => getSortedCards(activeCards, monthBalances, selectedBalanceMonth, sortMode),
     [activeCards, monthBalances, selectedBalanceMonth, sortMode],
+  );
+  const sortedCards = useMemo(
+    () => applyCardOrderSnapshot(liveSortedCards, balanceEditCardOrder),
+    [balanceEditCardOrder, liveSortedCards],
   );
 
   const filteredRows = useMemo(() => {
@@ -205,12 +219,17 @@ export default function CreditCardTracker({
         };
       })
       .filter((row) => {
-        const matchesSearch = !searchTerm || row.searchText.includes(searchTerm);
-        const matchesOwner = !filters.owner || row.card.owner === filters.owner;
-        const matchesStatus = !filters.status || row.statusValue === filters.status;
-        return matchesSearch && matchesOwner && matchesStatus;
+        return shouldShowCreditCardBalanceRow({
+          card: row.card,
+          filters,
+          searchTerm,
+          searchText: row.searchText,
+          statusValue: row.statusValue,
+          activeBalanceEditCardId,
+        });
       });
   }, [
+    activeBalanceEditCardId,
     filters.owner,
     filters.search,
     filters.status,
@@ -224,14 +243,7 @@ export default function CreditCardTracker({
   }, [filters.search, filters.owner, filters.status, sortMode, pageSize]);
 
   const pagination = useMemo(() => {
-    const total = filteredRows.length;
-    const perPage = pageSize === "all" ? total || 1 : Number(pageSize);
-    const totalPages = pageSize === "all" ? 1 : Math.max(Math.ceil(total / perPage), 1);
-    const safePage = Math.min(currentPage, totalPages);
-    const startIndex = pageSize === "all" ? 0 : (safePage - 1) * perPage;
-    const endExclusive = pageSize === "all" ? total : Math.min(startIndex + perPage, total);
-    const rows = filteredRows.slice(startIndex, endExclusive);
-    return { rows, total, totalPages, safePage, startIndex, endExclusive };
+    return paginateCreditCardBalanceRows(filteredRows, pageSize, currentPage);
   }, [currentPage, filteredRows, pageSize]);
 
   const utilizationSegments = useMemo(() => {
@@ -304,7 +316,31 @@ export default function CreditCardTracker({
     [onDeleteCard, recurringPayments],
   );
 
+  function ensureBalanceEditSnapshot(cardId) {
+    activeBalanceEditCardIdRef.current = cardId;
+    setActiveBalanceEditCardId(cardId);
+    if (!balanceEditCardOrderRef.current) {
+      balanceEditCardOrderRef.current = getBalanceEditOrderSnapshot(
+        liveSortedCards,
+        balanceEditCardOrderRef.current,
+      );
+      setBalanceEditCardOrder(balanceEditCardOrderRef.current);
+    }
+  }
+  function handleBalanceFocus(cardId) {
+    ensureBalanceEditSnapshot(cardId);
+  }
+  function handleBalanceBlur(cardId) {
+    if (activeBalanceEditCardIdRef.current !== cardId) return;
+    activeBalanceEditCardIdRef.current = null;
+    balanceEditCardOrderRef.current = null;
+    setActiveBalanceEditCardId((currentCardId) =>
+      currentCardId === cardId ? null : currentCardId,
+    );
+    setBalanceEditCardOrder(null);
+  }
   function handleBalanceChange(cardId, value) {
+    ensureBalanceEditSnapshot(cardId);
     if (value === "") {
       onMonthlyBalanceChange(selectedBalanceMonth, cardId, null);
       return;
@@ -562,6 +598,8 @@ export default function CreditCardTracker({
                             cardName={row.card.name}
                             value={monthBalances[row.card.id]?.balance}
                             onChange={handleBalanceChange}
+                            onFocus={handleBalanceFocus}
+                            onBlur={handleBalanceBlur}
                             className="max-w-[96px]"
                             inputIdPrefix="balance"
                           />
@@ -655,6 +693,8 @@ export default function CreditCardTracker({
                             cardName={row.card.name}
                             value={monthBalances[row.card.id]?.balance}
                             onChange={handleBalanceChange}
+                            onFocus={handleBalanceFocus}
+                            onBlur={handleBalanceBlur}
                             className="mt-0.5 max-w-[130px]"
                             inputIdPrefix="mobile-balance"
                           />
@@ -956,6 +996,8 @@ function BalanceInput({
   cardName,
   value,
   onChange,
+  onFocus,
+  onBlur,
   className = "",
   inputIdPrefix = "balance",
 }) {
@@ -977,15 +1019,20 @@ function BalanceInput({
         inputMode="decimal"
         value={displayValue}
         onFocus={(event) => {
+          const input = event.currentTarget;
+          onFocus(cardId);
           setDraftValue(String(savedValue));
-          requestAnimationFrame(() => event.currentTarget.select());
+          requestAnimationFrame(() => input.select());
         }}
         onChange={(event) => {
           const nextValue = event.target.value;
           setDraftValue(nextValue);
           onChange(cardId, nextValue);
         }}
-        onBlur={() => setDraftValue(null)}
+        onBlur={() => {
+          setDraftValue(null);
+          onBlur(cardId);
+        }}
         className="h-8 min-w-0 flex-1 bg-transparent text-sm font-semibold text-text-main outline-none"
         aria-label={`Balance for ${cardName}`}
       />

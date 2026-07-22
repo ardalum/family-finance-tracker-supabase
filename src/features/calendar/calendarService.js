@@ -89,7 +89,7 @@ export function buildCardDueEvents({
     .filter((card) => card?.isActive !== false)
     .map((card) => {
       const entry = monthlyBalances[card.id];
-      const status = getRowStatus(card, selectedMonth, entry);
+      const status = getRowStatus(card, selectedMonth, entry, today);
       const { paymentDueDate } = getStatementCycleDates(selectedMonth, card, entry);
       const balance = Number(entry?.balance || 0);
 
