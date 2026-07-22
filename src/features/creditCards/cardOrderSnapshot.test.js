@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
+import {
+  paginateCreditCardBalanceRows,
+  shouldShowCreditCardBalanceRow,
+} from "./balanceEditViewState.js";
 import { applyCardOrderSnapshot } from "./cardOrderSnapshot.js";
 import { getSortedCards } from "./creditCardSort.js";
 
@@ -82,6 +86,15 @@ describe("credit card balance edit order", () => {
     );
   });
 
+  it("returns the edited card to its correct balance-sorted position after blur", () => {
+    const liveSortedAfterBlur = [{ id: lateDueCard.id }, { id: earlyDueCard.id }];
+
+    assert.deepEqual(
+      applyCardOrderSnapshot(liveSortedAfterBlur, null).map((card) => card.id),
+      [lateDueCard.id, earlyDueCard.id],
+    );
+  });
+
   it("keeps default sorting stable when a focused card transitions from unchecked to unpaid", () => {
     const cards = [lateDueCard, earlyDueCard];
     const focusedOrder = getSortedCards(cards, {}, MONTH_KEY, "default").map((card) => card.id);
@@ -107,20 +120,100 @@ describe("credit card balance edit order", () => {
     assert.equal(applyCardOrderSnapshot(liveSortedCards, null), liveSortedCards);
   });
 
-  it("uses the same focus, blur, and change handlers for mobile and desktop balance inputs", () => {
-    const desktopSource = readFileSync(
-      new URL("./components/MonthlyBalanceDesktopTable.jsx", import.meta.url),
-      "utf8",
+  it("keeps an actively edited card visible across status-filter changes only", () => {
+    const card = {
+      id: "active-card",
+      name: "Everyday Rewards",
+      owner: "Arvin",
+    };
+
+    assert.equal(
+      shouldShowCreditCardBalanceRow({
+        card,
+        filters: { search: "", owner: "", status: "not-checked" },
+        searchTerm: "",
+        searchText: "everyday rewards arvin",
+        statusValue: "unpaid",
+        activeBalanceEditCardId: "active-card",
+      }),
+      true,
     );
-    const mobileSource = readFileSync(
-      new URL("./components/MonthlyBalanceCard.jsx", import.meta.url),
+    assert.equal(
+      shouldShowCreditCardBalanceRow({
+        card,
+        filters: { search: "travel", owner: "", status: "not-checked" },
+        searchTerm: "travel",
+        searchText: "everyday rewards arvin",
+        statusValue: "unpaid",
+        activeBalanceEditCardId: "active-card",
+      }),
+      false,
+    );
+    assert.equal(
+      shouldShowCreditCardBalanceRow({
+        card,
+        filters: { search: "", owner: "Kristine", status: "not-checked" },
+        searchTerm: "",
+        searchText: "everyday rewards arvin",
+        statusValue: "unpaid",
+        activeBalanceEditCardId: "active-card",
+      }),
+      false,
+    );
+  });
+
+  it("keeps pagination stable while a focused card would otherwise move pages", () => {
+    const focusedOrderCards = [
+      { id: "alpha" },
+      { id: "bravo" },
+      { id: "charlie" },
+      { id: "delta" },
+    ];
+    const liveSortedAfterChange = [
+      { id: "charlie" },
+      { id: "alpha" },
+      { id: "bravo" },
+      { id: "delta" },
+    ];
+    const focusedOrder = focusedOrderCards.map((card) => card.id);
+    const frozenRows = applyCardOrderSnapshot(liveSortedAfterChange, focusedOrder);
+    const frozenPage = paginateCreditCardBalanceRows(frozenRows, "2", 2);
+    const livePageAfterBlur = paginateCreditCardBalanceRows(liveSortedAfterChange, "2", 2);
+
+    assert.deepEqual(
+      frozenPage.rows.map((card) => card.id),
+      ["charlie", "delta"],
+    );
+    assert.deepEqual(
+      livePageAfterBlur.rows.map((card) => card.id),
+      ["bravo", "delta"],
+    );
+  });
+
+  it("wires the actual CreditCardTracker balance inputs into the edit snapshot handlers", () => {
+    const trackerSource = readFileSync(
+      new URL("./components/CreditCardTracker.jsx", import.meta.url),
       "utf8",
     );
 
-    for (const source of [desktopSource, mobileSource]) {
-      assert.equal(source.includes("onBalanceFocus(card.id)"), true);
-      assert.equal(source.includes("onBalanceBlur(card.id)"), true);
-      assert.equal(source.includes("onBalanceChange(card.id, event.target.value)"), true);
-    }
+    assert.equal(trackerSource.includes("useRef"), true);
+    assert.equal(trackerSource.includes("applyCardOrderSnapshot"), true);
+    assert.equal(trackerSource.includes("const liveSortedCards"), true);
+    assert.equal(
+      trackerSource.includes("applyCardOrderSnapshot(liveSortedCards, balanceEditCardOrder)"),
+      true,
+    );
+    assert.equal(trackerSource.includes("function ensureBalanceEditSnapshot(cardId)"), true);
+    assert.equal(
+      trackerSource.includes('ensureBalanceEditSnapshot(cardId);\n    if (value === "")'),
+      true,
+    );
+    assert.equal((trackerSource.match(/onFocus=\{handleBalanceFocus\}/g) ?? []).length, 2);
+    assert.equal((trackerSource.match(/onBlur=\{handleBalanceBlur\}/g) ?? []).length, 2);
+    assert.equal((trackerSource.match(/onChange=\{handleBalanceChange\}/g) ?? []).length, 2);
+    assert.equal(trackerSource.includes("onFocus(cardId);"), true);
+    assert.equal(trackerSource.includes("onBlur(cardId);"), true);
+    assert.equal(trackerSource.includes("const input = event.currentTarget;"), true);
+    assert.equal(trackerSource.includes("requestAnimationFrame(() => input.select());"), true);
   });
 });
